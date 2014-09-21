@@ -47,7 +47,6 @@
                       (let [departments (<! (fetch-departments (:url opts)))]
                         (.log js/console (println "xx:" departments))
                         (om/transact! app :departments #(conj % departments))
-                        ;;(om/transact! app #(assoc % :departments departments))
                         )
                       (<! (timeout (:poll-interval opts)))))
                  )
