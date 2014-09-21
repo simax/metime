@@ -7,7 +7,7 @@
                  [compojure "1.1.8"]
                  [org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2342"]
-                 [om "0.7.1"]
+                 [om "0.7.3"]
                  [org.clojure/core.async "0.1.338.0-5c5012-alpha"]
                  [cljs-http "0.1.2"]
                  [lein-cljsbuild "1.0.3"]

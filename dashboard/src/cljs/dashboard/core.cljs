@@ -17,39 +17,54 @@
   [url]
   (let [c (chan)]
     (go
-       (let [{departments :body} (<! (http/get url))]
-       ;;(let [departments [{:department "Departement 1"} {:department "Departement 2"}]]
+       ;;(let [{departments :body} (<! (http/get url))]
+       (let [departments [{:department "Department 1"} {:department "Department 2"}]]
          (>! c (vec departments))))
     c))
 
-(defn department [{:keys [department]} owner opts]
+(defn department-name [{:keys [department]} owner opts]
   (om/component
-   (dom/li nil department)))
+   (dom/li nil
+           (dom/span nil "hello !!!!!"))))
 
 
 (defn department-list [{:keys [departments]}]
+ (.log js/console (println "list of departments:" departments))
   (om/component
    (apply dom/ul nil
-          (om/build-all department departments))))
+          (om/build-all department-name departments))))
 
 (defn departments-box [app owner opts]
   (reify
+
     om/IInitState
     (init-state [_]
-                ;;(om/transact! app [:departments] (fn [] []))
-                )
+                {:departments []})
+
     om/IWillMount
     (will-mount [_]
                 (go (while true
                       (let [departments (<! (fetch-departments (:url opts)))]
-                        (.log js/console (pr-str departments))
-                        ;;(om/update! app #(assoc % :departments departments))
+                        (.log js/console (println "xx:" departments))
+                        (om/transact! app :departments #(conj % departments))
+                        ;;(om/transact! app #(assoc % :departments departments))
                         )
-                      (<! (timeout (:poll-interval opts))))))
-    om/IRender
-    (render [_]
-            (dom/h1 nil "Departments")
-            (om/build department-list app))))
+                      (<! (timeout (:poll-interval opts)))))
+                 )
+
+    om/IRenderState
+    (render-state [_ {:keys [departments]}]
+                  (.log js/console (println "departments in app:" departments))
+                  (dom/h1 nil "Departments"))))
+
+                  ;;(om/build department-list app))
+
+;;    om/IRender
+;;    (render [_]
+;;            (dom/h1 nil "Departments"))
+;;    ))
+            ;;(.log js/console (println "departments in app:" (:departments app)))
+            ;;(om/build department-list app)
 
 
 (defn om-app [app owner]
@@ -60,5 +75,4 @@
                               :poll-interval 2000}}))))
 
 (om/root om-app app-state {:target (. js/document (getElementById "main-container"))})
-
 
