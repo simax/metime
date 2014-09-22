@@ -39,24 +39,27 @@
 
     om/IInitState
     (init-state [_]
-                {:departments []})
-
-    om/IWillMount
-    (will-mount [_]
-                (go (while true
-                      (let [departments (<! (fetch-departments (:url opts)))]
+                (let [departments (<! (fetch-departments (:url opts)))]
                         (.log js/console (println "xx:" departments))
                         (om/transact! app :departments #(conj % departments))
-                        )
-                      (<! (timeout (:poll-interval opts)))))
-                 )
+                  {:departments departments}))
+
+
+;;    om/IWillMount
+;;   (will-mount [_]
+;;                (go (while true
+;;                      (let [departments (<! (fetch-departments (:url opts)))]
+;;                        (.log js/console (println "xx:" departments))
+;;                        (om/transact! app :departments #(conj % departments))
+;;                        )
+;;                      (<! (timeout (:poll-interval opts)))))
+;;                 )
 
     om/IRenderState
     (render-state [_ {:keys [departments]}]
                   (.log js/console (println "departments in app:" departments))
-                  (dom/h1 nil "Departments"))))
-
-                  ;;(om/build department-list app))
+                  (dom/h1 nil "Departments")
+                  (om/build department-list app))))
 
 ;;    om/IRender
 ;;    (render [_]
