@@ -8,8 +8,6 @@
 
 (enable-console-print!)
 
-(println "Hello world!")
-
 (def app-state
   (atom {}))
 
@@ -19,45 +17,40 @@
     (go
        ;;(let [{departments :body} (<! (http/get url))]
        (let [departments [{:department "Department 1"} {:department "Department 2"}]]
-         (>! c (vec departments))))
+         (.log js/console (println "fetch-departments:" departments)
+         (>! c (vec departments)))))
     c))
 
 (defn department-name [{:keys [department]} owner opts]
   (om/component
    (dom/li nil
-           (dom/span nil "hello !!!!!"))))
+           (dom/span nil department))))
 
 
 (defn department-list [{:keys [departments]}]
- (.log js/console (println "list of departments:" departments))
+ (.log js/console (println "department-list:" departments))
   (om/component
    (apply dom/ul nil
-          (om/build-all department-name departments))))
+          (om/build-all department-name (first departments)))))
 
 (defn departments-box [app owner opts]
   (reify
 
-    om/IInitState
-    (init-state [_]
-                (let [departments (<! (fetch-departments (:url opts)))]
-                        (.log js/console (println "xx:" departments))
-                        (om/transact! app :departments #(conj % departments))
-                  {:departments [{:department "Department 1"} {:department "Department 2"}]}))
 
+   om/IWillMount
+    (will-mount [_]
+                (go
+                   (let [deps (<! (fetch-departments (:url opts)))]
+                     (.log js/console (println "Will-mount-1:" deps))
+                     (om/transact! app :departments #(conj % deps))
+                     (.log js/console (println "Will-mount-2:" (:departments @app)))
+                   ;;(<! (timeout (:poll-interval opts)))
+                   )))
 
-;;    om/IWillMount
-;;   (will-mount [_]
-;;                (go (while true
-;;                      (let [departments (<! (fetch-departments (:url opts)))]
-;;                        (.log js/console (println "xx:" departments))
-;;                        (om/transact! app :departments #(conj % departments))
-;;                        )
-;;                      (<! (timeout (:poll-interval opts)))))
-;;                 )
 
     om/IRenderState
     (render-state [_ {:keys [departments]}]
-                  (.log js/console (println "departments in app:" departments))
+                  (.log js/console (println "Render-state:" departments))
                   (dom/h1 nil "Departments")
                   (om/build department-list app))))
 
