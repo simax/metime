@@ -42,7 +42,7 @@
                 (let [departments (<! (fetch-departments (:url opts)))]
                         (.log js/console (println "xx:" departments))
                         (om/transact! app :departments #(conj % departments))
-                  {:departments departments}))
+                  {:departments [{:department "Department 1"} {:department "Department 2"}]}))
 
 
 ;;    om/IWillMount

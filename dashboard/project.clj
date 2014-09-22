@@ -14,7 +14,8 @@
                  [com.facebook/react "0.11.2"]]
 
   :source-paths ["src/clj"]
-  :plugins [[lein-ring "0.8.11"]
+  :plugins [
+            [lein-ring "0.8.11"]
             [lein-pdo "0.1.1"]]
 
   :aliases {"up" ["pdo" "cljsbuild" "auto" "dev," "ring" "server-headless"]}
