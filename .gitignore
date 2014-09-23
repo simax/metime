@@ -1,6 +1,8 @@
-/target
-/classes
-/checkouts
+/dashboard/target/**
+/dashboard/classes/**
+/api/target/**
+/api/classes/**
+/checkouts/**
 pom.xml
 pom.xml.asc
 *.jar
