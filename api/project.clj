@@ -9,7 +9,8 @@
                  [org.postgresql/postgresql "9.3-1100-jdbc4"]
                  [liberator "0.11.0"]
                  [ring "1.2.2"]
-                 [cheshire "5.3.1"]]
+                 [cheshire "5.3.1"]
+                 [prone "0.6.0"]]
   :ring {:handler api.core/app}
   :clj-sql-up {:database {:subprotocol "postgresql"
                           :subname "mytime"

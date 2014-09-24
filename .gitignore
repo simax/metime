@@ -1,5 +1,6 @@
 /dashboard/target/**
 /dashboard/classes/**
+/dashboard/resources/public/js/out
 /api/target/**
 /api/classes/**
 /checkouts/**

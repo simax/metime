@@ -6,7 +6,8 @@
             [compojure.handler :as handler]
             [compojure.route :as route]
             [compojure.core :refer [defroutes context ANY]]
-            [api.resources :refer :all]))
+            [api.resources :refer :all]
+            [prone.middleware :as prone]))
 
 
 (defroutes app-routes
@@ -18,8 +19,10 @@
     (route/not-found "Not Found")))
 
 (def app
-  (-> (routes app-routes)
-      (handler/site)
-      (wrap-base-url)))
+  (->
+     (routes app-routes)
+     (prone/wrap-exceptions)
+     (handler/site)
+     (wrap-base-url)))
 
 

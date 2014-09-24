@@ -6,6 +6,7 @@
 (defdb db (postgres {:db "mytime"
                      :user "simonlomax"
                      :password "nomisxamol"}))
+
 (declare departments)
 
 (defentity employees

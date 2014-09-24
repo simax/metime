@@ -15,8 +15,8 @@
   [url]
   (let [c (chan)]
     (go
-       ;;(let [{departments :body} (<! (http/get url))]
-       (let [departments [{:department "Department 1"} {:department "Department 2"}]]
+       (let [{departments :body} (<! (http/get url))]
+       ;;(let [departments [{:department "Department 1"} {:department "Department 2"}]]
          (.log js/console (println "fetch-departments:" departments)
          (>! c (vec departments)))))
     c))
