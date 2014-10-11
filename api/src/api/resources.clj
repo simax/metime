@@ -2,7 +2,8 @@
   (:require [liberator.core :refer [resource defresource]]
             [liberator.representation :refer [as-response]]
             [api.data.departments :as deps]
-            [api.data.employees :as emps]))
+            [api.data.employees :as emps]
+            [cheshire.core :as json]))
 
 
 (defresource get-departments []
@@ -16,7 +17,10 @@
 
 
   :exists? (fn [ctx]
-              {::departments (deps/get-all)})
+              {::departments
+               ;;(deps/get-all)
+               (json/encode {:departments [{:department "Design"} {:department "Development"}]})
+               })
 
 
   :handle-ok ::departments)
