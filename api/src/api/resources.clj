@@ -7,8 +7,7 @@
 
 
 (defresource get-departments []
-  :available-media-types ["text/plain"
-                          "application/json"]
+  :available-media-types ["application/json"]
 
   :as-response (fn [d ctx]
                  (-> (as-response d ctx) ;; default implementation
@@ -17,18 +16,17 @@
 
 
   :exists? (fn [ctx]
-              {::departments
-               ;;(deps/get-all)
-               (json/encode {:departments [{:department "Design"} {:department "Development"}]})
-               })
+              [true
+               {::departments {:departments (deps/get-all)}
+                ;;{:departments [{:department "Design"} {:department "Development"} {:department "Sales and Marketing"}]}
+                }])
 
 
   :handle-ok ::departments)
 
 
 (defresource get-employees []
-  :available-media-types ["text/plain"
-                          "application/json"]
+  :available-media-types ["application/json"]
 
   :exists? (fn [ctx]
               {::employees (emps/get-all)})

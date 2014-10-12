@@ -11,7 +11,7 @@
                  [ring "1.2.2"]
                  [cheshire "5.3.1"]
                  [prone "0.6.0"]]
-  :ring {:handler api.core/app}
+  :ring {:handler api.core/app :auto-reload? true}
   :clj-sql-up {:database {:subprotocol "postgresql"
                           :subname "mytime"
                           :user "simonlomax"

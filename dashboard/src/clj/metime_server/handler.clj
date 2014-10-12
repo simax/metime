@@ -13,8 +13,7 @@
 
 (defroutes routes
   (GET "/" [] (resp/resource-response "index.html" {:root "public"}))
-  (GET  "/departments" [] (resp/response [{:department "Departement 1"}
-                                          {:department "Departement 2"}]))
+
   (compojure.route/resources "/")
   (not-found "Page not found."))
 
