@@ -23,7 +23,7 @@
 (defn employee-info [{:keys [lastname firstname]}]
   (om/component
   (dom/li nil
-          (apply dom/span #js {:classname "employee-name"} (str firstname lastname)))))
+          (apply dom/span #js {:classname "employee-name"} (str firstname " " lastname)))))
 
 (defn department-name [{:keys [department employees]} owner opts]
   (om/component
