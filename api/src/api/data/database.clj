@@ -3,12 +3,9 @@
             [korma.core :refer :all]))
 
 
-
 (defdb db (sqlite3 {:classname "org.sqlite.JDBC"
                     :subprotocol "sqlite"
                     :subname "/users/simonlomax/documents/development/clojure projects/metime/api/src/api/data/metime.sqlite"}))
-
-
 
 (declare departments)
 

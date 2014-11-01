@@ -20,16 +20,26 @@
     c))
 
 
-(defn department-name [{:keys [department]} owner opts]
+(defn employee-info [{:keys [lastname firstname]}]
+  (om/component
+  (dom/li nil
+          (apply dom/span #js {:classname "employee-name"} (str firstname lastname)))))
+
+(defn department-name [{:keys [department employees]} owner opts]
   (om/component
    (dom/li nil
-           (dom/span #js {:className "department"} department))))
+           (dom/div nil
+                    (dom/span #js {:className "department"} department)
+                     (apply dom/ul nil
+                      (om/build-all employee-info employees))))))
 
 
 (defn department-list [{:keys [departments]}]
   (om/component
-    (apply dom/ul nil
-      (om/build-all department-name departments))))
+    (dom/div nil
+      (dom/h2 nil "Departments")
+       (apply dom/ul nil
+        (om/build-all department-name departments)))))
 
 
 (defn departments-box [app owner opts]
@@ -44,8 +54,8 @@
 
     om/IRender
     (render [{:keys [departments]}]
-            (dom/h1 nil "Departments")
-            (om/build department-list app))))
+            (om/build department-list app)
+            )))
 
 
 (defn om-app [app owner]
