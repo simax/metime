@@ -3,9 +3,11 @@
             [korma.core :refer :all]))
 
 
-(defdb db (postgres {:db "mytime"
-                     :user "simonlomax"
-                     :password "nomisxamol"}))
+(defdb db (sqlite3 {:classname "org.sqlite.JDBC"
+                    :subprotocol "sqlite"
+                    :subname "/users/simonlomax/documents/development/clojure projects/metime/api/src/api/data/metime.sqlite"}))
+
+
 
 (declare departments)
 
