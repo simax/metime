@@ -5,7 +5,8 @@
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs-http.client :as http]
-            ))
+            [sablono.core :as html :refer-macros [html]]
+            [om-bootstrap.button :as b]))
 
 (enable-console-print!)
 
@@ -19,38 +20,59 @@
           (>! c deps)))
     c))
 
+(go
+  (let [deps (<! (fetch-departments "http://localhost:3030/api/departments"))]
+   (assoc @app-state :departments deps)))
+
+(defn csr-departments []
+  (om/ref-cursor (:departments (om/root-cursor app-state))))
+
+(defn toolbar [_]
+  (om/component
+   (html
+    (b/toolbar {}
+               (b/button {} "Default")
+               (b/button {:bs-style "primary"} "Primary")
+               (b/button {:bs-style "success"} "Success")
+               (b/button {:bs-style "info"} "Info")
+               (b/button {:bs-style "warning"} "Warning")
+               (b/button {:bs-style "danger"} "Danger")
+               (b/button {:bs-style "link"} "Link"))
+    )))
 
 (defn employee-info [{:keys [lastname firstname]}]
   (om/component
-  (dom/li nil
-          (dom/span #js {:className "employee-name"} (str firstname " " lastname)))))
+   (html
+    [:li
+     [:span {:class "employee-name"} (str firstname " " lastname)]])))
 
 (defn department-name [{:keys [department employees]} owner opts]
   (om/component
-   (dom/li nil
-           (dom/div nil
-                    (dom/span #js {:className "department-name"} department)
-                     (apply dom/ul nil
-                      (om/build-all employee-info employees))))))
-
+   (html
+    [:li
+     [:div
+      [:span {:class "department-name"} department]
+      [:ul (for [component (om/build-all employee-info employees)]
+             component)]]])))
 
 (defn department-list [{:keys [departments]}]
   (om/component
-    (dom/div nil
-      (dom/h2 nil "Departments")
-       (apply dom/ul nil
-        (om/build-all department-name departments)))))
-
+   (let [xs (om/observce owner (csr-departments))]
+     (html
+      [:div
+       [:h2 "Departments"]
+       (om/build toolbar {})
+       [:ul (for [component (om/build-all department-name xs)]
+              component)]]))))
 
 (defn departments-box [app owner opts]
   (reify
-   om/IWillMount
-    (will-mount [_]
-                (go
-                   (let [deps (<! (fetch-departments (:url opts)))]
-                     (om/transact! app #(assoc % :departments deps))
-                 )))
-
+;;    om/IWillMount
+;;     (will-mount [_]
+;;                 (go
+;;                    (let [deps (<! (fetch-departments (:url opts)))]
+;;                      (om/transact! app #(assoc % :departments deps))
+;;                  )))
 
     om/IRender
     (render [{:keys [departments]}]
@@ -60,10 +82,11 @@
 
 (defn om-app [app owner]
   (om/component
-   (dom/div nil
-            (om/build departments-box app
-                      {:opts {:url "http://localhost:3030/api/departments"
-                              :poll-interval 2000}}))))
+   (html
+    [:div
+     (om/build departments-box app
+               {:opts {:url "http://localhost:3030/api/departments"
+                       :poll-interval 2000}})])))
 
 (om/root om-app app-state {:target (. js/document (getElementById "main-container"))})
 
