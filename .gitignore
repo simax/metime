@@ -1,9 +1,5 @@
-/dashboard/target/**
-/dashboard/classes/**
-/dashboard/resources/public/js/out
-/api/target/**
-/api/classes/**
-/checkouts/**
+target/**
+resources/public/js/out
 pom.xml
 pom.xml.asc
 *.jar
