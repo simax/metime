@@ -39,8 +39,10 @@
 
   :clj-sql-up {:database {:classname "org.sqlite.JDBC"
                   :subprotocol "sqlite"
-                  :subname "/users/simonlomax/documents/development/clojure projects/metime/api/src/api/data/metime.sqlite"}
-             :deps [[org.xerial/sqlite-jdbc "3.7.2"]]}
+                  :subname "/Users/simonlomax/Documents/Development/Clojure Projects/metime/src/clj/metime/data/metime.sqlite"}
+                          ;; "/users/simonlomax/documents/development/clojure projects/metime/api/src/api/data/metime.sqlite"
+
+               :deps [[org.xerial/sqlite-jdbc "3.7.2"]]}
 
   :plugins [[lein-cljsbuild "1.0.3"]
             [lein-environ "1.0.0"]]

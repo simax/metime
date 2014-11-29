@@ -10,20 +10,6 @@
 
 (enable-console-print!)
 
-;; (defonce app-state (atom {:text "Hello Chestnut!"}))
-
-;; (defn main []
-;;   (om/root
-;;     (fn [app owner]
-;;       (reify
-;;         om/IRender
-;;         (render [_]
-;;                 (om/build toolbar {})
-;;                 )))
-;;     app-state
-;;     {:target (. js/document (getElementById "main-container"))}))
-
-
 (def app-state
   (atom {}))
 
@@ -58,24 +44,40 @@
 (defn employee-info [{:keys [lastname firstname]}]
   (om/component
    (html
-    [:li
-     [:span {:class "employee-name"} (str firstname " " lastname)]])))
+    [:li {:class "thumbnail pull-left well" :style {:width "200px" :margin-left "10px"}}
+       [:div {:class "row"}
+        [:div {:style {:margin-right "10px" :height "200px;"}}
+         [:div {:class "row caption text-center"}
+          [:form {:action "/admin/users/edit" :class "user-form" :method "get" :novalidate "novalidate"}
+           [:input {:id "Id" :name "Id" :type "hidden" :value ""}
+            [:img {:class "center-block img-rounded img-responsive"
+                   :width "100"
+                   :height "100"
+                   :src "http://www.gravatar.com/avatar/5fb2b8e434bc5f208ecd0e50cad4605b?s 100&amp;r PG"}
+             [:h4 (str firstname " " lastname)]
+             [:button {:class "btn btn-primary pull-right"} "Edit"]]]]
+             [:form {:action "/Admin/Impersonate" :class "impersonate-user-form" :method "post" :novalidate "novalidate"}
+              [:input {:id "Id" :name "Id" :type "hidden" :value ""}]
+              [:button {:class "btn btn-default pull-left"} "Login As"]]]]]])))
 
 (defn department-name [{:keys [department employees]} owner opts]
   (om/component
    (html
     [:li
      [:div
-      [:span {:class "department-name"} department]
       [:ul (for [component (om/build-all employee-info employees)]
-             component)]]])))
+             component)]
+      ]])))
+
 
 (defn department-list [{:keys [departments]}]
   (om/component
-    (dom/div nil
-      (dom/h2 nil "Departments")
-       (apply dom/ul nil
-        (om/build-all department-name departments)))))
+   (html
+    [:div {:class "panel body"}
+     [:h2 "EKM Departments"]
+     (apply dom/ul #js {:className "clearfix"}
+            (om/build-all department-name departments))])))
+
 
 (defn departments-box [app owner opts]
   (reify
@@ -88,8 +90,9 @@
 
     om/IRender
     (render [{:keys [departments]}]
-            (om/build department-list app)
-            )))
+            (html
+             [:div {:class "panel panel-default"}
+              (om/build department-list app)]))))
 
 
 (defn om-app [app owner]
@@ -99,6 +102,6 @@
      (om/build departments-box app
                {:opts {:url "http://localhost:3030/api/departments"
                        :poll-interval 2000}})])))
-
-(om/root om-app app-state {:target (. js/document (getElementById "main-container"))})
+(defn main []
+  (om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
 
