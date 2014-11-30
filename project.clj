@@ -12,6 +12,7 @@
                  [weasel "0.4.0-SNAPSHOT"]
                  [leiningen "2.5.0"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                 [cljs-hash "0.0.2"]
 
                  ;; Server
                  [ring "1.3.1"]
@@ -24,7 +25,7 @@
                  [prone "0.6.0"]
 
                  ;; UI
-                 [om "0.7.3"]
+                 [om "0.8.0-alpha2"]
                  [sablono "0.2.22"]
                  [racehub/om-bootstrap "0.3.1" exclusions [org.clojure/clojure]]
 
@@ -61,7 +62,7 @@
                                         :pretty-print  true}}}}
 
   :profiles {:dev {:repl-options {:init-ns metime.server
-                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+                                  }
 
                    :plugins [[lein-figwheel "0.1.4-SNAPSHOT"]]
 
@@ -70,7 +71,6 @@
                               :css-dirs ["resources/public/css"]}
 
                    :env {:is-dev true}
-
                    :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"]}}}}
 
              :uberjar {:hooks [leiningen.cljsbuild]

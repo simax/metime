@@ -7,7 +7,8 @@
             [compojure.route :as route]
             [compojure.core :refer [defroutes context ANY]]
             [metime.resources :refer :all]
-            [prone.middleware :as prone]))
+            [prone.middleware :as prone]
+            ))
 
 
 (defroutes app-routes

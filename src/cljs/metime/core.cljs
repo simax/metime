@@ -6,7 +6,10 @@
             [om.dom :as dom :include-macros true]
             [cljs-http.client :as http]
             [sablono.core :as html :refer-macros [html]]
-            [om-bootstrap.button :as b]))
+            [om-bootstrap.button :as b]
+            [cljs-hash.md5 :as hashgen]
+            [cljs-hash.goog :as gh]))
+
 
 (enable-console-print!)
 
@@ -41,22 +44,22 @@
                 (b/button {:bs-style "link"} "Link"))]
     )))
 
-(defn employee-info [{:keys [lastname firstname]}]
+(defn employee-info [{:keys [lastname firstname email]}]
   (om/component
    (html
     [:li {:class "thumbnail pull-left well" :style {:width "200px" :margin-left "10px"}}
        [:div {:class "row"}
         [:div {:style {:margin-right "10px" :height "200px;"}}
          [:div {:class "row caption text-center"}
-          [:form {:action "/admin/users/edit" :class "user-form" :method "get" :novalidate "novalidate"}
+          [:form {:action "/admin/users/edit" :class "user-form" :method "get" }
            [:input {:id "Id" :name "Id" :type "hidden" :value ""}
             [:img {:class "center-block img-rounded img-responsive"
                    :width "100"
                    :height "100"
-                   :src "http://www.gravatar.com/avatar/5fb2b8e434bc5f208ecd0e50cad4605b?s 100&amp;r PG"}
+                   :src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email) "?s 100&amp;r PG")}
              [:h4 (str firstname " " lastname)]
              [:button {:class "btn btn-primary pull-right"} "Edit"]]]]
-             [:form {:action "/Admin/Impersonate" :class "impersonate-user-form" :method "post" :novalidate "novalidate"}
+             [:form {:action "/Admin/Impersonate" :class "impersonate-user-form" :method "post" }
               [:input {:id "Id" :name "Id" :type "hidden" :value ""}]
               [:button {:class "btn btn-default pull-left"} "Login As"]]]]]])))
 
