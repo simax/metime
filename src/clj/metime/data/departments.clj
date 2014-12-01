@@ -6,4 +6,16 @@
             [clojure.walk :as walk]))
 
 (defn get-all []
-  (select departments (with employees)))
+   (select departments
+           (fields :department :id :managerid)
+           (with employees
+                 (fields
+                  :managerid
+                  :enddate
+                  :startdate
+                  :email
+                  :lastname
+                  :firstname
+                  :id))
+            (with manager
+                  )))

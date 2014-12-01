@@ -5,19 +5,21 @@
 
 (defdb db (sqlite3 {:classname "org.sqlite.JDBC"
                     :subprotocol "sqlite"
-                    ;; :subname "/users/simonlomax/documents/development/temp/metime/src/api/data/metime.sqlite"}))
                     :subname "/Users/simonlomax/Documents/Development/Clojure Projects/metime/src/clj/metime/data/metime.sqlite"}))
 
 
-
-(declare departments)
+(declare departments manager)
 
 (defentity employees
-  ;(entity-fields :id :firstname :lastname :email :startdate :enddate :active)
   (belongs-to departments))
 
+(defentity manager
+  (table :employees (fields [:firstanme :manager-firstname] [:lastname :manager-lastname] [:email :manager-email]))
+  (join departments (= :departments.managerid :id))
+  )
+
 (defentity departments
-  (has-many employees))
-
-
+  (has-many employees)
+  (has-one manager)
+  )
 

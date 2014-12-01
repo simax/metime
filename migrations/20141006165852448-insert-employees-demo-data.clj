@@ -75,7 +75,6 @@
     "insert into employees (firstname, lastname, email, startdate, enddate, active, departments_id, managerid) values ('Kayleigh','Hubbard','kayleighhubbard@ekmsystems.co.uk',NULL, NULL, TRUE,16,1);"
     "insert into employees (firstname, lastname, email, startdate, enddate, active, departments_id, managerid) values ('Phillip','Rhodes','philrhodes@ekmsystems.co.uk',NULL, NULL, TRUE,16,1);"
     "insert into employees (firstname, lastname, email, startdate, enddate, active, departments_id, managerid) values ('Blake','Stone','blakestone@ekmsystems.co.uk',NULL, NULL, TRUE,16,1);"
-    "insert into employees (firstname, lastname, email, startdate, enddate, active, departments_id, managerid) values ('Kadie','Green','kadiegreen@ekmsystems.co.uk',NULL, NULL, TRUE,16,1);"
     "insert into employees (firstname, lastname, email, startdate, enddate, active, departments_id, managerid) values ('Scott','Horrocks','scotthorrocks@ekmsystems.co.uk',NULL, NULL, TRUE,16,1);"
     "insert into employees (firstname, lastname, email, startdate, enddate, active, departments_id, managerid) values ('Oliver','Scott','oliverscott@ekmsystems.co.uk',NULL, NULL, TRUE,16,1);"
     "insert into employees (firstname, lastname, email, startdate, enddate, active, departments_id, managerid) values ('Ian','Gibson','iangibson@ekmsystems.co.uk',NULL, NULL, TRUE,16,1);"

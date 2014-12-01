@@ -6,10 +6,4 @@
 
 
 (defn get-all []
-  (json/encode
-;   [{:id 1, :name "EKM"}
-;    {:id 2, :name "Development"}
-;    {:id 3, :name "Design"}
-;    {:id 4, :name "Customer Support"}]
-
-   (select employees (with departments))))
+   (select employees (with departments)))

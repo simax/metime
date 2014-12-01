@@ -28,6 +28,7 @@
                  [om "0.8.0-alpha2"]
                  [sablono "0.2.22"]
                  [racehub/om-bootstrap "0.3.1" exclusions [org.clojure/clojure]]
+                 [secretary "1.2.1"]
 
                  ;; Dev
                  [enlive "1.1.5"]
@@ -41,7 +42,6 @@
   :clj-sql-up {:database {:classname "org.sqlite.JDBC"
                   :subprotocol "sqlite"
                   :subname "/Users/simonlomax/Documents/Development/Clojure Projects/metime/src/clj/metime/data/metime.sqlite"}
-                          ;; "/users/simonlomax/documents/development/clojure projects/metime/api/src/api/data/metime.sqlite"
 
                :deps [[org.xerial/sqlite-jdbc "3.7.2"]]}
 
