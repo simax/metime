@@ -10,16 +10,18 @@
 
 (declare departments manager)
 
-(defentity employees
-  (belongs-to departments))
+;; (defentity employees
+;;   (belongs-to departments))
 
 (defentity manager
-  (table :employees (fields [:firstanme :manager-firstname] [:lastname :manager-lastname] [:email :manager-email]))
-  (join departments (= :departments.managerid :id))
+  (table :employees)
+         (fields [:firstname :manager-firstname]
+                 [:lastname :manager-lastname]
+                 [:email :manager-email])
+  ;;(belongs-to departments {:fk :managerid})
   )
+
 
 (defentity departments
-  (has-many employees)
   (has-one manager)
-  )
-
+  (has-many employees))

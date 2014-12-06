@@ -17,9 +17,7 @@
 
   :exists? (fn [ctx]
               [true
-               {::departments {:departments (deps/get-all)}
-                ;;{:departments [{:department "Design"} {:department "Development"} {:department "Sales and Marketing"}]}
-                }])
+               {::departments {:departments (deps/get-all-with-employees)}}])
 
 
   :handle-ok ::departments)

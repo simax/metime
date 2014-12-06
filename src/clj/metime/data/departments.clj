@@ -5,17 +5,15 @@
             [metime.data.database :refer :all]
             [clojure.walk :as walk]))
 
-(defn get-all []
-   (select departments
-           (fields :department :id :managerid)
-           (with employees
-                 (fields
-                  :managerid
-                  :enddate
-                  :startdate
-                  :email
-                  :lastname
-                  :firstname
-                  :id))
-            (with manager
-                  )))
+(defn get-all-with-employees []
+  "Get all departments including their employees"
+  (select departments
+          (fields :department
+                  :id
+                  [:employees.email :manager-email]
+                  [:employees.lastname :manager-lastname]
+                  [:employees.firstname :manager-firstname])
+          (join manager (= :employees.id :managerid))
+          (with employees
+                ;;(where (= :department "Development"))
+                )))
