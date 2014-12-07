@@ -7,6 +7,7 @@
             [cljs-http.client :as http]
             [sablono.core :as html :refer-macros [html]]
             [om-bootstrap.button :as b]
+            [om-bootstrap.panel :as p]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]))
 
@@ -30,25 +31,12 @@
 ;; (defn csr-departments []
 ;;   (om/ref-cursor (:departments (om/root-cursor app-state))))
 
-(defn toolbar [_]
+
+(defn gravatar [email-address owner {:keys [size] :as opts}]
   (om/component
    (html
-    [:div
-     (b/toolbar {}
-                (b/button {} "Default")
-                (b/button {:bs-style "primary"} "Primary")
-                (b/button {:bs-style "success"} "Success")
-                (b/button {:bs-style "info"} "Info")
-                (b/button {:bs-style "warning"} "Warning")
-                (b/button {:bs-style "danger"} "Danger")
-                (b/button {:bs-style "link"} "Link"))]
-    )))
-
-(defn gravatar
-  [email-address size]
-   (html
     [:img {:className "center-block img-rounded img-responsive"
-           :src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")}]))
+           :src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")}])))
 
 
 (defn employee-info [{:keys [lastname firstname email]}]
@@ -56,25 +44,26 @@
    (html
     [:li {:className "thumbnail pull-left well" :style {:width "200px" :margin-left "10px"}}
        [:div {:className "row"}
-        [:div {:style {:margin-right "10px" :height "200px;"}}
+        [:div {:style {:margin-right "10px" :height "150px;"}}
          [:div {:className "row caption text-center"}
           [:input {:id "Id" :name "Id" :type "hidden" :value ""}]
-          (gravatar email)
+          (om/build gravatar email)
           [:h4 (str firstname " " lastname)]
           [:button {:className "btn btn-primary pull-right"} "Edit"]
           [:input {:id "Id" :name "Id" :type "hidden" :value ""}]
           [:button {:className "btn btn-default pull-left"} "Login As"]]]]])))
 
+
 (defn department-name [{:keys [department manager-email employees]} owner opts]
   (om/component
    (html
-    [:li {:className "panel panel-default"}
-     [:div {:className "panel-heading"}
-      [:h3 {:className "panel-title"} department
-        (gravatar manager-email 60)
-      ]]
+    [:li {:className "panel panel-default clearfix"}
+     (p/panel {:header
+               (dom/div #js{:className: "row" }
+                        (dom/div #js {:className "pull-right"} (om/build gravatar manager-email {:opts {:size 50}}))
+                        (dom/h3 nil department))})
      [:ul {:className "panel-body"} (for [component (om/build-all employee-info employees)]
-            component)]
+                                       component)]
      ])))
 
 

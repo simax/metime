@@ -7,4 +7,4 @@
 
 (defn get-all []
   "Get all employees"
-   (select employees (with departments)))
+   (select employees))
