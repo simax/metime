@@ -49,7 +49,8 @@
           [:input {:id "Id" :name "Id" :type "hidden" :value ""}]
           (om/build gravatar email)
           [:h4 (str firstname " " lastname)]
-          [:button {:className "btn btn-primary pull-right"} "Edit"]
+          [:button {:className "btn btn-primary pull-right"
+                    :onClick (fn [e] (js/alert "You clicked the edit button"))} "Edit"]
           [:input {:id "Id" :name "Id" :type "hidden" :value ""}]
           [:button {:className "btn btn-default pull-left"} "Login As"]]]]])))
 
