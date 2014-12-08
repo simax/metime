@@ -13,11 +13,11 @@ goog.addDependency("../cljs/core/async/impl/ioc_helpers.js", ['cljs.core.async.i
 goog.addDependency("../cljs/core/async/impl/timers.js", ['cljs.core.async.impl.timers'], ['cljs.core.async.impl.channels', 'cljs.core.async.impl.dispatch', 'cljs.core', 'cljs.core.async.impl.protocols']);
 goog.addDependency("../cljs/core/async.js", ['cljs.core.async'], ['cljs.core.async.impl.channels', 'cljs.core.async.impl.dispatch', 'cljs.core', 'cljs.core.async.impl.buffers', 'cljs.core.async.impl.protocols', 'cljs.core.async.impl.ioc_helpers', 'cljs.core.async.impl.timers']);
 goog.addDependency("../cljs_hash/goog.js", ['cljs_hash.goog'], ['goog.crypt', 'goog.crypt.Sha1', 'cljs.core', 'goog.crypt.Md5']);
+goog.addDependency("../om/dom.js", ['om.dom'], ['cljs.core']);
 goog.addDependency("../clojure/string.js", ['clojure.string'], ['goog.string', 'cljs.core', 'goog.string.StringBuffer']);
+goog.addDependency("../om_tools/dom.js", ['om_tools.dom'], ['cljs.core', 'om.dom', 'clojure.string']);
 goog.addDependency("../schema/utils.js", ['schema.utils'], ['goog.string', 'cljs.core', 'goog.string.format']);
 goog.addDependency("../schema/core.js", ['schema.core'], ['cljs.core', 'clojure.string', 'schema.utils']);
-goog.addDependency("../om/dom.js", ['om.dom'], ['cljs.core']);
-goog.addDependency("../om_tools/dom.js", ['om_tools.dom'], ['cljs.core', 'om.dom', 'clojure.string']);
 goog.addDependency("../plumbing/fnk/schema.js", ['plumbing.fnk.schema'], ['schema.core', 'cljs.core', 'schema.utils']);
 goog.addDependency("../plumbing/core.js", ['plumbing.core'], ['cljs.core', 'plumbing.fnk.schema', 'schema.utils']);
 goog.addDependency("../om/core.js", ['om.core'], ['cljs.core', 'om.dom', 'goog.ui.IdGenerator']);
@@ -48,7 +48,9 @@ goog.addDependency("../sablono/util.js", ['sablono.util'], ['goog.Uri', 'cljs.co
 goog.addDependency("../sablono/interpreter.js", ['sablono.interpreter'], ['sablono.util', 'cljs.core', 'clojure.string']);
 goog.addDependency("../clojure/walk.js", ['clojure.walk'], ['cljs.core']);
 goog.addDependency("../sablono/core.js", ['sablono.core'], ['goog.dom', 'sablono.util', 'cljs.core', 'sablono.interpreter', 'clojure.string', 'clojure.walk']);
+goog.addDependency("../secretary/core.js", ['secretary.core'], ['cljs.core', 'clojure.string', 'clojure.walk']);
 goog.addDependency("../om_bootstrap/button.js", ['om_bootstrap.button'], ['schema.core', 'om_tools.dom', 'om_tools.mixin', 'om_tools.core', 'cljs.core', 'om_bootstrap.mixins', 'om_bootstrap.util', 'om.core', 'om_bootstrap.types']);
-goog.addDependency("../metime/core.js", ['metime.core'], ['cljs_hash.goog', 'cljs.core', 'om_bootstrap.panel', 'cljs_http.client', 'om.dom', 'cljs_hash.md5', 'cljs.core.async', 'sablono.core', 'om.core', 'om_bootstrap.button', 'goog.events']);
+goog.addDependency("../om_bootstrap/random.js", ['om_bootstrap.random'], ['schema.core', 'om_tools.dom', 'om_tools.core', 'cljs.core', 'om_bootstrap.mixins', 'om_bootstrap.util', 'om.core', 'om_bootstrap.types']);
+goog.addDependency("../metime/core.js", ['metime.core'], ['cljs_hash.goog', 'om_tools.dom', 'om_tools.core', 'cljs.core', 'om_bootstrap.panel', 'cljs_http.client', 'cljs_hash.md5', 'cljs.core.async', 'sablono.core', 'om.core', 'secretary.core', 'om_bootstrap.button', 'goog.events', 'om_bootstrap.random']);
 goog.addDependency("../figwheel/client.js", ['figwheel.client'], ['goog.net.jsloader', 'cljs.core', 'cljs.core.async', 'clojure.string', 'cljs.reader']);
 goog.addDependency("../metime/dev.js", ['metime.dev'], ['weasel.repl', 'cljs.core', 'cljs.core.async', 'metime.core', 'figwheel.client']);

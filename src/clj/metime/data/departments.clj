@@ -10,10 +10,12 @@
   (select departments
           (fields :department
                   :id
+                  :managerid
                   [:employees.email :manager-email]
                   [:employees.lastname :manager-lastname]
                   [:employees.firstname :manager-firstname])
-          (join manager (= :employees.id :managerid))
+          (order :department)
           (with employees
-                ;;(where (= :department "Development"))
-                )))
+                (order :lastname))
+          (join manager (= :employees.id :managerid))
+          ))
