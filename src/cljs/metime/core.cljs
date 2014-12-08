@@ -46,8 +46,11 @@
             ])))
 
 
-(defn employee-info [{:keys [lastname firstname email id]}]
-  (om/component
+(defcomponent employee-info [{:keys [lastname firstname email id]}]
+  (display-name [_]
+    "employee-info")
+
+  (render [_]
    (html
     [:li {:class "thumbnail pull-left well" :style {:width "200px" :margin-left "10px"}}
        [:div {:class "row"}
