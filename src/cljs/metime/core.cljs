@@ -36,7 +36,7 @@
 
   (render [_]
           (html
-           [:img.center-block.img-rounded.img-responsive.gravatar
+           [:img.gravatar.img-circle
             {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")}
 ;;             (r/tooltip {:placement "right"
 ;;                         :position-left 150
@@ -51,41 +51,46 @@
     "employee-info")
 
   (render [_]
+    (let [edit (fn [e]
+                 (secretary/dispatch! (str "/employees/" id))
+                 (js/alert "You clicked the edit button"))]
    (html
-    [:li {:class "thumbnail pull-left well" :style {:width "200px" :margin-left "10px"}}
-       [:div {:class "row"}
-        [:div {:style {:margin-right "10px"}}
-         [:div {:class "row" :style {:height "140px"}}
-          (om/build gravatar email)
-          [:h5.caption.text-center (str firstname " " lastname)]]
-         [:div
-          [:button.btn.btn-default.pull-right
-                    {:onClick (fn [e]
-                                (secretary/dispatch! (str "/employees/" id))
-                                (js/alert "You clicked the edit button"))} [:span.glyphicon.glyphicon-edit]
-          [:button.btn.btn-default {:style {:margin-left "10px"}} [:span.glyphicon.glyphicon-log-in]]]]
-         ]]])))
+     [:div {:class "col-sm-3 col-lg-3"}
+       [:div {:class "dash-unit"}
+         [:div {:class "thumbnail" :style {:margin-top "20px"}}
+          [:h1 (str firstname " " lastname)]
+          [:div {:style {:margin-top "20px"} :onClick edit} (->gravatar email {:opts {:size 100}})]
+          [:h5.text-center "Days remaining:"]
+          [:div {:class "info-user"}
+						[:span {:aria-hidden "true" :class "li_user fs1"}]
+						[:span {:aria-hidden "true" :class "li_calendar fs1"}]
+						[:span {:aria-hidden "true" :class "li_mail fs1"}]
+					]]
+        ]]))))
 
 
-(defcomponent department-name [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
+(defcomponent department-heading [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
   (display-name [_]
     "department-name")
 
   (render [_]
-          (let [department-employees (filter #(not= (:id %) managerid) employees)]
+          (let [department-employees (filter #(not= (:id %) managerid) employees)
+                rows-of-employees (partition 4 4 nil department-employees)]
             (html
-             [:li.panel.panel-default
+             [:div.panel.panel-default.accordian-group
 
-              [:div.panel-heading.clearfix
+              [:div.panel-heading.clearfix.accordian-heading
                [:div.pull-left
                 [:div (om/build gravatar manager-email {:opts {:size 50}})]
                 [:h5 (str manager-firstname " " manager-lastname)]
-                ]
-               [:h2.center department]]
+               ]
+               [:h2 department]]
 
-              [:ul.panel-body (for [component (om/build-all employee-info department-employees)]
-                                component)]
-            ]))))
+              [:div.panel-body.accordian-body.in {:style {:height "auto"}}
+                 (for [employee-row rows-of-employees]
+                   [:div {:class "row accordian-inner"}
+                    (for [component (om/build-all employee-info employee-row)]
+                      component)])]]))))
 
 
 (defcomponent department-list [{:keys [departments]}]
@@ -94,11 +99,11 @@
 
   (render [_]
    (html
-    [:div.clearfix
-       (dom/ul (om/build-all department-name departments))])))
+    [:div.clearfix.accordian
+       (dom/ul (om/build-all department-heading departments))])))
 
 
-(defcomponent departments-box [app owner opts]
+(defcomponent departments-container [app owner opts]
   (display-name [_]
     "departments-box")
 
@@ -111,7 +116,7 @@
   (render-state [_ {:keys [departments]}]
                 (html
                  [:div
-                  (om/build department-list app)])))
+                  (->department-list app)])))
 
 
 (defcomponent om-app [app owner]
@@ -120,7 +125,7 @@
   (render [_]
           (html
            [:div
-            (om/build departments-box app
+            (->departments-container app
                       {:opts {:url "http://localhost:3030/api/departments"
                               :poll-interval 2000}})])))
 (defn main []
