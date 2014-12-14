@@ -3,6 +3,8 @@
 
 ## Development
 
+To start the api. At the terminal (or command line on Windows), type `lein ring server-headless 3030`.
+
 Start a REPL (in a terminal: `lein repl`, or from Emacs: open a
 clj/cljs file in the project, then do `M-x cider-jack-in`. Make sure
 CIDER is up to date).

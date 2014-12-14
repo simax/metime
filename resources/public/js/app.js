@@ -22,11 +22,6 @@ goog.addDependency("../plumbing/fnk/schema.js", ['plumbing.fnk.schema'], ['schem
 goog.addDependency("../plumbing/core.js", ['plumbing.core'], ['cljs.core', 'plumbing.fnk.schema', 'schema.utils']);
 goog.addDependency("../om/core.js", ['om.core'], ['cljs.core', 'om.dom', 'goog.ui.IdGenerator']);
 goog.addDependency("../om_tools/core.js", ['om_tools.core'], ['plumbing.core', 'cljs.core', 'om.core', 'plumbing.fnk.schema']);
-goog.addDependency("../om_tools/mixin.js", ['om_tools.mixin'], ['cljs.core', 'om.core']);
-goog.addDependency("../om_bootstrap/mixins.js", ['om_bootstrap.mixins'], ['schema.core', 'om_tools.mixin', 'cljs.core', 'cljs.core.async', 'om.core']);
-goog.addDependency("../om_bootstrap/util.js", ['om_bootstrap.util'], ['schema.core', 'cljs.core', 'om.core']);
-goog.addDependency("../om_bootstrap/types.js", ['om_bootstrap.types'], ['schema.core', 'cljs.core']);
-goog.addDependency("../om_bootstrap/panel.js", ['om_bootstrap.panel'], ['schema.core', 'om_tools.dom', 'om_tools.core', 'cljs.core', 'om_bootstrap.mixins', 'om_bootstrap.util', 'om.core', 'om_bootstrap.types']);
 goog.addDependency("../no/en/core.js", ['no.en.core'], ['cljs.core', 'goog.crypt.base64', 'clojure.string', 'cljs.reader']);
 goog.addDependency("../com/cognitect/transit/util.js", ['com.cognitect.transit.util'], ['goog.object']);
 goog.addDependency("../com/cognitect/transit/eq.js", ['com.cognitect.transit.eq'], ['com.cognitect.transit.util']);
@@ -49,8 +44,6 @@ goog.addDependency("../sablono/interpreter.js", ['sablono.interpreter'], ['sablo
 goog.addDependency("../clojure/walk.js", ['clojure.walk'], ['cljs.core']);
 goog.addDependency("../sablono/core.js", ['sablono.core'], ['goog.dom', 'sablono.util', 'cljs.core', 'sablono.interpreter', 'clojure.string', 'clojure.walk']);
 goog.addDependency("../secretary/core.js", ['secretary.core'], ['cljs.core', 'clojure.string', 'clojure.walk']);
-goog.addDependency("../om_bootstrap/button.js", ['om_bootstrap.button'], ['schema.core', 'om_tools.dom', 'om_tools.mixin', 'om_tools.core', 'cljs.core', 'om_bootstrap.mixins', 'om_bootstrap.util', 'om.core', 'om_bootstrap.types']);
-goog.addDependency("../om_bootstrap/random.js", ['om_bootstrap.random'], ['schema.core', 'om_tools.dom', 'om_tools.core', 'cljs.core', 'om_bootstrap.mixins', 'om_bootstrap.util', 'om.core', 'om_bootstrap.types']);
-goog.addDependency("../metime/core.js", ['metime.core'], ['cljs_hash.goog', 'om_tools.dom', 'om_tools.core', 'cljs.core', 'om_bootstrap.panel', 'cljs_http.client', 'cljs_hash.md5', 'cljs.core.async', 'sablono.core', 'om.core', 'secretary.core', 'om_bootstrap.button', 'goog.events', 'om_bootstrap.random']);
+goog.addDependency("../metime/core.js", ['metime.core'], ['cljs_hash.goog', 'om_tools.dom', 'om_tools.core', 'cljs.core', 'cljs_http.client', 'cljs_hash.md5', 'cljs.core.async', 'sablono.core', 'om.core', 'secretary.core', 'goog.events']);
 goog.addDependency("../figwheel/client.js", ['figwheel.client'], ['goog.net.jsloader', 'cljs.core', 'cljs.core.async', 'clojure.string', 'cljs.reader']);
 goog.addDependency("../metime/dev.js", ['metime.dev'], ['weasel.repl', 'cljs.core', 'cljs.core.async', 'metime.core', 'figwheel.client']);

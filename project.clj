@@ -27,7 +27,6 @@
                  ;; UI
                  [om "0.8.0-alpha2"]
                  [sablono "0.2.22"]
-                 [racehub/om-bootstrap "0.3.1" exclusions [org.clojure/clojure]]
                  [secretary "1.2.1"]
                  [prismatic/om-tools "0.3.6"]
 
