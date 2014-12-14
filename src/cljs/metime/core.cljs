@@ -79,10 +79,10 @@
                ]
                [:h2 department]
                [:button {:class "btn glyphicon glyphicon-sort col-md-offset-11 col-md-1 col-xs-offset-11 col-xs-1"
-                         :data-toggle "collapse" :data-parent "accordian" :data-target (str "#" department)}]
+                         :data-toggle "collapse" :data-parent "accordian" :data-target (str "#" (clojure.string/replace department #"[\s]" "-"))}]
               ]
 
-              [:div.panel-body.panel-collapse.collapse {:id department :style {:height "auto"}}
+              [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
                  (for [employee-row rows-of-employees]
                    [:div {:class "row accordian-inner" }
                     (for [employee-info-component (om/build-all employee-info employee-row)]
