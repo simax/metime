@@ -1,6 +1,7 @@
 (ns metime.core
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [goog.events :as events]
+            [goog.history.EventType :as EventType]
             [cljs.core.async :refer [put! <! >! chan timeout]]
             [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
@@ -9,7 +10,8 @@
             [sablono.core :as html :refer-macros [html]]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
-            [secretary.core :as secretary :refer-macros [defroute]]))
+            [secretary.core :as secretary :refer-macros [defroute]])
+  (:import goog.History))
 
 
 (enable-console-print!)
@@ -44,19 +46,22 @@
   (render [_]
     (let [edit (fn [e]
                  (secretary/dispatch! (str "/employees/" id))
-                 (js/alert str "You clicked the " (.target e) "button"))]
+                 (println "You clicked the button"))]
    (html
      [:div {:class "col-sm-3 col-lg-3"}
        [:div {:class "dash-unit"}
          [:div {:class "thumbnail" :style {:margin-top "20px"}}
-          [:h1 (str firstname " " lastname)]
-          [:div {:style {:margin-top "20px"} :onClick edit} (->gravatar email {:opts {:size 100}})]
+          [:a {:href (str "/#/employees/" id)}
+           [:h1 (str firstname " " lastname)]
+           [:div {:style {:margin-top "20px"}} (->gravatar email {:opts {:size 100}})]
+          ]
           [:div {:class "info-user"}
-						[:span {:aria-hidden "true" :onClick edit :class "li_user fs1"}]
-						[:span {:aria-hidden "true" :onClick edit :class "li_calendar fs1"}]
-						[:span {:aria-hidden "true" :onClick edit :class "li_mail fs1"}]
-						[:span {:aria-hidden "true" :onClick edit :class "glyphicon glyphicon-trash fs1"}]
-					]
+            [:span {:aria-hidden "true" :class "li_user fs1"}]
+            [:span {:aria-hidden "true" :class "li_calendar fs1"}]
+            [:span {:aria-hidden "true" :class "li_mail fs1"}]
+            [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
+          ]
+
           ;; For now, just simulate the number of days remaining
           [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
          ]]]))))
@@ -124,6 +129,10 @@
             (->departments-container app
                       {:opts {:url "http://localhost:3030/api/departments"
                               :poll-interval 2000}})])))
+
 (defn main []
+;;   (let [h (History.)]
+;;     (events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
+;;     (doto h (.setEnabled true)))
   (om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
 
