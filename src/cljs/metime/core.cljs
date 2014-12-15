@@ -11,10 +11,13 @@
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
             [secretary.core :as secretary :refer-macros [defroute]])
-  (:import goog.History))
+  (:import goog.History
+           goog.History.EventType))
 
 
 (enable-console-print!)
+
+(def history (History.))
 
 (defroute "/employees/:id" [id]
   (println (str "employee id: " id )))
@@ -29,6 +32,11 @@
           (>! c deps)))
     c))
 
+(defn employee-name [firstname lastname]
+  (let [disp-name (str firstname " " lastname)
+        name-length (count disp-name)]
+    (if (> name-length 20) (str (subs disp-name 0 17) "...") disp-name)))
+
 (defcomponent gravatar [email-address owner {:keys [size] :as opts}]
   (display-name [_]
     "gravatar")
@@ -37,7 +45,6 @@
           (html
            [:img.gravatar.img-circle
             {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")}])))
-
 
 (defcomponent employee-info [{:keys [lastname firstname email id]}]
   (display-name [_]
@@ -52,7 +59,7 @@
        [:div {:class "dash-unit"}
          [:div {:class "thumbnail" :style {:margin-top "20px"}}
           [:a {:href (str "/#/employees/" id)}
-           [:h1 (str firstname " " lastname)]
+           [:h1 (employee-name firstname lastname)]
            [:div {:style {:margin-top "20px"}} (->gravatar email {:opts {:size 100}})]
           ]
           [:div {:class "info-user"}
@@ -75,16 +82,26 @@
           (let [department-employees (filter #(not= (:id %) managerid) employees)
                 rows-of-employees (partition 4 4 nil department-employees)]
             (html
-             [:div#accordian.panel.panel-default
+             [:div#accordian.panel.panel-default.row
 
               [:div.panel-heading.clearfix.panel-heading
-               [:div.pull-left
-                [:div (om/build gravatar manager-email {:opts {:size 50}})]
-                [:h5 (str manager-firstname " " manager-lastname)]
+               [:div.col-md-2.col-xs-2
+                [:div.col-md-4.col-xs-4 (om/build gravatar manager-email {:opts {:size 50}})]
+                [:div.col-md-8.col-xs-8
+                 [:h5 (str manager-firstname " " manager-lastname)]
+                ]
                ]
-               [:h2 department]
-               [:button {:class "btn glyphicon glyphicon-sort col-md-offset-11 col-md-1 col-xs-offset-11 col-xs-1"
-                         :data-toggle "collapse" :data-parent "accordian" :data-target (str "#" (clojure.string/replace department #"[\s]" "-"))}]
+               [:div.col-md-10.col-xs-10
+                [:div.col-md-11.col-xs-11
+                 [:h2 department]
+                ]
+                [:div.col-md-1.col-xs-1
+                 [:button {:class "btn btn-default glyphicon glyphicon-sort"
+                           :data-toggle "collapse"
+                           :data-parent "accordian"
+                           :data-target (str "#" (clojure.string/replace department #"[\s]" "-"))}]
+                ]
+               ]
               ]
 
               [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
@@ -131,8 +148,8 @@
                               :poll-interval 2000}})])))
 
 (defn main []
-;;   (let [h (History.)]
-;;     (events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
-;;     (doto h (.setEnabled true)))
+  (let [h (History.)]
+    (events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
+    (doto h (.setEnabled true)))
   (om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
 
