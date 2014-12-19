@@ -15,15 +15,29 @@
            goog.History.EventType))
 
 
-(enable-console-print!)
+(def app-state
+  (atom {:state []}))
 
 (def history (History.))
+
+(defn refresh-navigation []
+   (
+     let [token (.getToken history)
+          set-active (fn [nav]
+                       (assoc-in nav [:state] :active (= (:path nav) token)))]
+
+    ;; #(map set-active %)
+    (swap! app-state #(map set-active %))
+    (println (str "token: " token))))
+
+ 
+(defn on-navigate [event]
+  (refresh-navigation)
+  (secretary/dispatch! (.-token event)))
 
 (defroute "/employees/:id" [id]
   (println (str "employee id: " id )))
 
-(def app-state
-  (atom {}))
 
 (defn fetch-departments
   [url]
@@ -31,6 +45,7 @@
     (go (let [deps (((<! (http/get url)) :body) :departments)]
           (>! c deps)))
     c))
+
 
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
@@ -74,7 +89,7 @@
          ]]]))))
 
 
-(defcomponent department-heading [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
+(defcomponent department-employees [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
   (display-name [_]
     "department-name")
 
@@ -105,10 +120,13 @@
               ]
 
               [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
-                 (for [employee-row rows-of-employees]
-                   [:div {:class "row accordian-inner" }
-                    (for [employee-info-component (om/build-all employee-info employee-row)]
-                      employee-info-component)])]]))))
+                 (if (not (zero? (count rows-of-employees)))
+                   (for [employee-row rows-of-employees]
+                     [:div.row.accordian-inner
+                      (for [employee-info-component (om/build-all employee-info employee-row)]
+                        employee-info-component)])
+                   [:div.row.accordian-inner
+                    [:h5.text-center "Currently, this department does not contain any employees"]])]]))))
 
 
 (defcomponent department-list [{:keys [departments]}]
@@ -118,7 +136,7 @@
   (render [_]
    (html
     [:div.clearfix.accordian
-       (dom/ul (om/build-all department-heading departments))])))
+       (dom/ul (om/build-all department-employees departments))])))
 
 
 (defcomponent departments-container [app owner opts]
@@ -148,8 +166,7 @@
                               :poll-interval 2000}})])))
 
 (defn main []
-  (let [h (History.)]
-    (events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
-    (doto h (.setEnabled true)))
+  (doto history
+    (goog.events/listen EventType/NAVIGATE on-navigate)
+    (.setEnabled true))
   (om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
-
