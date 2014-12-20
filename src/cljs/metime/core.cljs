@@ -16,28 +16,34 @@
 
 
 (def app-state
-  (atom {:state []}))
+  (atom {}))
+
+(defn refresh-navigation []
+;;   (
+;;    ;;let [token (.getToken history)
+;;    let [token "/employee/1"
+;;         set-active (fn [nav]
+;;                      (assoc-in [:state :active] (= (:path nav) token)))]
+
+;;    ;; #(map set-active %)
+;;    (swap! app-state #(map set-active %))
+;;    (println (str "token: " token))
+;;    (app-state))
+;;   (let [token "/employee/1"
+;;         set-active (fn [nav] (assoc nav :active (= (:path nav) token)))])
+;;   (swap! app-state #(map set-active %))
+)
+
+(refresh-navigation)
 
 (def history (History.))
 
-(defn refresh-navigation []
-   (
-     let [token (.getToken history)
-          set-active (fn [nav]
-                       (assoc-in nav [:state] :active (= (:path nav) token)))]
-
-    ;; #(map set-active %)
-    (swap! app-state #(map set-active %))
-    (println (str "token: " token))))
-
- 
 (defn on-navigate [event]
-  (refresh-navigation)
-  (secretary/dispatch! (.-token event)))
+  (refresh-navigation)
+  (secretary/dispatch! (.-token event)))
 
 (defroute "/employees/:id" [id]
   (println (str "employee id: " id )))
-
 
 (defn fetch-departments
   [url]
@@ -54,7 +60,7 @@
 
 (defcomponent gravatar [email-address owner {:keys [size] :as opts}]
   (display-name [_]
-    "gravatar")
+                "gravatar")
 
   (render [_]
           (html
@@ -63,35 +69,35 @@
 
 (defcomponent employee-info [{:keys [lastname firstname email id]}]
   (display-name [_]
-    "employee-info")
+                "employee-info")
 
   (render [_]
-    (let [edit (fn [e]
-                 (secretary/dispatch! (str "/employees/" id))
-                 (println "You clicked the button"))]
-   (html
-     [:div {:class "col-sm-3 col-lg-3"}
-       [:div {:class "dash-unit"}
-         [:div {:class "thumbnail" :style {:margin-top "20px"}}
-          [:a {:href (str "/#/employees/" id)}
-           [:h1 (employee-name firstname lastname)]
-           [:div {:style {:margin-top "20px"}} (->gravatar email {:opts {:size 100}})]
-          ]
-          [:div {:class "info-user"}
-            [:span {:aria-hidden "true" :class "li_user fs1"}]
-            [:span {:aria-hidden "true" :class "li_calendar fs1"}]
-            [:span {:aria-hidden "true" :class "li_mail fs1"}]
-            [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
-          ]
+          (let [edit (fn [e]
+                       (secretary/dispatch! (str "/employees/" id))
+                       (println "You clicked the button"))]
+            (html
+             [:div {:class "col-sm-3 col-lg-3"}
+              [:div {:class "dash-unit"}
+               [:div {:class "thumbnail" :style {:margin-top "20px"}}
+                [:a {:href (str "/#/employees/" id)}
+                 [:h1 (employee-name firstname lastname)]
+                 [:div {:style {:margin-top "20px"}} (->gravatar email {:opts {:size 100}})]
+                 ]
+                [:div {:class "info-user"}
+                 [:span {:aria-hidden "true" :class "li_user fs1"}]
+                 [:span {:aria-hidden "true" :class "li_calendar fs1"}]
+                 [:span {:aria-hidden "true" :class "li_mail fs1"}]
+                 [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
+                 ]
 
-          ;; For now, just simulate the number of days remaining
-          [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
-         ]]]))))
+                ;; For now, just simulate the number of days remaining
+                [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
+                ]]]))))
 
 
 (defcomponent department-employees [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
   (display-name [_]
-    "department-name")
+                "department-name")
 
   (render [_]
           (let [department-employees (filter #(not= (:id %) managerid) employees)
@@ -104,44 +110,44 @@
                 [:div.col-md-4.col-xs-4 (om/build gravatar manager-email {:opts {:size 50}})]
                 [:div.col-md-8.col-xs-8
                  [:h5 (str manager-firstname " " manager-lastname)]
+                 ]
                 ]
-               ]
                [:div.col-md-10.col-xs-10
                 [:div.col-md-11.col-xs-11
                  [:h2 department]
-                ]
+                 ]
                 [:div.col-md-1.col-xs-1
                  [:button {:class "btn btn-default glyphicon glyphicon-sort"
                            :data-toggle "collapse"
                            :data-parent "accordian"
                            :data-target (str "#" (clojure.string/replace department #"[\s]" "-"))}]
+                 ]
                 ]
                ]
-              ]
 
               [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
-                 (if (not (zero? (count rows-of-employees)))
-                   (for [employee-row rows-of-employees]
-                     [:div.row.accordian-inner
-                      (for [employee-info-component (om/build-all employee-info employee-row)]
-                        employee-info-component)])
+               (if (not (zero? (count rows-of-employees)))
+                 (for [employee-row rows-of-employees]
                    [:div.row.accordian-inner
-                    [:h5.text-center "Currently, this department does not contain any employees"]])]]))))
+                    (for [employee-info-component (om/build-all employee-info employee-row)]
+                      employee-info-component)])
+                 [:div.row.accordian-inner
+                  [:h5.text-center "Currently, this department does not contain any employees"]])]]))))
 
 
 (defcomponent department-list [{:keys [departments]}]
   (display-name [_]
-    "department-list")
+                "department-list")
 
   (render [_]
-   (html
-    [:div.clearfix.accordian
-       (dom/ul (om/build-all department-employees departments))])))
+          (html
+           [:div.clearfix.accordian
+            (dom/ul (om/build-all department-employees departments))])))
 
 
 (defcomponent departments-container [app owner opts]
   (display-name [_]
-    "departments-box")
+                "departments-box")
 
   (will-mount [_]
               (go
@@ -154,7 +160,6 @@
                  [:div.row
                   (->department-list app)])))
 
-
 (defcomponent om-app [app owner]
   (display-name [_]
                 "app")
@@ -162,9 +167,8 @@
           (html
            [:div
             (->departments-container app
-                      {:opts {:url "http://localhost:3030/api/departments"
-                              :poll-interval 2000}})])))
-
+                                     {:opts {:url "http://localhost:3030/api/departments"
+                                             :poll-interval 2000}})])))
 (defn main []
   (doto history
     (goog.events/listen EventType/NAVIGATE on-navigate)
