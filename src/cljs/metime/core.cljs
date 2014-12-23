@@ -18,31 +18,35 @@
 
 (def app-state
   (atom {:top-nav-bar [
-                       {:href "index.html"    :text "Employees"}
-                       {:href "manager.html"  :text "File Manager"}
-                       {:href "calendar.html" :text "Calendar"}
-                       {:href "tables.html"   :text "Tables"}
-                       {:href "login.html"    :text "Login"}
-                       {:href "user.html"     :text "User"}
+                       {:path "#employees"     :text "Employees"     :active true}
+                       {:path "#file-manager"  :text "File Manager"}
+                       {:path "#calendar"      :text "Calendar"}
+                       {:path "#tables"        :text "Tables"}
+                       {:path "#login"         :text "Login"}
+                       {:path "#user"          :text "User"}
                       ]}))
 
+(defcomponent top-nav-bar [{:keys [top-nav-bar]}]
+  (display-name [_]
+                "top-nav-bar")
+
+  (render [_]
+
+          (html
+           [:ul.nav.navbar-nav
+            (for [item top-nav-bar]
+              [:li {:class (when (= (:active item) true) "active")} [:a {:href (:path item)} (:text item)]])])))
+
+
 (defn refresh-navigation []
-;;   (
-;;    ;;let [token (.getToken history)
-;;    let [token "/employee/1"
-;;         set-active (fn [nav]
-;;                      (assoc-in [:state :active] (= (:path nav) token)))]
+  (
+   let [token (.getToken history)
+        set-active (fn [nav]
+                     (assoc-in [:top-nav-bar] (if (= (:path nav) token) ({:active true}) ({:active false}))))]
 
-;;    ;; #(map set-active %)
-;;    (swap! app-state #(map set-active %))
-;;    (println (str "token: " token))
-;;    (app-state))
-;;   (let [token "/employee/1"
-;;         set-active (fn [nav] (assoc nav :active (= (:path nav) token)))])
-;;   (swap! app-state #(map set-active %))
-)
+   (swap! app-state #(map set-active %))))
 
-(refresh-navigation)
+;; (refresh-navigation)
 
 (def history (History.))
 
@@ -177,22 +181,6 @@
             (->departments-container app
                                      {:opts {:url "http://localhost:3030/api/departments"
                                              :poll-interval 2000}})])))
-
-
-(defcomponent top-nav-bar [{:keys [top-nav-bar]}]
-  (display-name [_]
-                "top-nav-bar")
-
-  (render [_]
-
-          ;;(println "Count top-nav-bar: " (count top-nav-bar))
-          ;;(println "Last: text " (:text (last top-nav-bar)))
-          ;; (map #(println "text " %) top-nav-bar)
-
-          (html
-           [:ul.nav.navbar-nav
-            (for [item top-nav-bar]
-              [:li [:a {:href (:href item)} (:text item)]])])))
 
 (defn main []
   (doto history
