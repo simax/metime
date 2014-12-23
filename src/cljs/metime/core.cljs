@@ -42,11 +42,20 @@
   (
    let [token (.getToken history)
         set-active (fn [nav]
-                     (assoc-in [:top-nav-bar] (if (= (:path nav) token) ({:active true}) ({:active false}))))]
+                     ((if (= (:path item) token) (assoc item :active true) (assoc item :active false))))
+        set-menu-items (fn [_] (update-in @app-state [:top-nav-bar] #(map set-active %)))]
 
    (swap! app-state #(map set-active %))))
 
 ;; (refresh-navigation)
+
+;; (defn set-active [item]
+;;   (let [token "#calendar"]
+;;    (if (= (:path item) token) (assoc item :active true) (assoc item :active false))))
+
+;; (update-in @app-state [:top-nav-bar] #(map set-active %))
+
+
 
 (def history (History.))
 
