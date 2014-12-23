@@ -14,6 +14,7 @@
   (:import goog.History
            goog.History.EventType))
 
+(enable-console-print!)
 
 (def app-state
   (atom {:top-nav-bar [
@@ -23,7 +24,7 @@
                        {:href "tables.html"   :text "Tables"}
                        {:href "login.html"    :text "Login"}
                        {:href "user.html"     :text "User"}
-                     ]}))
+                      ]}))
 
 (defn refresh-navigation []
 ;;   (
@@ -185,22 +186,13 @@
   (render [_]
 
           ;;(println "Count top-nav-bar: " (count top-nav-bar))
-          (println "Last: text " (:text (last top-nav-bar)))
-          ;;(map #(println "href " (:href %)) top-nav-bar)
-
-          ;;(for [item top-nav-bar]
-            ;;[:li [:a {href= (:href item)} (:text item)]]
-            ;;(println (:href item))
-            ;;(map? item)
-          ;;)
-
+          ;;(println "Last: text " (:text (last top-nav-bar)))
+          ;; (map #(println "text " %) top-nav-bar)
 
           (html
            [:ul.nav.navbar-nav
-;;              (for [item top-nav_bar]
-;;                 [:li [:a {href= (:href item)} (:text item)]]
-;;                )
-           ])))
+            (for [item top-nav-bar]
+              [:li [:a {:href (:href item)} (:text item)]])])))
 
 (defn main []
   (doto history
