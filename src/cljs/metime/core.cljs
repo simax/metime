@@ -16,7 +16,14 @@
 
 
 (def app-state
-  (atom {}))
+  (atom {:top-nav-bar [
+                       {:href "index.html"    :text "Employees"}
+                       {:href "manager.html"  :text "File Manager"}
+                       {:href "calendar.html" :text "Calendar"}
+                       {:href "tables.html"   :text "Tables"}
+                       {:href "login.html"    :text "Login"}
+                       {:href "user.html"     :text "User"}
+                     ]}))
 
 (defn refresh-navigation []
 ;;   (
@@ -169,8 +176,39 @@
             (->departments-container app
                                      {:opts {:url "http://localhost:3030/api/departments"
                                              :poll-interval 2000}})])))
+
+
+(defcomponent top-nav-bar [{:keys [top-nav-bar]}]
+  (display-name [_]
+                "top-nav-bar")
+
+  (render [_]
+
+          ;;(println "Count top-nav-bar: " (count top-nav-bar))
+          (println "Last: text " (:text (last top-nav-bar)))
+          ;;(map #(println "href " (:href %)) top-nav-bar)
+
+          ;;(for [item top-nav-bar]
+            ;;[:li [:a {href= (:href item)} (:text item)]]
+            ;;(println (:href item))
+            ;;(map? item)
+          ;;)
+
+
+          (html
+           [:ul.nav.navbar-nav
+;;              (for [item top-nav_bar]
+;;                 [:li [:a {href= (:href item)} (:text item)]]
+;;                )
+           ])))
+
 (defn main []
   (doto history
     (goog.events/listen EventType/NAVIGATE on-navigate)
     (.setEnabled true))
+
+  ;; Top nav bar
+  (om/root top-nav-bar app-state {:target (. js/document (getElementById "top-nav-bar"))})
+
+  ;; Root component
   (om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
