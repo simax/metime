@@ -38,14 +38,14 @@
               [:li {:class (when (= (:active item) true) "active")} [:a {:href (:path item)} (:text item)]])])))
 
 
-(defn refresh-navigation []
-  (
-   let [token (.getToken history)
-        set-active (fn [nav]
-                     ((if (= (:path item) token) (assoc item :active true) (assoc item :active false))))
-        set-menu-items (fn [_] (update-in @app-state [:top-nav-bar] #(map set-active %)))]
+;; (defn refresh-navigation []
+;;   (
+;;    let [token (.getToken history)
+;;         set-active (fn [nav]
+;;                      ((if (= (:path item) token) (assoc item :active true) (assoc item :active false))))
+;;         set-menu-items (fn [_] (update-in @app-state [:top-nav-bar] #(map set-active %)))]
 
-   (swap! app-state #(map set-active %))))
+;;    (swap! app-state #(map set-active %))))
 
 ;; (refresh-navigation)
 
@@ -60,7 +60,7 @@
 (def history (History.))
 
 (defn on-navigate [event]
-  (refresh-navigation)
+  ;;(refresh-navigation)
   (secretary/dispatch! (.-token event)))
 
 (defroute "/employees/:id" [id]
