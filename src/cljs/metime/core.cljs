@@ -16,6 +16,8 @@
 
 (enable-console-print!)
 
+(def history (History.))
+
 (def app-state
   (atom {:top-nav-bar [
                        {:path "#employees"     :text "Employees"     :active true}
@@ -26,45 +28,39 @@
                        {:path "#user"          :text "User"}
                       ]}))
 
+
 (defcomponent top-nav-bar [{:keys [top-nav-bar]}]
   (display-name [_]
                 "top-nav-bar")
 
   (render [_]
-
           (html
            [:ul.nav.navbar-nav
             (for [item top-nav-bar]
-              [:li {:class (when (= (:active item) true) "active")} [:a {:href (:path item)} (:text item)]])])))
+              [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])])))
 
 
-;; (defn refresh-navigation []
-;;   (
-;;    let [token (.getToken history)
-;;         set-active (fn [nav]
-;;                      ((if (= (:path item) token) (assoc item :active true) (assoc item :active false))))
-;;         set-menu-items (fn [_] (update-in @app-state [:top-nav-bar] #(map set-active %)))]
+(defn toggle-active-status [item]
+  (let [token (str "#" (.getToken history))]
+    (if (= (:path item) token) (assoc item :active true) (assoc item :active false))))
 
-;;    (swap! app-state #(map set-active %))))
+(defn update-top-nav-bar [app-state-map]
+  (update-in app-state-map [:top-nav-bar] #(map toggle-active-status %)))
 
-;; (refresh-navigation)
+(defn refresh-navigation []
+  (swap! app-state update-top-nav-bar))
 
-;; (defn set-active [item]
-;;   (let [token "#calendar"]
-;;    (if (= (:path item) token) (assoc item :active true) (assoc item :active false))))
-
-;; (update-in @app-state [:top-nav-bar] #(map set-active %))
-
-
-
-(def history (History.))
 
 (defn on-navigate [event]
-  ;;(refresh-navigation)
-  (secretary/dispatch! (.-token event)))
+  (refresh-navigation)
+  ;;(secretary/dispatch! (.-token event))
+  )
 
-(defroute "/employees/:id" [id]
-  (println (str "employee id: " id )))
+;; (defroute "/employees" []
+;;   (println (str "employees, no id: ")))
+
+;; (defroute "/employees/:id" [id]
+;;   (println (str "employee id: " id )))
 
 (defn fetch-departments
   [url]
@@ -72,7 +68,6 @@
     (go (let [deps (((<! (http/get url)) :body) :departments)]
           (>! c deps)))
     c))
-
 
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
@@ -186,10 +181,12 @@
                 "app")
   (render [_]
           (html
-           [:div
-            (->departments-container app
-                                     {:opts {:url "http://localhost:3030/api/departments"
-                                             :poll-interval 2000}})])))
+           (if (= (.getToken history) "employees")
+             [:div
+              (->departments-container app
+                                       {:opts {:url "http://localhost:3030/api/departments"
+                                               :poll-interval 2000}})]
+             [:div [:h1 "Not the departmrnts list"]]))))
 
 (defn main []
   (doto history
@@ -201,3 +198,5 @@
 
   ;; Root component
   (om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
+
+
