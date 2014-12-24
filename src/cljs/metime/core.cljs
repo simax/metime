@@ -186,7 +186,7 @@
               (->departments-container app
                                        {:opts {:url "http://localhost:3030/api/departments"
                                                :poll-interval 2000}})]
-             [:div [:h1 "Not the departmrnts list"]]))))
+             [:div [:h1 "Not the departments list"]]))))
 
 (defn main []
   (doto history
