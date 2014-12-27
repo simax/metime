@@ -38,9 +38,7 @@
           (html
            [:ul.nav.navbar-nav
             (for [item top-nav-bar]
-              (do
-                (println (str "Item: " (:path item) " " (:active item false)))
-                [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]]))])))
+                [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])])))
 
 
 (defn toggle-active-status [item]
@@ -88,11 +86,10 @@
           (>! c deps)))
     c))
 
-(defn fetch-employee
-  [url id]
+(defn fetch-employee [url-with-id]
   (let [c (chan)]
-    (println "id: " id)
-    (go (let [emp (((<! (http/get url id)) :body) :employee)]
+    (println "Url with id: " url-with-id)
+    (go (let [emp (<! (http/get url-with-id) :body)]
           (>! c emp)))
     c))
 
@@ -207,15 +204,16 @@
   (display-name [_]
                 "employee")
 
-;;   (will-mount [_]
-;;               (go
-;;                (let [emp (<! (fetch-employee (:url opts) (:id app)))]
-;;                  (om/transact! app #(assoc % :employee emp))
-;;                  )))
+  (will-mount [_]
+              (let [url-with-id (str (:url opts) (:id app))]
+                (go
+                 (let [emp (<! (fetch-employee url-with-id))]
+                   (om/transact! app #(assoc % :employee emp))))))
 
-  (render-state [_ {:keys [emp]}]
+  (render-state [_ {:keys [employee]}]
                 (html
-                 [:h1 "Stuff about the employee goes here" ])))
+                 [:h1 "Stuff about the employee goes here"
+                 [:div (str "Email: " (:email employee))]])))
 
 (defcomponent om-app [app owner]
   (display-name [_]
@@ -230,10 +228,9 @@
                                          {:opts {:url "http://localhost:3030/api/departments"
                                                  :poll-interval 2000}})]
              "#employee"
-             (let [id (:id app)]
                [:div (->employee app
                                       {:opts {:url "http://localhost:3030/api/employees/"
-                                              :poll-interval 2000}})])
+                                              :poll-interval 2000}})]
 
              "#calendar"
                [:div [:h1 "Calendar page"]]

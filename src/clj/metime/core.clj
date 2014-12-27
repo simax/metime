@@ -15,7 +15,7 @@
   (context "/api" []
     (ANY "/departments"  [] (get-departments))
     (ANY "/employees"  [] (get-employees))
-    ;;(ANY "/employee/:id" [id] (employees/get-by-id id))
+    (ANY "/employees/:id" [id] (get-employee-by-id id))
     (route/resources "/")
     (route/not-found "Not Found")))
 
