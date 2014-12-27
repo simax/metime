@@ -19,7 +19,8 @@
 (def history (History.))
 
 (def app-state
-  (atom {:top-nav-bar [
+  (atom {:view "#employees"
+         :top-nav-bar [
                        {:path "#employees"     :text "Employees"     :active true}
                        {:path "#file-manager"  :text "File Manager"}
                        {:path "#calendar"      :text "Calendar"}
@@ -37,7 +38,9 @@
           (html
            [:ul.nav.navbar-nav
             (for [item top-nav-bar]
-              [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])])))
+              (do
+                (println (str "Item: " (:path item) " " (:active item false)))
+                [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]]))])))
 
 
 (defn toggle-active-status [item]
@@ -50,23 +53,47 @@
 (defn refresh-navigation []
   (swap! app-state update-top-nav-bar))
 
-
 (defn on-navigate [event]
   (refresh-navigation)
-  ;;(secretary/dispatch! (.-token event))
-  )
+  (secretary/dispatch! (.-token event)))
 
-;; (defroute "/employees" []
-;;   (println (str "employees, no id: ")))
+(defroute "/" []
+  (.setToken (History.) "employees"))
 
-;; (defroute "/employees/:id" [id]
-;;   (println (str "employee id: " id )))
+(defroute "/employees" []
+  (swap! app-state #(assoc %1 :view "#employees")))
+
+(defroute "/tables" []
+  (swap! app-state #(assoc %1 :view "#tables")))
+
+(defroute "/calendar" []
+  (swap! app-state #(assoc %1 :view "#calendar")))
+
+(defroute "/file-manager" []
+  (swap! app-state #(assoc %1 :view "#file-manager")))
+
+(defroute "/user" []
+  (swap! app-state #(assoc %1 :view "#user")))
+
+(defroute "/login" []
+  (swap! app-state #(assoc %1 :view "#login")))
+
+(defroute "/employees/:id" [id]
+  (swap! app-state #(assoc %1 :view "#employee" :id id)))
 
 (defn fetch-departments
   [url]
   (let [c (chan)]
     (go (let [deps (((<! (http/get url)) :body) :departments)]
           (>! c deps)))
+    c))
+
+(defn fetch-employee
+  [url id]
+  (let [c (chan)]
+    (println "id: " id)
+    (go (let [emp (((<! (http/get url id)) :body) :employee)]
+          (>! c emp)))
     c))
 
 (defn employee-name [firstname lastname]
@@ -104,7 +131,7 @@
                  [:span {:aria-hidden "true" :class "li_calendar fs1"}]
                  [:span {:aria-hidden "true" :class "li_mail fs1"}]
                  [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
-                 ]
+                ]
 
                 ;; For now, just simulate the number of days remaining
                 [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
@@ -176,17 +203,55 @@
                  [:div.row
                   (->department-list app)])))
 
+(defcomponent employee [app owner opts]
+  (display-name [_]
+                "employee")
+
+;;   (will-mount [_]
+;;               (go
+;;                (let [emp (<! (fetch-employee (:url opts) (:id app)))]
+;;                  (om/transact! app #(assoc % :employee emp))
+;;                  )))
+
+  (render-state [_ {:keys [emp]}]
+                (html
+                 [:h1 "Stuff about the employee goes here" ])))
+
 (defcomponent om-app [app owner]
   (display-name [_]
                 "app")
   (render [_]
           (html
-           (if (= (.getToken history) "employees")
-             [:div
-              (->departments-container app
-                                       {:opts {:url "http://localhost:3030/api/departments"
-                                               :poll-interval 2000}})]
-             [:div [:h1 "Not the departments list"]]))))
+           (condp = (:view app)
+
+             "#employees"
+               [:div
+                (->departments-container app
+                                         {:opts {:url "http://localhost:3030/api/departments"
+                                                 :poll-interval 2000}})]
+             "#employee"
+             (let [id (:id app)]
+               [:div (->employee app
+                                      {:opts {:url "http://localhost:3030/api/employees/"
+                                              :poll-interval 2000}})])
+
+             "#calendar"
+               [:div [:h1 "Calendar page"]]
+
+             "#tables"
+               [:div [:h1 "Tables page"]]
+
+             "#file-manager"
+               [:div [:h1 "File manager page"]]
+
+             "#user"
+               [:div [:h1 "User page"]]
+
+             "#login"
+               [:div [:h1 "Login page"]]
+
+             "default"
+               [:div [:h1 "The default page"]]))))
 
 (defn main []
   (doto history
