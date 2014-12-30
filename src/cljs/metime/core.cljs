@@ -233,22 +233,22 @@
                                               :poll-interval 2000}})]
 
              "#calendar"
-               [:div [:h1 "Calendar page"]]
+               [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
 
              "#tables"
-               [:div [:h1 "Tables page"]]
+               [:div {:style {:height "500px"}} [:h1 "Tables page"]]
 
              "#file-manager"
-               [:div [:h1 "File manager page"]]
+               [:div {:style {:height "500px"}} [:h1 "File manager page"]]
 
              "#user"
-               [:div [:h1 "User page"]]
+               [:div {:style {:height "500px"}} [:h1 "User page"]]
 
              "#login"
-               [:div [:h1 "Login page"]]
+               [:div {:style {:height "500px"}} [:h1 "Login page"]]
 
              "default"
-               [:div [:h1 "The default page"]]))))
+               [:div {:style {:height "500px"}} [:h1 "The default page"]]))))
 
 (defn main []
   (doto history
