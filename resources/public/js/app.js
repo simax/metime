@@ -44,6 +44,7 @@ goog.addDependency("../sablono/interpreter.js", ['sablono.interpreter'], ['sablo
 goog.addDependency("../clojure/walk.js", ['clojure.walk'], ['cljs.core']);
 goog.addDependency("../sablono/core.js", ['sablono.core'], ['goog.dom', 'sablono.util', 'cljs.core', 'sablono.interpreter', 'clojure.string', 'clojure.walk']);
 goog.addDependency("../secretary/core.js", ['secretary.core'], ['cljs.core', 'clojure.string', 'clojure.walk']);
-goog.addDependency("../metime/core.js", ['metime.core'], ['goog.History.EventType', 'cljs_hash.goog', 'om_tools.dom', 'om_tools.core', 'cljs.core', 'cljs_http.client', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'cljs.core.async', 'sablono.core', 'om.core', 'secretary.core', 'goog.events']);
+goog.addDependency("../metime/employee/components.js", ['metime.employee.components'], ['goog.History.EventType', 'cljs_hash.goog', 'om_tools.dom', 'om_tools.core', 'cljs.core', 'cljs_http.client', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'cljs.core.async', 'sablono.core', 'om.core', 'secretary.core', 'goog.events']);
+goog.addDependency("../metime/core.js", ['metime.core'], ['goog.History.EventType', 'cljs_hash.goog', 'om_tools.dom', 'om_tools.core', 'cljs.core', 'cljs_http.client', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'sablono.core', 'metime.employee.components', 'om.core', 'secretary.core', 'goog.events']);
 goog.addDependency("../figwheel/client.js", ['figwheel.client'], ['goog.net.jsloader', 'cljs.core', 'cljs.core.async', 'clojure.string', 'cljs.reader']);
 goog.addDependency("../metime/dev.js", ['metime.dev'], ['weasel.repl', 'cljs.core', 'cljs.core.async', 'metime.core', 'figwheel.client']);
