@@ -12,8 +12,7 @@
             [cljs-hash.goog :as gh]
             [secretary.core :as secretary :refer-macros [defroute]])
   (:import goog.History
-           goog.History.EventType)
-  )
+           goog.History.EventType))
 
 
 (declare app-state)
@@ -24,6 +23,15 @@
   (let [token (str "#" (.getToken history))]
     (if (= (:path item) token) (assoc item :active true) (assoc item :active false))))
 
+
+(defcomponent nav-menu-item [item]
+  (display-name [_]
+                "nav-menu-item")
+
+  (render [_]
+          (html
+           [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])))
+
 (defcomponent top-nav-bar [{:keys [top-nav-bar]}]
   (display-name [_]
                 "top-nav-bar")
@@ -31,8 +39,7 @@
   (render [_]
           (html
            [:ul.nav.navbar-nav
-            (for [item top-nav-bar]
-                [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])])))
+            (om/build-all nav-menu-item top-nav-bar {:key :path})])))
 
 
 (defn update-top-nav-bar [app-state-map]
@@ -58,16 +65,18 @@
         name-length (count disp-name)]
     (if (> name-length 20) (str (subs disp-name 0 17) "...") disp-name)))
 
-(defcomponent gravatar [email-address owner {:keys [size] :as opts}]
+(defcomponent gravatar [data owner]
   (display-name [_]
                 "gravatar")
 
   (render [_]
           (html
+           (let [email-address (:gravatar-email data)
+                 size (or (:gravatar-size data) 100)]
            [:img.gravatar.img-circle
-            {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")}])))
+            {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")}]))))
 
-(defcomponent employee-info [{:keys [lastname firstname email id]}]
+(defcomponent employee-info [{:keys [lastname firstname email id]} owner opts]
   (display-name [_]
                 "employee-info")
 
@@ -76,23 +85,23 @@
                        (secretary/dispatch! (str "/employees/" id))
                        (println "You clicked the button"))]
             (html
-             [:div {:class "col-sm-3 col-lg-3"}
-              [:div {:class "dash-unit"}
-               [:div {:class "thumbnail" :style {:margin-top "20px"}}
-                [:a {:href (str "/#/employees/" id)}
-                 [:h1 (employee-name firstname lastname)]
-                 [:div {:style {:margin-top "20px"}} (->gravatar email {:opts {:size 100}})]
+              [:div {:class "col-sm-3 col-lg-3"}
+               [:div {:class "dash-unit"}
+                [:div {:class "thumbnail" :style {:margin-top "20px"}}
+                 [:a {:href (str "/#/employees/" id)}
+                  [:h1 (employee-name firstname lastname)]
+                  [:div {:style {:margin-top "20px"}} (->gravatar {:gravatar-email email})]
                  ]
-                [:div {:class "info-user"}
-                 [:span {:aria-hidden "true" :class "li_user fs1"}]
-                 [:span {:aria-hidden "true" :class "li_calendar fs1"}]
-                 [:span {:aria-hidden "true" :class "li_mail fs1"}]
-                 [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
-                ]
+                 [:div {:class "info-user"}
+                  [:span {:aria-hidden "true" :class "li_user fs1"}]
+                  [:span {:aria-hidden "true" :class "li_calendar fs1"}]
+                  [:span {:aria-hidden "true" :class "li_mail fs1"}]
+                  [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
+                 ]
 
-                ;; For now, just simulate the number of days remaining
-                [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
-                ]]]))))
+                 ;; For now, just simulate the number of days remaining
+                 [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
+                 ]]]))))
 
 
 (defcomponent department-employees [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
@@ -107,7 +116,7 @@
 
               [:div.panel-heading.clearfix.panel-heading
                [:div.col-md-2.col-xs-2
-                [:div.col-md-4.col-xs-4 (om/build gravatar manager-email {:opts {:size 50}})]
+                [:div.col-md-4.col-xs-4 (->gravatar {:gravatar-email manager-email :gravatar-size 50})]
                 [:div.col-md-8.col-xs-8
                  [:h5 (str manager-firstname " " manager-lastname)]
                  ]
@@ -126,13 +135,9 @@
                ]
 
               [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
-               (if (not (zero? (count rows-of-employees)))
+               (if (not-empty rows-of-employees)
                  (for [employee-row rows-of-employees]
-                   [:div.row.accordian-inner
-                    (for [employee-info-component (om/build-all employee-info employee-row)]
-                      employee-info-component)])
-                 [:div.row.accordian-inner
-                  [:h5.text-center "Currently, this department does not contain any employees"]])]]))))
+                   (om/build-all employee-info employee-row {:key :id})))]]))))
 
 
 (defcomponent department-list [{:keys [departments]}]
@@ -142,7 +147,8 @@
   (render [_]
           (html
            [:div.clearfix.accordian
-            (dom/ul (om/build-all department-employees departments))])))
+            (dom/ul (om/build-all department-employees departments {:key :id}))
+            ])))
 
 
 (defcomponent departments-container [app owner opts]

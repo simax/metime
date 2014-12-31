@@ -15,6 +15,7 @@
            goog.History.EventType))
 
 
+
 (enable-console-print!)
 
 (def history (History.))

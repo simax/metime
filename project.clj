@@ -62,7 +62,7 @@
                                         :pretty-print  true}}}}
 
   :profiles {:dev {:repl-options {:init-ns metime.server
-                                  }
+                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
                    :plugins [[lein-figwheel "0.1.4-SNAPSHOT"]]
 
