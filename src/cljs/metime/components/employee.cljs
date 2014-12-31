@@ -14,6 +14,7 @@
   (:import goog.History
            goog.History.EventType))
 
+(enable-console-print!)
 
 (declare app-state)
 
@@ -55,8 +56,8 @@
 
 (defn fetch-employee [url-with-id]
   (let [c (chan)]
-    (println "Url with id: " url-with-id)
-    (go (let [emp (<! (http/get url-with-id) :body)]
+    (go (let [emp (first ((<! (http/get url-with-id)) :body))]
+         (println emp)
           (>! c emp)))
     c))
 
@@ -151,7 +152,7 @@
             ])))
 
 
-(defcomponent departments-container [app owner opts]
+(defcomponent departments-container [app _ opts]
   (display-name [_]
                 "departments-box")
 
@@ -161,12 +162,12 @@
                  (om/transact! app #(assoc % :departments deps))
                  )))
 
-  (render-state [_ {:keys [departments]}]
+  (render [_]
                 (html
                  [:div.row
                   (->department-list app)])))
 
-(defcomponent employee [app owner opts]
+(defcomponent employee [app _ opts]
   (display-name [_]
                 "employee")
 
@@ -176,7 +177,8 @@
                  (let [emp (<! (fetch-employee url-with-id))]
                    (om/transact! app #(assoc % :employee emp))))))
 
-  (render-state [_ {:keys [employee]}]
+  (render [_]
                 (html
                  [:h1 "Stuff about the employee goes here"
-                 [:div (str "Email: " (:email employee))]])))
+                 [:div (str "Email: " (:email (:employee app)))]])))
+
