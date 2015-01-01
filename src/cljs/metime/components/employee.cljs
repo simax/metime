@@ -1,4 +1,4 @@
-(ns metime.employee.components
+(ns metime.components.employee
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [goog.events :as events]
             [goog.history.EventType :as EventType]
@@ -10,6 +10,7 @@
             [sablono.core :as html :refer-macros [html]]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
+            [metime.components.utils :as utils]
             [secretary.core :as secretary :refer-macros [defroute]])
   (:import goog.History
            goog.History.EventType))
@@ -19,33 +20,6 @@
 (declare app-state)
 
 (def history (History.))
-
-(defn toggle-active-status [item]
-  (let [token (str "#" (.getToken history))]
-    (if (= (:path item) token) (assoc item :active true) (assoc item :active false))))
-
-
-(defcomponent nav-menu-item [item]
-  (display-name [_]
-                "nav-menu-item")
-
-  (render [_]
-          (html
-           [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])))
-
-(defcomponent top-nav-bar [{:keys [top-nav-bar]}]
-  (display-name [_]
-                "top-nav-bar")
-
-  (render [_]
-          (html
-           [:ul.nav.navbar-nav
-            (om/build-all nav-menu-item top-nav-bar {:key :path})])))
-
-
-(defn update-top-nav-bar [app-state-map]
-  (update-in app-state-map [:top-nav-bar] #(map toggle-active-status %)))
-
 
 (defn fetch-departments
   [url]
@@ -57,25 +31,18 @@
 (defn fetch-employee [url-with-id]
   (let [c (chan)]
     (go (let [emp (first ((<! (http/get url-with-id)) :body))]
-         (println emp)
-          (>! c emp)))
-    c))
+         (if-not (nil? emp)
+           ((println (str "Employee: " emp))
+            (>! c emp))
+            ((println "not found")
+             (>! c "not found"))))
+    c)))
 
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
         name-length (count disp-name)]
     (if (> name-length 20) (str (subs disp-name 0 17) "...") disp-name)))
 
-(defcomponent gravatar [data owner]
-  (display-name [_]
-                "gravatar")
-
-  (render [_]
-          (html
-           (let [email-address (:gravatar-email data)
-                 size (or (:gravatar-size data) 100)]
-           [:img.gravatar.img-circle
-            {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")}]))))
 
 (defcomponent employee-info [{:keys [lastname firstname email id]} owner opts]
   (display-name [_]
@@ -91,7 +58,7 @@
                 [:div {:class "thumbnail" :style {:margin-top "20px"}}
                  [:a {:href (str "/#/employees/" id)}
                   [:h1 (employee-name firstname lastname)]
-                  [:div {:style {:margin-top "20px"}} (->gravatar {:gravatar-email email})]
+                  [:div {:style {:margin-top "20px"}} (utils/->gravatar {:gravatar-email email})]
                  ]
                  [:div {:class "info-user"}
                   [:span {:aria-hidden "true" :class "li_user fs1"}]
@@ -117,7 +84,7 @@
 
               [:div.panel-heading.clearfix.panel-heading
                [:div.col-md-2.col-xs-2
-                [:div.col-md-4.col-xs-4 (->gravatar {:gravatar-email manager-email :gravatar-size 50})]
+                [:div.col-md-4.col-xs-4 (utils/->gravatar {:gravatar-email manager-email :gravatar-size 50})]
                 [:div.col-md-8.col-xs-8
                  [:h5 (str manager-firstname " " manager-lastname)]
                  ]
@@ -167,18 +134,29 @@
                  [:div.row
                   (->department-list app)])))
 
+
 (defcomponent employee [app _ opts]
   (display-name [_]
                 "employee")
 
   (will-mount [_]
+              (println "Mounting employee component")
               (let [url-with-id (str (:url opts) (:id app))]
                 (go
+                 (println "About to fetch")
                  (let [emp (<! (fetch-employee url-with-id))]
-                   (om/transact! app #(assoc % :employee emp))))))
+                  (println "Fetched")
+                  (if (= emp "not found")
+                     (om/transact! app #(dissoc % :employee))
+                     (om/transact! app #(assoc % :employee emp)))))))
 
   (render [_]
-                (html
-                 [:h1 "Stuff about the employee goes here"
-                 [:div (str "Email: " (:email (:employee app)))]])))
+          (println "Rendering")
+          (html
+                 ;;(if (contains? app :employee)
+                   [:h1 "Stuff about the employee goes here"
+                     [:div (str "Email: " (:email (:employee app)))]]
+                   ;;[:h1 "Sorry, we couldn't find that employee."])
+                 )))
+
 
