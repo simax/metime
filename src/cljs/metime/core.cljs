@@ -106,7 +106,7 @@
     (goog.events/listen EventType/NAVIGATE on-navigate)
     (.setEnabled true))
 
-  (secretary/set-config! :prefix "#")
+  ;;(secretary/set-config! :prefix "#")
 
   ;; Top nav bar
   (om/root nav/top-nav-bar app-state {:target (. js/document (getElementById "top-nav-bar"))})
