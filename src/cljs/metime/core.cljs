@@ -9,12 +9,11 @@
             [sablono.core :as html :refer-macros [html]]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
+            [metime.components.top-nav-bar :as nav]
             [secretary.core :as secretary :refer-macros [defroute]]
-            [metime.employee.components :as ec])
+            [metime.components.employee :as ec])
   (:import goog.History
            goog.History.EventType))
-
-
 
 (enable-console-print!)
 
@@ -55,6 +54,10 @@
 (defroute "/employees/:id" [id]
   (swap! app-state #(assoc %1 :view "#employee" :id id)))
 
+(defroute "*" []
+  (swap! app-state #(assoc %1 :view "#not-found")))
+
+
 (defcomponent om-app [app owner]
   (display-name [_]
                 "app")
@@ -87,12 +90,12 @@
              "#login"
                [:div {:style {:height "500px"}} [:h1 "Login page"]]
 
-             "default"
-               [:div {:style {:height "500px"}} [:h1 "The default page"]]))))
+             "#not-found"
+               [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]]))))
 
 
 (defn refresh-navigation []
-  (swap! app-state ec/update-top-nav-bar))
+  (swap! app-state nav/update-top-nav-bar))
 
 (defn on-navigate [event]
   (refresh-navigation)
@@ -103,10 +106,10 @@
     (goog.events/listen EventType/NAVIGATE on-navigate)
     (.setEnabled true))
 
-  (secretary/set-config! :prefix "#")
+  ;;(secretary/set-config! :prefix "#")
 
   ;; Top nav bar
-  (om/root ec/top-nav-bar app-state {:target (. js/document (getElementById "top-nav-bar"))})
+  (om/root nav/top-nav-bar app-state {:target (. js/document (getElementById "top-nav-bar"))})
 
   ;; Root component
   (om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
