@@ -19,8 +19,6 @@
 
 (declare app-state)
 
-(def history (History.))
-
 (defn fetch-departments
   [url]
   (let [c (chan)]
