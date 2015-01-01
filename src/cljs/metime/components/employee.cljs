@@ -172,6 +172,7 @@
                 "employee")
 
   (will-mount [_]
+              (println "Mounting employee component")
               (let [url-with-id (str (:url opts) (:id app))]
                 (go
                  (let [emp (<! (fetch-employee url-with-id))]
@@ -181,4 +182,3 @@
                 (html
                  [:h1 "Stuff about the employee goes here"
                  [:div (str "Email: " (:email (:employee app)))]])))
-
