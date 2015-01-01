@@ -29,14 +29,19 @@
     c))
 
 (defn fetch-employee [url-with-id]
+  (println "About to fetch emloyee")
   (let [c (chan)]
     (go (let [emp (first ((<! (http/get url-with-id)) :body))]
          (if-not (nil? emp)
-           ((println (str "Employee: " emp))
-            (>! c emp))
-            ((println "not found")
-             (>! c "not found"))))
-    c)))
+           (do
+             (println (str "Employee: " emp))
+             (>! c emp))
+
+            (do
+              (println "--->not found")
+              (>! c "not found")))))
+    c))
+
 
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
@@ -140,23 +145,26 @@
                 "employee")
 
   (will-mount [_]
-              (println "Mounting employee component")
               (let [url-with-id (str (:url opts) (:id app))]
+                (println "will-mount")
                 (go
-                 (println "About to fetch")
                  (let [emp (<! (fetch-employee url-with-id))]
-                  (println "Fetched")
                   (if (= emp "not found")
-                     (om/transact! app #(dissoc % :employee))
-                     (om/transact! app #(assoc % :employee emp)))))))
+                     (do
+                       (println "NOT FOUND!!!")
+                       (om/transact! app #(dissoc % :employee)))
+
+                     (do
+                       (println "Found OK!")
+                       (om/transact! app #(assoc % :employee emp))))))))
 
   (render [_]
           (println "Rendering")
           (html
-                 ;;(if (contains? app :employee)
+                 (if (contains? app :employee)
                    [:h1 "Stuff about the employee goes here"
                      [:div (str "Email: " (:email (:employee app)))]]
-                   ;;[:h1 "Sorry, we couldn't find that employee."])
+                   [:h1 "Sorry, we couldn't find that employee."])
                  )))
 
 
