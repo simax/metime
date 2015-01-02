@@ -137,10 +137,11 @@
   (om/transact! data edit-key (fn [_] (.. e -target -value))))
 
 (defn handle-save [e data]
-  (println data))
+  (println data)
+  )
 
 
-(defn employee-container-form [app owner]
+(defn employee-container-form [employee owner]
   [:div {:style {:padding "20" :background-color "white" :height "500"}}
    [:form.form-horizontal
     ;; First name
@@ -150,8 +151,8 @@
       [:input#first-name.form-control
        {:type "text"
         :placeholder "First name"
-        :on-change #(handle-change % (:employee app) :firstname owner)
-        :value (:firstname (:employee app))}]]]
+        :on-change #(handle-change % employee :firstname owner)
+        :value (:firstname employee)}]]]
 
     ;; Last name
     [:div.form-group
@@ -160,8 +161,8 @@
       [:input#last-name.form-control
        {:type "text"
         :placeholder "Last name"
-        :on-change #(handle-change % (:employee app) :lastname owner)
-        :value (:lastname (:employee app))}]]]
+        :on-change #(handle-change % employee :lastname owner)
+        :value (:lastname employee)}]]]
 
     ;; Email
     [:div.form-group
@@ -170,14 +171,23 @@
       [:input#last-name.form-control
        {:type "email"
         :placeholder "Email address"
-        :on-change #(handle-change % (:employee app) :email owner)
-        :value (:email (:employee app))}]]]]
+        :on-change #(handle-change % employee :email owner)
+        :value (:email employee)}]]]
+
+    ;; Start date
+    [:div.form-group
+     [:label.col-sm-2.control-label {:for "start-date"} "Start date"]
+     [:div.col-sm-3
+      [:input#start-date.form-control
+       {:type "date"
+        :placeholder "Start date"
+        :on-change #(handle-change % employee :startdate owner)
+        :value (:startdate employee)}]]]
 
     ;; Save button
     [:div.form-group
      [:div.col-sm-offset-2.col-sm-4
-      [:button#save.btn.btn-primary {:on-click #(handle-save % (:employee app))} "Save" ]]]
-   ])
+      [:button#save.btn.btn-primary {:type "button" :on-click #(handle-save % employee)} "Save"]]]]])
 
 
 
@@ -196,7 +206,7 @@
   (render [_]
           (html
            (if (contains? app :employee)
-             (employee-container-form app)
+             (employee-container-form (:employee app))
              (employee-not-found)
            ))))
 
