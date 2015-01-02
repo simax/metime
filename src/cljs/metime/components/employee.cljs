@@ -17,8 +17,6 @@
 
 (enable-console-print!)
 
-(declare app-state)
-
 (defn fetch-departments
   [url]
   (let [c (chan)]
@@ -41,9 +39,9 @@
     (if (> name-length 20) (str (subs disp-name 0 17) "...") disp-name)))
 
 
-(defcomponent employee-info [{:keys [lastname firstname email id]} owner opts]
+(defcomponent employee-list-item [{:keys [lastname firstname email id]}]
   (display-name [_]
-                "employee-info")
+                "employee-list-item")
 
   (render [_]
           (let [edit (fn [e]
@@ -69,13 +67,13 @@
                  ]]]))))
 
 
-(defcomponent department-employees [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
+(defcomponent department-list-item [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
   (display-name [_]
                 "department-name")
 
   (render [_]
-          (let [department-employees (filter #(not= (:id %) managerid) employees)
-                rows-of-employees (partition 4 4 nil department-employees)]
+          (let [department-list-item (filter #(not= (:id %) managerid) employees)
+                rows-of-employees (partition 4 4 nil department-list-item)]
             (html
              [:div#accordian.panel.panel-default.row
 
@@ -102,7 +100,7 @@
               [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
                (if (not-empty rows-of-employees)
                  (for [employee-row rows-of-employees]
-                   (om/build-all employee-info employee-row {:key :id})))]]))))
+                   (om/build-all employee-list-item employee-row {:key :id})))]]))))
 
 
 (defcomponent department-list [{:keys [departments]}]
@@ -112,7 +110,7 @@
   (render [_]
           (html
            [:div.clearfix.accordian
-            (dom/ul (om/build-all department-employees departments {:key :id}))
+            (dom/ul (om/build-all department-list-item departments {:key :id}))
             ])))
 
 
@@ -132,6 +130,57 @@
                   (->department-list app)])))
 
 
+(defn employee-not-found []
+  [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
+
+(defn handle-change [e data edit-key owner]
+  (om/transact! data edit-key (fn [_] (.. e -target -value))))
+
+(defn handle-save [e data]
+  (println data))
+
+
+(defn employee-container-form [app owner]
+  [:div {:style {:padding "20" :background-color "white" :height "500"}}
+   [:form.form-horizontal
+    ;; First name
+    [:div.form-group
+     [:label.col-sm-2.control-label {:for "first-name"} "First name"]
+     [:div.col-sm-4
+      [:input#first-name.form-control
+       {:type "text"
+        :placeholder "First name"
+        :on-change #(handle-change % (:employee app) :firstname owner)
+        :value (:firstname (:employee app))}]]]
+
+    ;; Last name
+    [:div.form-group
+     [:label.col-sm-2.control-label {:for "last-name"} "Last name"]
+     [:div.col-sm-4
+      [:input#last-name.form-control
+       {:type "text"
+        :placeholder "Last name"
+        :on-change #(handle-change % (:employee app) :lastname owner)
+        :value (:lastname (:employee app))}]]]
+
+    ;; Email
+    [:div.form-group
+     [:label.col-sm-2.control-label {:for "email"} "Email"]
+     [:div.col-sm-4
+      [:input#last-name.form-control
+       {:type "email"
+        :placeholder "Email address"
+        :on-change #(handle-change % (:employee app) :email owner)
+        :value (:email (:employee app))}]]]]
+
+    ;; Save button
+    [:div.form-group
+     [:div.col-sm-offset-2.col-sm-4
+      [:button#save.btn.btn-primary {:on-click #(handle-save % (:employee app))} "Save" ]]]
+   ])
+
+
+
 (defcomponent employee [app _ opts]
   (display-name [_]
                 "employee")
@@ -147,9 +196,8 @@
   (render [_]
           (html
            (if (contains? app :employee)
-             [:h1 {:style {:height "500" :background-color "green"}} "Stuff about the employee goes here"
-              [:div (str "Email: " (:email (:employee app)))]]
-             [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
-           )))
+             (employee-container-form app)
+             (employee-not-found)
+           ))))
 
 

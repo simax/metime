@@ -296,7 +296,7 @@ input[type=submit] {
 
 }
 input[type=text], textarea {
-	background: #cdcbcc;
+/* 	background: #cdcbcc; */
 	font-size: 13px;
 	display: block;
 	width: 100%;
@@ -306,7 +306,7 @@ input[type=text], textarea {
 	line-height: 18px;
 	padding: 0;
 	text-indent: 18px;
-	margin: 0 0 18px;
+/* 	margin: 0 0 18px; */
 }
 textarea {
 	line-height: 18px;

@@ -8,3 +8,17 @@ ul {
   margin-right: auto;
   cursor: pointer;
 }
+
+input[type=text], textarea {
+	background: #cdcbcc;
+	font-size: 13px;
+	display: block;
+	width: 100%;
+	border: none;
+	box-shadow: none;
+	height: 30px;
+	line-height: 18px;
+	padding: 0;
+	text-indent: 18px;
+/* 	margin: 0 0 18px; */
+}
