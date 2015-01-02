@@ -146,11 +146,6 @@
                      (om/transact! app #(assoc % :employee emp)))))))
 
   (render [_]
-<<<<<<< HEAD
-                (html
-                 [:h1 "Stuff about the employee goes here"
-                 [:div (str "Email: " (:email (:employee app)))]])))
-=======
           (html
            (if (contains? app :employee)
              [:h1 {:style {:height "500" :background-color "green"}} "Stuff about the employee goes here"
@@ -159,4 +154,3 @@
            )))
 
 
->>>>>>> employee-maintenance
