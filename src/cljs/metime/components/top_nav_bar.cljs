@@ -14,8 +14,6 @@
 
 (enable-console-print!)
 
-(declare app-state)
-
 (def history (History.))
 
 (defn toggle-active-status [item]

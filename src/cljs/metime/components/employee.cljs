@@ -17,8 +17,6 @@
 
 (enable-console-print!)
 
-(declare app-state)
-
 (defn fetch-departments
   [url]
   (let [c (chan)]
@@ -28,11 +26,14 @@
 
 (defn fetch-employee [url-with-id]
   (let [c (chan)]
-    (go (let [emp (first ((<! (http/get url-with-id)) :body))]
+    (go (let [emp ((<! (http/get url-with-id)) :body)]
          (if-not (nil? emp)
            (>! c emp)
-           (>! c "not found"))))
-    c))
+           (>! c "not found")))
+    (println (str "emp: " (:email emp)))
+        )
+    c
+    ))
 
 
 (defn employee-name [firstname lastname]
@@ -41,16 +42,16 @@
     (if (> name-length 20) (str (subs disp-name 0 17) "...") disp-name)))
 
 
-(defcomponent employee-info [{:keys [lastname firstname email id]} owner opts]
+(defcomponent employee-list-item [{:keys [lastname firstname email id]}]
   (display-name [_]
-                "employee-info")
+                "employee-list-item")
 
   (render [_]
           (let [edit (fn [e]
                        (secretary/dispatch! (str "/employees/" id))
                        (println "You clicked the button"))]
             (html
-              [:div {:class "col-sm-3 col-lg-3"}
+              [:div {:class "col-md-3 col-lg-3"}
                [:div {:class "dash-unit"}
                 [:div {:class "thumbnail" :style {:margin-top "20px"}}
                  [:a {:href (str "/#/employees/" id)}
@@ -69,13 +70,13 @@
                  ]]]))))
 
 
-(defcomponent department-employees [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
+(defcomponent department-list-item [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
   (display-name [_]
                 "department-name")
 
   (render [_]
-          (let [department-employees (filter #(not= (:id %) managerid) employees)
-                rows-of-employees (partition 4 4 nil department-employees)]
+          (let [department-list-item (filter #(not= (:id %) managerid) employees)
+                rows-of-employees (partition 4 4 nil department-list-item)]
             (html
              [:div#accordian.panel.panel-default.row
 
@@ -102,7 +103,7 @@
               [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
                (if (not-empty rows-of-employees)
                  (for [employee-row rows-of-employees]
-                   (om/build-all employee-info employee-row {:key :id})))]]))))
+                   (om/build-all employee-list-item employee-row {:key :id})))]]))))
 
 
 (defcomponent department-list [{:keys [departments]}]
@@ -112,7 +113,7 @@
   (render [_]
           (html
            [:div.clearfix.accordian
-            (dom/ul (om/build-all department-employees departments {:key :id}))
+            (dom/ul (om/build-all department-list-item departments {:key :id}))
             ])))
 
 
@@ -132,6 +133,83 @@
                   (->department-list app)])))
 
 
+(defn employee-not-found []
+  [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
+
+(defn handle-change [e data edit-key owner]
+  (om/transact! data edit-key (fn [_] (.. e -target -value))))
+
+(defn handle-save [e data]
+  (println data)
+  )
+
+
+(defn employee-container-form [employee owner]
+  [:div {:style {:padding "20" :background-color "white" :height "500"}}
+
+   [:div.well
+    ;; Employee gravatar
+    [:div.container-fluid
+     [:div.row
+      [:div.col-md-2  (utils/->gravatar {:gravatar-email (:email employee)})]
+      [:h1.col-md-8 (str (:firstname employee) " " (:lastname employee))]
+
+      [:div.col-md-2
+       [:h6.col-md-offset-4 "Manager"]
+       [:div (utils/->gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75})]
+       [:h5.col-md-offset-2 (str (:manager-firstname employee) " " (:manager-lastname employee))]
+      ]]
+    ]]
+
+   [:form.form-horizontal
+
+    ;; First name
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "first-name"} "First name"]
+     [:div.col-md-4
+      [:input#first-name.form-control
+       {:type "text"
+        :placeholder "First name"
+        :on-change #(handle-change % employee :firstname owner)
+        :value (:firstname employee)}]]]
+
+    ;; Last name
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "last-name"} "Last name"]
+     [:div.col-md-4
+      [:input#last-name.form-control
+       {:type "text"
+        :placeholder "Last name"
+        :on-change #(handle-change % employee :lastname owner)
+        :value (:lastname employee)}]]]
+
+    ;; Email
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "email"} "Email"]
+     [:div.col-md-4
+      [:input#last-name.form-control
+       {:type "email"
+        :placeholder "Email address"
+        :on-change #(handle-change % employee :email owner)
+        :value (:email employee)}]]]
+
+    ;; Start date
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "start-date"} "Start date"]
+     [:div.col-md-3
+      [:input#start-date.form-control
+       {:type "date"
+        :placeholder "Start date"
+        :on-change #(handle-change % employee :startdate owner)
+        :value (:startdate employee)}]]]
+
+    ;; Save button
+    [:div.form-group
+     [:div.col-md-offset-2.col-md-4
+      [:button#save.btn.btn-primary {:type "button" :on-click #(handle-save % employee)} "Save"]]]]])
+
+
+
 (defcomponent employee [app _ opts]
   (display-name [_]
                 "employee")
@@ -148,9 +226,8 @@
   (render [_]
           (html
            (if (contains? app :employee)
-             [:h1 {:style {:height "500" :background-color "green"}} "Stuff about the employee goes here"
-              [:div (str "Email: " (:email (:employee app)))]]
-             [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
-           )))
+             (employee-container-form (:employee app))
+             (employee-not-found)
+           ))))
 
 

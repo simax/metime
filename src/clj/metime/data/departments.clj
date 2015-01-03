@@ -17,5 +17,4 @@
           (order :department)
           (with employees
                 (order :lastname))
-          (join manager (= :employees.id :managerid))
-          ))
+          (join manager (= :employees.id :managerid))))
