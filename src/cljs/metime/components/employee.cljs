@@ -26,11 +26,14 @@
 
 (defn fetch-employee [url-with-id]
   (let [c (chan)]
-    (go (let [emp (first ((<! (http/get url-with-id)) :body))]
+    (go (let [emp ((<! (http/get url-with-id)) :body)]
          (if-not (nil? emp)
            (>! c emp)
-           (>! c "not found"))))
-    c))
+           (>! c "not found")))
+    (println (str "emp: " (:email emp)))
+        )
+    c
+    ))
 
 
 (defn employee-name [firstname lastname]
@@ -48,7 +51,7 @@
                        (secretary/dispatch! (str "/employees/" id))
                        (println "You clicked the button"))]
             (html
-              [:div {:class "col-sm-3 col-lg-3"}
+              [:div {:class "col-md-3 col-lg-3"}
                [:div {:class "dash-unit"}
                 [:div {:class "thumbnail" :style {:margin-top "20px"}}
                  [:a {:href (str "/#/employees/" id)}
@@ -143,11 +146,27 @@
 
 (defn employee-container-form [employee owner]
   [:div {:style {:padding "20" :background-color "white" :height "500"}}
+
+   [:div.well
+    ;; Employee gravatar
+    [:div.container-fluid
+     [:div.row
+      [:div.col-md-2  (utils/->gravatar {:gravatar-email (:email employee)})]
+      [:h1.col-md-8 (str (:firstname employee) " " (:lastname employee))]
+
+      [:div.col-md-2
+       [:h6.col-md-offset-4 "Manager"]
+       [:div (utils/->gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75})]
+       [:h5.col-md-offset-2 (str (:manager-firstname employee) " " (:manager-lastname employee))]
+      ]]
+    ]]
+
    [:form.form-horizontal
+
     ;; First name
     [:div.form-group
-     [:label.col-sm-2.control-label {:for "first-name"} "First name"]
-     [:div.col-sm-4
+     [:label.col-md-2.control-label {:for "first-name"} "First name"]
+     [:div.col-md-4
       [:input#first-name.form-control
        {:type "text"
         :placeholder "First name"
@@ -156,8 +175,8 @@
 
     ;; Last name
     [:div.form-group
-     [:label.col-sm-2.control-label {:for "last-name"} "Last name"]
-     [:div.col-sm-4
+     [:label.col-md-2.control-label {:for "last-name"} "Last name"]
+     [:div.col-md-4
       [:input#last-name.form-control
        {:type "text"
         :placeholder "Last name"
@@ -166,8 +185,8 @@
 
     ;; Email
     [:div.form-group
-     [:label.col-sm-2.control-label {:for "email"} "Email"]
-     [:div.col-sm-4
+     [:label.col-md-2.control-label {:for "email"} "Email"]
+     [:div.col-md-4
       [:input#last-name.form-control
        {:type "email"
         :placeholder "Email address"
@@ -176,8 +195,8 @@
 
     ;; Start date
     [:div.form-group
-     [:label.col-sm-2.control-label {:for "start-date"} "Start date"]
-     [:div.col-sm-3
+     [:label.col-md-2.control-label {:for "start-date"} "Start date"]
+     [:div.col-md-3
       [:input#start-date.form-control
        {:type "date"
         :placeholder "Start date"
@@ -186,7 +205,7 @@
 
     ;; Save button
     [:div.form-group
-     [:div.col-sm-offset-2.col-sm-4
+     [:div.col-md-offset-2.col-md-4
       [:button#save.btn.btn-primary {:type "button" :on-click #(handle-save % employee)} "Save"]]]]])
 
 

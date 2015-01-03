@@ -12,14 +12,44 @@
 (declare departments manager)
 
 (defentity employees
-  (belongs-to departments))
+  (table :employees)
+  (has-one departments))
+
 
 (defentity manager
   (table :employees)
-         (fields [:firstname :manager-firstname]
-                 [:lastname :manager-lastname]
-                 [:email :manager-email]))
+  (pk :managerid)
+  (entity-fields
+   [:firstname :manager-firstname]
+   [:lastname :manager-lastname]
+   [:email :manager-email]))
 
 (defentity departments
   (has-one manager)
   (has-many employees))
+
+
+;; (entity-fields
+;;    :firstname
+;;    :lastname
+;;    :email
+;;    :startdate
+;;    :enddate
+;;    :active)
+
+;; (entity-fields
+;;    [:id :manager-id]
+;;    [:firstname :manager-firstname]
+;;    [:lastname :manager-lastname]
+;;    [:email :manager-email])
+
+;; (entity-fields
+;;            [:manager.id manager-id]
+;;            [:manager.firstname manager-firstname]
+;;            :firstname
+;;            :lastname
+;;            :email
+;;            :startdate
+;;            :enddate
+;;            :active)
+
