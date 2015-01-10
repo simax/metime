@@ -36,7 +36,8 @@ to serve the api.
 
 ## Database migration
 
-See: https://github.com/ckuttruff/clj-sql-up
+Using clj-sql-up to handle DB migrations
+See: https://github.com/ckuttruff/clj-sql-up for details
 
 ## Trying it out
 
