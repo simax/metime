@@ -27,29 +27,3 @@
 (defentity departments
   (has-one manager)
   (has-many employees))
-
-
-;; (entity-fields
-;;    :firstname
-;;    :lastname
-;;    :email
-;;    :startdate
-;;    :enddate
-;;    :active)
-
-;; (entity-fields
-;;    [:id :manager-id]
-;;    [:firstname :manager-firstname]
-;;    [:lastname :manager-lastname]
-;;    [:email :manager-email])
-
-;; (entity-fields
-;;            [:manager.id manager-id]
-;;            [:manager.firstname manager-firstname]
-;;            :firstname
-;;            :lastname
-;;            :email
-;;            :startdate
-;;            :enddate
-;;            :active)
-

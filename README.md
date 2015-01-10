@@ -34,6 +34,10 @@ to serve the api.
 **Attention: It is not longer needed to run `lein figwheel`
   separately. This is now taken care of behind the scenes**
 
+## Database migration
+
+See: https://github.com/ckuttruff/clj-sql-up
+
 ## Trying it out
 
 If all is well you now have a browser window saying 'Hello Chestnut',
