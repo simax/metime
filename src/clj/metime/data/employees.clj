@@ -18,12 +18,18 @@
             [:employees.email :manager-email]
             [:employees.lastname :manager-lastname]
             [:employees.firstname :manager-firstname]
+            [:employees.dob :manager-dob]
+            [:employees.this_year_opening   :manager-this_year_opening]
+            [:employees.this_year_remaining :manager-this_year_remaining]
+            [:employees.next_year_opening   :manager-next_year_opening]
+            [:employees.next_year_remaining :manager-next_year_remaining]
+
             [:manager.lastname :lastname]
             [:manager.firstname :firstname]
             [:manager.email :email]
             [:manager.startdate :startdate]
             [:manager.enddate :enddate]
-            [:manager.active :active]
+
             )
            (order :id)
            (join [employees :manager]

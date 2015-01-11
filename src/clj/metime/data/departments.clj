@@ -18,3 +18,6 @@
           (with employees
                 (order :lastname))
           (join manager (= :employees.id :managerid))))
+
+(defn insert-department [new-department]
+  (insert departments (values new-department)))

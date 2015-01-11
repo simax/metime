@@ -13,6 +13,8 @@
                  [leiningen "2.5.0"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [cljs-hash "0.0.2"]
+                 [metis "0.3.3"]
+                 [ring-cors "0.1.6"]
 
                  ;; Server
                  [ring "1.3.1"]
@@ -23,6 +25,7 @@
                  [liberator "0.11.0"]
                  [cheshire "5.3.1"]
                  [prone "0.6.0"]
+                 [org.clojure/data.json "0.2.5"]
 
                  ;; UI
                  [om "0.8.0-alpha2"]
