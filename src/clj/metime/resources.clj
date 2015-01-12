@@ -40,24 +40,27 @@
 
 
 (defresource departments []
-  ;;:available-media-types ["application/json"]
-  :allowed-methods [:get :post]
-  ;;:known-content-type? #(check-content-type % ["application/json"])
-  :malformed? #(parse-json % ::data)
+  :available-media-types ["application/json"]
+  :allowed-methods [:post :get]
+  ;;:allowed? (fn [_ _ _] true)
+  ;;:known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
+  ;;:malformed? #(parse-json % ::data)
 
 
-  :as-response (fn [d ctx]
-                 (as-response d ctx))
+;;   :as-response (fn [d ctx]
+;;                  (as-response d ctx))
 
   :post! (fn [ctx]
            ;;(deps/insert-department {:body ctx})
+           {}
            )
 
-  :exists? (fn [ctx]
-              [true
-               {::departments {:departments (deps/get-all-with-employees)}}])
+;;   :exists? (fn [ctx]
+;;               [true
+;;                {::departments {:departments (deps/get-all-with-employees)}}])
 
-  :handle-ok ::departments)
+;;   :handle-ok ::departments
+  )
 
 
 (defresource employees []
