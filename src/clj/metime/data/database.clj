@@ -5,8 +5,9 @@
 
 (defdb db (sqlite3 {:classname "org.sqlite.JDBC"
                     :subprotocol "sqlite"
-                    :subname "C:/Development/clojure projects/metime/src/clj/metime/data/metime.sqlite"}))
-                    ;;:subname "/Users/simonlomax/Documents/Development/Clojure Projects/metime/src/clj/metime/data/metime.sqlite"}))
+                    ;;:subname "C:/Development/clojure projects/metime/src/clj/metime/data/metime.sqlite"}))
+                    :subname "/Users/simonlomax/Documents/Development/Clojure Projects/metime/src/clj/metime/data/metime.sqlite"}))
+
 
 
 (declare departments manager)

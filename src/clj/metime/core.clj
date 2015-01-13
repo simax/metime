@@ -8,7 +8,8 @@
             [compojure.route :as route]
             [compojure.core :refer [defroutes context ANY]]
             [metime.resources :refer :all]
-            [prone.middleware :as prone]))
+            [prone.middleware :as prone]
+            [liberator.dev]))
 
 
 (defroutes app-routes
@@ -27,6 +28,7 @@
      (wrap-cors
                 :access-control-allow-origin [#".*"]
                 :access-control-allow-methods [:get :put :post :delete])
-     (wrap-base-url)))
+     (wrap-base-url)
+     (liberator.dev/wrap-trace :header :ui)))
 
 

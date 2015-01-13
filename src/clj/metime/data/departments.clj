@@ -19,5 +19,9 @@
                 (order :lastname))
           (join manager (= :employees.id :managerid))))
 
-(defn insert-department [new-department]
-  (spit "sql-department.txt" (sql-only (insert departments (values {:department new-department})))))
+(defn insert-department [data]
+  (let [department (get data "department")
+        manager-id (get data "manager-id")]
+    ;;(spit "sql-departments.txt" (str ">>>" department)))
+  ;;(spit "sql-departments.txt" (sql-only (insert departments (values {:department department :manager-id manager-id}))))))
+  (insert departments (values {:department department :managerid manager-id}))))

@@ -51,7 +51,7 @@
                  (as-response d ctx))
 
   :post! (fn [ctx]
-           (deps/insert-department {:body ctx}))
+           (deps/insert-department (get-in ctx [:request :form-params])))
 
   :exists? (fn [ctx]
               [true
