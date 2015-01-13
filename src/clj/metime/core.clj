@@ -25,7 +25,7 @@
      (prone/wrap-exceptions)
      (handler/site)
      (wrap-cors
-                :access-control-allow-origin #"http://localhost:10555"
+                :access-control-allow-origin [#".*"]
                 :access-control-allow-methods [:get :put :post :delete])
      (wrap-base-url)))
 

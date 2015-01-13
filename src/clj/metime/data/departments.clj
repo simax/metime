@@ -20,4 +20,4 @@
           (join manager (= :employees.id :managerid))))
 
 (defn insert-department [new-department]
-  (insert departments (values new-department)))
+  (spit "sql-department.txt" (sql-only (insert departments (values {:department new-department})))))
