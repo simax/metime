@@ -39,13 +39,23 @@
     true))
 
 
-(defresource departments []
+(defresource get-departments []
   :available-media-types ["application/json"]
-  :allowed-methods [:post :get]
-  ;;:allowed? (fn [_ _ _] true)
+  :allowed-methods [:get]
   :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
-  ;;:malformed? #(parse-json % ::data)
 
+  :as-response (fn [d ctx]
+                 (as-response d ctx))
+
+  :exists? (fn [ctx]
+              [true {::departments {:departments (deps/get-all-with-employees)}}])
+
+  :handle-ok ::departments)
+
+(defresource create-departments []
+  :available-media-types ["application/json"]
+  :allowed-methods [:post]
+  :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
 
   :as-response (fn [d ctx]
                  (as-response d ctx))
@@ -53,16 +63,12 @@
   :post! (fn [ctx]
            (deps/insert-department (get-in ctx [:request :form-params])))
 
-  :exists? (fn [ctx]
-              [true
-               {::departments {:departments (deps/get-all-with-employees)}}])
-
-  :handle-ok ::departments
-  )
+  :handle-ok ::departments)
 
 
-(defresource employees []
+(defresource get-employees []
   :available-media-types ["application/json"]
+  :allowed-methods [:get]
 
   :as-response (fn [d ctx]
                  (as-response d ctx))
@@ -71,8 +77,10 @@
               {::employees (emps/get-all)})
   :handle-ok ::employees)
 
-(defresource employee [id]
+
+(defresource get-employee [id]
   :available-media-types ["application/json"]
+  :allowed-methods [:get]
 
   :as-response (fn [d ctx]
                  (as-response d ctx))

@@ -6,7 +6,7 @@
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
-            [compojure.core :refer [defroutes context ANY]]
+            [compojure.core :refer [defroutes context ANY GET POST PUT DELETE]]
             [metime.resources :refer :all]
             [prone.middleware :as prone]
             [liberator.dev]))
@@ -14,9 +14,10 @@
 
 (defroutes app-routes
   (context "/api" []
-    (ANY "/departments"  [] (departments))
-    (ANY "/employees"  [] (employees))
-    (ANY "/employees/:id" [id] (employee id))
+    (GET "/departments"  [] (get-departments))
+    (POST "/departments"  [] (create-departments))
+    (GET "/employees"  [] (get-employees))
+    (GET "/employees/:id" [id] (get-employee id))
     (route/resources "/")
     (route/not-found "Not Found")))
 
@@ -29,6 +30,7 @@
                 :access-control-allow-origin [#".*"]
                 :access-control-allow-methods [:get :put :post :delete])
      (wrap-base-url)
-     (liberator.dev/wrap-trace :header :ui)))
+     #_(liberator.dev/wrap-trace :header :ui)
+   ))
 
 
