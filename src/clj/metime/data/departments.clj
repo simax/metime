@@ -19,6 +19,24 @@
                 (order :lastname))
           (join manager (= :employees.id :managerid))))
 
+(defn get-department-by-id [id]
+  "Get the department with the given id"
+  (select departments
+          (fields :department
+                  :id
+                  :managerid
+                  [:employees.email :manager-email]
+                  [:employees.lastname :manager-lastname]
+                  [:employees.firstname :manager-firstname])
+          (order :department)
+          (with employees
+                (order :lastname))
+          (where {:id id})
+          (join manager (= :employees.id :managerid))))
+
+
 (defn insert-department [data]
   "Insert a new department"
-  (insert departments (values (walk/keywordize-keys data))))
+  (let [result (insert departments (values (walk/keywordize-keys data)))
+        new-id (first (vals result))]
+      new-id))

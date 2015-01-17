@@ -49,7 +49,17 @@
 
   :post! (fn [ctx]
            (if (= (get-in ctx [:request :request-method]) :post)
-             (deps/insert-department (get-in ctx [:request :form-params]))))
+             (try
+               (when-let [new-id (deps/insert-department (get-in ctx [:request :form-params]))]
+                 (do
+                   (spit "sql-statements.txt" (str "http://localhost:3030/api/departments/" new-id))
+                   {::location (str "http://localhost:3030/api/departments/" new-id)}))
+               (catch Exception e {::failure true}))))
+
+  :post-redirect? (fn [ctx]
+                    (if (::failure ctx)
+                      {:status 403 :location "" :body "Department already exists"}
+                      {:location (::location ctx)}))
 
   :handle-ok ::departments)
 
