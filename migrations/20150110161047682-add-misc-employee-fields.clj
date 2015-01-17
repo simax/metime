@@ -11,7 +11,7 @@
    "ALTER TABLE employees ADD COLUMN next_year_remaining int not null DEFAULT 0"])
 
 ;; No easy way to drop columns in SQLite.
-;; Need to create a new table, minus the unrequired column(s).
+;; Need to create a new table, omitting the unrequired column(s).
 ;; Copy existing records to new table
 ;; Drop original table
 ;; Rename new table to original

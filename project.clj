@@ -45,7 +45,7 @@
   ;; Used for data migrations
   :clj-sql-up {:database {:classname "org.sqlite.JDBC"
                   :subprotocol "sqlite"
-                  :subname "/Users/simonlomax/Documents/Development/Clojure Projects/metime/src/clj/metime/data/metime.sqlite"}
+                  :subname "data/metime.sqlite"}
 
                :deps [[org.xerial/sqlite-jdbc "3.7.2"]]}
 
@@ -59,7 +59,7 @@
   :cljsbuild {:builds {:app {:source-paths ["src/cljs"]
                              :compiler {:output-to     "resources/public/js/app.js"
                                         :output-dir    "resources/public/js/out"
-                                       :source-map    "resources/public/js/out.js.map"
+                                        :source-map    "resources/public/js/out.js.map"
                                         :preamble      ["react/react.min.js"]
                                         :externs       ["react/externs/react.js"]
                                         :optimizations :none

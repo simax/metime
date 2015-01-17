@@ -6,7 +6,7 @@
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
-            [compojure.core :refer [defroutes context ANY GET POST PUT DELETE]]
+            [compojure.core :refer [defroutes context ANY]]
             [metime.resources :refer :all]
             [prone.middleware :as prone]
             [liberator.dev]))
@@ -14,10 +14,10 @@
 
 (defroutes app-routes
   (context "/api" []
-    (GET "/departments"  [] (get-departments))
-    (POST "/departments"  [] (create-departments))
-    (GET "/employees"  [] (get-employees))
-    (GET "/employees/:id" [id] (get-employee id))
+    (ANY "/departments"  [] (departments))
+    (ANY "/departments"  [] (departments))
+    (ANY "/employees" [] (employees nil))
+    (ANY "/employees/:id" [id] (employees id))
     (route/resources "/")
     (route/not-found "Not Found")))
 
