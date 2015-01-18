@@ -38,40 +38,89 @@
      [false {:message "Unsupported Content-Type"}])
     true))
 
+ (defn requested-method [ctx method-name]
+   (= (get-in ctx [:request :request-method]) method-name))
 
 (defresource departments []
   :available-media-types ["application/edn" "application/json"]
   :allowed-methods [:get :post]
   :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
   :exists? (fn [ctx]
-             (if (= (get-in ctx [:request :request-method]) :get)
+             (if (requested-method ctx :get)
               [true {::departments {:departments (deps/get-all-with-employees)}}]))
 
   :post! (fn [ctx]
-           (if (= (get-in ctx [:request :request-method]) :post)
+           (if (requested-method ctx :post)
              (try
                (when-let [new-id (deps/insert-department (get-in ctx [:request :form-params]))]
-                 (do
-                   (spit "sql-statements.txt" (str "http://localhost:3030/api/departments/" new-id))
-                   {::location (str "http://localhost:3030/api/departments/" new-id)}))
+                   {::location (str "http://localhost:3030/api/departments/" new-id)})
                (catch Exception e {::failure true}))))
 
-  :post-redirect? (fn [ctx]
+  :post-redirect? false
+  :handle-created (fn [ctx]
                     (if (::failure ctx)
-                      {:status 403 :location "" :body "Department already exists"}
+                      {:status 403 :body "Department already exists"}
                       {:location (::location ctx)}))
 
   :handle-ok ::departments)
 
+(defresource department [id]
+  :available-media-types ["application/edn" "application/json"]
+  :allowed-methods [:get :delete :put]
+  :can-put-to-missing? false
+  :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
+  :exists? (fn [ctx]
+             (if (requested-method ctx :get)
+              (when-let [department (deps/get-department-by-id id)]
+                  [true {::department department}])
+             true))
 
-(defresource employees [id]
+  :processable? (fn [ctx]
+                 (if (requested-method ctx :delete)
+                   (if-let [department (deps/get-department-by-id id)]
+                     [(empty? (:employees department)) {::department department}]
+                     false)
+                   true))
+
+  :delete! (fn [ctx]
+             (deps/delete-department id))
+
+  :respond-with-entity? (fn [ctx] (empty? (:employees (::department ctx))))
+  :handle-ok ::department
+  :handle-not-found "Department not found")
+
+
+(defresource employees []
   :available-media-types ["application/edn" "application/json"]
   :allowed-methods [:get]
   :exists? (fn [ctx]
-             (if (= (get-in ctx [:request :request-method]) :get)
-                (if id
-                  {::employees (emps/get-employee-by-id id)}
-                  {::employees (emps/get-all)})))
+             (if (requested-method ctx :get)
+               {::employees (emps/get-all)}
+               true))
 
   :handle-ok ::employees)
 
+
+(defresource employee [id]
+  :available-media-types ["application/edn" "application/json"]
+  :allowed-methods [:get :delete :put]
+  :exists? (fn [ctx]
+             (if (requested-method ctx :get)
+               (let [employee (emps/get-employee-by-id id)]
+                 [(not (empty? employee)) {::employee employee}])
+               true))
+
+  :processable? (fn [ctx]
+                 (if (requested-method ctx :delete)
+                   (if-let [employee (emps/get-employee-by-id id)]
+                     [true {::employee employee}]
+                     false)
+                   true))
+
+  :delete! (fn [ctx]
+             (emps/delete-employee id))
+
+  :respond-with-entity? (fn [ctx] (not (empty? (::employee ctx))))
+
+  :handle-ok ::employee
+  :handle-not-found "Employee not found")

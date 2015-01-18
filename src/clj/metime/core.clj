@@ -15,9 +15,9 @@
 (defroutes app-routes
   (context "/api" []
     (ANY "/departments"  [] (departments))
-    (ANY "/departments"  [] (departments))
+    (ANY "/department/:id" [id] (department id))
     (ANY "/employees" [] (employees nil))
-    (ANY "/employees/:id" [id] (employees id))
+    (ANY "/employee/:id" [id] (employee id))
     (route/resources "/")
     (route/not-found "Not Found")))
 

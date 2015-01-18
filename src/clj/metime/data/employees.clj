@@ -34,7 +34,6 @@
            (join [employees :manager]
                  (= :employees.id :manager.managerid)))))
 
-
-;; (with manager)
-;; (join manager (= :employees.id :managerid))
-
+(defn delete-employee [id]
+  "Delete the employee with the given id"
+    (delete employees (where {:id id})))

@@ -21,7 +21,7 @@
 
 (defn get-department-by-id [id]
   "Get the department with the given id"
-  (select departments
+  (first (select departments
           (fields :department
                   :id
                   :managerid
@@ -32,11 +32,18 @@
           (with employees
                 (order :lastname))
           (where {:id id})
-          (join manager (= :employees.id :managerid))))
-
+          (join manager (= :employees.id :managerid)))))
 
 (defn insert-department [data]
   "Insert a new department"
-  (let [result (insert departments (values (walk/keywordize-keys data)))
-        new-id (first (vals result))]
-      new-id))
+  (let [result (insert departments (values (walk/keywordize-keys data)))]
+    ;; Needed to use this syntax here rather than :keyword lookup
+    ;; Because sqlite returns a key of last_insert_rowid().
+    ;; The parens at the end of the keyword cause problems for clojure.
+    (first (vals result))))
+
+(defn delete-department [id]
+  "Delete the department with the given id - providing it doesn't conatin any employees"
+  (if (empty? (:employees (get-department-by-id id)))
+    (delete departments (where {:id id}))))
+
