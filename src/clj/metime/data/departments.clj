@@ -34,6 +34,13 @@
           (where {:id id})
           (join manager (= :employees.id :managerid)))))
 
+(defn get-department-by-name [name]
+  "Get the department with the given name"
+  (first (select departments
+                 (fields :department
+                         :id)
+                 (where {:department name}))))
+
 (defn insert-department [data]
   "Insert a new department"
   (let [result (insert departments (values (walk/keywordize-keys data)))]
@@ -41,6 +48,11 @@
     ;; Because sqlite returns a key of last_insert_rowid().
     ;; The parens at the end of the keyword cause problems for clojure.
     (first (vals result))))
+
+(defn update-department [data]
+  (update departments
+          (set-fields data)
+          (where {:id (:id data)})))
 
 (defn delete-department [id]
   "Delete the department with the given id - providing it doesn't conatin any employees"

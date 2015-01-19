@@ -69,11 +69,23 @@
   :allowed-methods [:get :delete :put]
   :can-put-to-missing? false
   :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
+  :malformed? (fn [ctx]
+                (if (requested-method ctx :put)
+                  (not (every? #{:id :department :managerid} (keys (get-in ctx [:request :form-params]))))))
+
   :exists? (fn [ctx]
-             (if (requested-method ctx :get)
+             (if (or (requested-method ctx :get) (requested-method ctx :put))
               (when-let [department (deps/get-department-by-id id)]
                   [true {::department department}])
              true))
+
+  :conflict? (fn [ctx]
+               (let [new-department-name (:department (get-in ctx [:request :form-params]))
+                     existing-department (deps/get-department-by-name new-department-name)]
+                 (do
+                   (spit "sql-debug.txt" existing-department)
+                   (not (empty? existing-department)))))
+
 
   :processable? (fn [ctx]
                  (if (requested-method ctx :delete)
@@ -84,6 +96,9 @@
 
   :delete! (fn [ctx]
              (deps/delete-department id))
+
+  :put! (fn [ctx]
+             (deps/update-department (keys (get-in ctx [:request :form-params]))))
 
   :respond-with-entity? (fn [ctx] (empty? (:employees (::department ctx))))
   :handle-ok ::department
