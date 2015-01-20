@@ -4,7 +4,7 @@
             [metime.data.departments :as deps]
             [metime.data.employees :as emps]
             [clojure.java.io :as io]
-            ;; [cheshire.core :as json]
+            [clojure.walk :as walk]
             [clojure.data.json :as json]
             ))
 
@@ -71,7 +71,7 @@
   :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
   :malformed? (fn [ctx]
                 (if (requested-method ctx :put)
-                  (not (every? #{:id :department :managerid} (keys (get-in ctx [:request :form-params]))))))
+                  (not-every? (get-in ctx [:request :form-params]) ["department" "managerid"])))
 
   :exists? (fn [ctx]
              (if (or (requested-method ctx :get) (requested-method ctx :put))
@@ -80,11 +80,9 @@
              true))
 
   :conflict? (fn [ctx]
-               (let [new-department-name (:department (get-in ctx [:request :form-params]))
+               (let [new-department-name (get (get-in ctx [:request :form-params]) "department")
                      existing-department (deps/get-department-by-name new-department-name)]
-                 (do
-                   (spit "sql-debug.txt" existing-department)
-                   (not (empty? existing-department)))))
+                 (and (not (nil? existing-department)) (not= id (:id existing-department)))))
 
 
   :processable? (fn [ctx]
@@ -98,7 +96,7 @@
              (deps/delete-department id))
 
   :put! (fn [ctx]
-             (deps/update-department (keys (get-in ctx [:request :form-params]))))
+             (deps/update-department (walk/keywordize-keys (get-in ctx [:request :form-params]))))
 
   :respond-with-entity? (fn [ctx] (empty? (:employees (::department ctx))))
   :handle-ok ::department

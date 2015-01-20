@@ -46,7 +46,7 @@
   (let [result (insert departments (values (walk/keywordize-keys data)))]
     ;; Needed to use this syntax here rather than :keyword lookup
     ;; Because sqlite returns a key of last_insert_rowid().
-    ;; The parens at the end of the keyword cause problems for clojure.
+    ;; The parens at the end of the keyword cause problems trying to use the keyword as a function.
     (first (vals result))))
 
 (defn update-department [data]
