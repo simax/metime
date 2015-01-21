@@ -39,7 +39,12 @@
     true))
 
  (defn requested-method [ctx method-name]
+   "Test for the HTTP verb"
    (= (get-in ctx [:request :request-method]) method-name))
+
+ (def select-values
+   "Expects a map and a vector of keys. Returns a list of the values of those keys"
+   (comp vals select-keys))
 
 (defresource departments []
   :available-media-types ["application/edn" "application/json"]
@@ -71,7 +76,10 @@
   :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
   :malformed? (fn [ctx]
                 (if (requested-method ctx :put)
-                  (not-every? (get-in ctx [:request :form-params]) ["department" "managerid"])))
+                  (let [ks          ["department" "managerid" "id"]
+                        form-params (get-in ctx [:request :form-params])]
+                    (or (not-every? form-params ks)
+                        (some empty? (select-values form-params ks))))))
 
   :exists? (fn [ctx]
              (if (or (requested-method ctx :get) (requested-method ctx :put))
@@ -82,21 +90,27 @@
   :conflict? (fn [ctx]
                (let [new-department-name (get (get-in ctx [:request :form-params]) "department")
                      existing-department (deps/get-department-by-name new-department-name)]
-                 (and (not (nil? existing-department)) (not= id (:id existing-department)))))
+                 (spit "log.txt" (str "id: " id " (:id existing-department): " (:id existing-department)))
+                 (and (not (nil? existing-department)) (not= (str id) (str (:id existing-department))))))
 
 
   :processable? (fn [ctx]
-                 (if (requested-method ctx :delete)
-                   (if-let [department (deps/get-department-by-id id)]
-                     [(empty? (:employees department)) {::department department}]
-                     false)
-                   true))
+                  (let [method (get (get-in ctx [:request :form-params]))]
+                    (case method
+                      :delete (if-let [department (deps/get-department-by-id id)]
+                                [(empty? (:employees department)) {::department department}]
+                                false)
+                      :put (let values))))
+
 
   :delete! (fn [ctx]
              (deps/delete-department id))
 
   :put! (fn [ctx]
-             (deps/update-department (walk/keywordize-keys (get-in ctx [:request :form-params]))))
+          (deps/update-department (walk/keywordize-keys (get-in ctx [:request :form-params]))))
+
+  :new? (fn [ctx]
+          (requested-method ctx :post))
 
   :respond-with-entity? (fn [ctx] (empty? (:employees (::department ctx))))
   :handle-ok ::department
