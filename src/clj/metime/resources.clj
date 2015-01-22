@@ -1,4 +1,4 @@
-(ns metime.resources
+  (ns metime.resources
   (:require [liberator.core :refer [resource defresource]]
             [liberator.representation :refer [as-response]]
             [metime.data.departments :as deps]
@@ -6,7 +6,7 @@
             [clojure.java.io :as io]
             [clojure.walk :as walk]
             [clojure.data.json :as json]
-            ))
+            [metis.core :refer [defvalidator] :as v]))
 
 ;; convert the body to a reader. Useful for testing in the repl
 ;; where setting the body to a string is much simpler.
@@ -38,13 +38,27 @@
      [false {:message "Unsupported Content-Type"}])
     true))
 
- (defn requested-method [ctx method-name]
-   "Test for the HTTP verb"
-   (= (get-in ctx [:request :request-method]) method-name))
+(defn requested-method [ctx http-verb]
+  "Test for the HTTP verb"
+  (= (get-in ctx [:request :request-method]) http-verb))
 
- (def select-values
-   "Expects a map and a vector of keys. Returns a list of the values of those keys"
-   (comp vals select-keys))
+;; (defn select-values
+;;   "Expects a map and a vector of keys. Returns a list of the values of those keys"
+;;   (comp vals select-keys))
+
+(defn make-keyword-map [string-map]
+  (walk/keywordize-keys string-map))
+
+
+;;---------------------
+;; Validators
+
+(defvalidator department-validator
+  [:department :presence {:length {:greater-than 0}}]
+  [:managerid :numericality {:only-integer true :greater-than 0}])
+
+;;---------------------
+
 
 (defresource departments []
   :available-media-types ["application/edn" "application/json"]
@@ -53,6 +67,14 @@
   :exists? (fn [ctx]
              (if (requested-method ctx :get)
               [true {::departments {:departments (deps/get-all-with-employees)}}]))
+
+  :malformed? (fn [ctx]
+                (if (requested-method ctx :post)
+                  (let [validation-result (department-validator (make-keyword-map (get-in ctx [:request :form-params])))]
+                    (if (empty? validation-result)
+                      true
+                      false))
+                  true))
 
   :post! (fn [ctx]
            (if (requested-method ctx :post)
@@ -94,13 +116,13 @@
                  (and (not (nil? existing-department)) (not= (str id) (str (:id existing-department))))))
 
 
-  :processable? (fn [ctx]
-                  (let [method (get (get-in ctx [:request :form-params]))]
-                    (case method
-                      :delete (if-let [department (deps/get-department-by-id id)]
-                                [(empty? (:employees department)) {::department department}]
-                                false)
-                      :put (let values))))
+;;   :processable? (fn [ctx]
+;;                   (let [method (get (get-in ctx [:request :form-params]))]
+;;                     (case method
+;;                       :delete (if-let [department (deps/get-department-by-id id)]
+;;                                 [(empty? (:employees department)) {::department department}]
+;;                                 false)
+;;                       :put (let values))))
 
 
   :delete! (fn [ctx]
