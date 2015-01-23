@@ -46,15 +46,20 @@
 ;;   "Expects a map and a vector of keys. Returns a list of the values of those keys"
 ;;   (comp vals select-keys))
 
+
 (defn make-keyword-map [string-map]
   (walk/keywordize-keys string-map))
+
+(defn get-form-params [ctx]
+  (get-in ctx [:request :form-params]))
 
 
 ;;---------------------
 ;; Validators
 
 (defvalidator department-validator
-  [:department :presence {:length {:greater-than 0}}]
+  [:id :numericality {:only-integer true :greater-than 0 :only :updating :except :adding}]
+  [:department :length {:greater-than 0 :less-than 31}]
   [:managerid :numericality {:only-integer true :greater-than 0}])
 
 ;;---------------------
@@ -63,18 +68,23 @@
 (defresource departments []
   :available-media-types ["application/edn" "application/json"]
   :allowed-methods [:get :post]
-  :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
+  :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
   :exists? (fn [ctx]
              (if (requested-method ctx :get)
               [true {::departments {:departments (deps/get-all-with-employees)}}]))
 
   :malformed? (fn [ctx]
                 (if (requested-method ctx :post)
-                  (let [validation-result (department-validator (make-keyword-map (get-in ctx [:request :form-params])))]
-                    (if (empty? validation-result)
+                  (let [post-data (make-keyword-map (get-form-params ctx))
+                        validation-result (department-validator post-data :adding)]
+                    (if (not (empty? validation-result))
                       true
                       false))
                   true))
+
+  :processable? (fn [ctx]
+                  "Check here if duplication or allow DB uniqueness to enforce ??"
+                  )
 
   :post! (fn [ctx]
            (if (requested-method ctx :post)
@@ -96,12 +106,12 @@
   :allowed-methods [:get :delete :put]
   :can-put-to-missing? false
   :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
-  :malformed? (fn [ctx]
-                (if (requested-method ctx :put)
-                  (let [ks          ["department" "managerid" "id"]
-                        form-params (get-in ctx [:request :form-params])]
-                    (or (not-every? form-params ks)
-                        (some empty? (select-values form-params ks))))))
+;;   :malformed? (fn [ctx]
+;;                 (if (requested-method ctx :put)
+;;                   (let [ks          ["department" "managerid" "id"]
+;;                         form-params (get-in ctx [:request :form-params])]
+;;                     (or (not-every? form-params ks)
+;;                         (some empty? (select-values form-params ks))))))
 
   :exists? (fn [ctx]
              (if (or (requested-method ctx :get) (requested-method ctx :put))
