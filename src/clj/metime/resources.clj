@@ -6,7 +6,9 @@
             [clojure.java.io :as io]
             [clojure.walk :as walk]
             [clojure.data.json :as json]
-            [metis.core :refer [defvalidator] :as v]))
+            [metis.core :refer [defvalidator] :as v]
+            [clj-time.core :as t]
+            [clj-time.format :as f]))
 
 ;; convert the body to a reader. Useful for testing in the repl
 ;; where setting the body to a string is much simpler.
@@ -38,13 +40,10 @@
      [false {:message "Unsupported Content-Type"}])
     true))
 
+
 (defn requested-method [ctx http-verb]
   "Test for the HTTP verb"
   (= (get-in ctx [:request :request-method]) http-verb))
-
-;; (defn select-values
-;;   "Expects a map and a vector of keys. Returns a list of the values of those keys"
-;;   (comp vals select-keys))
 
 
 (defn make-keyword-map [string-map]
@@ -57,10 +56,34 @@
 ;;---------------------
 ;; Validators
 
+;; Metis custom formatter
+
+(defn date [m k _]
+  (if (seq (k m))
+    (try
+      (f/parse (f/formatters :date) (k m))
+      nil
+      (catch Exception e
+        "Invalid date"))
+    ))
+
 (defvalidator department-validator
-  [:id :numericality {:only-integer true :greater-than 0 :only :updating :except :adding}]
+  ;;[:id :numericality {:only-integer true :greater-than 0}]
   [:department :length {:greater-than 0 :less-than 31}]
   [:managerid :numericality {:only-integer true :greater-than 0}])
+
+(defvalidator employee-validator
+  ;;[:id :numericality {:only-integer true :greater-than 0 :only :adding}]
+  [:firstname :length {:greater-than 0 :less-than 31}]
+  [:lastname :length {:greater-than 0 :less-than 31}]
+  [:email :email {:greater-than 0 :less-than 31}]
+  [:departments_id :numericality {:only-integer true :greater-than 0}]
+  [:managerid :numericality {:only-integer true :greater-than 0}]
+  [:password [:length {:greater-than-or-equal-to 8}
+              :formatted {:pattern #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}"
+                          :message "alpha numeric, at least one number"}
+              :confirmation {:confirm :password-confirm}]]
+  [:dob :date])
 
 ;;---------------------
 
@@ -75,89 +98,113 @@
 
   :malformed? (fn [ctx]
                 (if (requested-method ctx :post)
-                  (let [post-data (make-keyword-map (get-form-params ctx))
-                        validation-result (department-validator post-data :adding)]
+                  (let [form-data (make-keyword-map (get-form-params ctx))
+                        validation-result (department-validator form-data)]
                     (if (not (empty? validation-result))
-                      true
+                      [true {::failure-message (str validation-result)}]
                       false))
-                  true))
+                  false))
 
-  :processable? (fn [ctx]
-                  "Check here if duplication or allow DB uniqueness to enforce ??"
-                  )
+  :handle-malformed ::failure-message
 
   :post! (fn [ctx]
+           "We allow the DB to enforce its constraints here, rather than relying on the processable? descision point.
+           That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
            (if (requested-method ctx :post)
              (try
-               (when-let [new-id (deps/insert-department (get-in ctx [:request :form-params]))]
+               (when-let [new-id (deps/insert-department (make-keyword-map (get-form-params ctx)))]
                    {::location (str "http://localhost:3030/api/departments/" new-id)})
-               (catch Exception e {::failure true}))))
+               (catch Exception e {::failure-message "Department already exists"}))))
 
   :post-redirect? false
   :handle-created (fn [ctx]
-                    (if (::failure ctx)
-                      {:status 403 :body "Department already exists"}
+                    (if (::failure-message ctx)
+                      {:status 403 :body (::failure-message ctx)}
                       {:location (::location ctx)}))
 
   :handle-ok ::departments)
 
+
 (defresource department [id]
   :available-media-types ["application/edn" "application/json"]
   :allowed-methods [:get :delete :put]
-  :can-put-to-missing? false
-  :known-content-type? #(check-content-type % ["text/html" "application/x-www-form-urlencoded" "application/json"])
-;;   :malformed? (fn [ctx]
-;;                 (if (requested-method ctx :put)
-;;                   (let [ks          ["department" "managerid" "id"]
-;;                         form-params (get-in ctx [:request :form-params])]
-;;                     (or (not-every? form-params ks)
-;;                         (some empty? (select-values form-params ks))))))
+  :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
 
+  :can-put-to-missing? false
   :exists? (fn [ctx]
              (if (or (requested-method ctx :get) (requested-method ctx :put))
-              (when-let [department (deps/get-department-by-id id)]
-                  [true {::department department}])
-             true))
+               (when-let [department (deps/get-department-by-id id)]
+                 [true {::department department}])
+               false))
+
+  :malformed? (fn [ctx]
+                (if (requested-method ctx :put)
+                  (let [form-data (make-keyword-map (get-form-params ctx))
+                        validation-result (department-validator form-data :updating)]
+                    (if (seq validation-result)
+                      [true {::failure-message (str validation-result)}]
+                      false))
+                  false))
+
+  :handle-malformed ::failure-message
 
   :conflict? (fn [ctx]
-               (let [new-department-name (get (get-in ctx [:request :form-params]) "department")
+               (let [new-department-name (:department (make-keyword-map (get-form-params ctx)))
                      existing-department (deps/get-department-by-name new-department-name)]
-                 (spit "log.txt" (str "id: " id " (:id existing-department): " (:id existing-department)))
                  (and (not (nil? existing-department)) (not= (str id) (str (:id existing-department))))))
 
-
-;;   :processable? (fn [ctx]
-;;                   (let [method (get (get-in ctx [:request :form-params]))]
-;;                     (case method
-;;                       :delete (if-let [department (deps/get-department-by-id id)]
-;;                                 [(empty? (:employees department)) {::department department}]
-;;                                 false)
-;;                       :put (let values))))
-
+  :handle-conflict {:department ["Department already exists"]}
 
   :delete! (fn [ctx]
              (deps/delete-department id))
 
   :put! (fn [ctx]
-          (deps/update-department (walk/keywordize-keys (get-in ctx [:request :form-params]))))
+          (let [new-data (make-keyword-map (get-form-params ctx))
+                existing-data (::department ctx)
+                updated-data (merge existing-data new-data)]
+            (deps/update-department updated-data)))
 
-  :new? (fn [ctx]
-          (requested-method ctx :post))
-
-  :respond-with-entity? (fn [ctx] (empty? (:employees (::department ctx))))
+  :respond-with-entity? (fn [ctx] (empty? (::department ctx)))
   :handle-ok ::department
   :handle-not-found "Department not found")
 
 
 (defresource employees []
   :available-media-types ["application/edn" "application/json"]
-  :allowed-methods [:get]
+  :allowed-methods [:get :post]
+  :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
   :exists? (fn [ctx]
              (if (requested-method ctx :get)
-               {::employees (emps/get-all)}
-               true))
+               [true {::employees (emps/get-all)}]))
+
+  :malformed? (fn [ctx]
+                (if (requested-method ctx :post)
+                  (let [form-data (make-keyword-map (get-form-params ctx))
+                        validation-result (employee-validator form-data)]
+                    (if (not (empty? validation-result))
+                      [true {::failure-message (str validation-result)}]
+                      false))
+                  false))
+
+  :handle-malformed ::failure-message
+
+  :post! (fn [ctx]
+           "We allow the DB to enforce its constraints here, rather than relying on the processable? descision point.
+           That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
+           (if (requested-method ctx :post)
+             (try
+               (when-let [new-id (emps/insert-employee (make-keyword-map (get-form-params ctx)))]
+                 {::location (str "http://localhost:3030/api/departments/" new-id)})
+               (catch Exception e {::failure-message "Department already exists"}))))
+
+  :post-redirect? false
+  :handle-created (fn [ctx]
+                    (if (::failure-message ctx)
+                      {:status 403 :body (::failure-message ctx)}
+                      {:location (::location ctx)}))
 
   :handle-ok ::employees)
+
 
 
 (defresource employee [id]

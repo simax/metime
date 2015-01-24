@@ -4,6 +4,14 @@
             [korma.core :refer :all]
             [metime.data.database :refer :all]))
 
+(defn insert-employee [data]
+  (let [result (insert employees (values data))]
+    ;; Needed to use this syntax here rather than :keyword lookup
+    ;; Because sqlite returns a key of last_insert_rowid().
+    ;; The parens at the end of the keyword cause problems trying to use the keyword as a function.
+    (first (vals result))))
+
+
 
 (defn get-all []
   "Get all employees"

@@ -24,6 +24,15 @@
   (first (select departments
           (fields :department
                   :id
+                  :managerid)
+          (order :department)
+          (where {:id id}))))
+
+(defn get-department-by-id-with-employees [id]
+  "Get the department with the given id"
+  (first (select departments
+          (fields :department
+                  :id
                   :managerid
                   [:employees.email :manager-email]
                   [:employees.lastname :manager-lastname]

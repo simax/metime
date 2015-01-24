@@ -15,6 +15,7 @@
                  [cljs-hash "0.0.2"]
                  [metis "0.3.3"]
                  [ring-cors "0.1.6"]
+                 [clj-time "0.8.0"]
 
                  ;; Server
                  [ring "1.3.1"]
