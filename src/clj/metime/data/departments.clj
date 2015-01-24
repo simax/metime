@@ -2,8 +2,7 @@
   (:require [cheshire.core :as json]
             [korma.db :refer :all]
             [korma.core :refer :all]
-            [metime.data.database :refer :all]
-            [clojure.walk :as walk]))
+            [metime.data.database :refer :all]))
 
 (defn get-all-with-employees []
   "Get all departments including their employees"
@@ -52,7 +51,7 @@
 
 (defn insert-department [data]
   "Insert a new department"
-  (let [result (insert departments (values (walk/keywordize-keys data)))]
+  (let [result (insert departments (values data))]
     ;; Needed to use this syntax here rather than :keyword lookup
     ;; Because sqlite returns a key of last_insert_rowid().
     ;; The parens at the end of the keyword cause problems trying to use the keyword as a function.

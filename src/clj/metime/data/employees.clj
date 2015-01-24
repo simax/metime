@@ -2,15 +2,29 @@
   (:require [cheshire.core :as json]
             [korma.db :refer :all]
             [korma.core :refer :all]
+            [digest :as hashgen]
             [metime.data.database :refer :all]))
 
+(defn uuid [] (str (java.util.UUID/randomUUID)))
+
+(defn prepare-for-insert [data]
+  "Prepare the incoming data ready for inserting into the DB."
+  "Generate a salted password and remove extraneous keys from the map"
+  (let [salt (uuid)
+        hashed-password (hashgen/md5 (str salt (:password data)))]
+        (-> data
+            (dissoc :password-confirm)
+            (assoc
+              :salt salt
+              :password hashed-password))))
+
 (defn insert-employee [data]
-  (let [result (insert employees (values data))]
+  (let [sanitized-data data
+        result (insert employees (values (prepare-for-insert data)))]
     ;; Needed to use this syntax here rather than :keyword lookup
     ;; Because sqlite returns a key of last_insert_rowid().
     ;; The parens at the end of the keyword cause problems trying to use the keyword as a function.
     (first (vals result))))
-
 
 
 (defn get-all []

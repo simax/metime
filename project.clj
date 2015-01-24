@@ -16,6 +16,7 @@
                  [metis "0.3.3"]
                  [ring-cors "0.1.6"]
                  [clj-time "0.8.0"]
+                 [digest "1.4.4"]
 
                  ;; Server
                  [ring "1.3.1"]

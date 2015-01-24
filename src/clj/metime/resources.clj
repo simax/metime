@@ -68,12 +68,10 @@
     ))
 
 (defvalidator department-validator
-  ;;[:id :numericality {:only-integer true :greater-than 0}]
   [:department :length {:greater-than 0 :less-than 31}]
   [:managerid :numericality {:only-integer true :greater-than 0}])
 
 (defvalidator employee-validator
-  ;;[:id :numericality {:only-integer true :greater-than 0 :only :adding}]
   [:firstname :length {:greater-than 0 :less-than 31}]
   [:lastname :length {:greater-than 0 :less-than 31}]
   [:email :email {:greater-than 0 :less-than 31}]
@@ -194,8 +192,8 @@
            (if (requested-method ctx :post)
              (try
                (when-let [new-id (emps/insert-employee (make-keyword-map (get-form-params ctx)))]
-                 {::location (str "http://localhost:3030/api/departments/" new-id)})
-               (catch Exception e {::failure-message "Department already exists"}))))
+                 {::location (str "http://localhost:3030/api/employees/" new-id)})
+               (catch Exception e {::failure-message "Employee already exists"}))))
 
   :post-redirect? false
   :handle-created (fn [ctx]
