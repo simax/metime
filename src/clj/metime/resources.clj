@@ -131,9 +131,21 @@
   :can-put-to-missing? false
   :exists? (fn [ctx]
              (if (or (requested-method ctx :get) (requested-method ctx :put))
-               (when-let [department (deps/get-department-by-id id)]
-                 [true {::department department}])
-               false))
+               (let [department (deps/get-department-by-id id)]
+                (if (empty? department)
+                  false
+                  [true {::department department}]))
+               true))
+
+  :processable? (fn [ctx]
+                  (if (requested-method ctx :delete)
+                    (let [department (deps/get-department-by-id id)]
+                      (if (empty? (:employees department))
+                        true
+                        [false {::failure-message "Unable to delete, the department contains employees"}])
+                    true)))
+
+  :handle-unprocessable-entity ::failure-message
 
   :malformed? (fn [ctx]
                 (if (requested-method ctx :put)
