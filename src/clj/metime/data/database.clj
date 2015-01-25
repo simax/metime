@@ -3,11 +3,13 @@
             [korma.core :refer :all]))
 
 
-(defdb db (sqlite3 {:classname "org.sqlite.JDBC"
-                    :subprotocol "sqlite"
-                    :subname "data/metime.sqlite"}))
+(def sqll (sqlite3
+           {:classname "org.sqlite.JDBC"
+            :subprotocol "sqlite"
+            :subname "data/metime.sqlite"}))
 
 
+(defdb db sqll)
 
 (declare departments manager)
 

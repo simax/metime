@@ -39,6 +39,7 @@
                  [enlive "1.1.5"]
                  [figwheel "0.1.4-SNAPSHOT"]
                  [environ "1.0.0"]
+                 [expectations "2.0.9"]
 
                  ]
 
