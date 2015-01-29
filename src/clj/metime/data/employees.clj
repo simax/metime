@@ -1,9 +1,10 @@
 (ns metime.data.employees
   (:require [cheshire.core :as json]
-            [korma.db :refer :all]
-            [korma.core :refer :all]
             [digest :as hashgen]
-            [metime.data.database :refer :all]))
+            [yesql.core :refer [defqueries]]
+            [metime.data.database :as db]))
+
+(defqueries "metime/data/sql/metime.sql" {:connection db/db-spec})
 
 (defn uuid [] (str (java.util.UUID/randomUUID)))
 
@@ -18,44 +19,26 @@
               :salt salt
               :password hashed-password))))
 
-(defn insert-employee [data]
-  (let [sanitized-data data
-        result (insert employees (values (prepare-for-insert data)))]
+
+(defn get-all-employees []
+   (db-get-all-employees))
+
+(defn get-employee-by-id [id]
+  (first (db-get-employee-by-id {:id id})))
+
+(defn insert-employee! [data]
     ;; Needed to use this syntax here rather than :keyword lookup
     ;; Because sqlite returns a key of last_insert_rowid().
     ;; The parens at the end of the keyword cause problems trying to use the keyword as a function.
+  (let [result (db-insert-employee<! (prepare-for-insert data))]
     (first (vals result))))
 
+(defn update-employee! [data]
+  (db-update-employee! data))
 
-(defn get-all []
-  "Get all employees"
-   (select employees))
-
-(defn get-employee-by-id [id]
-  "Get an indivdual employee by their id"
-  (first
-   (select employees
-           (where {:manager.id id})
-           (fields
-            [:employees.email               :manager-email]
-            [:employees.lastname            :manager-lastname]
-            [:employees.firstname           :manager-firstname]
-            [:employees.dob                 :manager-dob]
-            [:employees.this_year_opening   :this_year_opening]
-            [:employees.this_year_remaining :this_year_remaining]
-            [:employees.next_year_opening   :next_year_opening]
-            [:employees.next_year_remaining :next_year_remaining]
-            [:manager.lastname              :lastname]
-            [:manager.firstname             :firstname]
-            [:manager.email                 :email]
-            [:manager.startdate             :startdate]
-            [:manager.enddate               :enddate]
-
-            )
-           (order :id)
-           (join [employees :manager]
-                 (= :employees.id :manager.managerid)))))
-
-(defn delete-employee [id]
+(defn delete-employee! [id]
   "Delete the employee with the given id"
-    (delete employees (where {:id id})))
+    (db-delete-employee! {:id id}))
+
+(defn delete-all-employees! []
+  (db-delete-all-employees!))

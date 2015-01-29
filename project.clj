@@ -22,7 +22,7 @@
                  [ring "1.3.1"]
                  [compojure "1.2.0"]
                  [cljs-http "0.1.20"]
-                 [korma "0.4.0"]
+                 [yesql "0.5.0-beta2"]
                  [org.xerial/sqlite-jdbc "3.7.2"]
                  [liberator "0.11.0"]
                  [cheshire "5.3.1"]

@@ -1,69 +1,40 @@
 (ns metime.data.departments
   (:require [cheshire.core :as json]
-            [korma.db :refer :all]
-            [korma.core :refer :all]
-            [metime.data.database :refer :all]))
+            [yesql.core :refer [defqueries]]
+            [metime.data.database :as db]))
 
-(defn get-all-with-employees []
-  "Get all departments including their employees"
-  (select departments
-          (fields :department
-                  :id
-                  :managerid
-                  [:employees.email :manager-email]
-                  [:employees.lastname :manager-lastname]
-                  [:employees.firstname :manager-firstname])
-          (order :department)
-          (with employees
-                (order :lastname))
-          (join manager (= :employees.id :managerid))))
+(defqueries "metime/data/sql/metime.sql" {:connection db/db-spec})
+
+(defn get-all-departments []
+  (db-get-all-departments))
+
+(defn get-all-departments-with-employees []
+  (db-get-all-departments))
 
 (defn get-department-by-id [id]
-  "Get the department with the given id"
-  (first (select departments
-          (fields :department
-                  :id
-                  :managerid)
-          (order :department)
-          (where {:id id}))))
+  (first (db-get-department-by-id {:id id})))
 
 (defn get-department-by-id-with-employees [id]
-  "Get the department with the given id"
-  (first (select departments
-          (fields :department
-                  :id
-                  :managerid
-                  [:employees.email :manager-email]
-                  [:employees.lastname :manager-lastname]
-                  [:employees.firstname :manager-firstname])
-          (order :department)
-          (with employees
-                (order :lastname))
-          (where {:id id})
-          (join manager (= :employees.id :managerid)))))
+  (first (db-get-department-by-id-with-employees {:id id})))
 
-(defn get-department-by-name [name]
-  "Get the department with the given name"
-  (first (select departments
-                 (fields :department
-                         :id)
-                 (where {:department name}))))
+(defn get-department-by-name [department]
+  (db-get-department-by-name {:department department}))
 
-(defn insert-department [data]
-  "Insert a new department"
-  (let [result (insert departments (values data))]
-    ;; Needed to use this syntax here rather than :keyword lookup
-    ;; Because sqlite returns a key of last_insert_rowid().
-    ;; The parens at the end of the keyword cause problems trying to use the keyword as a function.
+(defn insert-department! [data]
+  ;; Needed to use this syntax here rather than :keyword lookup
+  ;; Because sqlite returns a key of last_insert_rowid().
+  ;; The parens at the end of the keyword cause problems trying to use the keyword as a function.
+  (let [result (db-insert-department<! data)]
     (first (vals result))))
 
-(defn update-department [data]
-  (update departments
-          (set-fields data)
-          (where {:id (:id data)})))
+(defn update-department! [data]
+  (db-update-department! data))
 
-(defn delete-department [id]
+(defn delete-department! [id]
   "Delete the department with the given id - providing it doesn't conatin any employees"
-  (if (empty? (:employees (get-department-by-id id)))
-    (delete departments (where {:id id}))))
+  (if (empty? (:employees (db-get-department-by-id {:id id})))
+    (db-delete-department! {:id id})))
+
+(defn delete-all-departments! []
+  (db-delete-all-departments!))
 

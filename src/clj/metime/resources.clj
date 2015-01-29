@@ -92,7 +92,7 @@
   :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
   :exists? (fn [ctx]
              (if (requested-method ctx :get)
-              [true {::departments {:departments (deps/get-all-with-employees)}}]))
+              [true {::departments {:departments (deps/get-all-departments-with-employees)}}]))
 
   :malformed? (fn [ctx]
                 (if (requested-method ctx :post)
@@ -110,7 +110,7 @@
            That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
            (if (requested-method ctx :post)
              (try
-               (when-let [new-id (deps/insert-department (make-keyword-map (get-form-params ctx)))]
+               (when-let [new-id (deps/insert-department! (make-keyword-map (get-form-params ctx)))]
                    {::location (str "http://localhost:3030/api/departments/" new-id)})
                (catch Exception e {::failure-message "Department already exists"}))))
 
@@ -166,13 +166,13 @@
   :handle-conflict {:department ["Department already exists"]}
 
   :delete! (fn [ctx]
-             (deps/delete-department id))
+             (deps/delete-department! id))
 
   :put! (fn [ctx]
           (let [new-data (make-keyword-map (get-form-params ctx))
                 existing-data (::department ctx)
                 updated-data (merge existing-data new-data)]
-            (deps/update-department updated-data)))
+            (deps/update-department! updated-data)))
 
   :respond-with-entity? (fn [ctx] (empty? (::department ctx)))
   :handle-ok ::department
@@ -185,7 +185,7 @@
   :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
   :exists? (fn [ctx]
              (if (requested-method ctx :get)
-               [true {::employees (emps/get-all)}]))
+               [true {::employees (emps/get-all-employees)}]))
 
   :malformed? (fn [ctx]
                 (if (requested-method ctx :post)
@@ -203,7 +203,7 @@
            That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
            (if (requested-method ctx :post)
              (try
-               (when-let [new-id (emps/insert-employee (make-keyword-map (get-form-params ctx)))]
+               (when-let [new-id (emps/insert-employee! (make-keyword-map (get-form-params ctx)))]
                  {::location (str "http://localhost:3030/api/employees/" new-id)})
                (catch Exception e {::failure-message "Employee already exists"}))))
 
@@ -234,7 +234,7 @@
                    true))
 
   :delete! (fn [ctx]
-             (emps/delete-employee id))
+             (emps/delete-employee! id))
 
   :respond-with-entity? (fn [ctx] (not (empty? (::employee ctx))))
 
