@@ -1,51 +1,58 @@
 (ns metime.test.data.database
   (:require [expectations :refer :all]
             [metime.data.departments :as deps]
-            [metime.data.employees :as emps]))
+            [metime.data.employees :as emps]
+            [metime.data.database :as db]))
 
 
 
 (defn in-context
   {:expectations-options :in-context}
   [work]
-  (with-redefs [deps/db-spec {:classname "org.sqlite.JDBC"
+  (with-redefs [db/db-spec {:classname "org.sqlite.JDBC"
                               :subprotocol "sqlite"
-                              ;;:subname "/users/simonlomax/documents/development/clojure projects/metime/data/metime.test"}
-                              :subname "data/metime.test"}
+                              :subname "/users/simonlomax/documents/development/clojure projects/metime/data/metime.test"}
+                              ;;:subname "data/metime.test"}
                 ]
 
-    (println (str "Switched to : " deps/db-spec))
+    (println (str "Switched to : " db/db-spec))
     (deps/delete-all-departments!)
     (emps/delete-all-employees!)
+
     (work)
     ))
 
-;; Insert a department
-(expect 1
-        (let [department-1-input {:department "Department 1" :managerid nil}]
-          (deps/insert-department! department-1-input)
-          (count (deps/get-all-departments))))
 
-;; Insert an employee into the department
-(expect 1
-        (let [employee-1-input {:firstname "David"
-                                :lastname "Sharpe"
-                                :email "davidsharpe@ekmsystems.co.uk"
-                                :startdate nil
-                                :enddate nil
-                                :dob nil
-                                :departments_id 1
-                                :managerid 0
-                                :password "abcd1234"
-                                :password-confirm "abcd1234"
-                                :this_year_opening 25
-                                :this_year_remaining 25
-                                :next_year_opening 25
-                                :next_year_remaining 25
-                                }]
+    ;; Insert a department
+    (expect 1
+            (let [department-1-input {:department "Department 1" :managerid nil}]
+              (deps/insert-department! department-1-input)
+              (count (deps/get-all-departments))))
 
-          (emps/insert-employee! employee-1-input)
-          (count (emps/get-all-employees))))
+
+    ;; Insert an employee into the department
+    (expect 1
+            (let [employee-1-input {:firstname "David"
+                                    :lastname "Sharpe"
+                                    :email "davidsharpe@ekmsystems.co.uk"
+                                    :startdate nil
+                                    :enddate nil
+                                    :dob nil
+                                    :departments_id 1
+                                    :managerid 0
+                                    :password "abcd1234"
+                                    :password-confirm "abcd1234"
+                                    :this_year_opening 25
+                                    :this_year_remaining 25
+                                    :next_year_opening 25
+                                    :next_year_remaining 25
+                                    }]
+
+              (emps/insert-employee! employee-1-input)
+              (count (emps/get-all-employees))))
+
+
+
 
 
 ;;   (def employee-2-input {
