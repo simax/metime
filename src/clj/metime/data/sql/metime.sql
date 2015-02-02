@@ -66,9 +66,6 @@ delete from departments where id = :id
 delete from departments
 
 
-
-
-
 -- name: db-get-all-employees
 -- Get all employees
 select * from employees
