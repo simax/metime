@@ -11,23 +11,67 @@
   [work]
   (with-redefs [db/db-spec {:classname "org.sqlite.JDBC"
                               :subprotocol "sqlite"
-                              :subname "/users/simonlomax/documents/development/clojure projects/metime/data/metime.test"}
-                              ;;:subname "data/metime.test"}
+                              ;;:subname "/users/simonlomax/documents/development/clojure projects/metime/data/metime.test"}
+                              :subname "data/metime.test"}
                 ]
 
-    (println (str "Switched to : " db/db-spec))
+    (println (str "Switched to : " (:subname db/db-spec)))
     (deps/delete-all-departments!)
     (emps/delete-all-employees!)
 
-    (work)
-    ))
+    (work)))
 
 
-    ;; Insert a department
-    (expect 1
+    ;; Successfully insert a department
+    (expect (more-of [:as inserted-departments]
+                     1              (count inserted-departments)
+                     "Department 1" (:department (first inserted-departments)))
+                      (let [department-1-input {:department "Department 1" :managerid nil}]
+                        (deps/insert-department! department-1-input)
+                        (deps/get-all-departments)))
+
+
+    ;; Expect a SQL exception if attempting to insert a duplicate department
+    (expect java.sql.SQLException
             (let [department-1-input {:department "Department 1" :managerid nil}]
               (deps/insert-department! department-1-input)
-              (count (deps/get-all-departments))))
+              (deps/insert-department! department-1-input)))    ;; Expect a SQL exception if attempting to insert a duplicate department
+
+    ;; TODO: need to stop entries with blank department names.
+    ;; Expect to get a SQL exception if attempting to insert invalid department data
+    (expect java.sql.SQLException
+            (let [department-1-input {:department "" :managerid nil}]
+              (deps/insert-department! department-1-input)))
+
+
+    ;; Expect to get correct department record when using deps/get-department-by-id with
+    ;; department id that exists in the DB.
+    (expect "Department 1"
+            (let [department-1-input {:department "Department 1" :managerid nil}]
+              (deps/insert-department! department-1-input)
+              (:department (deps/get-department-by-id 1))))
+
+    ;; Expect to get nil when using deps/get-department-by-id with
+    ;; department id that does not exists in the DB.
+    (expect nil
+            (let [department-1-input {:department "Department 1" :managerid nil}]
+              (deps/insert-department! department-1-input)
+              (:department (deps/get-department-by-id 2))))
+
+    ;; Expect to get correct department record when using deps/get-department-by-name with
+    ;; department name that exists in the DB.
+    (expect "Department 1"
+            (let [department-1-input {:department "Department 1" :managerid nil}]
+              (deps/insert-department! department-1-input)
+              (:department (first (deps/get-department-by-name "Department 1")))))
+
+    ;; Expect to get nil when using deps/get-department-by-name with
+    ;; department name that does not exist in the DB.
+    (expect nil
+            (let [department-1-input {:department "Department 1" :managerid nil}]
+              (deps/insert-department! department-1-input)
+              (:department (first (deps/get-department-by-name "Incorrect Department")))))
+
 
 
     ;; Insert an employee into the department

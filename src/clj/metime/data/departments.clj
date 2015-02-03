@@ -2,6 +2,7 @@
   (:require [cheshire.core :as json]
             [yesql.core :refer [defqueries defquery]]
             [metime.data.database :as db]
+            [clojure.string :as str]
             ))
 
 
@@ -23,6 +24,7 @@
   (db-get-department-by-name {:department department} {:connection db/db-spec}))
 
 (defn insert-department! [data]
+  {:pre (> 0 (count (str/trim (:department data))))}
   ;; Needed to use this syntax here rather than :keyword lookup
   ;; Because sqlite returns a key of last_insert_rowid().
   ;; The parens at the end of the keyword cause problems trying to use the keyword as a function.
