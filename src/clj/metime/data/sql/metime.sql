@@ -41,7 +41,6 @@ d.id, d.department, d.managerid,
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email',
 -- Employee info
 emps.*
-
 from departments d left join employees e on d.managerid = e.id left join employees emps on emps.departments_id = d.id
 where d.id = :id
 order by d.department, emps.lastname

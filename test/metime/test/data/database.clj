@@ -5,7 +5,6 @@
             [metime.data.database :as db]))
 
 
-
 (defn in-context
   {:expectations-options :in-context}
   [work]
@@ -15,12 +14,13 @@
                               :subname "data/metime.test"}
                 ]
 
-    (println (str "Switched to : " (:subname db/db-spec)))
+    ;;(println (str "Using DB : " (:subname db/db-spec)))
     (deps/delete-all-departments!)
     (emps/delete-all-employees!)
 
     (work)))
 
+    ;; ---------------------- Inserting departments ----------------------
 
     ;; Successfully insert a department
     (expect (more-of [:as inserted-departments]
@@ -37,12 +37,64 @@
               (deps/insert-department! department-1-input)
               (deps/insert-department! department-1-input)))    ;; Expect a SQL exception if attempting to insert a duplicate department
 
-    ;; TODO: need to stop entries with blank department names.
-    ;; Expect to get a SQL exception if attempting to insert invalid department data
+    ;; Expect to get a SQL exception if attempting to insert a department with no name
     (expect java.sql.SQLException
             (let [department-1-input {:department "" :managerid nil}]
               (deps/insert-department! department-1-input)))
 
+
+
+    ;; ---------------------- Updating departments ----------------------
+
+    ;; Expect to update the department name given an existing department in the DB
+    (expect "Updated Department 1"
+            (let [department-1-input {:department "Department 1" :managerid nil}
+                  department-1-update {:id 1 :department "Updated Department 1" :managerid nil}]
+              (deps/insert-department! department-1-input)
+              (deps/update-department! department-1-update)
+              (:department (deps/get-department-by-id 1))))
+
+    ;; Expect to receive nil if attempting to update a non existant department
+    (expect nil
+            (let [department-1-update {:id 1 :department "Updated Department 1" :managerid nil}]
+              (deps/update-department! department-1-update)
+              (:department (deps/get-department-by-id 1))))
+
+
+    ;; ---------------------- Deleting departments ----------------------
+
+    ;; Expect to delete the department given an existing department ID.
+    ;; Providing the department contains no employees.
+    (expect true
+            (let [department-1-input {:department "Department 1" :managerid nil}]
+              (deps/insert-department! department-1-input)
+              (deps/delete-department! 1)))
+
+    ;;Expect false if attempting to delete a department that contains employees
+    (expect false
+            (let [employee-1-input {:firstname "David"
+                                    :lastname "Sharpe"
+                                    :email "davidsharpe@ekmsystems.co.uk"
+                                    :startdate nil
+                                    :enddate nil
+                                    :dob nil
+                                    :departments_id 1
+                                    :managerid 0
+                                    :password "abcd1234"
+                                    :password-confirm "abcd1234"
+                                    :this_year_opening 25
+                                    :this_year_remaining 25
+                                    :next_year_opening 25
+                                    :next_year_remaining 25
+                                    }
+                  department-1-input {:department "Department 1" :managerid nil}]
+
+              (emps/insert-employee! employee-1-input)
+              (deps/insert-department! department-1-input)
+              (deps/delete-department! 1)))
+
+
+    ;; ---------------------- Fetching departments ----------------------
 
     ;; Expect to get correct department record when using deps/get-department-by-id with
     ;; department id that exists in the DB.
@@ -74,7 +126,9 @@
 
 
 
-    ;; Insert an employee into the department
+    ;; ---------------------- Inserting  employees ----------------------
+
+    ;; Successfully Insert an employee
     (expect 1
             (let [employee-1-input {:firstname "David"
                                     :lastname "Sharpe"
@@ -95,95 +149,174 @@
               (emps/insert-employee! employee-1-input)
               (count (emps/get-all-employees))))
 
+    ;; Expect a SQL exception if attempting to insert an employee with a duplicate email address
+    (expect java.sql.SQLException
+            (let [original-employee-input
+                  {:firstname "David"
+                   :lastname "Sharpe"
+                   :email "davidsharpe@ekmsystems.co.uk"
+                   :startdate nil
+                   :enddate nil
+                   :dob nil
+                   :departments_id 1
+                   :managerid 0
+                   :password "abcd1234"
+                   :password-confirm "abcd1234"
+                   :this_year_opening 25
+                   :this_year_remaining 25
+                   :next_year_opening 25
+                   :next_year_remaining 25
+                   }
+                  duplicate-employee-input original-employee-input]
+
+              (emps/insert-employee! original-employee-input)
+              (emps/insert-employee! duplicate-employee-input)))
+
+    ;; Expect to get a SQL exception if attempting to insert an employee
+    ;; with no firstname, lastname or email address
+    ;; Note: This test sets all 3 required fields to empty.
+    ;; One of them would be enough to cause the expected SQL exception.
+
+    (expect java.sql.SQLException
+            (let [invalid-employee-input
+                  {:firstname ""
+                   :lastname ""
+                   :email ""
+                   :startdate nil
+                   :enddate nil
+                   :dob nil
+                   :departments_id 1
+                   :managerid 0
+                   :password "abcd1234"
+                   :password-confirm "abcd1234"
+                   :this_year_opening 25
+                   :this_year_remaining 25
+                   :next_year_opening 25
+                   :next_year_remaining 25
+                   }]
+
+              (emps/insert-employee! invalid-employee-input)))
+
+    ;; ---------------------- Updating employees ----------------------
+
+    ;; Expect to update the employee name given the existing employee in the DB
+    (expect "Updated Lastname"
+            (let [employee-1-input
+                  {:firstname "Firstname"
+                   :lastname "Lastname"
+                   :email "someone@somewehere.com"
+                   :startdate nil
+                   :enddate nil
+                   :dob nil
+                   :departments_id 1
+                   :managerid 0
+                   :password "abcd1234"
+                   :password-confirm "abcd1234"
+                   :this_year_opening 25
+                   :this_year_remaining 25
+                   :next_year_opening 25
+                   :next_year_remaining 25
+                   }
+                  employee-1-update
+                  {:id 1
+                   :firstname "Firstname"
+                   :lastname "Updated Lastname"
+                   :email "someone@somewehere.com"
+                   :startdate nil
+                   :enddate nil
+                   :dob nil
+                   :departments_id 1
+                   :managerid 0
+                   :password "abcd1234"
+                   :password-confirm "abcd1234"
+                   :this_year_opening 25
+                   :this_year_remaining 25
+                   :next_year_opening 25
+                   :next_year_remaining 25
+                   }]
+
+              (emps/insert-employee! employee-1-input)
+              (emps/update-employee! employee-1-update)
+              (:lastname (emps/get-employee-by-id 1))))
+
+    ;; Expect to receive nil if attempting to update a non existant department
+    (expect nil
+            (let [missing-employee
+                  {:id 99
+                   :firstname "Firstname"
+                   :lastname "Updated Lastname"
+                   :email "someone@somewehere.com"
+                   :startdate nil
+                   :enddate nil
+                   :dob nil
+                   :departments_id 1
+                   :managerid 0
+                   :password "abcd1234"
+                   :password-confirm "abcd1234"
+                   :this_year_opening 25
+                   :this_year_remaining 25
+                   :next_year_opening 25
+                   :next_year_remaining 25
+                   }]
+
+              (emps/update-employee! missing-employee)
+              (:lastname (emps/get-employee-by-id 99))))
 
 
 
+    ;; ---------------------- Deleting employees ----------------------
 
-;;   (def employee-2-input {
-;;                          :firstname "Adam"
-;;                          :lastname "Duckett"
-;;                          :email "adamduckett@ekmsystems.co.uk"
-;;                          :startdate nil
-;;                          :enddate nil
-;;                          :dob nil
-;;                          :departments_id 1
-;;                          :managerid 1
-;;                          :password "abcd1234"
-;;                          :password-confirm "abcd1234"
-;;                          :this_year_opening 25
-;;                          :this_year_remaining 25
-;;                          :next_year_opening 25
-;;                          :next_year_remaining 25
-;;                          })
+    ;; Expect to delete the employee given an existing employee ID.
+    (expect true
+            (let [employee-1-input
+                  {:firstname "Firstname"
+                   :lastname "Updated Lastname"
+                   :email "someone@somewehere.com"
+                   :startdate nil
+                   :enddate nil
+                   :dob nil
+                   :departments_id 1
+                   :managerid 0
+                   :password "abcd1234"
+                   :password-confirm "abcd1234"
+                   :this_year_opening 25
+                   :this_year_remaining 25
+                   :next_year_opening 25
+                   :next_year_remaining 25
+                   }]
 
+              (emps/insert-employee! employee-1-input)
+              (emps/delete-employee! 1)))
 
-;;   (deps/insert-department! department-1-input)
-;;   (emps/insert-employee! employee-1-input)
-;;   (emps/insert-employee! employee-2-input))
-
-
-;; (def employee-2-output {:id 2
-;;                         :firstname "Adam",
-;;                         :lastname "Duckett",
-;;                         :email "adamduckett@ekmsystems.co.uk",
-;;                         :dob nil
-;;                         :managerid 1
-;;                         :manager-firstname "David",
-;;                         :manager-lastname "Sharpe",
-;;                         :manager-email "davidsharpe@ekmsystems.co.uk",
-;;                         :startdate nil,
-;;                         :enddate nil,
-;;                         :departments_id 1
-;;                         :this_year_opening 25,
-;;                         :this_year_remaining 25,
-;;                         :next_year_opening 25,
-;;                         :next_year_remaining 25
-;;                         })
+    ;;Expect false if attempting to delete an employee that doesn't exist
+    (expect false (emps/delete-employee! 99))
 
 
-;; (expect employee-2-output (dissoc (emps/get-employee-by-id 2) :salt :password)
+    ;; ---------------------- Fetching employees ----------------------
+
+    ;; Expect to get correct employee record when employee exists in the DB.
+    (expect "someone@somewhere.com"
+            (let [employee-1-input
+                  {:firstname "Firstname"
+                   :lastname "Updated Lastname"
+                   :email "someone@somewhere.com"
+                   :startdate nil
+                   :enddate nil
+                   :dob nil
+                   :departments_id 1
+                   :managerid 0
+                   :password "abcd1234"
+                   :password-confirm "abcd1234"
+                   :this_year_opening 25
+                   :this_year_remaining 25
+                   :next_year_opening 25
+                   :next_year_remaining 25
+                   }]
+              (emps/insert-employee! employee-1-input)
+              (:email (emps/get-employee-by-id 1))))
+
+    ;; Expect to get nil when attempting to fetch employee that does not exists in the DB.
+    (expect nil (:email (emps/get-employee-by-id 99)))
 
 
-;; (expect {
-;;          :next_year_remaining 0,
-;;          :manager-firstname "David",
-;;          :email "davidsharpe@ekmsystems.co.uk",
-;;          :this_year_remaining 0,
-;;          :manager-dob nil,
-;;          :lastname "Sharpe",
-;;          :next_year_opening 0,
-;;          :manager-email "davidsharpe@ekmsystems.co.uk",
-;;          :enddate nil,
-;;          :manager-lastname "Sharpe",
-;;          :firstname "David",
-;;          :startdate nil,
-;;          :this_year_opening 0}
-;;         (emps/get-employee-by-id 10))
-
-;;)
-
-;; (defn in-context
-;;   "Switch db-spec so we connect to the test DB, not the production DB"
-;;   {:expectations-options :in-context}
-;;   [work]
-
-;;   (println "Switching to metime.test")
-;;   (with-redefs [deps/db-spec {:classname "org.sqlite.JDBC"
-;;                             :subprotocol "sqlite"
-;;                             :subname "data/metime.test"}]
-
-
-;;     ;;(load-db-with-test-data)
-;;     (work)))
-
-
-;; (defn after-run
-;;   "rebind a var, expecations are run in the defined context"
-;;   {:expectations-options :after-run}
-;;   []
-
-;;   (do
-;;     (println "** Switching to metime.sqlite **")
-;;     ;;(switch-db "data/metime.sqlite")
-;;     ))
 

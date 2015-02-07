@@ -39,8 +39,11 @@
 
 (defn delete-employee! [id]
   "Delete the employee with the given id"
-  (db-delete-employee! {:id id} {:connection db/db-spec}))
+  (= 1 (db-delete-employee! {:id id} {:connection db/db-spec})))
 
 (defn delete-all-employees! []
+  "Probably only usefull while testing/debugging. Don't know a use case
+  for this function in production"
+
   (db-delete-all-employees! {} {:connection db/db-spec}))
 
