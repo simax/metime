@@ -27,8 +27,9 @@
      (prone/wrap-exceptions)
      (handler/site)
      (wrap-cors
-                :access-control-allow-origin [#".*"]
-                :access-control-allow-methods [:get :put :post :delete])
+      :access-control-allow-credentials "true"
+      :access-control-allow-origin [#".*"]
+      :access-control-allow-methods [:get :put :post :delete])
      (wrap-base-url)
      #_(liberator.dev/wrap-trace :header :ui)
    ))

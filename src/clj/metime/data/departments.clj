@@ -10,7 +10,7 @@
   (db-get-all-departments {} {:connection db/db-spec}))
 
 (defn get-all-departments-with-employees []
-  (db-get-all-departments {} {:connection db/db-spec}))
+  (db-get-all-departments-with-employees {} {:connection db/db-spec}))
 
 (defn get-department-by-id [id]
   (first (db-get-department-by-id {:id id} {:connection db/db-spec})))
