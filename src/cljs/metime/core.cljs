@@ -36,6 +36,10 @@
 (defroute "/employees" []
   (swap! app-state #(assoc %1 :view "#employees")))
 
+(defroute "/employees/:id" [id]
+  (println "Got here!")
+  (swap! app-state #(assoc %1 :view "#employee" :id id)))
+
 (defroute "/tables" []
   (swap! app-state #(assoc %1 :view "#tables")))
 
@@ -50,9 +54,6 @@
 
 (defroute "/login" []
   (swap! app-state #(assoc %1 :view "#login")))
-
-(defroute "/employees/:id" [id]
-  (swap! app-state #(assoc %1 :view "#employee" :id id)))
 
 (defroute "*" []
   (swap! app-state #(assoc %1 :view "#not-found")))
@@ -72,7 +73,7 @@
                                                  :poll-interval 2000}})]
              "#employee"
                [:div (ec/->employee app
-                                      {:opts {:url "http://localhost:3030/api/employees/"
+                                      {:opts {:url "http://localhost:3030/api/employee/"
                                               :poll-interval 2000}})]
 
              "#calendar"

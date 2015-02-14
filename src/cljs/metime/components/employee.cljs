@@ -30,8 +30,7 @@
          (if-not (nil? emp)
            (>! c emp)
            (>! c "not found")))
-    (println (str "emp: " (:email emp)))
-        )
+    (println (str "emp: " (:email emp))))
     c
     ))
 
@@ -73,6 +72,8 @@
 (defcomponent department-list-item [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
   (display-name [_]
                 "department-name")
+
+
 
   (render [_]
           (let [department-list-item (filter #(not= (:id %) managerid) employees)
@@ -217,6 +218,7 @@
   (will-mount [_]
               (let [url-with-id (str (:url opts) (:id app))]
                 (go
+                 (println (str "url-with-id: " url-with-id))
                  (let [emp (<! (fetch-employee url-with-id))]
                    (if (= emp "not found")
                      (om/transact! app #(dissoc % :employee))
