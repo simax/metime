@@ -11,7 +11,8 @@
             [cljs-hash.goog :as gh]
             [metime.components.top-nav-bar :as nav]
             [secretary.core :as secretary :refer-macros [defroute]]
-            [metime.components.employee :as ec])
+            [metime.components.employee :as ec]
+            [reagent.core :as reagent :refer [atom]])
   (:import goog.History
            goog.History.EventType))
 
@@ -96,6 +97,7 @@
 
 
 (defn refresh-navigation []
+  (println (str "path: " (:top-nav-bar @app-state)))
   (swap! app-state nav/update-top-nav-bar))
 
 (defn on-navigate [event]
@@ -110,9 +112,9 @@
   ;;(secretary/set-config! :prefix "#")
 
   ;; Top nav bar
-  (om/root nav/top-nav-bar app-state {:target (. js/document (getElementById "top-nav-bar"))})
+  (reagent/render [nav/top-nav-bar @app-state] (. js/document (getElementById "top-nav-bar"))))
 
   ;; Root component
-  (om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
+  ;;(om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
 
 

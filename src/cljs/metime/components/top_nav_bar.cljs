@@ -8,7 +8,8 @@
             [sablono.core :as html :refer-macros [html]]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
-            [secretary.core :as secretary :refer-macros [defroute]])
+            [secretary.core :as secretary :refer-macros [defroute]]
+            [reagent.core :as reagent :refer [atom]])
   (:import goog.History
            goog.History.EventType))
 
@@ -23,21 +24,10 @@
 (defn update-top-nav-bar [app-state-map]
   (update-in app-state-map [:top-nav-bar] #(map toggle-active-status %)))
 
+(defn nav-menu-item [item]
+  [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])
 
-(defcomponent nav-menu-item [item]
-  (display-name [_]
-                "nav-menu-item")
-
-  (render [_]
-          (html
-           [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])))
-
-(defcomponent top-nav-bar [{:keys [top-nav-bar]}]
-  (display-name [_]
-                "top-nav-bar")
-
-  (render [_]
-          (html
-           [:ul.nav.navbar-nav
-            (om/build-all nav-menu-item top-nav-bar {:key :path})])))
-
+(defn top-nav-bar [{:keys [top-nav-bar]}]
+  [:ul.nav.navbar-nav
+   (for [nav-bar top-nav-bar]
+     (nav-menu-item nav-bar))])
