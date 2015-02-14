@@ -1,5 +1,5 @@
 -- name: db-get-all-departments
--- Get all department
+-- Get all departments
 select
 -- Department info
 d.id, d.department, d.managerid,
@@ -74,7 +74,7 @@ delete from departments
 
 -- name: db-get-all-employees
 -- Get all employees
-select * from employees
+select * from employees order by lastname
 
 
 -- name: db-get-employee-by-id

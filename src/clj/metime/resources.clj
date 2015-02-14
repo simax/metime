@@ -8,7 +8,8 @@
             [clojure.data.json :as json]
             [metis.core :refer [defvalidator] :as v]
             [clj-time.core :as t]
-            [clj-time.format :as f]))
+            [clj-time.format :as f]
+            [clojure.set :refer :all]))
 
 ;; convert the body to a reader. Useful for testing in the repl
 ;; where setting the body to a string is much simpler.
@@ -86,13 +87,27 @@
 ;;---------------------
 
 
+(defn employees-by-department []
+  (let [data-emps            (emps/get-all-employees)
+        grouped-emps         (group-by :departments_id data-emps)
+
+        data-deps            (deps/get-all-departments)
+        set-of-deps          (rename (into #{} data-deps) {:id :departments_id})
+        set-of-emps          (into #{} (map #(hash-map :departments_id %1 :employees %2)
+                                            (keys grouped-emps)
+                                            (sort-by :lastname (vals grouped-emps))))]
+    (sort-by :department (join set-of-deps set-of-emps))))
+
+
 (defresource departments []
   :available-media-types ["application/edn" "application/json"]
   :allowed-methods [:get :post]
   :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
   :exists? (fn [ctx]
              (if (requested-method ctx :get)
-              [true {::departments {:departments (deps/get-all-departments-with-employees)}}]))
+              ;;[true {::departments {:departments (deps/get-all-departments-with-employees)}}]
+              [true {::departments {:departments (employees-by-department)}}]
+               ))
 
   :malformed? (fn [ctx]
                 (if (requested-method ctx :post)
