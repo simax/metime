@@ -2,19 +2,14 @@
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [goog.events :as events]
             [goog.history.EventType :as EventType]
-            [om.core :as om :include-macros true]
-            [om-tools.dom :as dom :include-macros true]
-            [om-tools.core :refer-macros [defcomponent]]
             [cljs-http.client :as http]
-            [sablono.core :as html :refer-macros [html]]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
             [metime.components.top-nav-bar :as nav]
             [secretary.core :as secretary :refer-macros [defroute]]
             [metime.components.employee :as ec]
             [reagent.core :as reagent :refer [atom]])
-  (:import goog.History
-           goog.History.EventType))
+  (:import goog.History))
 
 (enable-console-print!)
 
@@ -32,7 +27,7 @@
                       ]}))
 
 (defroute "/" []
-  (.setToken (History.) "employees"))
+  (.setToken history "employees"))
 
 (defroute "/employees" []
   (swap! app-state #(assoc %1 :view "#employees")))
@@ -60,61 +55,57 @@
   (swap! app-state #(assoc %1 :view "#not-found")))
 
 
-(defcomponent om-app [app owner]
-  (display-name [_]
-                "app")
-  (render [_]
-          (html
-           (condp = (:view app)
+(defn main-page [app owner]
+  (condp = (:view app)
 
-             "#employees"
-               [:div
-                (ec/->departments-container app
-                                         {:opts {:url "http://localhost:3030/api/departments"
-                                                 :poll-interval 2000}})]
-             "#employee"
-               [:div (ec/->employee app
-                                      {:opts {:url "http://localhost:3030/api/employee/"
-                                              :poll-interval 2000}})]
+    "#employees"
+    [:div
+     [ec/departments-container app
+                                 {:opts {:url "http://localhost:3030/api/departments"
+                                         :poll-interval 2000}}]]
+    "#employee"
+    [:div [ec/employee app
+                         {:opts {:url "http://localhost:3030/api/employee/"
+                                 :poll-interval 2000}}]]
 
-             "#calendar"
-               [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
+    "#calendar"
+    [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
 
-             "#tables"
-               [:div {:style {:height "500px"}} [:h1 "Tables page"]]
+    "#tables"
+    [:div {:style {:height "500px"}} [:h1 "Tables page"]]
 
-             "#file-manager"
-               [:div {:style {:height "500px"}} [:h1 "File manager page"]]
+    "#file-manager"
+    [:div {:style {:height "500px"}} [:h1 "File manager page"]]
 
-             "#user"
-               [:div {:style {:height "500px"}} [:h1 "User page"]]
+    "#user"
+    [:div {:style {:height "500px"}} [:h1 "User page"]]
 
-             "#login"
-               [:div {:style {:height "500px"}} [:h1 "Login page"]]
+    "#login"
+    [:div {:style {:height "500px"}} [:h1 "Login page"]]
 
-             "#not-found"
-               [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]]))))
+    "#not-found"
+    [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]]))
 
 
 (defn refresh-navigation []
-  (println (str "path: " (:top-nav-bar @app-state)))
   (swap! app-state nav/update-top-nav-bar))
 
 (defn on-navigate [event]
-  (refresh-navigation)
+  (println (str "token: " (.-token event)))
+  (println " ")
+  ;;(refresh-navigation)
   (secretary/dispatch! (.-token event)))
 
 (defn main []
-  (doto history
-    (goog.events/listen EventType/NAVIGATE on-navigate)
-    (.setEnabled true))
+    (goog.events/listen history EventType/NAVIGATE #(on-navigate %))
+    (doto history (.setEnabled true)))
 
-  ;;(secretary/set-config! :prefix "#")
+  (secretary/set-config! :prefix "#")
 
   ;; Top nav bar
-  (reagent/render [nav/top-nav-bar @app-state] (. js/document (getElementById "top-nav-bar"))))
+  (reagent/render [nav/top-nav-bar @app-state] (. js/document (getElementById "top-nav-bar")))
 
   ;; Root component
-  ;;(om/root om-app app-state {:target (. js/document (getElementById "app-container"))}))
+  ;;(om/root main-page app-state {:target (. js/document (getElementById "app-container"))}))
 
 

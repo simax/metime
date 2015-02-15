@@ -32,9 +32,7 @@
                  ;; UI
                  [om "0.8.0-alpha2"]
                  [reagent "0.5.0-alpha3"]
-                 [sablono "0.2.22"]
                  [secretary "1.2.1"]
-                 [prismatic/om-tools "0.3.6"]
 
                  ;; Dev
                  [enlive "1.1.5"]
