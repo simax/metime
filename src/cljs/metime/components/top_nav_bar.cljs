@@ -11,21 +11,37 @@
 
 (enable-console-print!)
 
-(def history (History.))
+(defn toggle-active-status [item token]
+  (.log js/console (str "item: " item " token: " token))
+  (if (= (:path item) token)
+    (assoc item :active true)
+    (assoc item :active false)))
 
-(defn toggle-active-status [item]
-  (let [token (str "#" (.getToken history))]
-    (if (= (:path item) token)
-      (assoc item :active true)
-      (assoc item :active false))))
-
-(defn update-top-nav-bar [app-state-map]
-  (update-in app-state-map [:top-nav-bar] #(map toggle-active-status %)))
+(defn update-top-nav-bar [app-state-map token]
+  (update-in app-state-map [:top-nav-bar] #(map toggle-active-status % token)))
 
 (defn nav-menu-item [item]
   [:li {:key (:path item) :class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])
 
 (defn top-nav-bar [{:keys [top-nav-bar]}]
+  [:div.navbar-nav.navbar-inverse.navbar-fixed-top
+   [:div.container
+    [:div.navbar-header
+     [:button.navbar-toggle {:data-toggle "collapse" :data-target ".navbar-collapse"}
+      [:span.icon-bar]
+      [:span.icon-bar]
+      [:span.icon-bar]
+      ]
+     [:a.navbar-brand {:href="/#employees"}
+      [:img {:src "assets/img/logo30.png" :alt "MeTime Dashboard"}]
+      ]
+     [:div#top-nav-bar.navbar-collapse.collapse]
+     ]
+    ]
+   ]
+
   [:ul.nav.navbar-nav
    (for [nav-bar top-nav-bar]
      [nav-menu-item nav-bar])])
+
+

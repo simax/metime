@@ -26,6 +26,8 @@
                        {:path "#user"          :text "User"}
                       ]}))
 
+(secretary/set-config! :prefix "#")
+
 (defroute "/" []
   (.setToken history "employees"))
 
@@ -33,13 +35,13 @@
   (swap! app-state #(assoc %1 :view "#employees")))
 
 (defroute "/employees/:id" [id]
-  (println "Got here!")
   (swap! app-state #(assoc %1 :view "#employee" :id id)))
 
 (defroute "/tables" []
   (swap! app-state #(assoc %1 :view "#tables")))
 
 (defroute "/calendar" []
+  (.log js/console "Got to calendar")
   (swap! app-state #(assoc %1 :view "#calendar")))
 
 (defroute "/file-manager" []
@@ -55,57 +57,67 @@
   (swap! app-state #(assoc %1 :view "#not-found")))
 
 
-(defn main-page [app owner]
+(defn main-page [app]
+
+  ;; Top nav bar
+  [nav/top-nav-bar @app]
+
+  ;; Page contents
   (condp = (:view app)
 
-    "#employees"
+    "employees"
     [:div
      [ec/departments-container app
                                  {:opts {:url "http://localhost:3030/api/departments"
                                          :poll-interval 2000}}]]
-    "#employee"
+    "employee"
     [:div [ec/employee app
                          {:opts {:url "http://localhost:3030/api/employee/"
                                  :poll-interval 2000}}]]
 
-    "#calendar"
+    "calendar"
     [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
 
-    "#tables"
+    "tables"
     [:div {:style {:height "500px"}} [:h1 "Tables page"]]
 
-    "#file-manager"
+    "file-manager"
     [:div {:style {:height "500px"}} [:h1 "File manager page"]]
 
-    "#user"
+    "user"
     [:div {:style {:height "500px"}} [:h1 "User page"]]
 
-    "#login"
+    "login"
     [:div {:style {:height "500px"}} [:h1 "Login page"]]
 
-    "#not-found"
+    "not-found"
     [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]]))
 
 
-(defn refresh-navigation []
-  (swap! app-state nav/update-top-nav-bar))
+(defn refresh-navigation [token]
+  (swap! app-state nav/update-top-nav-bar app-state token))
 
-(defn on-navigate [event]
-  (println (str "token: " (.-token event)))
-  (println " ")
-  ;;(refresh-navigation)
-  (secretary/dispatch! (.-token event)))
+;; (defn on-navigate [event]
+;;   (println (str "token: " (.-token event)))
+;;   (println " ")
+;;   ;;(refresh-navigation)
+;;   (secretary/dispatch! (.-token event)))
 
 (defn main []
-    (goog.events/listen history EventType/NAVIGATE #(on-navigate %))
-    (doto history (.setEnabled true)))
+  ;; History
+  (let [h (History.)
+        f (fn [he] ;; goog.History.Event
+            (let [token (.-token he)]
+              (if (seq token)
+                (do
+                  (.log js/console (str "token changed, navigating to : " token))
+                  (secretary/dispatch! token)
+                  (refresh-navigation token)))))]
+    (events/listen h EventType/NAVIGATE f)
+    (doto h (.setEnabled true)))
 
-  (secretary/set-config! :prefix "#")
+  ;; (. js/document (getElementById "top-nav-bar")
 
-  ;; Top nav bar
-  (reagent/render [nav/top-nav-bar @app-state] (. js/document (getElementById "top-nav-bar")))
-
-  ;; Root component
-  ;;(om/root main-page app-state {:target (. js/document (getElementById "app-container"))}))
-
+  ;; Main app component
+  (reagent/render [main-page app-state] (. js/document (getElementById "app-container"))))
 
