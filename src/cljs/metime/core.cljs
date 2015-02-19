@@ -61,37 +61,38 @@
 
   ;; Top nav bar
   [nav/top-nav-bar @app]
-
+)
   ;; Page contents
-  (condp = (:view app)
+;;  (condp = (:view @app)
 
-    "employees"
-    [:div
-     [ec/departments-container app
-                                 {:opts {:url "http://localhost:3030/api/departments"
-                                         :poll-interval 2000}}]]
-    "employee"
-    [:div [ec/employee app
-                         {:opts {:url "http://localhost:3030/api/employee/"
-                                 :poll-interval 2000}}]]
+;;     "#employees"
+;;     [:div
+;;      [:span "Employees"]]
+;;       [ec/departments-container app
+;;                                   {:opts {:url "http://localhost:3030/api/departments"
+;;                                           :poll-interval 2000}}]
+;;     "#employee"
+;;     [:div [ec/employee app
+;;                          {:opts {:url "http://localhost:3030/api/employee/"
+;;                                  :poll-interval 2000}}]]
 
-    "calendar"
-    [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
+;;     "#calendar"
+;;     [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
 
-    "tables"
-    [:div {:style {:height "500px"}} [:h1 "Tables page"]]
+;;     "#tables"
+;;     [:div {:style {:height "500px"}} [:h1 "Tables page"]]
 
-    "file-manager"
-    [:div {:style {:height "500px"}} [:h1 "File manager page"]]
+;;     "#file-manager"
+;;     [:div {:style {:height "500px"}} [:h1 "File manager page"]]
 
-    "user"
-    [:div {:style {:height "500px"}} [:h1 "User page"]]
+;;     "#user"
+;;     [:div {:style {:height "500px"}} [:h1 "User page"]]
 
-    "login"
-    [:div {:style {:height "500px"}} [:h1 "Login page"]]
+;;     "#login"
+;;     [:div {:style {:height "500px"}} [:h1 "Login page"]]
 
-    "not-found"
-    [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]]))
+;;     "not-found"
+;;     [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]]))
 
 
 (defn refresh-navigation [token]
@@ -102,6 +103,10 @@
 ;;   (println " ")
 ;;   ;;(refresh-navigation)
 ;;   (secretary/dispatch! (.-token event)))
+
+(defn my-component []
+  [:div
+   [:span "Component"]])
 
 (defn main []
   ;; History
