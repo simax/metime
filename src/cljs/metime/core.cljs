@@ -41,7 +41,7 @@
   (swap! app-state #(assoc %1 :view "#tables")))
 
 (defroute "/calendar" []
-  (.log js/console "Got to calendar")
+  (println "Switched to calendar")
   (swap! app-state #(assoc %1 :view "#calendar")))
 
 (defroute "/file-manager" []
@@ -60,53 +60,56 @@
 (defn main-page [app]
 
   ;; Top nav bar
-  [nav/top-nav-bar @app]
-)
+  [:div
+   [nav/top-nav-bar @app]
+
+ (js/console.log (str "@app: " (:view @app)))
+
   ;; Page contents
-;;  (condp = (:view @app)
+ (condp = (:view @app)
 
-;;     "#employees"
-;;     [:div
-;;      [:span "Employees"]]
-;;       [ec/departments-container app
-;;                                   {:opts {:url "http://localhost:3030/api/departments"
-;;                                           :poll-interval 2000}}]
-;;     "#employee"
-;;     [:div [ec/employee app
-;;                          {:opts {:url "http://localhost:3030/api/employee/"
-;;                                  :poll-interval 2000}}]]
+   "#employees"
+   [:div
+    [:span "Employees"]
+    [ec/departments-container app
+     {:opts {:url "http://localhost:3030/api/departments"
+             :poll-interval 2000}}]]
 
-;;     "#calendar"
-;;     [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
+   "#employee"
+   [:div [ec/employee app
+          {:opts {:url "http://localhost:3030/api/employee/"
+                  :poll-interval 2000}}]]
 
-;;     "#tables"
-;;     [:div {:style {:height "500px"}} [:h1 "Tables page"]]
+   "#calendar"
+   [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
 
-;;     "#file-manager"
-;;     [:div {:style {:height "500px"}} [:h1 "File manager page"]]
+   "#tables"
+   [:div {:style {:height "500px"}} [:h1 "Tables page"]]
 
-;;     "#user"
-;;     [:div {:style {:height "500px"}} [:h1 "User page"]]
+   "#file-manager"
+   [:div {:style {:height "500px"}} [:h1 "File manager page"]]
 
-;;     "#login"
-;;     [:div {:style {:height "500px"}} [:h1 "Login page"]]
+   "#user"
+   [:div {:style {:height "500px"}} [:h1 "User page"]]
 
-;;     "not-found"
-;;     [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]]))
+   "#login"
+   [:div {:style {:height "500px"}} [:h1 "Login page"]]
+
+   "not-found"
+   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
+   ])
 
 
-(defn refresh-navigation [token]
-  (swap! app-state nav/update-top-nav-bar app-state token))
+(defn refresh-navigation [app-state token]
+  ;;(js/console.log token)
+  (swap! app-state nav/update-top-nav-bar token))
+  ;;(nav/update-top-nav-bar @app-state token))
 
 ;; (defn on-navigate [event]
 ;;   (println (str "token: " (.-token event)))
 ;;   (println " ")
 ;;   ;;(refresh-navigation)
 ;;   (secretary/dispatch! (.-token event)))
-
-(defn my-component []
-  [:div
-   [:span "Component"]])
 
 (defn main []
   ;; History
@@ -115,13 +118,13 @@
             (let [token (.-token he)]
               (if (seq token)
                 (do
-                  (.log js/console (str "token changed, navigating to : " token))
-                  (secretary/dispatch! token)
-                  (refresh-navigation token)))))]
+                  ;; Can't use println inside here. Async?
+                  ;;(js/console.log (str "token changed, navigating to : " token))
+                  ;;(secretary/dispatch! token)
+                  (refresh-navigation app-state token)
+                  ))))]
     (events/listen h EventType/NAVIGATE f)
     (doto h (.setEnabled true)))
-
-  ;; (. js/document (getElementById "top-nav-bar")
 
   ;; Main app component
   (reagent/render [main-page app-state] (. js/document (getElementById "app-container"))))
