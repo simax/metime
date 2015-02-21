@@ -14,13 +14,6 @@
 
 (enable-console-print!)
 
-(defn fetch-departments
-  [url]
-  (let [c (chan)]
-    (go (let [deps (((<! (http/get url)) :body) :departments)]
-          (>! c deps)))
-    c))
-
 (defn fetch-employee [url-with-id]
   (let [c (chan)]
     (go
@@ -39,35 +32,30 @@
 
 
 (defn employee-list-item [{:keys [lastname firstname email id]}]
-  (let [edit (fn [e]
-               (secretary/dispatch! (str "/employees/" id))
-               (println "You clicked the button"))]
+  (fn [{:keys [lastname firstname email id]}]
+    [:div {:class "col-md-3 col-lg-3"}
+     [:div {:class "dash-unit"}
+      [:div {:class "thumbnail" :style {:margin-top "20px"}}
+       [:a {:href (str "/#employees/" id)}
+        [:h1 (employee-name firstname lastname)]
+        [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
+        ]
+       [:div {:class "info-user"}
+        [:span {:aria-hidden "true" :class "li_user fs1"}]
+        [:span {:aria-hidden "true" :class "li_calendar fs1"}]
+        [:span {:aria-hidden "true" :class "li_mail fs1"}]
+        [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
+        ]
 
-    (fn [{:keys [lastname firstname email id]}]
-      [:div {:class "col-md-3 col-lg-3"}
-       [:div {:class "dash-unit"}
-        [:div {:class "thumbnail" :style {:margin-top "20px"}}
-         [:a {:href (str "/#/employees/" id)}
-          [:h1 (employee-name firstname lastname)]
-          [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
-          ]
-         [:div {:class "info-user"}
-          [:span {:aria-hidden "true" :class "li_user fs1"}]
-          [:span {:aria-hidden "true" :class "li_calendar fs1"}]
-          [:span {:aria-hidden "true" :class "li_mail fs1"}]
-          [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
-          ]
-
-         ;; For now, just simulate the number of days remaining
-         [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
-         ]]])))
+       ;; For now, just simulate the number of days remaining
+       [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
+       ]]]))
 
 
-(defn department-list-item [{:keys [department managerid manager-firstname manager-lastname manager-email employees]} owner opts]
+(defn department-list-item [{:keys [department managerid manager-firstname manager-lastname manager-email employees]}]
   (let [department-list-item (filter #(not= (:id %) managerid) employees)
         rows-of-employees (partition 4 4 nil department-list-item)]
      [:div#accordian.panel.panel-default.row
-
       [:div.panel-heading.clearfix.panel-heading
        [:div.col-md-2.col-xs-2
         [:div.col-md-4.col-xs-4 [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]]
@@ -83,40 +71,32 @@
          [:button {:class "btn btn-default glyphicon glyphicon-sort"
                    :data-toggle "collapse"
                    :data-parent "accordian"
-                   :data-target (str "#" (clojure.string/replace department #"[\s]" "-"))}]
-         ]
-        ]
-       ]
+                   :data-target (str "#" (clojure.string/replace department #"[\s]" "-"))}]]]]
 
       [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
        (if (not-empty rows-of-employees)
          (for [employee-row rows-of-employees]
-           [employee-list-item employee-row {:key :id}]))]]))
+           [employee-list-item employee-row {:key :id}]))]
+      ]))
 
 
-(defn department-list [{:keys [departments]}]
+(defn department-list [departments]
   [:div.clearfix.accordian
    [:dom/ul
-    (for [d departments]
-      [department-list-item {:key :id}])]])
+    (for [dep departments]
+      [department-list-item dep])]])
 
+(defn fetch-departments
+  [url deps]
+    (go (let [data (((<! (http/get url)) :body) :departments)]
+          (js/console.log (str "Data: " data))
+          )))
 
-(defn departments-container [app _ opts]
-
-  (reagent/create-class
-    {:display-name "departments-box"
-
-     :will-mount
-     (fn [app _ opts]
-       (go
-        (let [deps (<! (fetch-departments (:url opts)))]
-          (swap! app #(assoc % :departments deps)))))
-
-     :reagent-render
-     (fn [app _ opts]
-       [:div.row
-        [department-list app]])}))
-
+(defn departments-container [app opts]
+   (let [deps (atom {})]
+     (fn []
+       (fetch-departments (:url opts) deps)
+       [:div.row [department-list @deps]])))
 
 (defn employee-not-found []
   [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
@@ -196,7 +176,7 @@
    {
     :display-name "employee"
 
-    :will-mount
+    :component-will-mount
     (fn [app _ opts]
       (let [url-with-id (str (:url opts) (:id app))]
        (go

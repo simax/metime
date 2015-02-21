@@ -56,29 +56,24 @@
 (defroute "*" []
   (swap! app-state #(assoc %1 :view "#not-found")))
 
-
 (defn main-page [app]
 
   ;; Top nav bar
   [:div
    [nav/top-nav-bar @app]
 
- (js/console.log (str "@app: " (:view @app)))
-
   ;; Page contents
  (condp = (:view @app)
 
    "#employees"
    [:div
-    [:span "Employees"]
-    [ec/departments-container app
-     {:opts {:url "http://localhost:3030/api/departments"
-             :poll-interval 2000}}]]
+    [:span [:h1 {:style {:height "500px"}} "Employees"]
+     [ec/departments-container app
+      {:url "http://localhost:3030/api/departments" :poll-interval 2000}]]]
 
    "#employee"
    [:div [ec/employee app
-          {:opts {:url "http://localhost:3030/api/employee/"
-                  :poll-interval 2000}}]]
+          {:url "http://localhost:3030/api/employee/" :poll-interval 2000}]]
 
    "#calendar"
    [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
@@ -101,15 +96,7 @@
 
 
 (defn refresh-navigation [app-state token]
-  ;;(js/console.log token)
   (swap! app-state nav/update-top-nav-bar token))
-  ;;(nav/update-top-nav-bar @app-state token))
-
-;; (defn on-navigate [event]
-;;   (println (str "token: " (.-token event)))
-;;   (println " ")
-;;   ;;(refresh-navigation)
-;;   (secretary/dispatch! (.-token event)))
 
 (defn main []
   ;; History
@@ -118,8 +105,6 @@
             (let [token (.-token he)]
               (if (seq token)
                 (do
-                  ;; Can't use println inside here. Async?
-                  ;;(js/console.log (str "token changed, navigating to : " token))
                   ;;(secretary/dispatch! token)
                   (refresh-navigation app-state token)
                   ))))]
