@@ -36,7 +36,7 @@
     [:div {:class "col-md-3 col-lg-3"}
      [:div {:class "dash-unit"}
       [:div {:class "thumbnail" :style {:margin-top "20px"}}
-       [:a {:href (str "/#employees/" id)}
+       [:a {:href (str "/#employee/" id)}
         [:h1 (employee-name firstname lastname)]
         [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
         ]
@@ -73,30 +73,35 @@
                    :data-parent "accordian"
                    :data-target (str "#" (clojure.string/replace department #"[\s]" "-"))}]]]]
 
-      [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
-       (if (not-empty rows-of-employees)
-         (for [employee-row rows-of-employees]
-           [employee-list-item employee-row {:key :id}]))]
-      ]))
+       [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
+        (if (not-empty rows-of-employees)
+          [:dom/ul
+           (for [employee-row rows-of-employees]
+              (for [employee-item employee-row]
+                ^{:key (:id employee-item)} [employee-list-item employee-item])
+              )])]]))
 
 
 (defn department-list [departments]
   [:div.clearfix.accordian
    [:dom/ul
     (for [dep departments]
-      [department-list-item dep])]])
+      ^{:key (:department dep)} [:li [department-list-item dep]]
+    )]])
 
 (defn fetch-departments
   [url deps]
-    (go (let [data (((<! (http/get url)) :body) :departments)]
-          (js/console.log (str "Data: " data))
-          )))
+    (go
+     ;; The following will "park" until data the http GET returns data
+     (let [data (((<! (http/get url)) :body) :departments)]
+         ;; Changing the contents of the deps atom will cause Reagent to re-render
+         (swap! deps #(assoc % :departments (into [] data))))))
 
 (defn departments-container [app opts]
-   (let [deps (atom {})]
-     (fn []
-       (fetch-departments (:url opts) deps)
-       [:div.row [department-list @deps]])))
+  (let [deps (atom {})
+        _    (fetch-departments (:url opts) deps)]
+    (fn []
+      [department-list (:departments @deps)])))
 
 (defn employee-not-found []
   [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
@@ -172,6 +177,8 @@
 
 
 (defn employee [app _ opts]
+  ;; Change this to load the employee and then
+  ;; return a render function like departments-container
   (reagent/create-class
    {
     :display-name "employee"

@@ -14,5 +14,6 @@
   (let [email-address (:gravatar-email data)
         size (or (:gravatar-size data) 100)]
     [:img.gravatar.img-circle
-     {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")}]))
+     (if (seq email-address)
+       {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")})]))
 

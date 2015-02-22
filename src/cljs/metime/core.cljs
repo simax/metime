@@ -34,7 +34,7 @@
 (defroute "/employees" []
   (swap! app-state #(assoc %1 :view "#employees")))
 
-(defroute "/employees/:id" [id]
+(defroute "/employee/:id" [id]
   (swap! app-state #(assoc %1 :view "#employee" :id id)))
 
 (defroute "/tables" []
@@ -65,15 +65,9 @@
   ;; Page contents
  (condp = (:view @app)
 
-   "#employees"
-   [:div
-    [:span [:h1 {:style {:height "500px"}} "Employees"]
-     [ec/departments-container app
-      {:url "http://localhost:3030/api/departments" :poll-interval 2000}]]]
-
    "#employee"
    [:div [ec/employee app
-          {:url "http://localhost:3030/api/employee/" :poll-interval 2000}]]
+          {:url "http://localhost:3030/api/employee/18"}]]
 
    "#calendar"
    [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
@@ -89,6 +83,11 @@
 
    "#login"
    [:div {:style {:height "500px"}} [:h1 "Login page"]]
+
+   "#employees"
+   [:div
+    [ec/departments-container app
+     {:url "http://localhost:3030/api/departments"}]]
 
    "not-found"
    [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
