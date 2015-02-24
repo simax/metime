@@ -8,8 +8,6 @@
 
 (enable-console-print!)
 
-(def history (History.))
-
 (defn gravatar [data]
   (let [email-address (:gravatar-email data)
         size (or (:gravatar-size data) 100)]

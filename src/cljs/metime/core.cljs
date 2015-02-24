@@ -13,48 +13,51 @@
 
 (enable-console-print!)
 
-(def history (History.))
+(defn set-hash! [loc]
+  ;; Set the hash portion of the url in the address bar.
+  ;; e.g. (set-hash! "/dip") ;; => http://localhost:3000/#/dip
+  (set! (.-hash js/window.location) loc))
 
 (def app-state
-  (atom {:view "#employees"
+  (atom {:view "#/employees"
          :top-nav-bar [
-                       {:path "#employees"     :text "Employees"     :active true}
-                       {:path "#file-manager"  :text "File Manager"}
-                       {:path "#calendar"      :text "Calendar"}
-                       {:path "#tables"        :text "Tables"}
-                       {:path "#login"         :text "Login"}
-                       {:path "#user"          :text "User"}
+                       {:path "#/employees"     :text "Employees"     :active true}
+                       {:path "#/file-manager"  :text "File Manager"}
+                       {:path "#/calendar"      :text "Calendar"}
+                       {:path "#/tables"        :text "Tables"}
+                       {:path "#/login"         :text "Login"}
+                       {:path "#/user"          :text "User"}
                       ]}))
 
 (secretary/set-config! :prefix "#")
 
 (defroute "/" []
-  (.setToken history "employees"))
+  (swap! app-state #(assoc %1 :view "employees")))
 
-(defroute "/employees" []
-  (swap! app-state #(assoc %1 :view "#employees")))
+(defroute "employees" []
+  (swap! app-state #(assoc %1 :view "employees")))
 
-(defroute "/employee/:id" [id]
-  (swap! app-state #(assoc %1 :view "#employee" :id id)))
+(defroute "employee/:id" [id]
+  (swap! app-state #(assoc %1 :view "employee" :id id)))
 
-(defroute "/tables" []
-  (swap! app-state #(assoc %1 :view "#tables")))
+(defroute "tables" []
+  (swap! app-state #(assoc %1 :view "tables")))
 
-(defroute "/calendar" []
+(defroute "calendar" []
   (println "Switched to calendar")
-  (swap! app-state #(assoc %1 :view "#calendar")))
+  (swap! app-state #(assoc %1 :view "calendar")))
 
-(defroute "/file-manager" []
-  (swap! app-state #(assoc %1 :view "#file-manager")))
+(defroute "file-manager" []
+  (swap! app-state #(assoc %1 :view "file-manager")))
 
-(defroute "/user" []
-  (swap! app-state #(assoc %1 :view "#user")))
+(defroute "user" []
+  (swap! app-state #(assoc %1 :view "user")))
 
-(defroute "/login" []
-  (swap! app-state #(assoc %1 :view "#login")))
+(defroute "login" []
+  (swap! app-state #(assoc %1 :view "login")))
 
-(defroute "*" []
-  (swap! app-state #(assoc %1 :view "#not-found")))
+;; (defroute "*" []
+;;   (swap! app-state #(assoc %1 :view "not-found")))
 
 (defn main-page [app]
 
@@ -62,29 +65,31 @@
   [:div
    [nav/top-nav-bar @app]
 
-  ;; Page contents
+ ;; (js/console.log (str "view:-->>> " (:view @app)))
+
+ ;; Page contents
  (condp = (:view @app)
 
-   "#employee"
+   "#/employee"
    [:div [ec/employee app
           {:url "http://localhost:3030/api/employee/18"}]]
 
-   "#calendar"
+   "#/calendar"
    [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
 
-   "#tables"
+   "#/tables"
    [:div {:style {:height "500px"}} [:h1 "Tables page"]]
 
-   "#file-manager"
+   "#/file-manager"
    [:div {:style {:height "500px"}} [:h1 "File manager page"]]
 
-   "#user"
+   "#/user"
    [:div {:style {:height "500px"}} [:h1 "User page"]]
 
-   "#login"
+   "#/login"
    [:div {:style {:height "500px"}} [:h1 "Login page"]]
 
-   "#employees"
+   "#/employees"
    [:div
     [ec/departments-container app
      {:url "http://localhost:3030/api/departments"}]]
@@ -104,11 +109,14 @@
             (let [token (.-token he)]
               (if (seq token)
                 (do
-                  ;;(secretary/dispatch! token)
+                  (secretary/dispatch! token)
                   (refresh-navigation app-state token)
                   ))))]
     (events/listen h EventType/NAVIGATE f)
     (doto h (.setEnabled true)))
+
+  (set-hash! "/employees")
+  (secretary/dispatch! "/employees")
 
   ;; Main app component
   (reagent/render [main-page app-state] (. js/document (getElementById "app-container"))))
