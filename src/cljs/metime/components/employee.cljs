@@ -24,19 +24,17 @@
        (println (str "emp: " (:email emp)))))
     c))
 
-
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
         name-length (count disp-name)]
     (if (> name-length 20) (str (subs disp-name 0 17) "...") disp-name)))
-
 
 (defn employee-list-item [{:keys [lastname firstname email id]}]
   (fn [{:keys [lastname firstname email id]}]
     [:div {:class "col-md-3 col-lg-3"}
      [:div {:class "dash-unit"}
       [:div {:class "thumbnail" :style {:margin-top "20px"}}
-       [:a {:href (str "/#employee/" id)}
+       [:a {:href (str "#/employee/" id)}
         [:h1 (employee-name firstname lastname)]
         [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
         ]
@@ -50,7 +48,6 @@
        ;; For now, just simulate the number of days remaining
        [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
        ]]]))
-
 
 (defn department-list-item [{:keys [department managerid manager-firstname manager-lastname manager-email employees]}]
   (let [department-list-item (filter #(not= (:id %) managerid) employees)
@@ -97,10 +94,13 @@
          ;; Changing the contents of the deps atom will cause Reagent to re-render
          (swap! deps #(assoc % :departments (into [] data))))))
 
-(defn departments-container [app]
+(defn departments-container [app opts]
+  ;; opts {:url "http://localhost:3030/api/departments"}
+  ;; TODO: Should improve this. Just return data from fetch-departments
+  ;; rather than puttingit into an atom
 
-  (let [opts {:url "http://localhost:3030/api/departments"}
-        deps (atom {})
+  (js/console.log (str "(:url opts): " (:url opts)))
+  (let [deps (atom {})
         _    (fetch-departments (:url opts) deps)]
     (fn []
       [department-list (:departments @deps)])))
@@ -178,17 +178,18 @@
       [:button#save.btn.btn-primary {:type "button" :on-click #(handle-save % employee)} "Save"]]]]])
 
 
-(defn employee [app _ opts]
-  ;; Change this to load the employee and then
+(defn employee [app opts]
+  ;; TODO: Change this to load the employee and then
   ;; return a render function like departments-container
   (reagent/create-class
    {
     :display-name "employee"
 
     :component-will-mount
-    (fn [app _ opts]
-      (let [url-with-id (str (:url opts) (:id app))]
-       (go
+    (fn [app opts]
+      (let [url-with-id (str (:url opts) (:id opts))]
+        (js/console.log "(str (:url opts) (:id opts)): " (str (:url opts) (:id opts)))
+        (go
         (println (str "url-with-id: " url-with-id))
         (let [emp (<! (fetch-employee url-with-id))]
           (if (= emp "not found")
@@ -196,7 +197,7 @@
             (swap! app #(assoc % :employee emp)))))))
 
     :reagent-render
-    (fn [app _ opts]
+    (fn [app opts]
       (if (contains? app :employee)
         (employee-container-form (:employee app))
         (employee-not-found)))}))

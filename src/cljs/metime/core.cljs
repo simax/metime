@@ -40,11 +40,17 @@
 (defn employees-component []
   [:div
    [ec/departments-container app
-    {:url "http://localhost:3030/api/departments"}]])
+         {:url "http://localhost:3030/api/departments"}]])
 
-(defn employee-component []
-     [:div [ec/employee app
-            {:url "http://localhost:3030/api/employee/18"}]])
+(defn employee-component [id]
+  (js/console.log (str "employee component id: " id))
+  [:div [ec/employee app
+         {:url "http://localhost:3030/api/employee/"
+          :id  id }]])
+
+(defn not-found []
+  [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
+
 
 ;; Note: Components need to be defined before the app-state atom
 ;;       because they are refered to and probably evaluated
@@ -70,7 +76,11 @@
   (swap! app-state #(assoc %1 :view employees-component)))
 
 (defroute employee-route "/employee/:id" [id]
-  (swap! app-state #(assoc %1 :view employee-component :id id)))
+  (js/console.log (str "employee route id: " id))
+  ;; Need to deal with this differently
+  ;; Possibly have another map for params?
+  ;; The id isn't being passed thru properly here
+  (swap! app-state #(assoc %1 :view employee-component id)))
 
 (defroute tables-route "/tables" []
   (swap! app-state #(assoc %1 :view tables-component)))
@@ -90,9 +100,6 @@
 (defroute "*" []
   (swap! app-state #(assoc %1 :view not-found)))
 
-(defn not-found []
-  [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
-
 (defn main-page [app]
 
     ;; Top nav bar
@@ -100,7 +107,6 @@
      [nav/top-nav-bar @app]
      ;; Component
      [(@app :view)]])
-
 
 
 (defn refresh-navigation [app-state token]
