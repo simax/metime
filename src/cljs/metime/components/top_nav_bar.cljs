@@ -22,7 +22,9 @@
     (update-in updated-view [:top-nav-bar] #(map (partial toggle-active-status prefixed-token) %))))
 
 (defn nav-menu-item [item]
-  [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]])
+  (let [route (:path item)]
+    ;;(js/console.log (:path item))
+    [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]]))
 
 (defn top-nav-bar [{:keys [top-nav-bar]}]
   [:div.navbar-nav.navbar-inverse.navbar-fixed-top
