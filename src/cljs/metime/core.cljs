@@ -22,8 +22,37 @@
   "Get the hash portion of the url in the address bar."
   (subs (.-hash js/window.location) 1))
 
+(defn calendar-component []
+  [:div [:h1 {:style {:height "500px"}} "Calendar page"]])
+
+(defn tables-component []
+  [:div {:style {:height "500px"}} [:h1 "Tables page"]])
+
+(defn file-manager-component []
+  [:div {:style {:height "500px"}} [:h1 "File manager page"]])
+
+(defn user-component []
+  [:div {:style {:height "500px"}} [:h1 "User page"]])
+
+(defn login-component []
+  [:div {:style {:height "500px"}} [:h1 "Login page"]])
+
+(defn employees-component []
+  [:div
+   [ec/departments-container app
+    {:url "http://localhost:3030/api/departments"}]])
+
+(defn employee-component []
+     [:div [ec/employee app
+            {:url "http://localhost:3030/api/employee/18"}]])
+
+;; Note: Components need to be defined before the app-state atom
+;;       because they are refered to and probably evaluated
+;;       when the atom is defined.
+
 (def app-state
-  (atom {:top-nav-bar [
+  (atom {:view employees-component
+         :top-nav-bar [
                        {:path "#/employees"     :text "Employees"     :active true}
                        {:path "#/file-manager"  :text "File Manager"}
                        {:path "#/calendar"      :text "Calendar"}
@@ -38,93 +67,60 @@
   (swap! app-state #(assoc %1 :view "employees")))
 
 (defroute employees-route "/employees" []
-  (js/console.log "2. Here ")
-  ;;(swap! app-state #(assoc %1 :view "employees"))
-  )
+  (swap! app-state #(assoc %1 :view employees-component)))
 
 (defroute employee-route "/employee/:id" [id]
-  (swap! app-state #(assoc %1 :view "employee" :id id)))
+  (swap! app-state #(assoc %1 :view employee-component :id id)))
 
 (defroute tables-route "/tables" []
-  (swap! app-state #(assoc %1 :view "tables")))
+  (swap! app-state #(assoc %1 :view tables-component)))
 
 (defroute calendar-route "/calendar" []
-  (swap! app-state #(assoc %1 :view "calendar")))
+  (swap! app-state #(assoc %1 :view calendar-component)))
 
 (defroute file-manager-route "/file-manager" []
-  (swap! app-state #(assoc %1 :view "file-manager")))
+  (swap! app-state #(assoc %1 :view file-manager-component)))
 
 (defroute user-route "/user" []
-  (swap! app-state #(assoc %1 :view "user")))
+  (swap! app-state #(assoc %1 :view user-component)))
 
 (defroute login-route "/login" []
-  (swap! app-state #(assoc %1 :view "login")))
+  (swap! app-state #(assoc %1 :view login-component)))
 
 (defroute "*" []
-  (swap! app-state #(assoc %1 :view "not-found")))
+  (swap! app-state #(assoc %1 :view not-found)))
+
+(defn not-found []
+  [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
 (defn main-page [app]
 
-  ;;(when (= "not-found" (:view @app)) (secretary/dispatch! (employees-route)))
+    ;; Top nav bar
+    [:div
+     [nav/top-nav-bar @app]
+     ;; Component
+     [(@app :view)]])
 
-  ;;(js/console.log (str "view:-->>> " (:view @app)))
-
-  ;; Top nav bar
-  [:div
-   [nav/top-nav-bar @app]
-
-   ;; Page contents
-   (condp = (get-current-location);;(:view @app)
-
-     "/employee"
-     [:div [ec/employee app
-            {:url "http://localhost:3030/api/employee/18"}]]
-
-     "/calendar"
-     [:div [:h1 {:style {:height "500px"}} "Calendar page"]]
-
-     "/tables"
-     [:div {:style {:height "500px"}} [:h1 "Tables page"]]
-
-     "/file-manager"
-     [:div {:style {:height "500px"}} [:h1 "File manager page"]]
-
-     "/user"
-     [:div {:style {:height "500px"}} [:h1 "User page"]]
-
-     "/login"
-     [:div {:style {:height "500px"}} [:h1 "Login page"]]
-
-     "/employees"
-     [:div
-      [ec/departments-container app
-       {:url "http://localhost:3030/api/departments"}]]
-
-     ;; not-found
-     [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
-   ])
 
 
 (defn refresh-navigation [app-state token]
-  (swap! app-state nav/update-top-nav-bar token))
+  (set-hash! token)
+  (swap! app-state nav/update-top-nav-bar token)
+  (secretary/dispatch! token))
 
 (defn main []
-  ;; History
+
+  ;; Main app component
+  (reagent/render [main-page app-state] (. js/document (getElementById "app-container")))
+
+  ;; Routing history
   (let [h (History.)
         f (fn [he] ;; goog.History.Event
             (let [token (.-token he)]
               (if (seq token)
-                (do
-                  (js/console.log "1. Here ")
-                  (secretary/dispatch! token)
-                  (js/console.log "99. Here Now !!!")
-                  (refresh-navigation app-state token)
-                  ))))]
+                (refresh-navigation app-state token)
+                (refresh-navigation app-state "/employees"))
+              ))]
 
     (events/listen h EventType/NAVIGATE f)
-    (doto h (.setEnabled true))
-
-  ;; Main app component
-    (js/console.log "Initially Here !!!")
-    (reagent/render [main-page app-state] (. js/document (getElementById "app-container")))))
-
+    (doto h (.setEnabled true))))

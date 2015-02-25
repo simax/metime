@@ -97,8 +97,10 @@
          ;; Changing the contents of the deps atom will cause Reagent to re-render
          (swap! deps #(assoc % :departments (into [] data))))))
 
-(defn departments-container [app opts]
-  (let [deps (atom {})
+(defn departments-container [app]
+
+  (let [opts {:url "http://localhost:3030/api/departments"}
+        deps (atom {})
         _    (fetch-departments (:url opts) deps)]
     (fn []
       [department-list (:departments @deps)])))
