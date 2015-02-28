@@ -39,14 +39,12 @@
 
 (defn employees-component []
   [:div
-   [ec/departments-container app
-         {:url "http://localhost:3030/api/departments"}]])
+   [ec/departments-container {:url "http://localhost:3030/api/departments"}]])
 
-(defn employee-component [id]
-  (js/console.log (str "employee component id: " id))
-  [:div [ec/employee app
-         {:url "http://localhost:3030/api/employee/"
-          :id  id }]])
+(defn employee-component [params]
+  [:div
+   [ec/employee app-state
+    {:url "http://localhost:3030/api/employee/" :id (:id params)}]])
 
 (defn not-found []
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
@@ -76,11 +74,7 @@
   (swap! app-state #(assoc %1 :view employees-component)))
 
 (defroute employee-route "/employee/:id" [id]
-  (js/console.log (str "employee route id: " id))
-  ;; Need to deal with this differently
-  ;; Possibly have another map for params?
-  ;; The id isn't being passed thru properly here
-  (swap! app-state #(assoc %1 :view employee-component)))
+  (swap! app-state #(assoc %1 :view employee-component :params {:id id})))
 
 (defroute tables-route "/tables" []
   (swap! app-state #(assoc %1 :view tables-component)))
@@ -106,7 +100,7 @@
     [:div
      [nav/top-nav-bar @app]
      ;; Component
-     [(@app :view)]])
+     [(:view @app) (:params @app)]])
 
 
 (defn refresh-navigation [app-state token]

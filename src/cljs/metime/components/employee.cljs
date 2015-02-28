@@ -14,15 +14,6 @@
 
 (enable-console-print!)
 
-(defn fetch-employee [url-with-id]
-  (let [c (chan)]
-    (go
-     (let [emp ((<! (http/get url-with-id)) :body)]
-       (if-not (nil? emp)
-         (>! c emp)
-         (>! c "not found"))
-       (println (str "emp: " (:email emp)))))
-    c))
 
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
@@ -91,8 +82,7 @@
    ;; The following will "park" until data the http GET returns data
    (((<! (http/get url)) :body) :departments)))
 
-(defn departments-container [app opts]
-  ;; opts {:url "http://localhost:3030/api/departments"}
+(defn departments-container [opts]
   (let [local-state (atom {})]
     (go
      (let [deps (<! (fetch-departments (:url opts)))]
@@ -172,28 +162,24 @@
      [:div.col-md-offset-2.col-md-4
       [:button#save.btn.btn-primary {:type "button" :on-click #(handle-save % employee)} "Save"]]]]])
 
+(defn fetch-employee [url-with-id]
+  (let [c (chan)]
+    (go
+     (let [emp ((<! (http/get url-with-id)) :body)]
+       (if-not (nil? emp)
+         (>! c emp)
+         (>! c "not found"))
+       (println (str "emp: " (:email emp)))))
+    c))
 
 (defn employee [app opts]
-  ;; TODO: Change this to load the employee and then
-  ;; return a render function like departments-container
-  (reagent/create-class
-   {
-    :display-name "employee"
-
-    :component-will-mount
+  (let [url-with-id (str (:url opts) (:id opts))]
+    (go
+     (let [emp (<! (fetch-employee url-with-id))]
+       (if (= emp "not found")
+         (swap! app #(dissoc % :employee))
+         (swap! app #(assoc % :employee emp)))))
     (fn [app opts]
-      (let [url-with-id (str (:url opts) (:id opts))]
-        (js/console.log "(:url opts) (:id opts): " (str (:url opts) (:id opts)))
-        (go
-        (println (str "url-with-id: " url-with-id))
-        (let [emp (<! (fetch-employee url-with-id))]
-          (if (= emp "not found")
-            (swap! app #(dissoc % :employee))
-            (swap! app #(assoc % :employee emp)))))))
-
-    :reagent-render
-    (fn [app opts]
-      (if (contains? app :employee)
-        (employee-container-form (:employee app))
-        (employee-not-found)))}))
-
+      (if (contains? @app :employee)
+        (employee-container-form (:employee @app))
+        (employee-not-found)))))
