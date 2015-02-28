@@ -80,7 +80,7 @@
   ;; Need to deal with this differently
   ;; Possibly have another map for params?
   ;; The id isn't being passed thru properly here
-  (swap! app-state #(assoc %1 :view employee-component id)))
+  (swap! app-state #(assoc %1 :view employee-component)))
 
 (defroute tables-route "/tables" []
   (swap! app-state #(assoc %1 :view tables-component)))

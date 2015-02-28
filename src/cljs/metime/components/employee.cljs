@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [goog.events :as events]
             [goog.history.EventType :as EventType]
-            [cljs.core.async :refer [put! <! >! chan timeout]]
+            [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [cljs-http.client :as http]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
@@ -78,7 +78,6 @@
                 ^{:key (:id employee-item)} [employee-list-item employee-item])
               )])]]))
 
-
 (defn department-list [departments]
   [:div.clearfix.accordian
    [:dom/ul
@@ -87,23 +86,19 @@
     )]])
 
 (defn fetch-departments
-  [url deps]
-    (go
-     ;; The following will "park" until data the http GET returns data
-     (let [data (((<! (http/get url)) :body) :departments)]
-         ;; Changing the contents of the deps atom will cause Reagent to re-render
-         (swap! deps #(assoc % :departments (into [] data))))))
+  [url]
+  (go
+   ;; The following will "park" until data the http GET returns data
+   (((<! (http/get url)) :body) :departments)))
 
 (defn departments-container [app opts]
   ;; opts {:url "http://localhost:3030/api/departments"}
-  ;; TODO: Should improve this. Just return data from fetch-departments
-  ;; rather than puttingit into an atom
-
-  (js/console.log (str "(:url opts): " (:url opts)))
-  (let [deps (atom {})
-        _    (fetch-departments (:url opts) deps)]
-    (fn []
-      [department-list (:departments @deps)])))
+  (let [local-state (atom {})]
+    (go
+     (let [deps (<! (fetch-departments (:url opts)))]
+       (swap! local-state #(assoc % :departments deps))))
+     (fn []
+       [department-list (:departments @local-state)])))
 
 (defn employee-not-found []
   [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
@@ -188,7 +183,7 @@
     :component-will-mount
     (fn [app opts]
       (let [url-with-id (str (:url opts) (:id opts))]
-        (js/console.log "(str (:url opts) (:id opts)): " (str (:url opts) (:id opts)))
+        (js/console.log "(:url opts) (:id opts): " (str (:url opts) (:id opts)))
         (go
         (println (str "url-with-id: " url-with-id))
         (let [emp (<! (fetch-employee url-with-id))]
