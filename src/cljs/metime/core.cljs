@@ -43,18 +43,18 @@
 
 (defn employee-component [params]
   [:div
-   [ec/employee app-state
+   [ec/employee app-db
     {:url "http://localhost:3030/api/employee/" :id (:id params)}]])
 
 (defn not-found []
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
 
-;; Note: Components need to be defined before the app-state atom
+;; Note: Components need to be defined before the app-db atom
 ;;       because they are refered to and probably evaluated
 ;;       when the atom is defined.
 
-(def app-state
+(def app-db
   (atom {:view employees-component
          :top-nav-bar [
                        {:path "#/employees"     :text "Employees"     :active true}
@@ -67,32 +67,32 @@
 
 (secretary/set-config! :prefix "#")
 
-(defroute root-route "/" []
-  (swap! app-state #(assoc %1 :view "employees")))
+  (defroute root-route "/" []
+  (swap! app-db #(assoc %1 :view "employees")))
 
-(defroute employees-route "/employees" []
-  (swap! app-state #(assoc %1 :view employees-component)))
+  (defroute employees-route "/employees" []
+    (swap! app-db #(assoc %1 :view employees-component)))
 
-(defroute employee-route "/employee/:id" [id]
-  (swap! app-state #(assoc %1 :view employee-component :params {:id id})))
+  (defroute employee-route "/employee/:id" [id]
+    (swap! app-db #(assoc %1 :view employee-component :params {:id id})))
 
-(defroute tables-route "/tables" []
-  (swap! app-state #(assoc %1 :view tables-component)))
+  (defroute tables-route "/tables" []
+    (swap! app-db #(assoc %1 :view tables-component)))
 
-(defroute calendar-route "/calendar" []
-  (swap! app-state #(assoc %1 :view calendar-component)))
+  (defroute calendar-route "/calendar" []
+    (swap! app-db #(assoc %1 :view calendar-component)))
 
-(defroute file-manager-route "/file-manager" []
-  (swap! app-state #(assoc %1 :view file-manager-component)))
+  (defroute file-manager-route "/file-manager" []
+    (swap! app-db #(assoc %1 :view file-manager-component)))
 
-(defroute user-route "/user" []
-  (swap! app-state #(assoc %1 :view user-component)))
+  (defroute user-route "/user" []
+    (swap! app-db #(assoc %1 :view user-component)))
 
-(defroute login-route "/login" []
-  (swap! app-state #(assoc %1 :view login-component)))
+  (defroute login-route "/login" []
+    (swap! app-db #(assoc %1 :view login-component)))
 
-(defroute "*" []
-  (swap! app-state #(assoc %1 :view not-found)))
+  (defroute "*" []
+    (swap! app-db #(assoc %1 :view not-found)))
 
 (defn main-page [app]
 
@@ -103,23 +103,23 @@
      [(:view @app) (:params @app)]])
 
 
-(defn refresh-navigation [app-state token]
+(defn refresh-navigation [app-db token]
   (set-hash! token)
-  (swap! app-state nav/update-top-nav-bar token)
+  (swap! app-db nav/update-top-nav-bar token)
   (secretary/dispatch! token))
 
 (defn main []
 
   ;; Main app component
-  (reagent/render [main-page app-state] (. js/document (getElementById "app-container")))
+  (reagent/render [main-page app-db] (. js/document (getElementById "app-container")))
 
   ;; Routing history
   (let [h (History.)
         f (fn [he] ;; goog.History.Event
             (let [token (.-token he)]
               (if (seq token)
-                (refresh-navigation app-state token)
-                (refresh-navigation app-state "/employees"))
+                (refresh-navigation app-db token)
+                (refresh-navigation app-db "/employees"))
               ))]
 
     (events/listen h EventType/NAVIGATE f)

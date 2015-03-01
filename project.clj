@@ -14,14 +14,13 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [cljs-hash "0.0.2"]
                  [metis "0.3.3"]
-                 [ring-cors "0.1.6"]
                  [clj-time "0.8.0"]
                  [digest "1.4.4"]
 
                  ;; Server
                  [ring "1.3.1"]
+                 [ring-cors "0.1.6"]
                  [compojure "1.2.0"]
-                 [cljs-http "0.1.20"]
                  [yesql "0.5.0-beta2"]
                  [org.xerial/sqlite-jdbc "3.7.2"]
                  [liberator "0.11.0"]
@@ -29,10 +28,11 @@
                  [prone "0.6.0"]
                  [org.clojure/data.json "0.2.5"]
 
-                 ;; UI
-                 [om "0.8.0-alpha2"]
+                 ;; UI/Client
                  [reagent "0.5.0-alpha3"]
+                 [re-frame "0.1.7"]
                  [secretary "1.2.1"]
+                 [cljs-http "0.1.27"]
 
                  ;; Dev
                  [enlive "1.1.5"]

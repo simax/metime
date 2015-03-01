@@ -79,8 +79,8 @@
 (defn fetch-departments
   [url]
   (go
-   ;; The following will "park" until data the http GET returns data
-   (((<! (http/get url)) :body) :departments)))
+   ;; Using <! in a go block will "park" until the http GET returns data
+   (get-in (<! (http/get url)) [:body :departments])))
 
 (defn departments-container [opts]
   (let [local-state (atom {})]

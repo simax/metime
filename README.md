@@ -54,7 +54,7 @@ In the REPL, type
 
 ```
 (ns metime.core)
-(swap! app-state assoc :text "Interactivity FTW")
+(swap! app-db assoc :text "Interactivity FTW")
 ```
 
 Notice again how the browser updates.
