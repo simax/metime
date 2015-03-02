@@ -50,6 +50,35 @@
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
 
+(secretary/set-config! :prefix "#")
+
+(defroute root-route "/" []
+  (swap! app-db #(assoc %1 :view "employees")))
+
+(defroute employees-route "/employees" []
+  (swap! app-db #(assoc %1 :view employees-component)))
+
+(defroute employee-route "/employee/:id" [id]
+  (swap! app-db #(assoc %1 :view employee-component :params {:id id})))
+
+(defroute tables-route "/tables" []
+  (swap! app-db #(assoc %1 :view tables-component)))
+
+(defroute calendar-route "/calendar" []
+  (swap! app-db #(assoc %1 :view calendar-component)))
+
+(defroute file-manager-route "/file-manager" []
+  (swap! app-db #(assoc %1 :view file-manager-component)))
+
+(defroute user-route "/user" []
+  (swap! app-db #(assoc %1 :view user-component)))
+
+(defroute login-route "/login" []
+  (swap! app-db #(assoc %1 :view login-component)))
+
+(defroute "*" []
+  (swap! app-db #(assoc %1 :view not-found)))
+
 ;; Note: Components need to be defined before the app-db atom
 ;;       because they are refered to and probably evaluated
 ;;       when the atom is defined.
@@ -57,42 +86,13 @@
 (def app-db
   (atom {:view employees-component
          :top-nav-bar [
-                       {:path "#/employees"     :text "Employees"     :active true}
-                       {:path "#/file-manager"  :text "File Manager"}
-                       {:path "#/calendar"      :text "Calendar"}
-                       {:path "#/tables"        :text "Tables"}
-                       {:path "#/login"         :text "Login"}
-                       {:path "#/user"          :text "User"}
+                       {:path (employees-route)     :text "Employees"     :active true}
+                       {:path (file-manager-route)  :text "File Manager"}
+                       {:path (calendar-route)      :text "Calendar"}
+                       {:path (tables-route)        :text "Tables"}
+                       {:path (login-route)         :text "Login"}
+                       {:path (user-route)          :text "User"}
                        ]}))
-
-(secretary/set-config! :prefix "#")
-
-  (defroute root-route "/" []
-  (swap! app-db #(assoc %1 :view "employees")))
-
-  (defroute employees-route "/employees" []
-    (swap! app-db #(assoc %1 :view employees-component)))
-
-  (defroute employee-route "/employee/:id" [id]
-    (swap! app-db #(assoc %1 :view employee-component :params {:id id})))
-
-  (defroute tables-route "/tables" []
-    (swap! app-db #(assoc %1 :view tables-component)))
-
-  (defroute calendar-route "/calendar" []
-    (swap! app-db #(assoc %1 :view calendar-component)))
-
-  (defroute file-manager-route "/file-manager" []
-    (swap! app-db #(assoc %1 :view file-manager-component)))
-
-  (defroute user-route "/user" []
-    (swap! app-db #(assoc %1 :view user-component)))
-
-  (defroute login-route "/login" []
-    (swap! app-db #(assoc %1 :view login-component)))
-
-  (defroute "*" []
-    (swap! app-db #(assoc %1 :view not-found)))
 
 (defn main-page [app]
 
@@ -119,7 +119,7 @@
             (let [token (.-token he)]
               (if (seq token)
                 (refresh-navigation app-db token)
-                (refresh-navigation app-db "/employees"))
+                (refresh-navigation app-db (employees-route)))
               ))]
 
     (events/listen h EventType/NAVIGATE f)
