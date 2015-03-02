@@ -11,6 +11,7 @@
             [reagent.core :as reagent :refer [atom]])
   (:import goog.History))
 
+(declare app-db)
 (enable-console-print!)
 
 (defn set-hash! [loc]
@@ -59,6 +60,7 @@
   (swap! app-db #(assoc %1 :view employees-component)))
 
 (defroute employee-route "/employee/:id" [id]
+  (js/console.log "Reached employee-route")
   (swap! app-db #(assoc %1 :view employee-component :params {:id id})))
 
 (defroute tables-route "/tables" []
@@ -105,7 +107,8 @@
 
 (defn refresh-navigation [app-db token]
   (set-hash! token)
-  (swap! app-db nav/update-top-nav-bar token)
+  (js/console.log (str "token: " token))
+  ;;(reset! app-db (nav/update-top-nav-bar @app-db token))
   (secretary/dispatch! token))
 
 (defn main []

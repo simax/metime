@@ -180,6 +180,9 @@
          (swap! app #(dissoc % :employee))
          (swap! app #(assoc % :employee emp)))))
     (fn [app opts]
+      ;; Need to add flag to say we've finished searching for the employee
+      ;; and we couldn't find it. Meanwhile we could show a progress indicator
+      ;; instead of "Sorry, we couldn't find....
       (if (contains? @app :employee)
         (employee-container-form (:employee @app))
         (employee-not-found)))))
