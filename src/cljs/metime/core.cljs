@@ -1,5 +1,6 @@
 (ns metime.core
-  (:require-macros [cljs.core.async.macros :refer [go alt!]])
+  (:require-macros [cljs.core.async.macros :refer [go alt!]]
+                   [reagent.ratom :refer [reaction]])
   (:require [goog.events :as events]
             [goog.history.EventType :as EventType]
             [cljs-http.client :as http]
@@ -8,9 +9,15 @@
             [metime.components.top-nav-bar :as nav]
             [secretary.core :as secretary :refer-macros [defroute]]
             [metime.components.employee :as ec]
-            [reagent.core :as reagent :refer [atom]])
+            [reagent.core :as reagent :refer [atom]]
+            [re-frame.core :refer [register-handler
+                                   path
+                                   register-sub
+                                   dispatch
+                                   subscribe]])
   (:import goog.History))
 
+(declare app-db)
 (enable-console-print!)
 
 (defn set-hash! [loc]
@@ -38,89 +45,114 @@
   [:div {:style {:height "500px"}} [:h1 "Login page"]])
 
 (defn employees-component []
-  [:div
+  [:div ;; Put the url inside the component subscribe function
    [ec/departments-container {:url "http://localhost:3030/api/departments"}]])
 
-(defn employee-component [params]
-  [:div
-   [ec/employee app-state
-    {:url "http://localhost:3030/api/employee/" :id (:id params)}]])
+(defn employee-component []
+    [:div
+     [ec/employee app-db {:url (:url @app-db)}]])
 
 (defn not-found []
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
 
-;; Note: Components need to be defined before the app-state atom
-;;       because they are refered to and probably evaluated
-;;       when the atom is defined.
-
-(def app-state
-  (atom {:view employees-component
-         :top-nav-bar [
-                       {:path "#/employees"     :text "Employees"     :active true}
-                       {:path "#/file-manager"  :text "File Manager"}
-                       {:path "#/calendar"      :text "Calendar"}
-                       {:path "#/tables"        :text "Tables"}
-                       {:path "#/login"         :text "Login"}
-                       {:path "#/user"          :text "User"}
-                       ]}))
-
 (secretary/set-config! :prefix "#")
 
 (defroute root-route "/" []
-  (swap! app-state #(assoc %1 :view "employees")))
+  (dispatch [:switch-route employees-component]))
 
 (defroute employees-route "/employees" []
-  (swap! app-state #(assoc %1 :view employees-component)))
+  (dispatch [:switch-route employees-component]))
 
 (defroute employee-route "/employee/:id" [id]
-  (swap! app-state #(assoc %1 :view employee-component :params {:id id})))
+  (let [url (str "http://localhost:3030/api/employee/" id)]
+    (js/console.log (str "Reached employee-route with id: " id))
+    (go
+     (let [emp (<! (ec/fetch-employee url))]
+       (if (= emp "not found")
+         (swap! app-db #(dissoc % :employee))
+         (swap! app-db #(assoc % :view employee-component :employee emp)))))))
 
 (defroute tables-route "/tables" []
-  (swap! app-state #(assoc %1 :view tables-component)))
+  (dispatch [:switch-route tables-component]))
 
 (defroute calendar-route "/calendar" []
-  (swap! app-state #(assoc %1 :view calendar-component)))
+  (js/console.log "Calendar route!!!")
+  (dispatch [:switch-route calendar-component]))
 
 (defroute file-manager-route "/file-manager" []
-  (swap! app-state #(assoc %1 :view file-manager-component)))
+  (dispatch [:switch-route file-manager-component]))
 
 (defroute user-route "/user" []
-  (swap! app-state #(assoc %1 :view user-component)))
+  (dispatch [:switch-route user-component]))
 
 (defroute login-route "/login" []
-  (swap! app-state #(assoc %1 :view login-component)))
+  (dispatch [:switch-route login-component]))
 
 (defroute "*" []
-  (swap! app-state #(assoc %1 :view not-found)))
+  (dispatch [:switch-route not-found]))
 
-(defn main-page [app]
+(register-handler
+ :switch-route
+ (fn [db [_ view-component]]
+   ;; call nav/update-top-nav-bar
+   (assoc db :view view-component)))
 
-    ;; Top nav bar
-    [:div
-     [nav/top-nav-bar @app]
-     ;; Component
-     [(:view @app) (:params @app)]])
+(register-handler
+ :initialize-db
+ (fn
+   [__]
+   {:view employees-component
+    :top-nav-bar [
+                  {:path (employees-route)     :text "Employees"     :active true}
+                  {:path (file-manager-route)  :text "File Manager"}
+                  {:path (calendar-route)      :text "Calendar"}
+                  {:path (tables-route)        :text "Tables"}
+                  {:path (login-route)         :text "Login"}
+                  {:path (user-route)          :text "User"}
+                  ]}))
+
+(register-sub
+ :db
+ (fn [db _]
+   (reaction @db)))
+
+(register-sub       ;; we can check if there is data
+  :initialised?     ;; usage (subscribe [:initialised?])
+  (fn  [db _]
+    (reaction (not (empty? @db)))))   ;; do we have data
 
 
-(defn refresh-navigation [app-state token]
-  (set-hash! token)
-  (swap! app-state nav/update-top-nav-bar token)
-  (secretary/dispatch! token))
+(defn main-panel []
+  (let [db (subscribe [:db])]
+    (fn []
+      ;; Top nav bar
+      [:div
+       [nav/top-nav-bar @db]
+       ;; Component
+       [(:view @db) (:params @db)]
+      ])))
+
+ (defn top-panel []
+   (let [ready?  (subscribe [:initialised?])]
+    (fn []
+      (if-not @ready?               ;; do we have good data?
+        [:h1 {:style {:text-align "center" :color "red"}} "Initialising ..."]   ;; tell them we are working on it
+        [main-panel]))))            ;; all good, render this component
 
 (defn main []
-
+  (dispatch [:initialize-db])
   ;; Main app component
-  (reagent/render [main-page app-state] (. js/document (getElementById "app-container")))
+  (reagent/render [top-panel] (js/document.getElementById "app-container"))
 
   ;; Routing history
   (let [h (History.)
         f (fn [he] ;; goog.History.Event
             (let [token (.-token he)]
               (if (seq token)
-                (refresh-navigation app-state token)
-                (refresh-navigation app-state "/employees"))
-              ))]
+                (secretary/dispatch! token)
+                (secretary/dispatch! (employees-component))
+              )))]
 
     (events/listen h EventType/NAVIGATE f)
     (doto h (.setEnabled true))))

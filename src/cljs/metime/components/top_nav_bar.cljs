@@ -16,9 +16,9 @@
     (assoc item :active true)
     (assoc item :active false)))
 
-(defn update-top-nav-bar [app-state token]
+(defn update-top-nav-bar [db token]
   (let [prefixed-token (str "#" token)
-        updated-view (assoc app-state :view prefixed-token)]
+        updated-view (assoc db :view prefixed-token)]
     (update-in updated-view [:top-nav-bar] #(map (partial toggle-active-status prefixed-token) %))))
 
 (defn nav-menu-item [item]

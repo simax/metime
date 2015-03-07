@@ -32,6 +32,7 @@
                  ;; UI
                  [om "0.8.0-alpha2"]
                  [reagent "0.5.0-alpha3"]
+                 [re-frame "0.2.0"]
                  [secretary "1.2.1"]
 
                  ;; Dev
