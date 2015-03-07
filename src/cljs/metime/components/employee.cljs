@@ -169,20 +169,13 @@
        (if-not (nil? emp)
          (>! c emp)
          (>! c "not found"))
-       (println (str "emp: " (:email emp)))))
+       (js/console.log (str "emp: " (:email emp)))))
     c))
 
-(defn employee [app opts]
-  (let [url-with-id (str (:url opts) (:id opts))]
-    (go
-     (let [emp (<! (fetch-employee url-with-id))]
-       (if (= emp "not found")
-         (swap! app #(dissoc % :employee))
-         (swap! app #(assoc % :employee emp)))))
-    (fn [app opts]
-      ;; Need to add flag to say we've finished searching for the employee
-      ;; and we couldn't find it. Meanwhile we could show a progress indicator
-      ;; instead of "Sorry, we couldn't find....
-      (if (contains? @app :employee)
-        (employee-container-form (:employee @app))
-        (employee-not-found)))))
+(defn employee []
+  ;; Need to add flag to say we've finished searching for the employee
+  ;; and we couldn't find it. Meanwhile we could show a progress indicator
+  ;; instead of "Sorry, we couldn't find....
+  (if (contains? @app-db :employee)
+    (employee-container-form (:employee @app-db))
+    (employee-not-found)))

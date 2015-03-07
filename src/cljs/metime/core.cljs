@@ -1,129 +1,105 @@
 (ns metime.core
-  (:require-macros [cljs.core.async.macros :refer [go alt!]])
-  (:require [goog.events :as events]
-            [goog.history.EventType :as EventType]
-            [cljs-http.client :as http]
-            [cljs-hash.md5 :as hashgen]
-            [cljs-hash.goog :as gh]
-            [metime.components.top-nav-bar :as nav]
-            [secretary.core :as secretary :refer-macros [defroute]]
-            [metime.components.employee :as ec]
-            [reagent.core :as reagent :refer [atom]])
-  (:import goog.History))
+  (:require-macros [reagent.ratom :refer [reaction]])
+  (:require [reagent.core :as reagent :refer [atom]]
+            [re-frame.core :refer [register-handler
+                                   path
+                                   register-sub
+                                   dispatch
+                                   subscribe]]))
 
-(declare app-db)
-(enable-console-print!)
 
-(defn set-hash! [loc]
-  "Set the hash portion of the url in the address bar.
-  e.g. (set-hash! '/dip') => http://localhost:3000/#/dip"
-  (set! (.-hash js/window.location) loc))
+(defonce time-updater (js/setInterval
+                        #(dispatch [:timer (js/Date.)]) 1000))
 
-(defn get-current-location []
-  "Get the hash portion of the url in the address bar."
-  (subs (.-hash js/window.location) 1))
+;;; this is the initial state
+(defonce initial-state
+  {:timer (js/Date.)
+   :time-color "#f34"})
 
-(defn calendar-component []
-  [:div [:h1 {:style {:height "500px"}} "Calendar page"]])
+;; Handlers
+;-------------------------------------------------------------
 
-(defn tables-component []
-  [:div {:style {:height "500px"}} [:h1 "Tables page"]])
+;; This handler sets the initial state
+(register-handler
+  ;; the handler is passed a map (not an atom) and must return the new state
+  ;; of the db
+  :initialize
+  (fn
+    [db _]
+    (merge db initial-state)))
 
-(defn file-manager-component []
-  [:div {:style {:height "500px"}} [:h1 "File manager page"]])
+;; This handler changes the color of the displayed time
+(register-handler
+  ;;; register-handler can take 3 arguments to allow you to insert middleware
+  ;;; see https://github.com/Day8/re-frame/wiki/Handler-Middleware
+  :time-color
+  (path [:time-color])
+  (fn
+    ;; the path handler allows you to get directly to items in the database
+    ;; return the value you want assoc'd in
+    [time-color [_ value]]
+    value))
 
-(defn user-component []
-  [:div {:style {:height "500px"}} [:h1 "User page"]])
+;; This handler changes the value of the time
+(register-handler
+  :timer
+  (fn
+    ;; the first item in the second argument is :timer the second is the
+    ;; new value
+    [db [_ value]]
+    (assoc db :timer value)))
 
-(defn login-component []
-  [:div {:style {:height "500px"}} [:h1 "Login page"]])
+;; add subscriptions to :timer and :time-color
+(register-sub
+  :timer
+  (fn
+    [db _]
+    ;; you need to wrap your subscription code in a reaction
+    (reaction (:timer @db))))
 
-(defn employees-component []
+(register-sub
+  :time-color
+  (fn
+    [db _]
+    ;; you need to wrap your subscription code in a reaction
+    (reaction (:time-color @db))))
+
+(dispatch [:initialize])
+
+
+(defn greeting [message]
+  [:h1 message])
+
+(defn clock []
+  (let [time-color (subscribe [:time-color])
+        timer (subscribe [:timer])]
+    ;;; wrap your component in a function to use the suscription
+    (fn []
+      ;; note that the initialize call will not be dispatched immediately
+      ;; as it is an async call
+      (when @timer
+        (let [time-str (-> @timer .toTimeString (clojure.string/split " ") first)]
+          [:div.example-clock
+           {:style {:color @time-color}}
+           time-str])))))
+
+(defn color-input []
+  (let [time-color (subscribe [:time-color])]
+    ;;; wrap your component in a function to use the suscription
+    (fn []
+      [:div.color-input
+       "Time color: "
+       [:input {:type "text"
+                :value @time-color
+                :on-change #(dispatch
+                              [:time-color (-> % .-target .-value)])}]])))
+
+(defn simple-example []
   [:div
-   [ec/departments-container {:url "http://localhost:3030/api/departments"}]])
+   [greeting "Hello world, it is now"]
+   [clock]
+   [color-input]])
 
-(defn employee-component [params]
-  [:div
-   [ec/employee app-db
-    {:url "http://localhost:3030/api/employee/" :id (:id params)}]])
-
-(defn not-found []
-  [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
-
-
-(secretary/set-config! :prefix "#")
-
-(defroute root-route "/" []
-  (swap! app-db #(assoc %1 :view "employees")))
-
-(defroute employees-route "/employees" []
-  (swap! app-db #(assoc %1 :view employees-component)))
-
-(defroute employee-route "/employee/:id" [id]
-  (js/console.log "Reached employee-route")
-  (swap! app-db #(assoc %1 :view employee-component :params {:id id})))
-
-(defroute tables-route "/tables" []
-  (swap! app-db #(assoc %1 :view tables-component)))
-
-(defroute calendar-route "/calendar" []
-  (swap! app-db #(assoc %1 :view calendar-component)))
-
-(defroute file-manager-route "/file-manager" []
-  (swap! app-db #(assoc %1 :view file-manager-component)))
-
-(defroute user-route "/user" []
-  (swap! app-db #(assoc %1 :view user-component)))
-
-(defroute login-route "/login" []
-  (swap! app-db #(assoc %1 :view login-component)))
-
-(defroute "*" []
-  (swap! app-db #(assoc %1 :view not-found)))
-
-;; Note: Components need to be defined before the app-db atom
-;;       because they are refered to and probably evaluated
-;;       when the atom is defined.
-
-(def app-db
-  (atom {:view employees-component
-         :top-nav-bar [
-                       {:path (employees-route)     :text "Employees"     :active true}
-                       {:path (file-manager-route)  :text "File Manager"}
-                       {:path (calendar-route)      :text "Calendar"}
-                       {:path (tables-route)        :text "Tables"}
-                       {:path (login-route)         :text "Login"}
-                       {:path (user-route)          :text "User"}
-                       ]}))
-
-(defn main-page [app]
-
-    ;; Top nav bar
-    [:div
-     [nav/top-nav-bar @app]
-     ;; Component
-     [(:view @app) (:params @app)]])
-
-
-(defn refresh-navigation [app-db token]
-  (set-hash! token)
-  (js/console.log (str "token: " token))
-  ;;(reset! app-db (nav/update-top-nav-bar @app-db token))
-  (secretary/dispatch! token))
-
-(defn main []
-
-  ;; Main app component
-  (reagent/render [main-page app-db] (. js/document (getElementById "app-container")))
-
-  ;; Routing history
-  (let [h (History.)
-        f (fn [he] ;; goog.History.Event
-            (let [token (.-token he)]
-              (if (seq token)
-                (refresh-navigation app-db token)
-                (refresh-navigation app-db (employees-route)))
-              ))]
-
-    (events/listen h EventType/NAVIGATE f)
-    (doto h (.setEnabled true))))
+(defn ^:export run []
+  (reagent/render [simple-example]
+                  (js/document.getElementById "app")))

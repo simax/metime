@@ -7,7 +7,7 @@
   :source-paths ["src/clj" "src/cljs"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2511" :scope "provided"]
+                 [org.clojure/clojurescript "0.0-2816" :scope "provided"]
                  [com.cemerick/piggieback "0.1.3"]
                  [weasel "0.4.0-SNAPSHOT"]
                  [leiningen "2.5.0"]
@@ -30,13 +30,13 @@
 
                  ;; UI/Client
                  [reagent "0.5.0-alpha3"]
-                 [re-frame "0.1.7"]
+                 [re-frame "0.2.0"]
                  [secretary "1.2.1"]
                  [cljs-http "0.1.27"]
 
                  ;; Dev
                  [enlive "1.1.5"]
-                 [figwheel "0.1.4-SNAPSHOT"]
+                 [figwheel "0.2.3-SNAPSHOT"]
                  [environ "1.0.0"]
                  [expectations "2.0.9"]
 
@@ -51,7 +51,7 @@
 
                :deps [[org.xerial/sqlite-jdbc "3.7.2"]]}
 
-  :plugins [[lein-cljsbuild "1.0.3"]
+  :plugins [[lein-cljsbuild "1.0.4"]
             [lein-environ "1.0.0"]]
 
   :min-lein-version "2.5.0"
@@ -70,7 +70,7 @@
   :profiles {:dev {:repl-options {:init-ns metime.server
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
-                   :plugins [[lein-figwheel "0.1.4-SNAPSHOT"]]
+                   :plugins [[lein-figwheel "0.2.3-SNAPSHOT"]]
 
                    :figwheel {:http-server-root "public"
                               :port 3449
