@@ -27,7 +27,7 @@
 
 (defn get-current-location []
   "Get the hash portion of the url in the address bar."
-  (subs (.-hash js/window.location) 1))
+  (subs (.-hash js/window.location) 0))
 
 (defn calendar-component []
   [:div [:h1 {:style {:height "500px"}} "Calendar page"]])
@@ -95,8 +95,7 @@
 (register-handler
  :switch-route
  (fn [db [_ view-component]]
-   ;; call nav/update-top-nav-bar
-   (assoc db :view view-component)))
+   (nav/update-top-nav-bar db view-component)))
 
 (register-handler
  :initialize-db
@@ -136,23 +135,25 @@
  (defn top-panel []
    (let [ready?  (subscribe [:initialised?])]
     (fn []
-      (if-not @ready?               ;; do we have good data?
+      (if-not @ready?                                                           ;; do we have good data?
         [:h1 {:style {:text-align "center" :color "red"}} "Initialising ..."]   ;; tell them we are working on it
-        [main-panel]))))            ;; all good, render this component
+        [main-panel]))))                                                        ;; all good, render this component
 
 (defn main []
   (dispatch [:initialize-db])
   ;; Main app component
   (reagent/render [top-panel] (js/document.getElementById "app-container"))
 
-  ;; Routing history
+    ;; Routing history
   (let [h (History.)
         f (fn [he] ;; goog.History.Event
             (let [token (.-token he)]
               (if (seq token)
-                (secretary/dispatch! token)
-                (secretary/dispatch! (employees-component))
-              )))]
+                  (secretary/dispatch! token)
+                (do
+                  (set-hash! "#/employees")
+                  (secretary/dispatch! (employees-route))))))]
 
     (events/listen h EventType/NAVIGATE f)
-    (doto h (.setEnabled true))))
+    (doto h (.setEnabled true))
+  ))

@@ -5,7 +5,8 @@
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
             [secretary.core :as secretary :refer-macros [defroute]]
-            [reagent.core :as reagent :refer [atom]])
+            [reagent.core :as reagent :refer [atom]]
+            [metime.core :as mc])
   (:import goog.History
            goog.History.EventType))
 
@@ -16,14 +17,12 @@
     (assoc item :active true)
     (assoc item :active false)))
 
-(defn update-top-nav-bar [db token]
-  (let [prefixed-token (str "#" token)
-        updated-view (assoc db :view prefixed-token)]
-    (update-in updated-view [:top-nav-bar] #(map (partial toggle-active-status prefixed-token) %))))
+(defn update-top-nav-bar [db view-component]
+  (let [updated-view (assoc db :view view-component)]
+    (update-in updated-view [:top-nav-bar] #(map (partial toggle-active-status (mc/get-current-location)) %))))
 
 (defn nav-menu-item [item]
   (let [route (:path item)]
-    ;;(js/console.log (:path item))
     [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]]))
 
 (defn top-nav-bar [{:keys [top-nav-bar]}]
