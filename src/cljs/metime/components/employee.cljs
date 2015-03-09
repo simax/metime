@@ -1,14 +1,18 @@
 (ns metime.components.employee
-  (:require-macros [cljs.core.async.macros :refer [go alt!]])
-  (:require [goog.events :as events]
-            [goog.history.EventType :as EventType]
-            [cljs.core.async :refer [put! take! <! >! chan timeout]]
+  (:require-macros [cljs.core.async.macros :refer [go alt!]]
+                   [reagent.ratom :refer [reaction]])
+  (:require [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [cljs-http.client :as http]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
             [metime.components.utils :as utils]
             [secretary.core :as secretary :refer-macros [defroute]]
-            [reagent.core :as reagent :refer [atom]])
+            [reagent.core :as reagent :refer [atom]]
+            [re-frame.core :refer [register-handler
+                                   path
+                                   register-sub
+                                   dispatch
+                                   subscribe]])
   (:import goog.History
            goog.History.EventType))
 
@@ -74,21 +78,11 @@
    [:dom/ul
     (for [dep departments]
       ^{:key (:department dep)} [:li [department-list-item dep]]
-    )]])
+    )
+    ]])
 
-(defn fetch-departments
-  [url]
-  (go
-   ;; The following will "park" until data the http GET returns data
-   (((<! (http/get url)) :body) :departments)))
-
-(defn departments-container [opts]
-  (let [local-state (atom {})]
-    (go
-     (let [deps (<! (fetch-departments (:url opts)))]
-       (swap! local-state #(assoc % :departments deps))))
-     (fn []
-       [department-list (:departments @local-state)])))
+(defn departments-container [deps]
+  [department-list deps])
 
 (defn employee-not-found []
   [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])

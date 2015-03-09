@@ -26,7 +26,7 @@
   (set! (.-hash js/window.location) loc))
 
 (defn get-current-location []
-  "Get the hash portion of the url in the address bar."
+  "Get the url in the address bar, including the hash portion."
   (subs (.-hash js/window.location) 0))
 
 (defn calendar-component []
@@ -44,17 +44,26 @@
 (defn login-component []
   [:div {:style {:height "500px"}} [:h1 "Login page"]])
 
+(register-sub
+  :departments
+  (fn  [db _]
+    (reaction (:deps @db))))
+
 (defn employees-component []
-  [:div ;; Put the url inside the component subscribe function
-   [ec/departments-container {:url "http://localhost:3030/api/departments"}]])
+  (let [ready? (subscribe [:loading-employees])
+        deps   (subscribe [:departments])]
+  (fn []
+    (if-not @ready?
+      [:h1 {:style {:text-align "center" :color "red"}} "Initialising ..."]
+      [:div [ec/departments-container @deps]]))))
+
 
 (defn employee-component []
-    [:div
-     [ec/employee app-db {:url (:url @app-db)}]])
+  [:div
+   [ec/employee app-db {:url (:url @app-db)}]])
 
 (defn not-found []
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
-
 
 (secretary/set-config! :prefix "#")
 
@@ -62,6 +71,7 @@
   (dispatch [:switch-route employees-component]))
 
 (defroute employees-route "/employees" []
+  (dispatch [:fetch-department-employees "http://localhost:3030/api/departments"])
   (dispatch [:switch-route employees-component]))
 
 (defroute employee-route "/employee/:id" [id]
@@ -102,6 +112,7 @@
  (fn
    [__]
    {:view employees-component
+    :loading-employees true
     :top-nav-bar [
                   {:path (employees-route)     :text "Employees"     :active true}
                   {:path (file-manager-route)  :text "File Manager"}
@@ -110,6 +121,24 @@
                   {:path (login-route)         :text "Login"}
                   {:path (user-route)          :text "User"}
                   ]}))
+
+
+(register-handler
+ :process-employees-response
+ (fn [db [_ department-employees]]
+   (assoc db :deps (js->clj department-employees) :loading-employees false)))
+
+(defn fetch-departments
+  [url]
+  (go
+   ;; The following will "park" until the http GET returns data
+   (dispatch [:process-employees-response (((<! (http/get url)) :body) :departments)])))
+
+(register-handler
+ :fetch-department-employees
+ (fn [db [_ url]]
+   (let [deps (fetch-departments url)]
+     (assoc db :loading-employees true))))
 
 (register-sub
  :db
@@ -121,12 +150,11 @@
   (fn  [db _]
     (reaction (not (empty? @db)))))   ;; do we have data
 
-
 (defn main-panel []
   (let [db (subscribe [:db])]
     (fn []
-      ;; Top nav bar
       [:div
+       ;; Top nav bar
        [nav/top-nav-bar @db]
        ;; Component
        [(:view @db) (:params @db)]
