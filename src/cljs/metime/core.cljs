@@ -10,6 +10,7 @@
             [secretary.core :as secretary :refer-macros [defroute]]
             [metime.components.employee :as ec]
             [reagent.core :as reagent :refer [atom]]
+            [metime.components.utils :as utils]
             [re-frame.core :refer [register-handler
                                    path
                                    register-sub
@@ -19,15 +20,7 @@
 
 (declare app-db)
 (enable-console-print!)
-
-(defn set-hash! [loc]
-  "Set the hash portion of the url in the address bar.
-  e.g. (set-hash! '/dip') => http://localhost:3000/#/dip"
-  (set! (.-hash js/window.location) loc))
-
-(defn get-current-location []
-  "Get the url in the address bar, including the hash portion."
-  (subs (.-hash js/window.location) 0))
+(secretary/set-config! :prefix "#")
 
 (defn calendar-component []
   [:div [:h1 {:style {:height "500px"}} "Calendar page"]])
@@ -49,14 +42,19 @@
   (fn  [db _]
     (reaction (:deps @db))))
 
-(defn employees-component []
-  (let [ready? (subscribe [:loading-employees])
-        deps   (subscribe [:departments])]
-  (fn []
-    (if-not @ready?
-      [:h1 {:style {:text-align "center" :color "red"}} "Initialising ..."]
-      [:div [ec/departments-container @deps]]))))
+;; (register-sub
+;;  :loading-employees
+;;  (fn [db _]
+;;    (reaction (:loading-employees @db))))
 
+
+(defn employees-component []
+  (dispatch [:fetch-department-employees "http://localhost:3030/api/departments"])
+  (let [deps   (subscribe [:departments])]
+    (fn []
+      (if-not (seq @deps)
+        [:h1 {:style {:text-align "center" :color "red"}} "Fetching employees ..."]
+        [:div [ec/departments-container @deps]]))))
 
 (defn employee-component []
   [:div
@@ -65,13 +63,10 @@
 (defn not-found []
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
-(secretary/set-config! :prefix "#")
-
 (defroute root-route "/" []
   (dispatch [:switch-route employees-component]))
 
 (defroute employees-route "/employees" []
-  (dispatch [:fetch-department-employees "http://localhost:3030/api/departments"])
   (dispatch [:switch-route employees-component]))
 
 (defroute employee-route "/employee/:id" [id]
@@ -87,7 +82,6 @@
   (dispatch [:switch-route tables-component]))
 
 (defroute calendar-route "/calendar" []
-  (js/console.log "Calendar route!!!")
   (dispatch [:switch-route calendar-component]))
 
 (defroute file-manager-route "/file-manager" []
@@ -108,11 +102,10 @@
    (nav/update-top-nav-bar db view-component)))
 
 (register-handler
- :initialize-db
+ :initialise-db
  (fn
    [__]
    {:view employees-component
-    :loading-employees true
     :top-nav-bar [
                   {:path (employees-route)     :text "Employees"     :active true}
                   {:path (file-manager-route)  :text "File Manager"}
@@ -126,7 +119,7 @@
 (register-handler
  :process-employees-response
  (fn [db [_ department-employees]]
-   (assoc db :deps (js->clj department-employees) :loading-employees false)))
+   (assoc db :deps (js->clj department-employees))))
 
 (defn fetch-departments
   [url]
@@ -138,50 +131,52 @@
  :fetch-department-employees
  (fn [db [_ url]]
    (let [deps (fetch-departments url)]
-     (assoc db :loading-employees true))))
+     (assoc db :deps nil))))
 
 (register-sub
- :db
+ :db-changed?
  (fn [db _]
    (reaction @db)))
 
-(register-sub       ;; we can check if there is data
-  :initialised?     ;; usage (subscribe [:initialised?])
+(register-sub
+  :initialised?
   (fn  [db _]
-    (reaction (not (empty? @db)))))   ;; do we have data
+    (reaction (not (empty? @db)))))
 
 (defn main-panel []
-  (let [db (subscribe [:db])]
+  (let [db (subscribe [:db-changed?])]
     (fn []
       [:div
        ;; Top nav bar
        [nav/top-nav-bar @db]
-       ;; Component
+       ;; Components
        [(:view @db) (:params @db)]
       ])))
 
  (defn top-panel []
    (let [ready?  (subscribe [:initialised?])]
     (fn []
-      (if-not @ready?                                                           ;; do we have good data?
-        [:h1 {:style {:text-align "center" :color "red"}} "Initialising ..."]   ;; tell them we are working on it
-        [main-panel]))))                                                        ;; all good, render this component
+      (if-not @ready?
+        [:h1 {:style {:text-align "center" :color "red"}} ]
+        [main-panel]))))
+
+ (defn routing-history []
+   "Routing history"
+   (let [h (History.)
+         f (fn [he] ;; goog.History.Event
+             (let [token (.-token he)]
+               (if (seq token)
+                 (secretary/dispatch! token)
+                 (do
+                   ;; If we're at the root, go to #/employees
+                   (utils/set-hash! "#/employees")
+                   (secretary/dispatch! (employees-route))))))]
+
+     (events/listen h EventType/NAVIGATE f)
+     (doto h (.setEnabled true))))
 
 (defn main []
-  (dispatch [:initialize-db])
+  (dispatch [:initialise-db])
   ;; Main app component
   (reagent/render [top-panel] (js/document.getElementById "app-container"))
-
-    ;; Routing history
-  (let [h (History.)
-        f (fn [he] ;; goog.History.Event
-            (let [token (.-token he)]
-              (if (seq token)
-                  (secretary/dispatch! token)
-                (do
-                  (set-hash! "#/employees")
-                  (secretary/dispatch! (employees-route))))))]
-
-    (events/listen h EventType/NAVIGATE f)
-    (doto h (.setEnabled true))
-  ))
+  (routing-history))

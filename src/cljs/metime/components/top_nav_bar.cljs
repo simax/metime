@@ -6,7 +6,7 @@
             [cljs-hash.goog :as gh]
             [secretary.core :as secretary :refer-macros [defroute]]
             [reagent.core :as reagent :refer [atom]]
-            [metime.core :as mc])
+            [metime.components.utils :as utils])
   (:import goog.History
            goog.History.EventType))
 
@@ -19,7 +19,7 @@
 
 (defn update-top-nav-bar [db view-component]
   (let [updated-view (assoc db :view view-component)]
-    (update-in updated-view [:top-nav-bar] #(map (partial toggle-active-status (mc/get-current-location)) %))))
+    (update-in updated-view [:top-nav-bar] #(map (partial toggle-active-status (utils/get-current-location)) %))))
 
 (defn nav-menu-item [item]
   (let [route (:path item)]

@@ -39,9 +39,9 @@ goog.addDependency("../cljs_http/util.js", ['cljs_http.util'], ['no.en.core', 'g
 goog.addDependency("../cljs_http/core.js", ['cljs_http.core'], ['goog.net.XhrIo', 'cljs.core', 'cljs_http.util', 'cljs.core.async', 'goog.net.EventType']);
 goog.addDependency("../cljs_http/client.js", ['cljs_http.client'], ['cljs_http.core', 'no.en.core', 'goog.Uri', 'cljs.core', 'cljs_http.util', 'cljs.core.async', 'clojure.string', 'cljs.reader']);
 goog.addDependency("../cljs_hash/md5.js", ['cljs_hash.md5'], ['cljs.core']);
+goog.addDependency("../metime/components/utils.js", ['metime.components.utils'], ['goog.History.EventType', 'cljs_hash.goog', 'cljs.core', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'goog.events']);
 goog.addDependency("../clojure/walk.js", ['clojure.walk'], ['cljs.core']);
 goog.addDependency("../secretary/core.js", ['secretary.core'], ['cljs.core', 'clojure.string', 'clojure.walk']);
-goog.addDependency("../metime/components/utils.js", ['metime.components.utils'], ['goog.History.EventType', 'cljs_hash.goog', 'cljs.core', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'goog.events']);
 goog.addDependency("../re_frame/utils.js", ['re_frame.utils'], ['cljs.core']);
 goog.addDependency("../re_frame/db.js", ['re_frame.db'], ['reagent.core', 'cljs.core']);
 goog.addDependency("../re_frame/handlers.js", ['re_frame.handlers'], ['cljs.core', 're_frame.utils', 're_frame.db']);
@@ -53,7 +53,7 @@ goog.addDependency("../clojure/data.js", ['clojure.data'], ['cljs.core', 'clojur
 goog.addDependency("../re_frame/middleware.js", ['re_frame.middleware'], ['reagent.ratom', 'cljs.core', 're_frame.undo', 're_frame.utils', 'clojure.data']);
 goog.addDependency("../re_frame/core.js", ['re_frame.core'], ['cljs.core', 're_frame.router', 're_frame.handlers', 're_frame.subs', 're_frame.middleware']);
 goog.addDependency("../metime/components/employee.js", ['metime.components.employee'], ['goog.History.EventType', 'cljs_hash.goog', 'reagent.core', 'cljs.core', 'cljs_http.client', 'cljs_hash.md5', 'goog.History', 'metime.components.utils', 'cljs.core.async', 'secretary.core', 're_frame.core']);
-goog.addDependency("../metime/components/top_nav_bar.js", ['metime.components.top_nav_bar'], ['goog.History.EventType', 'cljs_hash.goog', 'reagent.core', 'cljs.core', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'metime.core', 'secretary.core', 'goog.events']);
-goog.addDependency("../metime/core.js", ['metime.core'], ['cljs_hash.goog', 'reagent.core', 'cljs.core', 'cljs_http.client', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'secretary.core', 'metime.components.employee', 'goog.events', 're_frame.core', 'metime.components.top_nav_bar']);
+goog.addDependency("../metime/components/top_nav_bar.js", ['metime.components.top_nav_bar'], ['goog.History.EventType', 'cljs_hash.goog', 'reagent.core', 'cljs.core', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'metime.components.utils', 'secretary.core', 'goog.events']);
+goog.addDependency("../metime/core.js", ['metime.core'], ['cljs_hash.goog', 'reagent.core', 'cljs.core', 'cljs_http.client', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'metime.components.utils', 'secretary.core', 'metime.components.employee', 'goog.events', 're_frame.core', 'metime.components.top_nav_bar']);
 goog.addDependency("../figwheel/client.js", ['figwheel.client'], ['goog.net.jsloader', 'cljs.core', 'cljs.core.async', 'clojure.string', 'cljs.reader']);
 goog.addDependency("../metime/dev.js", ['metime.dev'], ['weasel.repl', 'cljs.core', 'cljs.core.async', 'metime.core', 'figwheel.client']);
