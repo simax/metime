@@ -22,6 +22,9 @@
 (enable-console-print!)
 (secretary/set-config! :prefix "#")
 
+(defn loader-component []
+  [:div.loader-container [:img {:src "assets/img/loader.gif" }]])
+
 (defn calendar-component []
   [:div [:h1 {:style {:height "500px"}} "Calendar page"]])
 
@@ -42,23 +45,21 @@
   (fn  [db _]
     (reaction (:deps @db))))
 
-;; (register-sub
-;;  :loading-employees
-;;  (fn [db _]
-;;    (reaction (:loading-employees @db))))
-
-
 (defn employees-component []
   (dispatch [:fetch-department-employees "http://localhost:3030/api/departments"])
   (let [deps   (subscribe [:departments])]
     (fn []
       (if-not (seq @deps)
-        [:h1 {:style {:text-align "center" :color "red"}} "Fetching employees ..."]
+        [loader-component]
         [:div [ec/departments-container @deps]]))))
 
 (defn employee-component []
-  [:div
-   [ec/employee app-db {:url (:url @app-db)}]])
+  (dispatch [:fetch-employee (str "http://localhost:3030/api/employee/" 19)])
+  (let [emp (subscribe [:employee 19])]
+    (fn []
+      (if (nil? @emp)
+        [loader-component]
+        [:div [ec/employee-container-form @emp]]))))
 
 (defn not-found []
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
@@ -70,13 +71,7 @@
   (dispatch [:switch-route employees-component]))
 
 (defroute employee-route "/employee/:id" [id]
-  (let [url (str "http://localhost:3030/api/employee/" id)]
-    (js/console.log (str "Reached employee-route with id: " id))
-    (go
-     (let [emp (<! (ec/fetch-employee url))]
-       (if (= emp "not found")
-         (swap! app-db #(dissoc % :employee))
-         (swap! app-db #(assoc % :view employee-component :employee emp)))))))
+  (dispatch [:employee-route-switcher employee-component id]))
 
 (defroute tables-route "/tables" []
   (dispatch [:switch-route tables-component]))
@@ -95,6 +90,11 @@
 
 (defroute "*" []
   (dispatch [:switch-route not-found]))
+
+(register-handler
+ :employee-route-switcher
+ (fn [db [_ id]]
+   (assoc db :view employee-component :params id)))
 
 (register-handler
  :switch-route
