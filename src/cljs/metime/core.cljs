@@ -72,7 +72,7 @@
         [loader-component]
         (if (:not-found @emp)
           [ec/employee-not-found]
-          [ec/employee-container-form @emp])))))
+          [ec/employee-container-form emp])))))
 
 (defn not-found []
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])

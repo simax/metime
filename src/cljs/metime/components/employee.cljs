@@ -88,7 +88,9 @@
   [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
 
 (defn handle-change [e data edit-key]
-  (swap! data edit-key (fn [_] (.. e -target -value))))
+  (js/console.log (:firstname @data))
+  (swap! data (update-in @data [edit-key] (fn [_] (.. e -target -value))))
+  )
 
 (defn handle-save [e data]
   (println data))
@@ -100,13 +102,13 @@
     ;; Employee gravatar
     [:div.container-fluid
      [:div.row
-      [:div.col-md-2  [utils/gravatar {:gravatar-email (:email employee)}]]
-      [:h1.col-md-8 (str (:firstname employee) " " (:lastname employee))]
+      [:div.col-md-2  [utils/gravatar {:gravatar-email (:email @employee)}]]
+      [:h1.col-md-8 (str (:firstname @employee) " " (:lastname @employee))]
 
       [:div.col-md-2
        [:h6.col-md-offset-4 "Manager"]
-       [:div [utils/gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75}]]
-       [:h5.col-md-offset-2 (str (:manager-firstname employee) " " (:manager-lastname employee))]
+       [:div [utils/gravatar {:gravatar-email (:manager-email @employee) :gravatar-size 75}]]
+       [:h5.col-md-offset-2 (str (:manager-firstname @employee) " " (:manager-lastname @employee))]
       ]]
     ]]
 
@@ -119,7 +121,7 @@
        {:type "text"
         :placeholder "First name"
         :on-change #(handle-change % employee :firstname)
-        :value (:firstname employee)}]]]
+        :value (:firstname @employee)}]]]
 
     ;; Last name
     [:div.form-group
@@ -129,7 +131,7 @@
        {:type "text"
         :placeholder "Last name"
         :on-change #(handle-change % employee :lastname)
-        :value (:lastname employee)}]]]
+        :value (:lastname @employee)}]]]
 
     ;; Email
     [:div.form-group
@@ -139,7 +141,7 @@
        {:type "email"
         :placeholder "Email address"
         :on-change #(handle-change % employee :email)
-        :value (:email employee)}]]]
+        :value (:email @employee)}]]]
 
     ;; Start date
     [:div.form-group
@@ -149,7 +151,7 @@
        {:type "date"
         :placeholder "Start date"
         :on-change #(handle-change % employee :startdate)
-        :value (:startdate employee)}]]]
+        :value (:startdate @employee)}]]]
 
     ;; Save button
     [:div.form-group
