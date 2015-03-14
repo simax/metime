@@ -19,6 +19,13 @@
   (:import goog.History))
 
 (declare app-db)
+(declare employees-route)
+(declare file-manager-route)
+(declare calendar-route)
+(declare tables-route)
+(declare login-route)
+(declare user-route)
+
 (enable-console-print!)
 (secretary/set-config! :prefix "#")
 
@@ -45,11 +52,6 @@
   (fn [db _]
     (reaction (:deps @db))))
 
-(register-sub
-  :employee
-  (fn [db _]
-    (reaction (:employee @db))))
-
 (defn employees-component []
   (dispatch [:fetch-department-employees "http://localhost:3030/api/departments"])
   (let [deps (subscribe [:departments])]
@@ -59,16 +61,18 @@
         [:div [ec/departments-container @deps]]))))
 
 (register-sub
- :employee-id
- (fn [db _]
-   (reaction (:employee-id @db))))
+  :employee
+  (fn [db _]
+    (reaction (:employee @db))))
 
 (defn employee-component []
-    (let [emp (subscribe [:employee])]
-      (fn []
-        (if (nil? @emp)
-          [loader-component]
-          [:div [ec/employee-container-form @emp]]))))
+  (let [emp (subscribe [:employee])]
+    (fn []
+      (if (nil? @emp)
+        [loader-component]
+        (if (:not-found @emp)
+          [ec/employee-not-found]
+          [ec/employee-container-form @emp])))))
 
 (defn not-found []
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
@@ -136,7 +140,6 @@
                   {:path (user-route)          :text "User"}
                   ]}))
 
-
 (register-handler
  :process-employees-response
  (fn [db [_ department-employees]]
@@ -145,7 +148,9 @@
 (register-handler
  :process-employee-response
  (fn [db [_ employee]]
-   (assoc db :employee (js->clj employee))))
+   (if (nil? (:firstname employee))
+     (assoc db :employee {:not-found true})
+     (assoc db :employee (assoc (js->clj employee) :not-found false)))))
 
 (defn fetch-employee
   [url]
@@ -195,7 +200,7 @@
    (let [ready?  (subscribe [:initialised?])]
     (fn []
       (if-not @ready?
-        [loader-component] ;;[:h1 {:style {:text-align "center" :color "red"}} ]
+        [loader-component]
         [main-panel]))))
 
  (defn routing-history []
