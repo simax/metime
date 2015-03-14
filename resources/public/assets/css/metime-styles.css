@@ -27,23 +27,29 @@ input[type=text], textarea {
 /* 	margin: 0 0 18px; */
 }
 
-.main-container {
+.wrapper {
   height: 100%;
   overflow:auto;
-  padding-bottom:300px; /* this needs to be bigger than footer height*/
+  position: relative;
 }
 
+.main-app-container {
+  padding-botton: 100px;
+ }
+
 .footer {
+  bottom: 0;
   position: relative;
-  margin-top: -300px; /* negative value of footer height */
-  height: 300px;
+  margin-top: 5px; /* negative value of footer height */
+  height: 75px;
   clear:both;
   padding-top:20px;
 }
 
 .loader-container {
-    height: 10em;
+    height: 700px;
     position: relative }
+
 .loader-container img {
     margin: 0;
     position: absolute;

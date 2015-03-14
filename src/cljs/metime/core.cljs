@@ -26,7 +26,7 @@
   [:div.loader-container [:img {:src "assets/img/loader.gif" }]])
 
 (defn calendar-component []
-  [:div [:h1 {:style {:height "500px"}} "Calendar page"]])
+  [:div {:style {:height "500px"}} [:h1 "Calendar page"]])
 
 (defn tables-component []
   [:div {:style {:height "500px"}} [:h1 "Tables page"]])
@@ -42,64 +42,85 @@
 
 (register-sub
   :departments
-  (fn  [db _]
+  (fn [db _]
     (reaction (:deps @db))))
+
+(register-sub
+  :employee
+  (fn [db _]
+    (reaction (:employee @db))))
 
 (defn employees-component []
   (dispatch [:fetch-department-employees "http://localhost:3030/api/departments"])
-  (let [deps   (subscribe [:departments])]
+  (let [deps (subscribe [:departments])]
     (fn []
       (if-not (seq @deps)
         [loader-component]
         [:div [ec/departments-container @deps]]))))
 
+(register-sub
+ :employee-id
+ (fn [db _]
+   (reaction (:employee-id @db))))
+
 (defn employee-component []
-  (dispatch [:fetch-employee (str "http://localhost:3030/api/employee/" 19)])
-  (let [emp (subscribe [:employee 19])]
-    (fn []
-      (if (nil? @emp)
-        [loader-component]
-        [:div [ec/employee-container-form @emp]]))))
+    (let [emp (subscribe [:employee])]
+      (fn []
+        (if (nil? @emp)
+          [loader-component]
+          [:div [ec/employee-container-form @emp]]))))
 
 (defn not-found []
   [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
 (defroute root-route "/" []
-  (dispatch [:switch-route employees-component]))
+  (dispatch [:switch-route employees-component (employees-route)]))
 
 (defroute employees-route "/employees" []
-  (dispatch [:switch-route employees-component]))
+  (dispatch [:switch-route employees-component (employees-route)]))
 
 (defroute employee-route "/employee/:id" [id]
   (dispatch [:employee-route-switcher employee-component id]))
 
 (defroute tables-route "/tables" []
-  (dispatch [:switch-route tables-component]))
+  (dispatch [:switch-route tables-component (tables-route)]))
 
 (defroute calendar-route "/calendar" []
-  (dispatch [:switch-route calendar-component]))
+  (dispatch [:switch-route calendar-component (calendar-route)]))
 
 (defroute file-manager-route "/file-manager" []
-  (dispatch [:switch-route file-manager-component]))
+  (dispatch [:switch-route file-manager-component (file-manager-route)]))
 
 (defroute user-route "/user" []
-  (dispatch [:switch-route user-component]))
+  (dispatch [:switch-route user-component (user-route)]))
 
 (defroute login-route "/login" []
-  (dispatch [:switch-route login-component]))
+  (dispatch [:switch-route login-component (login-route)]))
 
 (defroute "*" []
   (dispatch [:switch-route not-found]))
 
+(defn employee-route-switcher-middleware
+  [handler]
+  (fn employee-handler
+    [db [_ view-component id]]
+    (handler db [_ id])
+    (nav/update-top-nav-bar db view-component (employees-route))))
+
+(defn employee-route-switcher-handler
+  [db [_ id]]
+  (dispatch [:fetch-employee id])
+  db)
+
 (register-handler
  :employee-route-switcher
- (fn [db [_ id]]
-   (assoc db :view employee-component :params id)))
+ employee-route-switcher-middleware
+ employee-route-switcher-handler)
 
 (register-handler
  :switch-route
- (fn [db [_ view-component]]
-   (nav/update-top-nav-bar db view-component)))
+ (fn [db [_ view-component top-level-menu-text]]
+   (nav/update-top-nav-bar db view-component top-level-menu-text)))
 
 (register-handler
  :initialise-db
@@ -121,6 +142,17 @@
  (fn [db [_ department-employees]]
    (assoc db :deps (js->clj department-employees))))
 
+(register-handler
+ :process-employee-response
+ (fn [db [_ employee]]
+   (assoc db :employee (js->clj employee))))
+
+(defn fetch-employee
+  [url]
+  (go
+   ;; The following will "park" until the http GET returns data
+   (dispatch [:process-employee-response ((<! (http/get url)) :body)])))
+
 (defn fetch-departments
   [url]
   (go
@@ -130,8 +162,14 @@
 (register-handler
  :fetch-department-employees
  (fn [db [_ url]]
-   (let [deps (fetch-departments url)]
+   (let [_ (fetch-departments url)]
      (assoc db :deps nil))))
+
+(register-handler
+ :fetch-employee
+ (fn [db [_ id]]
+   (let [_ (fetch-employee (str "http://localhost:3030/api/employee/" id))]
+     (assoc db :employee nil))))
 
 (register-sub
  :db-changed?
@@ -140,7 +178,7 @@
 
 (register-sub
   :initialised?
-  (fn  [db _]
+  (fn [db _]
     (reaction (not (empty? @db)))))
 
 (defn main-panel []
@@ -157,7 +195,7 @@
    (let [ready?  (subscribe [:initialised?])]
     (fn []
       (if-not @ready?
-        [:h1 {:style {:text-align "center" :color "red"}} ]
+        [loader-component] ;;[:h1 {:style {:text-align "center" :color "red"}} ]
         [main-panel]))))
 
  (defn routing-history []

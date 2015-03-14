@@ -17,9 +17,9 @@
     (assoc item :active true)
     (assoc item :active false)))
 
-(defn update-top-nav-bar [db view-component]
+(defn update-top-nav-bar [db view-component top-level-menu-text]
   (let [updated-view (assoc db :view view-component)]
-    (update-in updated-view [:top-nav-bar] #(map (partial toggle-active-status (utils/get-current-location)) %))))
+    (update-in updated-view [:top-nav-bar] #(map (partial toggle-active-status top-level-menu-text) %))))
 
 (defn nav-menu-item [item]
   (let [route (:path item)]
