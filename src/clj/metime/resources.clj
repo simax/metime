@@ -105,8 +105,7 @@
   :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
   :exists? (fn [ctx]
              (if (requested-method ctx :get)
-              ;;[true {::departments {:departments (deps/get-all-departments-with-employees)}}]
-              [true {::departments {:departments (employees-by-department)}}]
+               [true {::departments {:departments (employees-by-department)}}]
                ))
 
   :malformed? (fn [ctx]
@@ -157,8 +156,8 @@
                     (let [department (deps/get-department-by-id id)]
                       (if (empty? (:employees department))
                         true
-                        [false {::failure-message "Unable to delete, the department contains employees"}])
-                    true)))
+                        [false {::failure-message "Unable to delete, the department contains employees"}]))
+                    true))
 
   :handle-unprocessable-entity ::failure-message
 
@@ -175,7 +174,7 @@
 
   :conflict? (fn [ctx]
                (let [new-department-name (:department (make-keyword-map (get-form-params ctx)))
-                     existing-department (deps/get-department-by-name new-department-name)]
+                     existing-department (first (deps/get-department-by-name new-department-name))]
                  (and (not (nil? existing-department)) (not= (str id) (str (:id existing-department))))))
 
   :handle-conflict {:department ["Department already exists"]}
@@ -187,9 +186,12 @@
           (let [new-data (make-keyword-map (get-form-params ctx))
                 existing-data (::department ctx)
                 updated-data (merge existing-data new-data)]
-            (deps/update-department! updated-data)))
+            (deps/update-department! updated-data)
+            {::department updated-data}))
 
-  :respond-with-entity? (fn [ctx] (empty? (::department ctx)))
+  :new? (fn [ctx] (nil? ::department))
+  :respond-with-entity? (fn [ctx] (not (empty? (::department ctx))))
+  :multiple-representations? false
   :handle-ok ::department
   :handle-not-found "Department not found")
 
@@ -235,14 +237,14 @@
 (defresource employee [id]
   :available-media-types ["application/edn" "application/json"]
   :allowed-methods [:get :delete :put]
+  :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
+  :can-put-to-missing? false
   :exists? (fn [ctx]
-             (if (requested-method ctx :get)
                (let [employee (emps/get-employee-by-id id)]
-                 [(not (empty? employee)) {::employee employee}])
-               true))
+                 [(not (empty? employee)) {::employee employee}]))
 
   :processable? (fn [ctx]
-                 (if (requested-method ctx :delete)
+                 (if (or (requested-method ctx :delete) (requested-method ctx :put))
                    (if-let [employee (emps/get-employee-by-id id)]
                      [true {::employee employee}]
                      false)
@@ -251,7 +253,17 @@
   :delete! (fn [ctx]
              (emps/delete-employee! id))
 
+  :put! (fn [ctx]
+          (let [new-data (make-keyword-map (get-form-params ctx))
+                existing-data (::employee ctx)
+                updated-data (merge existing-data new-data)]
+            (spit "debug.txt" existing-data)
+            (emps/update-employee! updated-data)
+            {::employee updated-data}))
+
+  :new? (fn [ctx] (nil? ::employee))
   :respond-with-entity? (fn [ctx] (not (empty? (::employee ctx))))
+  :multiple-representations? false
 
   :handle-ok ::employee
   :handle-not-found "Employee not found")

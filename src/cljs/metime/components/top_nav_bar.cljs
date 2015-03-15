@@ -6,7 +6,7 @@
             [cljs-hash.goog :as gh]
             [secretary.core :as secretary :refer-macros [defroute]]
             [reagent.core :as reagent :refer [atom]]
-            [metime.components.utils :as utils])
+            [metime.utils :as utils])
   (:import goog.History
            goog.History.EventType))
 

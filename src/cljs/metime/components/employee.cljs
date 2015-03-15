@@ -5,7 +5,7 @@
             [cljs-http.client :as http]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
-            [metime.components.utils :as utils]
+            [metime.utils :as utils]
             [secretary.core :as secretary :refer-macros [defroute]]
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [register-handler
@@ -18,6 +18,25 @@
 
 (enable-console-print!)
 
+(defn handle-input-change [db [_ property-name new-value ]]
+  (assoc-in db [:employee property-name] new-value))
+
+(register-handler
+  :input-change
+  handle-input-change)
+
+(defn handle-employee-save [db _]
+  (let [employee-id (get-in db [:employee :id])]
+    (if (not (nil? employee-id))
+      (let [endpoint (utils/api db (str "/employee/" employee-id))]
+        (http/put endpoint {:form-params (:employee db)}))
+      (let [endpoint (utils/api db "/employees")]
+        (http/post endpoint {:form-params (:employee db)})))
+    db))
+
+(register-handler
+ :employee-save
+ handle-employee-save)
 
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
@@ -87,13 +106,6 @@
 (defn employee-not-found []
   [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
 
-(defn handle-change [e data edit-key]
-  (js/console.log (:firstname @data))
-  (swap! data (update-in @data [edit-key] (fn [_] (.. e -target -value))))
-  )
-
-(defn handle-save [e data]
-  (println data))
 
 (defn employee-container-form [employee]
   [:div {:style {:padding "20" :background-color "white" :height "500"}}
@@ -120,7 +132,7 @@
       [:input#first-name.form-control
        {:type "text"
         :placeholder "First name"
-        :on-change #(handle-change % employee :firstname)
+        :on-change #(dispatch [:input-change :firstname (-> % .-target .-value)])
         :value (:firstname @employee)}]]]
 
     ;; Last name
@@ -130,7 +142,7 @@
       [:input#last-name.form-control
        {:type "text"
         :placeholder "Last name"
-        :on-change #(handle-change % employee :lastname)
+        :on-change #(dispatch [:input-change :lastname (-> % .-target .-value)])
         :value (:lastname @employee)}]]]
 
     ;; Email
@@ -140,7 +152,7 @@
       [:input#last-name.form-control
        {:type "email"
         :placeholder "Email address"
-        :on-change #(handle-change % employee :email)
+        :on-change #(dispatch [:input-change  :email (-> % .-target .-value)])
         :value (:email @employee)}]]]
 
     ;; Start date
@@ -150,13 +162,13 @@
       [:input#start-date.form-control
        {:type "date"
         :placeholder "Start date"
-        :on-change #(handle-change % employee :startdate)
+        :on-change #(dispatch [:input-change  :startdate (-> % .-target .-value)])
         :value (:startdate @employee)}]]]
 
     ;; Save button
     [:div.form-group
      [:div.col-md-offset-2.col-md-4
-      [:button#save.btn.btn-primary {:type "button" :on-click #(handle-save % employee)} "Save"]]]]])
+      [:button#save.btn.btn-primary {:type "button" :on-click #(dispatch [:employee-save])} "Save"]]]]])
 
 (defn fetch-employee [url-with-id]
   (let [c (chan)]

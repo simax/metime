@@ -10,7 +10,7 @@
             [secretary.core :as secretary :refer-macros [defroute]]
             [metime.components.employee :as ec]
             [reagent.core :as reagent :refer [atom]]
-            [metime.components.utils :as utils]
+            [metime.utils :as utils]
             [re-frame.core :refer [register-handler
                                    path
                                    register-sub
@@ -18,7 +18,6 @@
                                    subscribe]])
   (:import goog.History))
 
-(declare app-db)
 (declare employees-route)
 (declare file-manager-route)
 (declare calendar-route)
@@ -53,7 +52,7 @@
     (reaction (:deps @db))))
 
 (defn employees-component []
-  (dispatch [:fetch-department-employees "http://localhost:3030/api/departments"])
+  (dispatch [:fetch-department-employees "/departments"])
   (let [deps (subscribe [:departments])]
     (fn []
       (if-not (seq @deps)
@@ -130,7 +129,8 @@
  :initialise-db
  (fn
    [__]
-   {:view employees-component
+   {:api-root-url "http://localhost:3030/api"
+    :view employees-component
     :top-nav-bar [
                   {:path (employees-route)     :text "Employees"     :active true}
                   {:path (file-manager-route)  :text "File Manager"}
@@ -166,14 +166,14 @@
 
 (register-handler
  :fetch-department-employees
- (fn [db [_ url]]
-   (let [_ (fetch-departments url)]
+ (fn [db [_ endpoint]]
+   (let [_ (fetch-departments (utils/api db endpoint))]
      (assoc db :deps nil))))
 
 (register-handler
  :fetch-employee
  (fn [db [_ id]]
-   (let [_ (fetch-employee (str "http://localhost:3030/api/employee/" id))]
+   (let [_ (fetch-employee (str (utils/api db "/employee/") id))]
      (assoc db :employee nil))))
 
 (register-sub
