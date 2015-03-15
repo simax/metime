@@ -86,11 +86,13 @@
 
        [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
         (if (not-empty rows-of-employees)
-          [:dom/ul
-           (for [employee-row rows-of-employees]
+          [:div
+           [:button {:class "btn btn-primary glyphicon glyphicon-plus-sign"} " Add employee"]
+           [:dom/ul {:style {:margin-top "20px"}}
+            (for [employee-row rows-of-employees]
               (for [employee-item employee-row]
                 ^{:key (:id employee-item)} [employee-list-item employee-item])
-              )])]]))
+              )]])]]))
 
 (defn department-list [departments]
   [:div.clearfix.accordian
