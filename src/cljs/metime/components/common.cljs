@@ -8,17 +8,18 @@
 
 (defn input-value [component] (-> component .-target .-value))
 
-(defn input-element
+(defn input-element []
   "An input element which updates its value on change"
   [{:keys [id name type property place-holder value]}]
-  (fn []
     [:input {:id id
              :name name
              :placeholder place-holder
              :class "form-control"
              :type type
              :value value
-             :on-change #(dispatch [:input-change property (input-value %)])}]))
+             :on-change #(dispatch [:input-change property (input-value %)])}]
+  ;;[:div "xxxx"]
+  )
 
 
 ;; (defn email-input

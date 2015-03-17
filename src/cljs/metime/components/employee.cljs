@@ -135,19 +135,19 @@
      [:label.col-md-2.control-label {:for "first-name"} "First name"]
      [:div.col-md-4
 
-;;            (com/input-element {:id first-name
-;;                          :name first-name
-;;                          :type "text"
-;;                          :property :firstname
-;;                          :place-holder "First name"
-;;                          :value (:firstname @employee)})]
-
-
-      [:input#first-name.form-control
-       {:type "text"
-        :placeholder "First name"
-        :on-change #(dispatch [:input-change :firstname (input-value %)])
+      [com/input-element
+       {:id "first-name"
+        :name "first-name"
+        :type "text"
+        :property :firstname
+        :place-holder "First name"
         :value (:firstname @employee)}]]]
+
+;;       [:input#first-name.form-control
+;;        {:type "text"
+;;         :placeholder "First name"
+;;         :on-change #(dispatch [:input-change :firstname (input-value %)])
+;;         :value (:firstname @employee)}]
 
       ;; Last name
     [:div.form-group
