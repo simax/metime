@@ -7,6 +7,7 @@
             [cljs-hash.goog :as gh]
             [metime.utils :as utils]
             [secretary.core :as secretary :refer-macros [defroute]]
+            [metime.components.common :as com]
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [register-handler
                                    path
@@ -90,7 +91,7 @@
         (if (not-empty rows-of-employees)
           [:div
            [:button {:class "btn btn-primary glyphicon glyphicon-plus-sign"} " Add employee"]
-           [:dom/ul {:style {:margin-top "20px"}}
+           [:ul {:style {:margin-top "20px"}}
             (for [employee-row rows-of-employees]
               (for [employee-item employee-row]
                 ^{:key (:id employee-item)} [employee-list-item employee-item])
@@ -98,7 +99,7 @@
 
 (defn department-list [departments]
   [:div.clearfix.accordian
-   [:dom/ul
+   [:ul
     (for [dep departments]
       ^{:key (:department dep)} [:li [department-list-item dep]]
     )
@@ -133,13 +134,22 @@
     [:div.form-group
      [:label.col-md-2.control-label {:for "first-name"} "First name"]
      [:div.col-md-4
+
+;;            (com/input-element {:id first-name
+;;                          :name first-name
+;;                          :type "text"
+;;                          :property :firstname
+;;                          :place-holder "First name"
+;;                          :value (:firstname @employee)})]
+
+
       [:input#first-name.form-control
        {:type "text"
         :placeholder "First name"
         :on-change #(dispatch [:input-change :firstname (input-value %)])
         :value (:firstname @employee)}]]]
 
-    ;; Last name
+      ;; Last name
     [:div.form-group
      [:label.col-md-2.control-label {:for "last-name"} "Last name"]
      [:div.col-md-4
