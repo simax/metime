@@ -58,3 +58,4 @@ goog.addDependency("../metime/core.js", ['metime.core'], ['cljs_hash.goog', 'rea
 goog.addDependency("../figwheel/client.js", ['figwheel.client'], ['goog.net.jsloader', 'cljs.core', 'cljs.core.async', 'clojure.string', 'cljs.reader']);
 goog.addDependency("../metime/dev.js", ['metime.dev'], ['weasel.repl', 'cljs.core', 'cljs.core.async', 'metime.core', 'figwheel.client']);
 goog.addDependency("../metime/components/utils.js", ['metime.components.utils'], ['goog.History.EventType', 'cljs_hash.goog', 'cljs.core', 'goog.history.EventType', 'cljs_hash.md5', 'goog.History', 'goog.events']);
+goog.addDependency("../metime/components/common.js", ['metime.components.common'], ['cljs.core']);

@@ -18,6 +18,8 @@
 
 (enable-console-print!)
 
+(defn input-value [component] (-> component .-target .-value))
+
 (defn handle-input-change [db [_ property-name new-value ]]
   (assoc-in db [:employee property-name] new-value))
 
@@ -134,7 +136,7 @@
       [:input#first-name.form-control
        {:type "text"
         :placeholder "First name"
-        :on-change #(dispatch [:input-change :firstname (-> % .-target .-value)])
+        :on-change #(dispatch [:input-change :firstname (input-value %)])
         :value (:firstname @employee)}]]]
 
     ;; Last name
@@ -144,7 +146,7 @@
       [:input#last-name.form-control
        {:type "text"
         :placeholder "Last name"
-        :on-change #(dispatch [:input-change :lastname (-> % .-target .-value)])
+        :on-change #(dispatch [:input-change :lastname (input-value %)])
         :value (:lastname @employee)}]]]
 
     ;; Email
@@ -154,7 +156,7 @@
       [:input#last-name.form-control
        {:type "email"
         :placeholder "Email address"
-        :on-change #(dispatch [:input-change  :email (-> % .-target .-value)])
+        :on-change #(dispatch [:input-change :email (input-value %)])
         :value (:email @employee)}]]]
 
     ;; Start date
@@ -164,7 +166,7 @@
       [:input#start-date.form-control
        {:type "date"
         :placeholder "Start date"
-        :on-change #(dispatch [:input-change  :startdate (-> % .-target .-value)])
+        :on-change #(dispatch [:input-change  :startdate (input-value %)])
         :value (:startdate @employee)}]]]
 
     ;; Save button
