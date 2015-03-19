@@ -7,7 +7,7 @@
             [cljs-hash.goog :as gh]
             [metime.utils :as utils]
             [secretary.core :as secretary :refer-macros [defroute]]
-            ;; [metime.components.common :as com]
+            [metime.components.common :as com]
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [register-handler
                                    path
@@ -18,26 +18,6 @@
            goog.History.EventType))
 
 (enable-console-print!)
-
-(defn simon [id name type place-holder value]
-  (input-element id name type place-holder value))
-
-(defn input-element []
-  "An input element which updates its value on change"
-  [xid xname xtype place-holder xvalue]
-    [:input {:id xid
-             :name xname
-             :placeholder place-holder
-             :class "form-control"
-             :type xtype
-             :value xvalue
-             ;;:on-change #(dispatch [:input-change property (input-value %)])
-             }]
-  ;;[:div "xxxx"]
-  )
-
-
-(defn input-value [component] (-> component .-target .-value))
 
 (defn handle-input-change [db [_ property-name new-value ]]
   (assoc-in db [:employee property-name] new-value))
@@ -153,33 +133,18 @@
      [:label.col-md-2.control-label {:for "first-name"} "First name"]
      [:div.col-md-4
 
-      id name type property place-holder value
-      [simon "first-name" "first-name" "text" "place-holder" (:firstname @employee)]]
+      (com/input-element
+       {:id "firstname"
+        :name "firstname"
+        :type "text"
+        :placeholder "First name"
+        :value (:firstname @employee)
+        ;;:on-change #(dispatch [:input-change :firstname (input-value %)])
+        }
+       )
+     ]]
 
-;;        {:id id
-;;                :name "first-name"
-;;                :placeholder place-holder
-;;                :class "form-control"
-;;                :type "text"
-;;                :value "James"
-;;                }
-
-;;       [com/input-element
-;;        {:id "first-name"
-;;         :name "first-name"
-;;         :type "text"
-;;         :property :firstname
-;;         :place-holder "First name"
-;;         :value (:firstname @employee)}]]
-
-;;       [:input#first-name.form-control
-;;        {:type "text"
-;;         :placeholder "First name"
-;;         :on-change #(dispatch [:input-change :firstname (input-value %)])
-;;         :value (:firstname @employee)}]
-
-     ]
-      ;; Last name
+    ;; Last name
     [:div.form-group
      [:label.col-md-2.control-label {:for "last-name"} "Last name"]
      [:div.col-md-4

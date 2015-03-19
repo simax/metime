@@ -17,6 +17,7 @@
                  [ring-cors "0.1.6"]
                  [clj-time "0.8.0"]
                  [digest "1.4.4"]
+                 [sablono "0.3.4"]
 
                  ;; Server
                  [ring "1.3.1"]
