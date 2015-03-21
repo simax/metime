@@ -21,5 +21,3 @@
           :value value
           :on-change on-change
           }])
-
-

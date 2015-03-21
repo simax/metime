@@ -257,7 +257,6 @@
           (let [new-data (make-keyword-map (get-form-params ctx))
                 existing-data (::employee ctx)
                 updated-data (merge existing-data new-data)]
-            (spit "debug.txt" existing-data)
             (emps/update-employee! updated-data)
             {::employee updated-data}))
 

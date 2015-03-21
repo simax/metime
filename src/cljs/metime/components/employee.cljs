@@ -147,31 +147,43 @@
     [:div.form-group
      [:label.col-md-2.control-label {:for "last-name"} "Last name"]
      [:div.col-md-4
-      [:input#last-name.form-control
-       {:type "text"
+      [com/input-element
+       {:id "lastname"
+        :name "lastname"
+        :type "text"
         :placeholder "Last name"
-        :on-change #(dispatch [:input-change :lastname (input-value %)])
-        :value (:lastname @employee)}]]]
+        :value (:lastname @employee)
+        :on-change #(dispatch [:input-change :lastname (com/input-value %)])
+        }]]
+      ]
 
     ;; Email
     [:div.form-group
      [:label.col-md-2.control-label {:for "email"} "Email"]
      [:div.col-md-4
-      [:input#last-name.form-control
-       {:type "email"
+      [com/input-element
+       {:id "email"
+        :name "email"
+        :type "email"
         :placeholder "Email address"
-        :on-change #(dispatch [:input-change :email (input-value %)])
-        :value (:email @employee)}]]]
+        :value (:email @employee)
+        :on-change #(dispatch [:input-change :email (com/input-value %)])
+        }]]
+     ]
 
     ;; Start date
     [:div.form-group
      [:label.col-md-2.control-label {:for "start-date"} "Start date"]
      [:div.col-md-3
-      [:input#start-date.form-control
-       {:type "date"
-        :placeholder "Start date"
-        :on-change #(dispatch [:input-change  :startdate (input-value %)])
-        :value (:startdate @employee)}]]]
+       [com/input-element
+        {:id "startdate"
+         :name "startdate"
+         :type "date"
+         :placeholder "Start date"
+         :value (:startdate @employee)
+         :on-change #(dispatch [:input-change :startdate (com/input-value %)])
+         }]]
+     ]
 
     ;; Save button
     [:div.form-group
