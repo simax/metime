@@ -133,15 +133,14 @@
      [:label.col-md-2.control-label {:for "first-name"} "First name"]
      [:div.col-md-4
 
-      (com/input-element
+      [com/input-element
        {:id "firstname"
         :name "firstname"
         :type "text"
         :placeholder "First name"
         :value (:firstname @employee)
-        ;;:on-change #(dispatch [:input-change :firstname (input-value %)])
-        }
-       )
+        :on-change #(dispatch [:input-change :firstname (com/input-value %)])
+       }]
      ]]
 
     ;; Last name
@@ -198,5 +197,5 @@
          (swap! app #(assoc % :employee emp)))))
     (fn [app opts]
       (if (contains? @app :employee)
-        (employee-container-form (:employee @app))
-        (employee-not-found)))))
+        [employee-container-form (:employee @app)]
+        [employee-not-found]))))

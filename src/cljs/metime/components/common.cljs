@@ -1,6 +1,6 @@
 (ns metime.components.common
   (:require
-            [sablono.core :as html :refer-macros [html]]
+            ;;[sablono.core :as html :refer-macros [html]]
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [register-handler
                                    path
@@ -10,16 +10,16 @@
 
 (defn input-value [component] (-> component .-target .-value))
 
-(defn input-element [{:keys [id name type placeholder value]}]
+(defn input-element [{:keys [id name type placeholder on-change value]}]
   "An input element which updates its value on change"
-  (html [:input
+   [:input
          {:id id
           :name name
           :placeholder placeholder
           :class "form-control"
           :type type
           :value value
-          :on-change #(dispatch [:input-change property (input-value %)])
-          }]))
+          :on-change on-change
+          }])
 
 
