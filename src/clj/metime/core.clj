@@ -17,6 +17,8 @@
     (ANY "/departments"  [] (departments))
     (ANY "/department/:id" [id] (department id))
     (ANY "/employees" [] (employees))
+    ;; Is this route needed?
+    (ANY "/employees/add" [] (employees))
     (ANY "/employee/:id" [id] (employee id))
     (route/resources "/")
     (route/not-found "Not Found")))

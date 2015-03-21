@@ -85,6 +85,9 @@
 (defroute employee-route "/employee/:id" [id]
   (dispatch [:employee-route-switcher employee-component id]))
 
+(defroute employee-add-route "/employees/add" []
+  (dispatch [:employee-route-switcher employee-component 0]))
+
 (defroute tables-route "/tables" []
   (dispatch [:switch-route tables-component (tables-route)]))
 
@@ -173,8 +176,21 @@
 (register-handler
  :fetch-employee
  (fn [db [_ id]]
-   (let [_ (fetch-employee (str (utils/api db "/employee/") id))]
-     (assoc db :employee nil))))
+   (if (> id 0)
+     (fetch-employee (str (utils/api db "/employee/") id)))
+     (assoc-in db [:employee] {:id 0
+                               :firstname ""
+                               :lastname ""
+                               :email ""
+                               :dob nil
+                               :startdate nil
+                               :endate nil
+                               :this_year_opening 25
+                               :this_year_remaining 25
+                               :next_year_opening 25
+                               :next_year_remaining 25
+                               :departments_id 3
+                               :managerid 10})))
 
 (register-sub
  :db-changed?

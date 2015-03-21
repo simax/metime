@@ -26,9 +26,19 @@
   :input-change
   handle-input-change)
 
+(defn handle-employee-add [db _]
+  ;; Need to make this better
+  (let [url "#/employees/add"]
+    (utils/set-hash! url)
+    (secretary/dispatch! url)))
+
+(register-handler
+ :employee-add
+ handle-employee-add)
+
 (defn handle-employee-save [db _]
   (let [employee-id (get-in db [:employee :id])]
-    (if (not (nil? employee-id))
+    (if (not (zero? employee-id))
       (let [endpoint (utils/api db (str "/employee/" employee-id))]
         (http/put endpoint {:form-params (:employee db)}))
       (let [endpoint (utils/api db "/employees")]
@@ -45,24 +55,23 @@
     (if (> name-length 20) (str (subs disp-name 0 17) "...") disp-name)))
 
 (defn employee-list-item [{:keys [lastname firstname email id]}]
-  (fn [{:keys [lastname firstname email id]}]
-    [:div {:class "col-md-3 col-lg-3"}
-     [:div {:class "dash-unit"}
-      [:div {:class "thumbnail" :style {:margin-top "20px"}}
-       [:a {:href (str "#/employee/" id)}
-        [:h1 (employee-name firstname lastname)]
-        [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
-        ]
-       [:div {:class "info-user"}
-        [:span {:aria-hidden "true" :class "li_user fs1"}]
-        [:span {:aria-hidden "true" :class "li_calendar fs1"}]
-        [:span {:aria-hidden "true" :class "li_mail fs1"}]
-        [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
-        ]
+  [:div {:class "col-md-3 col-lg-3"}
+   [:div {:class "dash-unit"}
+    [:div {:class "thumbnail" :style {:margin-top "20px"}}
+     [:a {:href (str "#/employee/" id)}
+      [:h1 (employee-name firstname lastname)]
+      [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
+      ]
+     [:div {:class "info-user"}
+      [:span {:aria-hidden "true" :class "li_user fs1"}]
+      [:span {:aria-hidden "true" :class "li_calendar fs1"}]
+      [:span {:aria-hidden "true" :class "li_mail fs1"}]
+      [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
+      ]
 
-       ;; For now, just simulate the number of days remaining
-       [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
-       ]]]))
+     ;; For now, just simulate the number of days remaining
+     [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
+     ]]])
 
 (defn department-list-item [{:keys [department managerid manager-firstname manager-lastname manager-email employees]}]
   (let [department-list-item (filter #(not= (:id %) managerid) employees)
@@ -88,7 +97,8 @@
        [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
         (if (not-empty rows-of-employees)
           [:div
-           [:button {:class "btn btn-primary glyphicon glyphicon-plus-sign"} " Add employee"]
+           [:button {:class "btn btn-primary glyphicon glyphicon-plus-sign"
+                     :on-click #(dispatch [:employee-add])} " Add employee"]
            [:ul {:style {:margin-top "20px"}}
             (for [employee-row rows-of-employees]
               (for [employee-item employee-row]
@@ -99,8 +109,7 @@
   [:div.clearfix.accordian
    [:ul
     (for [dep departments]
-      ^{:key (:department dep)} [:li [department-list-item dep]]
-    )
+      ^{:key (:department dep)} [:li [department-list-item dep]])
     ]])
 
 (defn departments-container [deps]
@@ -109,10 +118,11 @@
 (defn employee-not-found []
   [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
 
+(defn is-new-employee? [employee]
+  (zero? (:id @employee)))
 
 (defn employee-container-form [employee]
-  [:div {:style {:padding "20" :background-color "white" :height "500"}}
-
+  [:div.well
    [:div.well
     ;; Employee gravatar
     [:div.container-fluid
@@ -130,7 +140,7 @@
    [:form.form-horizontal
     ;; First name
     [:div.form-group
-     [:label.col-md-2.control-label {:for "first-name"} "First name"]
+     [:label.col-md-2.control-label {:for "firstname"} "First name"]
      [:div.col-md-4
 
       [com/input-element
@@ -145,7 +155,7 @@
 
     ;; Last name
     [:div.form-group
-     [:label.col-md-2.control-label {:for "last-name"} "Last name"]
+     [:label.col-md-2.control-label {:for "lastname"} "Last name"]
      [:div.col-md-4
       [com/input-element
        {:id "lastname"
@@ -171,9 +181,23 @@
         }]]
      ]
 
+    ;; Dob
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "dob"} "Date of birth"]
+     [:div.col-md-3
+       [com/input-element
+        {:id "dob"
+         :name "dob"
+         :type "date"
+         :placeholder "Dob"
+         :value (:dob @employee)
+         :on-change #(dispatch [:input-change :dob (com/input-value %)])
+         }]]
+     ]
+
     ;; Start date
     [:div.form-group
-     [:label.col-md-2.control-label {:for "start-date"} "Start date"]
+     [:label.col-md-2.control-label {:for "startdate"} "Start date"]
      [:div.col-md-3
        [com/input-element
         {:id "startdate"
@@ -182,6 +206,92 @@
          :placeholder "Start date"
          :value (:startdate @employee)
          :on-change #(dispatch [:input-change :startdate (com/input-value %)])
+         }]]
+     ]
+
+    ;; Departments drop down list
+
+    ;; password
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "password"} "Password"]
+     [:div.col-md-3
+       [com/input-element
+        {:id "password"
+         :name "password"
+         :type "password"
+         :placeholder "Password"
+         :value (:password @employee)
+         :on-change #(dispatch [:input-change :password (com/input-value %)])
+         }]]
+     ]
+
+    ;; password-confirm
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "password-confirm"} "Confirm password"]
+     [:div.col-md-3
+       [com/input-element
+        {:id "password-confirm"
+         :name "password-confirm"
+         :type "password"
+         :placeholder "Confirm password"
+         :value (:password-confirm @employee)
+         :on-change #(dispatch [:input-change :password-confirm (com/input-value %)])
+         }]]
+     ]
+
+    ;; this_year_opening
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "this_year_opening"} "This year opening"]
+     [:div.col-md-3
+       [com/input-element
+        {:id "this_year_opening"
+         :name "this_year_opening"
+         :type "number"
+         :placeholder ""
+         :value (:this_year_opening @employee)
+         :on-change #(dispatch [:input-change :this_year_opening (com/input-value %)])
+         }]]
+     ]
+
+    ;; this_year_remaining
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "this_year_remaining"} "This year remaining"]
+     [:div.col-md-3
+       [com/input-element
+        {:id "this_year_remaining"
+         :name "this_year_remaining"
+         :type "number"
+         :placeholder ""
+         :value (:this_year_remaining @employee)
+         :on-change #(dispatch [:input-change :this_year_remaining (com/input-value %)])
+         }]]
+     ]
+
+    ;; next_year_opening
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "next_year_opening"} "Next year opening"]
+     [:div.col-md-3
+       [com/input-element
+        {:id "next_year_opening"
+         :name "next_year_opening"
+         :type "number"
+         :placeholder ""
+         :value (:next_year_opening @employee)
+         :on-change #(dispatch [:input-change :next_year_opening (com/input-value %)])
+         }]]
+     ]
+
+    ;; next_year_remaining
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "next_year_remaining"} "Next year remaining"]
+     [:div.col-md-3
+       [com/input-element
+        {:id "next_year_remaining"
+         :name "next_year_remaining"
+         :type "number"
+         :placeholder ""
+         :value (:next_year_remaining @employee)
+         :on-change #(dispatch [:input-change :next_year_remaining (com/input-value %)])
          }]]
      ]
 
