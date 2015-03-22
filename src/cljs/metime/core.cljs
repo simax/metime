@@ -184,13 +184,13 @@
                                :email ""
                                :dob nil
                                :startdate nil
-                               :endate nil
+                               :enddate nil
                                :this_year_opening 25
                                :this_year_remaining 25
                                :next_year_opening 25
                                :next_year_remaining 25
                                :departments_id 3
-                               :managerid 10})))
+                               :managerid 27})))
 
 (register-sub
  :db-changed?

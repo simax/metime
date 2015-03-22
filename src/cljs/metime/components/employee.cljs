@@ -209,6 +209,20 @@
          }]]
      ]
 
+    ;; End date
+    [:div.form-group
+     [:label.col-md-2.control-label {:for "enddate"} "End date"]
+     [:div.col-md-3
+       [com/input-element
+        {:id "enddate"
+         :name "enddate"
+         :type "date"
+         :placeholder "End date"
+         :value (:enddate @employee)
+         :on-change #(dispatch [:input-change :enddate (com/input-value %)])
+         }]]
+     ]
+
     ;; Departments drop down list
 
     ;; password
