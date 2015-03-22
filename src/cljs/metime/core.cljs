@@ -74,7 +74,7 @@
           [ec/employee-container-form emp])))))
 
 (defn not-found []
-  [:div {:style {:height "500px"}} [:h1 {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
+  [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
 (defroute root-route "/" []
   (dispatch [:switch-route employees-component (employees-route)]))
@@ -219,8 +219,8 @@
         [loader-component]
         [main-panel]))))
 
- (defn routing-history []
-   "Routing history"
+ (defn hook-browser-navigation! []
+   "Routing history, back button etc."
    (let [h (History.)
          f (fn [he] ;; goog.History.Event
              (let [token (.-token he)]
@@ -238,4 +238,4 @@
   (dispatch [:initialise-db])
   ;; Main app component
   (reagent/render [top-panel] (js/document.getElementById "app-container"))
-  (routing-history))
+  (hook-browser-navigation!))

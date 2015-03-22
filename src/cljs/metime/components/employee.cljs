@@ -116,7 +116,8 @@
   [department-list deps])
 
 (defn employee-not-found []
-  [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."])
+  [:div.well [:h1.text-center {:style {:color "red"}} "Sorry, we couldn't find that employee."]])
+
 
 (defn is-new-employee? [employee]
   (zero? (:id @employee)))
