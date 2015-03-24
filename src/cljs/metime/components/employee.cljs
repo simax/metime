@@ -36,13 +36,17 @@
  :employee-add
  handle-employee-add)
 
+(defn is-new-employee? [id]
+  (zero? id))
+
 (defn handle-employee-save [db _]
   (let [employee-id (get-in db [:employee :id])]
-    (if (not (zero? employee-id))
+    (if (not (is-new-employee? employee-id))
       (let [endpoint (utils/api db (str "/employee/" employee-id))]
         (http/put endpoint {:form-params (:employee db)}))
-      (let [endpoint (utils/api db "/employees")]
-        (http/post endpoint {:form-params (:employee db)})))
+      (let [endpoint (utils/api db "/employees")
+            data (assoc (:employee db) :password "password1" :password-confirm "password1")]
+        (http/post endpoint {:form-params data})))
     db))
 
 (register-handler
@@ -117,10 +121,6 @@
 
 (defn employee-not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "Sorry, we couldn't find that employee."]])
-
-
-(defn is-new-employee? [employee]
-  (zero? (:id @employee)))
 
 (defn employee-container-form [employee]
   [:div.well
@@ -227,32 +227,32 @@
     ;; Departments drop down list
 
     ;; password
-    [:div.form-group
-     [:label.col-md-2.control-label {:for "password"} "Password"]
-     [:div.col-md-3
-       [com/input-element
-        {:id "password"
-         :name "password"
-         :type "password"
-         :placeholder "Password"
-         :value (:password @employee)
-         :on-change #(dispatch [:input-change :password (com/input-value %)])
-         }]]
-     ]
+;;     [:div.form-group
+;;      [:label.col-md-2.control-label {:for "password"} "Password"]
+;;      [:div.col-md-3
+;;        [com/input-element
+;;         {:id "password"
+;;          :name "password"
+;;          :type "password"
+;;          :placeholder "Password"
+;;          :value (:password @employee)
+;;          :on-change #(dispatch [:input-change :password (com/input-value %)])
+;;          }]]
+;;      ]
 
-    ;; password-confirm
-    [:div.form-group
-     [:label.col-md-2.control-label {:for "password-confirm"} "Confirm password"]
-     [:div.col-md-3
-       [com/input-element
-        {:id "password-confirm"
-         :name "password-confirm"
-         :type "password"
-         :placeholder "Confirm password"
-         :value (:password-confirm @employee)
-         :on-change #(dispatch [:input-change :password-confirm (com/input-value %)])
-         }]]
-     ]
+;;     ;; password-confirm
+;;     [:div.form-group
+;;      [:label.col-md-2.control-label {:for "password-confirm"} "Confirm password"]
+;;      [:div.col-md-3
+;;        [com/input-element
+;;         {:id "password-confirm"
+;;          :name "password-confirm"
+;;          :type "password"
+;;          :placeholder "Confirm password"
+;;          :value (:password-confirm @employee)
+;;          :on-change #(dispatch [:input-change :password-confirm (com/input-value %)])
+;;          }]]
+;;      ]
 
     ;; this_year_opening
     [:div.form-group
