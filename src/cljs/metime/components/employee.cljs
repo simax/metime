@@ -239,12 +239,12 @@
        [:div.form-group
         [:label.col-md-2.control-label {:for "department"} "Department"]
         [:div.col-md-3
-         [:select.form-control {:name "department"}
-          ;;[:option {:value 0} ""]
-          ;; Need to add department id into the mix here.
+         [:select.form-control {:id "department"
+                                :name "department"
+                                :value (:departments_id @employee)
+                                :on-change #(dispatch [:input-change :departments_id (com/input-value %)])}
           (for [m @departments]
-            [:option (:department m)])]
-          ]]
+            ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])]]]
 
        ;; this_year_opening
        [:div.form-group
