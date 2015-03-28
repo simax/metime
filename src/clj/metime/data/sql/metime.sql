@@ -2,7 +2,7 @@
 -- Get all departments
 select
 -- Department info
-d.id, d.department, d.managerid,
+d.id, d.id as 'departmentid', d.department, d.managerid,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email'
 from departments d left join employees e on d.managerid = e.id
@@ -13,7 +13,7 @@ order by d.department
 -- Get all department with employees
 select
 -- Department info
-d.id, d.department, d.managerid,
+d.id, d.id as 'departmentid', d.id as 'departmentid', d.department, d.managerid,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email',
 -- Employee info

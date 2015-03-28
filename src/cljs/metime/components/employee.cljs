@@ -53,6 +53,22 @@
  :employee-save
  handle-employee-save)
 
+(defn parse-int [s]
+   (Integer. (re-find  #"\d+" s )))
+
+(defn handle-department-change [db [_ id]]
+  (let [deps (:deps db)
+        dep (first (filter #(= (:departmentid %) (js/parseInt id)) deps))
+        updated-emp (assoc (:employee db)
+                      :departments_id id
+                      :managerid (:managerid dep)
+                      :manager-email (:manager-email dep))]
+    (assoc db :employee updated-emp)))
+
+(register-handler
+ :department-change
+ handle-department-change)
+
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
         name-length (count disp-name)]
@@ -242,7 +258,7 @@
          [:select.form-control {:id "department"
                                 :name "department"
                                 :value (:departments_id @employee)
-                                :on-change #(dispatch [:input-change :departments_id (com/input-value %)])}
+                                :on-change #(dispatch [:department-change (com/input-value %)])}
           (for [m @departments]
             ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])]]]
 

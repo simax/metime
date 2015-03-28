@@ -189,8 +189,8 @@
                                :this_year_remaining 25
                                :next_year_opening 25
                                :next_year_remaining 25
-                               :departments_id 3
-                               :managerid 27})))
+                               :departments_id 0
+                               :managerid 0})))
 
 (register-sub
  :db-changed?
@@ -227,7 +227,7 @@
                (if (seq token)
                  (secretary/dispatch! token)
                  (do
-                   ;; If we're at the root, go to #/employees
+                   ;; If we're at the root, redirect to #/employees
                    (utils/set-hash! "#/employees")
                    (secretary/dispatch! (employees-route))))))]
 
