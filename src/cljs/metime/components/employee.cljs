@@ -146,125 +146,123 @@
  :deps
  departments-query)
 
+(defn employee-core-heading [employee]
+  [:div.well
+   ;; Employee gravatar
+   [:div.container-fluid
+    [:div.row
+     [:div.col-md-2  [utils/gravatar {:gravatar-email (:email @employee)}]]
+     [:h1.col-md-8 (str (:firstname @employee) " " (:lastname @employee))]
+
+     [:div.col-md-2
+      [:h6.col-md-offset-4 "Manager"]
+      [:div [utils/gravatar {:gravatar-email (:manager-email @employee) :gravatar-size 75}]]
+      [:h5.col-md-offset-2 (str (:manager-firstname @employee) " " (:manager-lastname @employee))]
+      ]]
+    ]]
+  )
 
 (defn employee-core-details [employee]
   (let [departments (subscribe [:deps])]
     (fn []
       [:div.well
-       [:div.well
-        ;; Employee gravatar
-        [:div.container-fluid
-         [:div.row
-          [:div.col-md-2  [utils/gravatar {:gravatar-email (:email @employee)}]]
-          [:h1.col-md-8 (str (:firstname @employee) " " (:lastname @employee))]
+       [:form.form-horizontal
 
-          [:div.col-md-2
-           [:h6.col-md-offset-4 "Manager"]
-           [:div [utils/gravatar {:gravatar-email (:manager-email @employee) :gravatar-size 75}]]
-           [:h5.col-md-offset-2 (str (:manager-firstname @employee) " " (:manager-lastname @employee))]
-           ]]
-         ]]
+        ;; Departments drop down list
+        [:div.form-group
+         [:label.col-md-4.control-label {:for "department"} "Department"]
+         [:div.col-md-8
+          [:select.form-control {:id "department"
+                                 :name "department"
+                                 :value (:departments_id @employee)
+                                 :on-change #(dispatch [:department-change (com/input-value %)])}
+           (for [m @departments]
+             ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])]]]
 
-       [:div.well
-        [:form.form-horizontal
+        ;; First name
+        [:div.form-group
+         [:label.col-md-4.control-label {:for "firstname"} "First name"]
+         [:div.col-md-8
+          [com/input-element
+           {:id "firstname"
+            :name "firstname"
+            :type "text"
+            :placeholder "First name"
+            :value (:firstname @employee)
+            :on-change #(dispatch [:input-change :firstname (com/input-value %)])
+            }]
+          ]]
 
-         ;; Departments drop down list
-         [:div.form-group
-          [:label.col-md-2.control-label {:for "department"} "Department"]
-          [:div.col-md-3
-           [:select.form-control {:id "department"
-                                  :name "department"
-                                  :value (:departments_id @employee)
-                                  :on-change #(dispatch [:department-change (com/input-value %)])}
-            (for [m @departments]
-              ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])]]]
+        ;; Last name
+        [:div.form-group
+         [:label.col-md-4.control-label {:for "lastname"} "Last name"]
+         [:div.col-md-8
+          [com/input-element
+           {:id "lastname"
+            :name "lastname"
+            :type "text"
+            :placeholder "Last name"
+            :value (:lastname @employee)
+            :on-change #(dispatch [:input-change :lastname (com/input-value %)])
+            }]]
+         ]
 
-         ;; First name
-         [:div.form-group
-          [:label.col-md-2.control-label {:for "firstname"} "First name"]
-          [:div.col-md-4
+        ;; Email
+        [:div.form-group
+         [:label.col-md-4.control-label {:for "email"} "Email"]
+         [:div.col-md-8
+          [com/input-element
+           {:id "email"
+            :name "email"
+            :type "email"
+            :placeholder "Email address"
+            :value (:email @employee)
+            :on-change #(dispatch [:input-change :email (com/input-value %)])
+            }]]
+         ]
 
-           [com/input-element
-            {:id "firstname"
-             :name "firstname"
-             :type "text"
-             :placeholder "First name"
-             :value (:firstname @employee)
-             :on-change #(dispatch [:input-change :firstname (com/input-value %)])
-             }]
-           ]]
+        ;; DOB
+        [:div.form-group
+         [:label.col-md-4.control-label {:for "dob"} "Date of birth"]
+         [:div.col-md-8
+          [com/input-element
+           {:id "dob"
+            :name "dob"
+            :type "date"
+            :placeholder "Dob"
+            :value (:dob @employee)
+            :on-change #(dispatch [:input-change :dob (com/input-value %)])
+            }]]
+         ]
 
-         ;; Last name
-         [:div.form-group
-          [:label.col-md-2.control-label {:for "lastname"} "Last name"]
-          [:div.col-md-4
-           [com/input-element
-            {:id "lastname"
-             :name "lastname"
-             :type "text"
-             :placeholder "Last name"
-             :value (:lastname @employee)
-             :on-change #(dispatch [:input-change :lastname (com/input-value %)])
-             }]]
-          ]
+        ;; Start date
+        [:div.form-group
+         [:label.col-md-4.control-label {:for "startdate"} "Start date"]
+         [:div.col-md-8
+          [com/input-element
+           {:id "startdate"
+            :name "startdate"
+            :type "date"
+            :placeholder "Start date"
+            :value (:startdate @employee)
+            :on-change #(dispatch [:input-change :startdate (com/input-value %)])
+            }]]
+         ]
 
-         ;; Email
-         [:div.form-group
-          [:label.col-md-2.control-label {:for "email"} "Email"]
-          [:div.col-md-4
-           [com/input-element
-            {:id "email"
-             :name "email"
-             :type "email"
-             :placeholder "Email address"
-             :value (:email @employee)
-             :on-change #(dispatch [:input-change :email (com/input-value %)])
-             }]]
-          ]
-
-         ;; DOB
-         [:div.form-group
-          [:label.col-md-2.control-label {:for "dob"} "Date of birth"]
-          [:div.col-md-3
-           [com/input-element
-            {:id "dob"
-             :name "dob"
-             :type "date"
-             :placeholder "Dob"
-             :value (:dob @employee)
-             :on-change #(dispatch [:input-change :dob (com/input-value %)])
-             }]]
-          ]
-
-         ;; Start date
-         [:div.form-group
-          [:label.col-md-2.control-label {:for "startdate"} "Start date"]
-          [:div.col-md-3
-           [com/input-element
-            {:id "startdate"
-             :name "startdate"
-             :type "date"
-             :placeholder "Start date"
-             :value (:startdate @employee)
-             :on-change #(dispatch [:input-change :startdate (com/input-value %)])
-             }]]
-          ]
-
-         ;; End date
-         [:div.form-group
-          [:label.col-md-2.control-label {:for "enddate"} "End date"]
-          [:div.col-md-3
-           [com/input-element
-            {:id "enddate"
-             :name "enddate"
-             :type "date"
-             :placeholder "End date"
-             :value (:enddate @employee)
-             :on-change #(dispatch [:input-change :enddate (com/input-value %)])
-             }]]
-          ]
-         ]]
-       ]
+        ;; End date
+        [:div.form-group
+         [:label.col-md-4.control-label {:for "enddate"} "End date"]
+         [:div.col-md-8
+          [com/input-element
+           {:id "enddate"
+            :name "enddate"
+            :type "date"
+            :placeholder "End date"
+            :value (:enddate @employee)
+            :on-change #(dispatch [:input-change :enddate (com/input-value %)])
+            }]]
+         ]
+        ]]
 )))
 
 
@@ -273,8 +271,8 @@
    [:form.form-horizontal
     ;; this_year_opening
     [:div.form-group
-     [:label.col-md-2.control-label {:for "this_year_opening"} "This year opening"]
-     [:div.col-md-3
+     [:label.col-md-4.control-label {:for "this_year_opening"} "This year opening"]
+     [:div.col-md-8
       [com/input-element
        {:id "this_year_opening"
         :name "this_year_opening"
@@ -287,8 +285,8 @@
 
     ;; this_year_remaining
     [:div.form-group
-     [:label.col-md-2.control-label {:for "this_year_remaining"} "This year remaining"]
-     [:div.col-md-3
+     [:label.col-md-4.control-label {:for "this_year_remaining"} "This year remaining"]
+     [:div.col-md-8
       [com/input-element
        {:id "this_year_remaining"
         :name "this_year_remaining"
@@ -301,8 +299,8 @@
 
     ;; next_year_opening
     [:div.form-group
-     [:label.col-md-2.control-label {:for "next_year_opening"} "Next year opening"]
-     [:div.col-md-3
+     [:label.col-md-4.control-label {:for "next_year_opening"} "Next year opening"]
+     [:div.col-md-8
       [com/input-element
        {:id "next_year_opening"
         :name "next_year_opening"
@@ -315,8 +313,8 @@
 
     ;; next_year_remaining
     [:div.form-group
-     [:label.col-md-2.control-label {:for "next_year_remaining"} "Next year remaining"]
-     [:div.col-md-3
+     [:label.col-md-4.control-label {:for "next_year_remaining"} "Next year remaining"]
+     [:div.col-md-8
       [com/input-element
        {:id "next_year_remaining"
         :name "next_year_remaining"
@@ -336,8 +334,15 @@
 
       [:div.well
 
-       [employee-core-details employee]
-       [employee-balances employee]
+       [employee-core-heading employee]
+       [:div.well
+        [:div.row
+         [:div.col-md-6
+          [employee-core-details employee]]
+         [:div.col-md-6
+          [employee-balances employee]]
+         ]
+       ]
 
        [:div.well
         [:form.form-horizontal
