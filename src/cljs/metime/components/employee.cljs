@@ -165,13 +165,14 @@
 (defn employee-core-details [employee]
   (let [departments (subscribe [:deps])]
     (fn []
-      [:div.well
+      [:div.panel.panel-default
+       [:div.panel-heading [:h3.panel-title "Employee"]]
        [:form.form-horizontal
 
         ;; Departments drop down list
         [:div.form-group
          [:label.col-md-4.control-label {:for "department"} "Department"]
-         [:div.col-md-8
+         [:div.col-md-7
           [:select.form-control {:id "department"
                                  :name "department"
                                  :value (:departments_id @employee)
@@ -182,7 +183,7 @@
         ;; First name
         [:div.form-group
          [:label.col-md-4.control-label {:for "firstname"} "First name"]
-         [:div.col-md-8
+         [:div.col-md-7
           [com/input-element
            {:id "firstname"
             :name "firstname"
@@ -196,7 +197,7 @@
         ;; Last name
         [:div.form-group
          [:label.col-md-4.control-label {:for "lastname"} "Last name"]
-         [:div.col-md-8
+         [:div.col-md-7
           [com/input-element
            {:id "lastname"
             :name "lastname"
@@ -210,7 +211,7 @@
         ;; Email
         [:div.form-group
          [:label.col-md-4.control-label {:for "email"} "Email"]
-         [:div.col-md-8
+         [:div.col-md-7
           [com/input-element
            {:id "email"
             :name "email"
@@ -224,7 +225,7 @@
         ;; DOB
         [:div.form-group
          [:label.col-md-4.control-label {:for "dob"} "Date of birth"]
-         [:div.col-md-8
+         [:div.col-md-4
           [com/input-element
            {:id "dob"
             :name "dob"
@@ -238,7 +239,7 @@
         ;; Start date
         [:div.form-group
          [:label.col-md-4.control-label {:for "startdate"} "Start date"]
-         [:div.col-md-8
+         [:div.col-md-4
           [com/input-element
            {:id "startdate"
             :name "startdate"
@@ -252,7 +253,7 @@
         ;; End date
         [:div.form-group
          [:label.col-md-4.control-label {:for "enddate"} "End date"]
-         [:div.col-md-8
+         [:div.col-md-4
           [com/input-element
            {:id "enddate"
             :name "enddate"
@@ -267,12 +268,13 @@
 
 
 (defn employee-balances [employee]
-  [:div.well
+  [:div.panel.panel-default
+   [:div.panel-heading [:h3.panel-title "Balances"]]
    [:form.form-horizontal
     ;; this_year_opening
     [:div.form-group
      [:label.col-md-6.control-label {:for "this_year_opening"} "This year opening"]
-     [:div.col-md-3
+     [:div.col-md-4
       [com/input-element
        {:id "this_year_opening"
         :name "this_year_opening"
@@ -286,7 +288,7 @@
     ;; this_year_remaining
     [:div.form-group
      [:label.col-md-6.control-label {:for "this_year_remaining"} "This year remaining"]
-     [:div.col-md-3
+     [:div.col-md-4
       [com/input-element
        {:id "this_year_remaining"
         :name "this_year_remaining"
@@ -300,7 +302,7 @@
     ;; next_year_opening
     [:div.form-group
      [:label.col-md-6.control-label {:for "next_year_opening"} "Next year opening"]
-     [:div.col-md-3
+     [:div.col-md-4
       [com/input-element
        {:id "next_year_opening"
         :name "next_year_opening"
@@ -314,7 +316,7 @@
     ;; next_year_remaining
     [:div.form-group
      [:label.col-md-6.control-label {:for "next_year_remaining"} "Next year remaining"]
-     [:div.col-md-3
+     [:div.col-md-4
       [com/input-element
        {:id "next_year_remaining"
         :name "next_year_remaining"
@@ -337,9 +339,9 @@
        [employee-core-heading employee]
        [:div.well
         [:div.row
-         [:div.col-md-6
+         [:div.col-md-8
           [employee-core-details employee]]
-         [:div.col-md-6
+         [:div.col-md-4
           [employee-balances employee]]
          ]
        ]
