@@ -271,8 +271,8 @@
    [:form.form-horizontal
     ;; this_year_opening
     [:div.form-group
-     [:label.col-md-4.control-label {:for "this_year_opening"} "This year opening"]
-     [:div.col-md-8
+     [:label.col-md-6.control-label {:for "this_year_opening"} "This year opening"]
+     [:div.col-md-3
       [com/input-element
        {:id "this_year_opening"
         :name "this_year_opening"
@@ -285,8 +285,8 @@
 
     ;; this_year_remaining
     [:div.form-group
-     [:label.col-md-4.control-label {:for "this_year_remaining"} "This year remaining"]
-     [:div.col-md-8
+     [:label.col-md-6.control-label {:for "this_year_remaining"} "This year remaining"]
+     [:div.col-md-3
       [com/input-element
        {:id "this_year_remaining"
         :name "this_year_remaining"
@@ -299,8 +299,8 @@
 
     ;; next_year_opening
     [:div.form-group
-     [:label.col-md-4.control-label {:for "next_year_opening"} "Next year opening"]
-     [:div.col-md-8
+     [:label.col-md-6.control-label {:for "next_year_opening"} "Next year opening"]
+     [:div.col-md-3
       [com/input-element
        {:id "next_year_opening"
         :name "next_year_opening"
@@ -313,8 +313,8 @@
 
     ;; next_year_remaining
     [:div.form-group
-     [:label.col-md-4.control-label {:for "next_year_remaining"} "Next year remaining"]
-     [:div.col-md-8
+     [:label.col-md-6.control-label {:for "next_year_remaining"} "Next year remaining"]
+     [:div.col-md-3
       [com/input-element
        {:id "next_year_remaining"
         :name "next_year_remaining"
