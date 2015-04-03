@@ -9,12 +9,10 @@
 (enable-console-print!)
 
 (defn gravatar [data]
-  (let [email-address (:gravatar-email data)
+  (let [email-address (or (:gravatar-email data) "")
         size (or (:gravatar-size data) 100)]
     [:img.gravatar.img-circle
-     (if (seq email-address)
-       {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?s=" size "&r=PG&d=mm")}
-       {:src (str "assets/img/blank-avatar.png") :width "100" :height "100"})]))
+     {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?size=" size "&r=PG&d=mm")}]))
 
 (defn set-hash! [loc]
   "Set the hash portion of the url in the address bar.
