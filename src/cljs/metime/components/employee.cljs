@@ -54,7 +54,9 @@
  handle-employee-save)
 
 (defn parse-int [s]
-   (Integer. (re-find  #"\d+" s )))
+;;   (if (not (seq s))
+;;     0
+   (js/parseInt s))
 
 (defn handle-department-change [db [_ id]]
   (let [deps (:deps db)
@@ -182,6 +184,13 @@
            (for [m @departments]
              ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])]]]
 
+
+;;         [:div.form-group
+;;          [:label.col-md-4.control-label {:for "firstname"} ":default-value"]
+;;          [:div.col-md-7
+;;           [my-input (:firstname @employee)]
+;;           ]]
+
         ;; First name
         [:div.form-group
          [:label.col-md-4.control-label {:for "firstname"} "First name"]
@@ -268,6 +277,21 @@
         ]]]
 )))
 
+(defn my-input [data]
+  (if (and (number? data) (not (= data 25)))
+    [:input {:type "number"
+             :name "input-box"
+             :default-value data
+             :class "form-control"
+             :on-change #(dispatch [:input-change :firstname (com/input-value %)])
+             }]
+;;     [:input {:type "text"
+;;              :name "input-box"
+;;              :placeholder "Enter some text"
+;;              :class "form-control"
+;;              :on-change #(dispatch [:input-change :firstname (com/input-value %)])
+;;              }]
+    ))
 
 (defn employee-balances [employee]
   [:div.panel.panel-default
@@ -275,6 +299,13 @@
    [:div.panel-body
 
     [:form.form-horizontal
+
+     [:div.form-group
+      [:label.col-md-6.control-label "Default value:"]
+      [:div.col-md-4
+       (js/console.log (str "parse-int: " (parse-int (:this_year_opening @employee))))
+     [my-input (parse-int (:this_year_opening @employee))]]]
+
      ;; this_year_opening
      [:div.form-group
       [:label.col-md-6.control-label {:for "this_year_opening"} "This year opening"]
@@ -340,13 +371,15 @@
 
       [:div.well
 
-       [employee-core-heading employee]
+      [employee-core-heading employee]
        [:div.well
         [:div.row
          [:div.col-md-8
-          [employee-core-details employee]]
+          [employee-core-details employee]
+          ]
          [:div.col-md-4
-          [employee-balances employee]]
+          [employee-balances employee]
+          ]
          ]
        ]
 
@@ -365,8 +398,7 @@
      (let [emp ((<! (http/get url-with-id)) :body)]
        (if-not (nil? emp)
          (>! c emp)
-         (>! c "not found"))
-       (println (str "emp: " (:email emp)))))
+         (>! c "not found"))))
     c))
 
 (defn employee [app opts]
