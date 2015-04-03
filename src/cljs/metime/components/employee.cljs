@@ -147,7 +147,8 @@
  departments-query)
 
 (defn employee-core-heading [employee]
-  [:div.well
+  [:div.panel.panel-default
+   [:div.panel-body
    ;; Employee gravatar
    [:div.container-fluid
     [:div.row
@@ -159,7 +160,7 @@
       [:div [utils/gravatar {:gravatar-email (:manager-email @employee) :gravatar-size 75}]]
       [:h5.col-md-offset-2 (str (:manager-firstname @employee) " " (:manager-lastname @employee))]
       ]]
-    ]]
+    ]]]
   )
 
 (defn employee-core-details [employee]
@@ -167,6 +168,7 @@
     (fn []
       [:div.panel.panel-default
        [:div.panel-heading [:h3.panel-title "Employee"]]
+       [:div.panel-body
        [:form.form-horizontal
 
         ;; Departments drop down list
@@ -263,71 +265,73 @@
             :on-change #(dispatch [:input-change :enddate (com/input-value %)])
             }]]
          ]
-        ]]
+        ]]]
 )))
 
 
 (defn employee-balances [employee]
   [:div.panel.panel-default
    [:div.panel-heading [:h3.panel-title "Balances"]]
-   [:form.form-horizontal
-    ;; this_year_opening
-    [:div.form-group
-     [:label.col-md-6.control-label {:for "this_year_opening"} "This year opening"]
-     [:div.col-md-4
-      [com/input-element
-       {:id "this_year_opening"
-        :name "this_year_opening"
-        :type "number"
-        :placeholder ""
-        :value (:this_year_opening @employee)
-        :on-change #(dispatch [:input-change :this_year_opening (com/input-value %)])
-        }]]
-     ]
+   [:div.panel-body
 
-    ;; this_year_remaining
-    [:div.form-group
-     [:label.col-md-6.control-label {:for "this_year_remaining"} "This year remaining"]
-     [:div.col-md-4
-      [com/input-element
-       {:id "this_year_remaining"
-        :name "this_year_remaining"
-        :type "number"
-        :placeholder ""
-        :value (:this_year_remaining @employee)
-        :on-change #(dispatch [:input-change :this_year_remaining (com/input-value %)])
-        }]]
-     ]
+    [:form.form-horizontal
+     ;; this_year_opening
+     [:div.form-group
+      [:label.col-md-6.control-label {:for "this_year_opening"} "This year opening"]
+      [:div.col-md-4
+       [com/input-element
+        {:id "this_year_opening"
+         :name "this_year_opening"
+         :type "number"
+         :placeholder ""
+         :value (:this_year_opening @employee)
+         :on-change #(dispatch [:input-change :this_year_opening (com/input-value %)])
+         }]]
+      ]
 
-    ;; next_year_opening
-    [:div.form-group
-     [:label.col-md-6.control-label {:for "next_year_opening"} "Next year opening"]
-     [:div.col-md-4
-      [com/input-element
-       {:id "next_year_opening"
-        :name "next_year_opening"
-        :type "number"
-        :placeholder ""
-        :value (:next_year_opening @employee)
-        :on-change #(dispatch [:input-change :next_year_opening (com/input-value %)])
-        }]]
-     ]
+     ;; this_year_remaining
+     [:div.form-group
+      [:label.col-md-6.control-label {:for "this_year_remaining"} "This year remaining"]
+      [:div.col-md-4
+       [com/input-element
+        {:id "this_year_remaining"
+         :name "this_year_remaining"
+         :type "number"
+         :placeholder ""
+         :value (:this_year_remaining @employee)
+         :on-change #(dispatch [:input-change :this_year_remaining (com/input-value %)])
+         }]]
+      ]
 
-    ;; next_year_remaining
-    [:div.form-group
-     [:label.col-md-6.control-label {:for "next_year_remaining"} "Next year remaining"]
-     [:div.col-md-4
-      [com/input-element
-       {:id "next_year_remaining"
-        :name "next_year_remaining"
-        :type "number"
-        :placeholder ""
-        :value (:next_year_remaining @employee)
-        :on-change #(dispatch [:input-change :next_year_remaining (com/input-value %)])
-        }]]
+     ;; next_year_opening
+     [:div.form-group
+      [:label.col-md-6.control-label {:for "next_year_opening"} "Next year opening"]
+      [:div.col-md-4
+       [com/input-element
+        {:id "next_year_opening"
+         :name "next_year_opening"
+         :type "number"
+         :placeholder ""
+         :value (:next_year_opening @employee)
+         :on-change #(dispatch [:input-change :next_year_opening (com/input-value %)])
+         }]]
+      ]
+
+     ;; next_year_remaining
+     [:div.form-group
+      [:label.col-md-6.control-label {:for "next_year_remaining"} "Next year remaining"]
+      [:div.col-md-4
+       [com/input-element
+        {:id "next_year_remaining"
+         :name "next_year_remaining"
+         :type "number"
+         :placeholder ""
+         :value (:next_year_remaining @employee)
+         :on-change #(dispatch [:input-change :next_year_remaining (com/input-value %)])
+         }]]
+      ]
      ]
-    ]
-   ]
+    ]]
   )
 
 (defn employee-container-form [employee]
