@@ -54,9 +54,9 @@
  handle-employee-save)
 
 (defn parse-int [s]
-;;   (if (not (seq s))
-;;     0
-   (js/parseInt s))
+   (try
+     (js/parseInt s)
+     (catch js/Object e (0))))
 
 (defn handle-department-change [db [_ id]]
   (let [deps (:deps db)
@@ -179,7 +179,7 @@
          [:div.col-md-7
           [:select.form-control {:id "department"
                                  :name "department"
-                                 :value (:departments_id @employee)
+                                 :default-value (:departments_id @employee)
                                  :on-change #(dispatch [:department-change (com/input-value %)])}
            (for [m @departments]
              ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])]]]
@@ -200,7 +200,7 @@
             :name "firstname"
             :type "text"
             :placeholder "First name"
-            :value (:firstname @employee)
+            :default-value (:firstname @employee)
             :on-change #(dispatch [:input-change :firstname (com/input-value %)])
             }]
           ]]
@@ -214,7 +214,7 @@
             :name "lastname"
             :type "text"
             :placeholder "Last name"
-            :value (:lastname @employee)
+            :default-value (:lastname @employee)
             :on-change #(dispatch [:input-change :lastname (com/input-value %)])
             }]]
          ]
@@ -228,7 +228,7 @@
             :name "email"
             :type "email"
             :placeholder "Email address"
-            :value (:email @employee)
+            :default-value (:email @employee)
             :on-change #(dispatch [:input-change :email (com/input-value %)])
             }]]
          ]
@@ -242,7 +242,7 @@
             :name "dob"
             :type "date"
             :placeholder "Dob"
-            :value (:dob @employee)
+            :default-value (:dob @employee)
             :on-change #(dispatch [:input-change :dob (com/input-value %)])
             }]]
          ]
@@ -256,7 +256,7 @@
             :name "startdate"
             :type "date"
             :placeholder "Start date"
-            :value (:startdate @employee)
+            :default-value (:startdate @employee)
             :on-change #(dispatch [:input-change :startdate (com/input-value %)])
             }]]
          ]
@@ -270,7 +270,7 @@
             :name "enddate"
             :type "date"
             :placeholder "End date"
-            :value (:enddate @employee)
+            :default-value (:enddate @employee)
             :on-change #(dispatch [:input-change :enddate (com/input-value %)])
             }]]
          ]
@@ -315,7 +315,7 @@
          :name "this_year_opening"
          :type "number"
          :placeholder ""
-         :value (:this_year_opening @employee)
+         :default-value (:this_year_opening @employee)
          :on-change #(dispatch [:input-change :this_year_opening (com/input-value %)])
          }]]
       ]
@@ -329,7 +329,7 @@
          :name "this_year_remaining"
          :type "number"
          :placeholder ""
-         :value (:this_year_remaining @employee)
+         :default-value (:this_year_remaining @employee)
          :on-change #(dispatch [:input-change :this_year_remaining (com/input-value %)])
          }]]
       ]
@@ -343,7 +343,7 @@
          :name "next_year_opening"
          :type "number"
          :placeholder ""
-         :value (:next_year_opening @employee)
+         :default-value (:next_year_opening @employee)
          :on-change #(dispatch [:input-change :next_year_opening (com/input-value %)])
          }]]
       ]
@@ -357,7 +357,7 @@
          :name "next_year_remaining"
          :type "number"
          :placeholder ""
-         :value (:next_year_remaining @employee)
+         :default-value (:next_year_remaining @employee)
          :on-change #(dispatch [:input-change :next_year_remaining (com/input-value %)])
          }]]
       ]
@@ -401,14 +401,3 @@
          (>! c "not found"))))
     c))
 
-(defn employee [app opts]
-  (let [url-with-id (str (:url opts) (:id opts))]
-    (go
-     (let [emp (<! (fetch-employee url-with-id))]
-       (if (= emp "not found")
-         (swap! app #(dissoc % :employee))
-         (swap! app #(assoc % :employee emp)))))
-    (fn [app opts]
-      (if (contains? @app :employee)
-        [employee-container-form (:employee @app)]
-        [employee-not-found]))))
