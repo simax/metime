@@ -60,18 +60,20 @@
         [:div [ec/departments-container @deps]]))))
 
 (register-sub
-  :employee
-  (fn [db _]
-    (reaction (:employee @db))))
+ :employee
+ (fn [db _]
+   (reaction (and (seq (:deps @db))
+                  (seq (:employee @db))
+                  ))))
 
 (defn employee-component []
   (let [emp (subscribe [:employee])]
     (fn []
-      (if (nil? @emp)
+      (if (not (:is-ready? @emp))
         [loader-component]
         (if (:not-found @emp)
           [ec/employee-not-found]
-          [ec/employee-container-form emp])))))
+          [ec/employee-maintenance-form @emp])))))
 
 (defn not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
@@ -106,8 +108,7 @@
 (defroute "*" []
   (dispatch [:switch-route not-found]))
 
-(defn employee-route-switcher-middleware
-  [handler]
+(defn employee-route-switcher-middleware [handler]
   (fn employee-handler
     [db [_ view-component id]]
     (handler db [_ id])
@@ -134,6 +135,7 @@
    [__]
    {:api-root-url "http://localhost:3030/api"
     :view employees-component
+    :employee {:is-ready? false }
     :top-nav-bar [
                   {:path (employees-route)     :text "Employees"     :active true}
                   {:path (file-manager-route)  :text "File Manager"}
@@ -151,20 +153,23 @@
 (register-handler
  :process-employee-response
  (fn [db [_ employee]]
-   (if (nil? (:firstname employee))
-     (assoc db :employee {:not-found true})
-     (assoc db :employee (assoc (js->clj employee) :not-found false)))))
+   (let [emp (js->clj employee)]
+     (if (nil? (:id emp))
+       (assoc db :employee :is-ready? true :not-found true)
+       ((js/console.log (str "first-name " (:firstname emp)))
+        (assoc db :employee (assoc emp :is-ready? true :not-found false)))
+       ))))
 
 (defn fetch-employee
-  [url]
-  (go
-   ;; The following will "park" until the http GET returns data
-   (dispatch [:process-employee-response ((<! (http/get url)) :body)])))
+  [db url]
+  ;; The following go block will "park" until the http request returns data
+  (go (dispatch [:process-employee-response ((<! (http/get url)) :body)]))
+  db)
 
 (defn fetch-departments
   [url]
   (go
-   ;; The following will "park" until the http GET returns data
+   ;; The following go block will "park" until the http request returns data
    (dispatch [:process-employees-response (((<! (http/get url)) :body) :departments)])))
 
 (register-handler
@@ -177,8 +182,9 @@
  :fetch-employee
  (fn [db [_ id]]
    (if (> id 0)
-     (fetch-employee (str (utils/api db "/employee/") id)))
-     (assoc-in db [:employee] {:id 0
+     (fetch-employee db (str (utils/api db "/employee/") id))
+     (assoc-in db [:employee] {:is-ready? true
+                               :id 0
                                :firstname ""
                                :lastname ""
                                :email ""
@@ -190,7 +196,7 @@
                                :next_year_opening 25
                                :next_year_remaining 25
                                :departments_id 0
-                               :managerid 0})))
+                               :managerid 0}))))
 
 (register-sub
  :db-changed?
