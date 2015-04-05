@@ -136,14 +136,13 @@
 (defn employee-not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "Sorry, we couldn't find that employee."]])
 
-;; (defn employee-query
-;;   [db _]
-;;   (reaction (and (seq (:deps @db))
-;;                  (seq (:employee @db)))))
+(defn departments-query
+  [db _]
+  (reaction (get-in @db [:deps])))
 
-;; (register-sub
-;;  :initialize-employee
-;;  employee-query)
+(register-sub
+ :deps
+ departments-query)
 
 (defn employee-core-heading [employee]
   [:div.panel.panel-default
@@ -163,108 +162,110 @@
   )
 
 (defn employee-core-details [employee]
-  [:div.panel.panel-default
-   [:div.panel-heading [:h3.panel-title "Employee"]]
-   [:div.panel-body
-    [:form.form-horizontal
+  (let [departments (subscribe [:deps])]
+    (fn [employee]
+      [:div.panel.panel-default
+       [:div.panel-heading [:h3.panel-title "Employee"]]
+       [:div.panel-body
+        [:form.form-horizontal
 
-     ;; Departments drop down list
-     [:div.form-group
-      [:label.col-md-4.control-label {:for "department"} "Department"]
-      [:div.col-md-7
-       [:select.form-control {:id "department"
-                              :name "department"
-                              :default-value (:departments_id employee)
-                              :on-change #(dispatch [:department-change (com/input-value %)])}
-;;         (for [m @departments]
-;;           ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])
-        ]]]
+         ;; Departments drop down list
+         [:div.form-group
+          [:label.col-md-4.control-label {:for "department"} "Department"]
+          [:div.col-md-7
+           [:select.form-control {:id "department"
+                                  :name "department"
+                                  :default-value (:departments_id employee)
+                                  :on-change #(dispatch [:department-change (com/input-value %)])}
+                    (for [m @departments]
+                      ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])
+            ]]]
 
-     ;; First name
-     [:div.form-group
-      [:label.col-md-4.control-label {:for "firstname"} "First name"]
-      [:div.col-md-7
-       [com/input-element
-        {:id "firstname"
-         :name "firstname"
-         :type "text"
-         :placeholder "First name"
-         :default-value (:firstname employee)
-         :on-change #(dispatch [:input-change :firstname (com/input-value %)])
-         }]
-       ]]
+         ;; First name
+         [:div.form-group
+          [:label.col-md-4.control-label {:for "firstname"} "First name"]
+          [:div.col-md-7
+           [com/input-element
+            {:id "firstname"
+             :name "firstname"
+             :type "text"
+             :placeholder "First name"
+             :default-value (:firstname employee)
+             :on-change #(dispatch [:input-change :firstname (com/input-value %)])
+             }]
+           ]]
 
-     ;; Last name
-     [:div.form-group
-      [:label.col-md-4.control-label {:for "lastname"} "Last name"]
-      [:div.col-md-7
-       [com/input-element
-        {:id "lastname"
-         :name "lastname"
-         :type "text"
-         :placeholder "Last name"
-         :default-value (:lastname employee)
-         :on-change #(dispatch [:input-change :lastname (com/input-value %)])
-         }]]
-      ]
+         ;; Last name
+         [:div.form-group
+          [:label.col-md-4.control-label {:for "lastname"} "Last name"]
+          [:div.col-md-7
+           [com/input-element
+            {:id "lastname"
+             :name "lastname"
+             :type "text"
+             :placeholder "Last name"
+             :default-value (:lastname employee)
+             :on-change #(dispatch [:input-change :lastname (com/input-value %)])
+             }]]
+          ]
 
-     ;; Email
-     [:div.form-group
-      [:label.col-md-4.control-label {:for "email"} "Email"]
-      [:div.col-md-7
-       [com/input-element
-        {:id "email"
-         :name "email"
-         :type "email"
-         :placeholder "Email address"
-         :default-value (:email employee)
-         :on-change #(dispatch [:input-change :email (com/input-value %)])
-         }]]
-      ]
+         ;; Email
+         [:div.form-group
+          [:label.col-md-4.control-label {:for "email"} "Email"]
+          [:div.col-md-7
+           [com/input-element
+            {:id "email"
+             :name "email"
+             :type "email"
+             :placeholder "Email address"
+             :default-value (:email employee)
+             :on-change #(dispatch [:input-change :email (com/input-value %)])
+             }]]
+          ]
 
-     ;; DOB
-     [:div.form-group
-      [:label.col-md-4.control-label {:for "dob"} "Date of birth"]
-      [:div.col-md-4
-       [com/input-element
-        {:id "dob"
-         :name "dob"
-         :type "date"
-         :placeholder "Dob"
-         :default-value (:dob employee)
-         :on-change #(dispatch [:input-change :dob (com/input-value %)])
-         }]]
-      ]
+         ;; DOB
+         [:div.form-group
+          [:label.col-md-4.control-label {:for "dob"} "Date of birth"]
+          [:div.col-md-4
+           [com/input-element
+            {:id "dob"
+             :name "dob"
+             :type "date"
+             :placeholder "Dob"
+             :default-value (:dob employee)
+             :on-change #(dispatch [:input-change :dob (com/input-value %)])
+             }]]
+          ]
 
-     ;; Start date
-     [:div.form-group
-      [:label.col-md-4.control-label {:for "startdate"} "Start date"]
-      [:div.col-md-4
-       [com/input-element
-        {:id "startdate"
-         :name "startdate"
-         :type "date"
-         :placeholder "Start date"
-         :default-value (:startdate employee)
-         :on-change #(dispatch [:input-change :startdate (com/input-value %)])
-         }]]
-      ]
+         ;; Start date
+         [:div.form-group
+          [:label.col-md-4.control-label {:for "startdate"} "Start date"]
+          [:div.col-md-4
+           [com/input-element
+            {:id "startdate"
+             :name "startdate"
+             :type "date"
+             :placeholder "Start date"
+             :default-value (:startdate employee)
+             :on-change #(dispatch [:input-change :startdate (com/input-value %)])
+             }]]
+          ]
 
-     ;; End date
-     [:div.form-group
-      [:label.col-md-4.control-label {:for "enddate"} "End date"]
-      [:div.col-md-4
-       [com/input-element
-        {:id "enddate"
-         :name "enddate"
-         :type "date"
-         :placeholder "End date"
-         :default-value (:enddate employee)
-         :on-change #(dispatch [:input-change :enddate (com/input-value %)])
-         }]]
-      ]
-     ]]]
-  )
+         ;; End date
+         [:div.form-group
+          [:label.col-md-4.control-label {:for "enddate"} "End date"]
+          [:div.col-md-4
+           [com/input-element
+            {:id "enddate"
+             :name "enddate"
+             :type "date"
+             :placeholder "End date"
+             :default-value (:enddate employee)
+             :on-change #(dispatch [:input-change :enddate (com/input-value %)])
+             }]]
+          ]
+         ]]]
+      )))
 
 (defn my-input [data]
   (if (and (number? data) (not (= data 25)))
@@ -349,31 +350,28 @@
   )
 
 (defn employee-maintenance-form [employee]
-  ;;(let [employee (subscribe [:initialize-employee])]
-    (fn []
+  [:div.well
 
-      [:div.well
+   [employee-core-heading employee]
+   [:div.well
+    [:div.row
+     [:div.col-md-8
+      [employee-core-details employee]
+      ]
+     [:div.col-md-4
+      [employee-balances employee]
+      ]
+     ]
+    ]
 
-      [employee-core-heading @employee]
-       [:div.well
-        [:div.row
-         [:div.col-md-8
-          [employee-core-details @employee]
-          ]
-         [:div.col-md-4
-          [employee-balances @employee]
-          ]
-         ]
-       ]
-
-       [:div.well
-        [:form.form-horizontal
-         ;; Save button
-         [:div.form-group
-          [:div.col-md-offset-2.col-md-4
-           [:button#save.btn.btn-primary {:type "button" :on-click #(dispatch [:employee-save])} "Save"]]]]
-        ]
-      ]))
+   [:div.well
+    [:form.form-horizontal
+     ;; Save button
+     [:div.form-group
+      [:div.col-md-offset-2.col-md-4
+       [:button#save.btn.btn-primary {:type "button" :on-click #(dispatch [:employee-save])} "Save"]]]]
+    ]
+   ])
 
 (defn fetch-employee [url-with-id]
   (let [c (chan)]

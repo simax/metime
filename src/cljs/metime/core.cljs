@@ -62,18 +62,20 @@
 (register-sub
  :employee
  (fn [db _]
-   (reaction (and (seq (:deps @db))
-                  (seq (:employee @db))
-                  ))))
+   (reaction (:employee @db))))
+
 
 (defn employee-component []
   (let [emp (subscribe [:employee])]
     (fn []
+      (js/console.log (str "is-ready?: " (:is-ready? @emp)))
+      (js/console.log (str "firstname: " (:firstname @emp)))
       (if (not (:is-ready? @emp))
         [loader-component]
         (if (:not-found @emp)
           [ec/employee-not-found]
-          [ec/employee-maintenance-form @emp])))))
+          [ec/employee-maintenance-form @emp]
+          )))))
 
 (defn not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
@@ -155,16 +157,15 @@
  (fn [db [_ employee]]
    (let [emp (js->clj employee)]
      (if (nil? (:id emp))
-       (assoc db :employee :is-ready? true :not-found true)
-       ((js/console.log (str "first-name " (:firstname emp)))
-        (assoc db :employee (assoc emp :is-ready? true :not-found false)))
-       ))))
+       (assoc db :employee (assoc {} :is-ready? true :not-found true))
+       (assoc db :employee (assoc emp :is-ready? true :not-found false)))
+       )))
 
 (defn fetch-employee
   [db url]
   ;; The following go block will "park" until the http request returns data
   (go (dispatch [:process-employee-response ((<! (http/get url)) :body)]))
-  db)
+  (assoc db {:employee {:is-ready? true}}))
 
 (defn fetch-departments
   [url]
@@ -215,7 +216,7 @@
        ;; Top nav bar
        [nav/top-nav-bar @db]
        ;; Components
-       [(:view @db) (:params @db)]
+       [(:view @db)]
       ])))
 
  (defn top-panel []
