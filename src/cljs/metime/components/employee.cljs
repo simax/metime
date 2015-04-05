@@ -176,7 +176,7 @@
            [:select.form-control {:id "department"
                                   :name "department"
                                   :default-value (:departments_id employee)
-                                  :on-change #(dispatch [:department-change (com/input-value %)])}
+                                  :on-blur #(dispatch [:department-change (com/input-value %)])}
                     (for [m @departments]
                       ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])
             ]]]
@@ -191,7 +191,7 @@
              :type "text"
              :placeholder "First name"
              :default-value (:firstname employee)
-             :on-change #(dispatch [:input-change :firstname (com/input-value %)])
+             :on-blur #(dispatch [:input-change :firstname (com/input-value %)])
              }]
            ]]
 
@@ -205,7 +205,7 @@
              :type "text"
              :placeholder "Last name"
              :default-value (:lastname employee)
-             :on-change #(dispatch [:input-change :lastname (com/input-value %)])
+             :on-blur #(dispatch [:input-change :lastname (com/input-value %)])
              }]]
           ]
 
@@ -219,7 +219,7 @@
              :type "email"
              :placeholder "Email address"
              :default-value (:email employee)
-             :on-change #(dispatch [:input-change :email (com/input-value %)])
+             :on-blur #(dispatch [:input-change :email (com/input-value %)])
              }]]
           ]
 
@@ -233,7 +233,7 @@
              :type "date"
              :placeholder "Dob"
              :default-value (:dob employee)
-             :on-change #(dispatch [:input-change :dob (com/input-value %)])
+             :on-blur #(dispatch [:input-change :dob (com/input-value %)])
              }]]
           ]
 
@@ -247,7 +247,7 @@
              :type "date"
              :placeholder "Start date"
              :default-value (:startdate employee)
-             :on-change #(dispatch [:input-change :startdate (com/input-value %)])
+             :on-blur #(dispatch [:input-change :startdate (com/input-value %)])
              }]]
           ]
 
@@ -261,7 +261,7 @@
              :type "date"
              :placeholder "End date"
              :default-value (:enddate employee)
-             :on-change #(dispatch [:input-change :enddate (com/input-value %)])
+             :on-blur #(dispatch [:input-change :enddate (com/input-value %)])
              }]]
           ]
          ]]]
@@ -273,7 +273,7 @@
              :name "input-box"
              :default-value data
              :class "form-control"
-             :on-change #(dispatch [:input-change :firstname (com/input-value %)])
+             :on-blur #(dispatch [:input-change :firstname (com/input-value %)])
              }]
     ))
 
@@ -300,7 +300,7 @@
          :type "number"
          :placeholder ""
          :default-value (parse-int (:this_year_opening employee))
-         :on-change #(dispatch [:input-change :this_year_opening (com/input-value %)])
+         :on-blur #(dispatch [:input-change :this_year_opening (com/input-value %)])
          }]]
       ]
 
@@ -314,7 +314,7 @@
          :type "number"
          :placeholder ""
          :default-value (parse-int (:this_year_remaining employee))
-         :on-change #(dispatch [:input-change :this_year_remaining (com/input-value %)])
+         :on-blur #(dispatch [:input-change :this_year_remaining (com/input-value %)])
          }]]
       ]
 
@@ -328,7 +328,7 @@
          :type "number"
          :placeholder ""
          :default-value (parse-int (:next_year_opening employee))
-         :on-change #(dispatch [:input-change :next_year_opening (com/input-value %)])
+         :on-blur #(dispatch [:input-change :next_year_opening (com/input-value %)])
          }]]
       ]
 
@@ -342,7 +342,7 @@
          :type "number"
          :placeholder ""
          :default-value (parse-int (:next_year_remaining employee))
-         :on-change #(dispatch [:input-change :next_year_remaining (com/input-value %)])
+         :on-blur #(dispatch [:input-change :next_year_remaining (com/input-value %)])
          }]]
       ]
      ]

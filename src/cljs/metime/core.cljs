@@ -68,8 +68,6 @@
 (defn employee-component []
   (let [emp (subscribe [:employee])]
     (fn []
-      (js/console.log (str "is-ready?: " (:is-ready? @emp)))
-      (js/console.log (str "firstname: " (:firstname @emp)))
       (if (not (:is-ready? @emp))
         [loader-component]
         (if (:not-found @emp)

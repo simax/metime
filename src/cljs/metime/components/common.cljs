@@ -9,16 +9,14 @@
 
 (defn input-value [component] (-> component .-target .-value))
 
-(defn input-element [{:keys [id name type placeholder on-change default-value]}]
+(defn input-element [{:keys [id name type placeholder on-blur default-value]}]
   "An input element which updates its value on change"
-;;   (if (or (and (string? default-value) (seq default-value))
-;;           (number? default-value))
-    [:input
-     {:id id
-      :name name
-      :placeholder placeholder
-      :class "form-control"
-      :type type
-      :default-value default-value
-      :on-change on-change
-      }])
+  ^{:key default-value} [:input
+                         {:id id
+                          :name name
+                          :placeholder placeholder
+                          :class "form-control"
+                          :type type
+                          :default-value default-value
+                          :on-blur on-blur
+                          }])
