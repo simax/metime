@@ -79,6 +79,7 @@
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
 (defroute root-route "/" []
+  (utils/set-hash! "#/employees")
   (dispatch [:switch-route employees-component (employees-route)]))
 
 (defroute employees-route "/employees" []
@@ -163,7 +164,7 @@
   [db url]
   ;; The following go block will "park" until the http request returns data
   (go (dispatch [:process-employee-response ((<! (http/get url)) :body)]))
-  (assoc db {:employee {:is-ready? true}}))
+  (assoc db :employee {:is-ready? false}))
 
 (defn fetch-departments
   [url]
@@ -231,10 +232,11 @@
              (let [token (.-token he)]
                (if (seq token)
                  (secretary/dispatch! token)
-                 (do
-                   ;; If we're at the root, redirect to #/employees
-                   (utils/set-hash! "#/employees")
-                   (secretary/dispatch! (employees-route))))))]
+;;                  (do
+;;                    ;; If we're at the root, redirect to #/employees
+;;                    (utils/set-hash! "#/employees")
+;;                    (secretary/dispatch! (employees-route)))
+                 )))]
 
      (events/listen h EventType/NAVIGATE f)
      (doto h (.setEnabled true))))
