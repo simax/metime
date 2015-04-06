@@ -232,10 +232,6 @@
              (let [token (.-token he)]
                (if (seq token)
                  (secretary/dispatch! token)
-;;                  (do
-;;                    ;; If we're at the root, redirect to #/employees
-;;                    (utils/set-hash! "#/employees")
-;;                    (secretary/dispatch! (employees-route)))
                  )))]
 
      (events/listen h EventType/NAVIGATE f)
