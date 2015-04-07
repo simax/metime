@@ -30,7 +30,8 @@
   ;; Need to make this better
   (let [url "#/employees/add"]
     (utils/set-hash! url)
-    (secretary/dispatch! url)))
+    (secretary/dispatch! url))
+    db)
 
 (register-handler
  :employee-add
