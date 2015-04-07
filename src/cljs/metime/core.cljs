@@ -147,7 +147,7 @@
                   ]}))
 
 (register-handler
- :process-employees-response
+ :process-departments-response
  (fn [db [_ department-employees]]
    (assoc db :deps (js->clj department-employees))))
 
@@ -170,7 +170,7 @@
   [url]
   (go
    ;; The following go block will "park" until the http request returns data
-   (dispatch [:process-employees-response (((<! (http/get url)) :body) :departments)])))
+   (dispatch [:process-departments-response (((<! (http/get url)) :body) :departments)])))
 
 (register-handler
  :fetch-department-employees

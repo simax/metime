@@ -176,7 +176,7 @@
            [:select.form-control {:id "department"
                                   :name "department"
                                   :default-value (:departments_id employee)
-                                  :on-blur #(dispatch [:department-change (com/input-value %)])}
+                                  :on-change #(dispatch [:department-change (com/input-value %)])}
                     (for [m @departments]
                       ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])
             ]]]
