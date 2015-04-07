@@ -6,7 +6,7 @@
             [cljs-http.client :as http]
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
-            [metime.components.top-nav-bar :as nav]
+            [metime.components.nav-bar :as nav]
             [secretary.core :as secretary :refer-macros [defroute]]
             [metime.components.employee :as ec]
             [reagent.core :as reagent :refer [atom]]
@@ -113,7 +113,7 @@
   (fn employee-handler
     [db [_ view-component id]]
     (handler db [_ id])
-    (nav/update-top-nav-bar db view-component (employees-route))))
+    (nav/update-nav-bar db view-component (employees-route))))
 
 (defn employee-route-switcher-handler
   [db [_ id]]
@@ -128,7 +128,7 @@
 (register-handler
  :switch-route
  (fn [db [_ view-component top-level-menu-text]]
-   (nav/update-top-nav-bar db view-component top-level-menu-text)))
+   (nav/update-nav-bar db view-component top-level-menu-text)))
 
 (register-handler
  :initialise-db
@@ -137,7 +137,7 @@
    {:api-root-url "http://localhost:3030/api"
     :view employees-component
     :employee {:is-ready? false }
-    :top-nav-bar [
+    :nav-bar [
                   {:path (employees-route)     :text "Employees"     :active true}
                   {:path (file-manager-route)  :text "File Manager"}
                   {:path (calendar-route)      :text "Calendar"}
@@ -213,7 +213,7 @@
     (fn []
       [:div
        ;; Top nav bar
-       [nav/top-nav-bar @db]
+       [nav/nav-bar @db]
        ;; Components
        [(:view @db)]
       ])))

@@ -25,3 +25,10 @@
 
 (defn api [db endpoint]
   (str (:api-root-url db) endpoint))
+
+(defn parse-int [s]
+  "Parse the string for an integer"
+  (if (nil? s) 0
+    (try
+      (js/parseInt s)
+      (catch js/Object e 0))))

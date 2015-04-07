@@ -267,22 +267,6 @@
          ]]]
       )))
 
-(defn my-input [data]
-  (if (and (number? data) (not (= data 25)))
-    [:input {:type "number"
-             :name "input-box"
-             :default-value data
-             :class "form-control"
-             :on-blur #(dispatch [:input-change :firstname (com/input-value %)])
-             }]
-    ))
-
-(defn parse-int [s]
-  (if (nil? s) 0
-    (try
-      (js/parseInt s)
-      (catch js/Object e 0))))
-
 (defn employee-balances [employee]
   [:div.panel.panel-default
    [:div.panel-heading [:h3.panel-title "Balances"]]
@@ -299,7 +283,7 @@
          :name "this_year_opening"
          :type "number"
          :placeholder ""
-         :default-value (parse-int (:this_year_opening employee))
+         :default-value (utils/parse-int (:this_year_opening employee))
          :on-blur #(dispatch [:input-change :this_year_opening (com/input-value %)])
          }]]
       ]
@@ -313,7 +297,7 @@
          :name "this_year_remaining"
          :type "number"
          :placeholder ""
-         :default-value (parse-int (:this_year_remaining employee))
+         :default-value (utils/parse-int (:this_year_remaining employee))
          :on-blur #(dispatch [:input-change :this_year_remaining (com/input-value %)])
          }]]
       ]
@@ -327,7 +311,7 @@
          :name "next_year_opening"
          :type "number"
          :placeholder ""
-         :default-value (parse-int (:next_year_opening employee))
+         :default-value (utils/parse-int (:next_year_opening employee))
          :on-blur #(dispatch [:input-change :next_year_opening (com/input-value %)])
          }]]
       ]
@@ -341,7 +325,7 @@
          :name "next_year_remaining"
          :type "number"
          :placeholder ""
-         :default-value (parse-int (:next_year_remaining employee))
+         :default-value (utils/parse-int (:next_year_remaining employee))
          :on-blur #(dispatch [:input-change :next_year_remaining (com/input-value %)])
          }]]
       ]
