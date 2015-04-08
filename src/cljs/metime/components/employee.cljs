@@ -13,6 +13,7 @@
                                    path
                                    register-sub
                                    dispatch
+                                   dispatch-sync
                                    subscribe]])
   (:import goog.History
            goog.History.EventType))
@@ -176,8 +177,8 @@
           [:div.col-md-7
            [:select.form-control {:id "department"
                                   :name "department"
-                                  :default-value (:departments_id employee)
-                                  :on-change #(dispatch [:department-change (com/input-value %)])}
+                                  :value (:departments_id employee)
+                                  :on-change #(dispatch-sync [:department-change (com/input-value %)])}
                     (for [m @departments]
                       ^{:key (:departments_id m)} [:option {:value (:departments_id m)} (:department m)])
             ]]]
