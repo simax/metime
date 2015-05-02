@@ -18,6 +18,7 @@
                                    subscribe]])
   (:import goog.History))
 
+
 (declare employees-route)
 (declare file-manager-route)
 (declare calendar-route)
@@ -66,7 +67,7 @@
 
 
 (defn employee-component []
-  (let [emp (subscribe [:employee])]
+   (let [emp (subscribe [:employee])]
     (fn []
       (if (not (:is-ready? @emp))
         [loader-component]
@@ -74,6 +75,8 @@
           [ec/employee-not-found]
           [ec/employee-maintenance-form @emp]
           )))))
+
+(+ 1 2 3 (* 5 6 7))
 
 (defn not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])

@@ -6,11 +6,16 @@
             [cljs-hash.md5 :as hashgen]
             [cljs-hash.goog :as gh]
             [metime.utils :as utils]
+            ;[metis.core :refer [defvalidator]]
             [secretary.core :as secretary :refer-macros [defroute]]
             [metime.components.common :as com]
-            [reagent.core :as reagent :refer [atom]]
+            [reagent.core :refer [atom]]
+            [validateur.validation :refer [errors validation-set valid? invalid? presence-of length-of] :as v]
             [re-frame.core :refer [register-handler
                                    path
+                                   debug
+                                   after
+                                   enrich
                                    register-sub
                                    dispatch
                                    dispatch-sync
@@ -20,12 +25,37 @@
 
 (enable-console-print!)
 
+(def employee-validator
+  (validation-set
+    (length-of :firstname :within (range 1 31))))
+
+;(defvalidator employee-validator
+;  [:firstname :length {:greater-than 0 :less-than 31}]
+;  [:lastname :length {:greater-than 0 :less-than 31}]
+;  [:email :email {:greater-than 0 :less-than 31}]
+;  [:departments_id :numericality {:only-integer true :greater-than 0}]
+;  [:managerid :numericality {:only-integer true :greater-than 0}]
+;  [:password [:length {:greater-than-or-equal-to 8}
+;              :formatted {:pattern #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}"
+;                          :message "alpha numeric, at least one number"}
+;              :confirmation {:confirm :password-confirm}]]
+;  [:dob :date])
+
+(defn validate-employee [db _]
+  (let [employee (:employee db)
+        ;result (v/valid? employee-validator employee)
+        ]
+    (js/console.log (str "Errors in employee's firstname: " (errors :firstname (employee-validator employee))))
+    db))
+
 (defn handle-input-change [db [_ property-name new-value ]]
   (assoc-in db [:employee property-name] new-value))
 
 (register-handler
   :input-change
+  (enrich validate-employee)
   handle-input-change)
+
 
 (defn handle-employee-add [db _]
   ;; Need to make this better
