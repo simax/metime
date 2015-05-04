@@ -10,7 +10,7 @@
             [secretary.core :as secretary :refer-macros [defroute]]
             [metime.components.common :as com]
             [reagent.core :refer [atom]]
-            [validateur.validation :refer [errors validation-set valid? invalid? presence-of length-of] :as v]
+            [validateur.validation :refer [numericality-of errors validation-set valid? invalid? presence-of length-of validate-when] :as v]
             [re-frame.core :refer [register-handler
                                    path
                                    debug
@@ -25,9 +25,16 @@
 
 (enable-console-print!)
 
+;;TODO: Need to work out how to make sure confirmation is same as password
 (def employee-validator
   (validation-set
-    (length-of :firstname :within (range 1 31))))
+    (length-of :firstname :within (range 1 31))
+    (length-of :lastname :within (range 1 31))
+    (presence-of :email)
+    (numericality-of :departments_id :only-integer true :gt 0 :messages {:blank "Must be greater then 0"})
+    (numericality-of :managerid :only-integer true :gt 0 :messages {:blank "Must be greater then 0"})
+    (length-of :password :within (range 8 100))
+    (validate-when #(contains? % :password) (presence-of :confirmation))))
 
 ;(defvalidator employee-validator
 ;  [:firstname :length {:greater-than 0 :less-than 31}]
@@ -43,8 +50,7 @@
 
 (defn validate-employee [db _]
   (let [employee (:employee db)
-        ;result (v/valid? employee-validator employee)
-        ]
+        result (v/valid? employee-validator employee)]
     (js/console.log (str "Errors in employee's firstname: " (errors :firstname (employee-validator employee))))
     db))
 

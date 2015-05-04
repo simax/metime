@@ -31,7 +31,7 @@
                  [org.clojure/data.json "0.2.5"]
 
                  ;; UI
-                 [om "0.8.0-alpha2"]
+                 ;;[om "0.8.0-alpha2"]
                  [reagent "0.5.0-alpha3"]
                  [re-frame "0.2.0"]
                  [secretary "1.2.1"]
@@ -43,7 +43,7 @@
                  [expectations "2.0.9"]
 
                  ]
-
+  ;;:jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"]
   :ring {:handler metime.core/app :auto-reload? true}
 
   ;; Used for data migrations
