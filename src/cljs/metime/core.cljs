@@ -76,8 +76,6 @@
           [ec/employee-maintenance-form @emp]
           )))))
 
-(+ 1 2 3 (* 5 6 7))
-
 (defn not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 

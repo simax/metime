@@ -1,12 +1,5 @@
 (ns metime.components.nav-bar
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
-  (:require [goog.events :as events]
-            [goog.history.EventType :as EventType]
-            [cljs-hash.md5 :as hashgen]
-            [cljs-hash.goog :as gh]
-            [secretary.core :as secretary :refer-macros [defroute]]
-            [reagent.core :as reagent :refer [atom]]
-            [metime.utils :as utils])
   (:import goog.History
            goog.History.EventType))
 
