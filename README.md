@@ -1,63 +1,30 @@
-# metime
+# Metime
 
 
 ## Development
 
 To start the api. At the terminal (or command line on Windows), type `lein ring server-headless 3030`.
 
-Start a REPL (in a terminal: `lein repl`, or from Emacs: open a
-clj/cljs file in the project, then do `M-x cider-jack-in`. Make sure
-CIDER is up to date).
+## REPL
+Start a REPL 
+At the terminal, type: lein figwheel
+in the browser navigate to 'http://localhost:3449'. This will connect to the REPL.
 
-In the REPL do
+In IntelliJ. 
+Run the Clojurescript REPL
+Once in the REPL window, type:
+(use 'figwheel-sidecar.repl-api)
+(cljs-repl)
+You should now see Figwheel Controls, start-autobuild etc
+You can now interact with the app and the browser.
+Try typing (js/alert "Hello World!!!") and you should see the alert popup in the browser.
 
-```clojure
-(run)
-(browser-repl)
-```
-
-The call to `(run)` does two things, it starts the webserver at port
-10555, and also the Figwheel server which takes care of live reloading
-ClojureScript code and CSS. Give them some time to start.
-
-Running `(browser-repl)` starts the Weasel REPL server, and drops you
-into a ClojureScript REPL. Evaluating expressions here will only work
-once you've loaded the page, so the browser can connect to Weasel.
-
-When you see the line `Successfully compiled "resources/public/app.js"
-in 21.36 seconds.`, you're ready to go. Browse to
-`http://localhost:10555` and enjoy.
-
-In a second terminal window run `lein ring server-headless 3030`
-to serve the api.
-
-**Attention: It is not longer needed to run `lein figwheel`
-  separately. This is now taken care of behind the scenes**
 
 ## Database migration
 
 Using clj-sql-up to handle DB migrations
 See: https://github.com/ckuttruff/clj-sql-up for details
 
-## Trying it out
-
-If all is well you now have a browser window saying 'Hello Chestnut',
-and a REPL prompt that looks like `cljs.user=>`.
-
-Open `resources/public/css/style.css` and change some styling of the
-H1 element. Notice how it's updated instantly in the browser.
-
-Open `src/cljs/metime/core.cljs`, and change `dom/h1` to
-`dom/h2`. As soon as you save the file, your browser is updated.
-
-In the REPL, type
-
-```
-(ns metime.core)
-(swap! app-state assoc :text "Interactivity FTW")
-```
-
-Notice again how the browser updates.
 
 ## Deploying to Heroku
 

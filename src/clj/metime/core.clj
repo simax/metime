@@ -6,13 +6,16 @@
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
-            [compojure.core :refer [defroutes context ANY]]
+            [compojure.core :refer [defroutes context GET ANY]]
             [metime.resources :refer :all]
+            [selmer.parser :refer [render-file]]
+            [environ.core :refer [env]]
             [prone.middleware :as prone]
             [liberator.dev]))
 
 
 (defroutes app-routes
+           (GET "/" [] (render-file "index.html" {:dev (env :dev?)}))
   (context "/api" []
     (ANY "/departments"  [] (departments))
     (ANY "/department/:id" [id] (department id))
