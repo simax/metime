@@ -34,7 +34,6 @@
                            ;; Dev
                            [org.clojure/tools.trace "0.7.8"]
                            [enlive "1.1.5"]
-                           ;;[figwheel "0.1.4-SNAPSHOT"]
                            [selmer "0.8.0"]
                            [environ "1.0.0"]
                            [expectations "2.0.9"]
@@ -79,7 +78,6 @@
 
             :profiles {:dev     {:repl-options {:init-ns          metime.server
                                                 :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
-
                                  :dependencies [[ring-mock "0.1.5"]
                                                 [ring/ring-devel "1.3.2"]
                                                 [leiningen "2.5.1"]
@@ -93,7 +91,7 @@
                                  :figwheel     {:http-server-root "public"
                                                 :nrepl-port       7888
                                                 :port             3449
-                                                :css-dirs         ["resources/public/css"]
+                                                :css-dirs         ["resources/public/assets/css"]
                                                 :ring-handler     metime.core/app}
 
                                  :env          {:dev? true}
