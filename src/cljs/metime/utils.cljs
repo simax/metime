@@ -1,8 +1,10 @@
 (ns metime.utils
-  (:require [goog.events :as events]
-            [goog.history.EventType :as EventType]
-            [cljs-hash.md5 :as hashgen]
-            [cljs-hash.goog :as gh])
+  (:require [cljs-hash.md5 :as hashgen]
+            [re-frame.core :refer [register-handler
+                                   path
+                                   register-sub
+                                   dispatch
+                                   subscribe]])
   (:import goog.History
            goog.History.EventType))
 
@@ -32,3 +34,19 @@
     (try
       (js/parseInt s)
       (catch js/Object e 0))))
+
+(defn input-value [component] (-> component .-target .-value))
+
+(defn input-element [{:keys [id name type placeholder on-blur on-change default-value value]}]
+  "An input element which updates its value on change"
+  ^{:key id} [:input
+              {:id            id
+               :name          name
+               :placeholder   placeholder
+               :class         "form-control"
+               :type          type
+               :default-value default-value
+               :on-blur       on-blur
+               :on-change     on-change
+               }])
+
