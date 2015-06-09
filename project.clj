@@ -76,8 +76,9 @@
                                                       :optimizations :none
                                                       :pretty-print  true}}}}
 
-            :profiles {:dev     {:repl-options {:init-ns          metime.server
-                                                :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+            :profiles {:dev     {:repl-options {:init-ns metime.server
+                                                ;;:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
+                                                }
                                  :dependencies [[ring-mock "0.1.5"]
                                                 [ring/ring-devel "1.3.2"]
                                                 [leiningen "2.5.1"]

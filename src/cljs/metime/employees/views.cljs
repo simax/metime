@@ -106,7 +106,7 @@
      ]]]
   )
 
-(defn employee-core-details [employee]
+(defn employee-core-details []
   (let [departments (subscribe [:deps])]
     (fn [employee]
       [:div.panel.panel-default
@@ -302,13 +302,6 @@
     ]
    ])
 
-;(defn fetch-employee [url-with-id]
-;  (let [c (chan)]
-;    (go
-;     (let [emp ((<! (http/get url-with-id)) :body)]
-;       (if-not (nil? emp)
-;         (>! c emp)
-;         (>! c "not found"))))
-;    c))
+
 
 

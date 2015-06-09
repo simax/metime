@@ -9,7 +9,6 @@
                                    enrich
                                    register-sub
                                    dispatch
-                                   dispatch-sync
                                    subscribe]]
             [validateur.validation :refer [numericality-of
                                            errors
@@ -18,8 +17,7 @@
                                            invalid?
                                            presence-of
                                            length-of
-                                           validate-when] :as v]
-            ))
+                                           validate-when] :as v]))
 
 ;;TODO: Need to work out how to make sure confirmation is same as password
 (def employee-validator

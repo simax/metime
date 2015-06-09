@@ -2,34 +2,17 @@
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [metime.navigation.handlers]
             [metime.navigation.subs]
+            [metime.employees.views :as ev]
+            [secretary.core :refer-macros [defroute]]
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch
-                                   subscribe]])
+                                   subscribe]]
+            [metime.utils :as utils])
   (:import goog.History
            goog.History.EventType))
 
 (enable-console-print!)
-
-
-(defn nav-menu-item [item]
-  (let [route (:path item)]
-    [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]]))
-
-(defn nav-bar [{:keys [nav-bar]}]
-  [:div.navbar-nav.navbar-inverse.navbar-fixed-top
-   [:div.container
-    [:div.navbar-header
-     [:button.navbar-toggle {:data-toggle "collapse" :data-target ".navbar-collapse"}
-      [:span.icon-bar]
-      [:span.icon-bar]
-      [:span.icon-bar]
-      ]
-     [:a.navbar-brand {:href="/#employees"} [:img {:src "assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
-    [:div#nav-bar.navbar-collapse.collapse
-     [:ul.nav.navbar-nav
-      (for [nav-bar-item nav-bar]
-        ^{:key (:path nav-bar-item)} [nav-menu-item nav-bar-item])]]]])
 
 (defn loader-component []
   [:div.loader-container [:img {:src "assets/img/loader.gif"}]])
@@ -52,6 +35,74 @@
 (defn not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
+(defn employees-component []
+  (dispatch [:fetch-department-employees "/departments"])
+  (let [deps (subscribe [:departments])]
+    (fn []
+      (if-not (seq @deps)
+        [loader-component]
+        [:div [ev/departments-container @deps]]))))
+
+(defn employee-component []
+  (let [emp (subscribe [:employee])]
+    (fn []
+      (if (not (:is-ready? @emp))
+        [loader-component]
+        (if (:not-found @emp)
+          [ev/employee-not-found]
+          [ev/employee-maintenance-form @emp])))))
+
+(defroute tables-route "/tables" []
+          (dispatch [:switch-route :tables tables-component]))
+
+(defroute calendar-route "/calendar" []
+          (dispatch [:switch-route :calendar calendar-component]))
+
+(defroute file-manager-route "/file-manager" []
+          (dispatch [:switch-route :file-manager file-manager-component]))
+
+(defroute user-route "/user" []
+          (dispatch [:switch-route :user user-component]))
+
+(defroute login-route "/login" []
+          (dispatch [:switch-route :login login-component]))
+
+(defroute employees-route "/employees" []
+          (dispatch [:switch-route :employees employees-component]))
+
+(defroute root-route "/" []
+          (utils/set-hash! "#/employees")
+          (dispatch [:switch-route :employees employees-component]))
+
+(defroute employee-route "/employee/:id" [id]
+          (dispatch [:employee-route-switcher employee-component id]))
+
+(defroute employee-add-route "/employees/add" []
+          (dispatch [:employee-route-switcher employee-component 0]))
+
+(defroute "*" []
+          (dispatch [:switch-route not-found]))
+
+(defn nav-menu-item [item]
+  (let [route (:path item)]
+    [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]]))
+
+(defn nav-bar [{:keys [nav-bar]}]
+  [:div.navbar-nav.navbar-inverse.navbar-fixed-top
+   [:div.container
+    [:div.navbar-header
+     [:button.navbar-toggle {:data-toggle "collapse" :data-target ".navbar-collapse"}
+      [:span.icon-bar]
+      [:span.icon-bar]
+      [:span.icon-bar]
+      ]
+     [:a.navbar-brand {:href= "/#employees"} [:img {:src "assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
+    [:div#nav-bar.navbar-collapse.collapse
+     [:ul.nav.navbar-nav
+      (for [nav-bar-item nav-bar]
+        ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item])]
+     ]]])
+
 (defn main-panel []
   (let [db (subscribe [:db-changed?])]
     (fn []
@@ -59,8 +110,7 @@
        ;; Top nav bar
        [nav-bar @db]
        ;; Components
-       [(:view @db)]
-       ])))
+       [(:view @db)]])))
 
 (defn top-panel []
   (let [ready? (subscribe [:initialised?])]

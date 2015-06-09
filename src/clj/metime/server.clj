@@ -1,6 +1,7 @@
 (ns metime.server
   (:require [clojure.java.io :as io]
-            [metime.dev :refer [is-dev? inject-devmode-html browser-repl start-figwheel]]
+    ;;[metime.dev :refer [is-dev? inject-devmode-html browser-repl start-figwheel]]
+            [metime.core :refer [app]]
             [compojure.core :refer [defroutes context ANY GET]]
             [compojure.route :refer [resources]]
             [compojure.handler :refer [api]]

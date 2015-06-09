@@ -10,82 +10,22 @@
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [cljs-http.client :as http]
             [metime.utils :as utils]
-            [metime.employees.views :as ev]))
+            [metime.employees.views]))
 
-(declare root-route)
-(declare employee-add-route)
-(declare employees-route)
-(declare employee-route)
-(declare file-manager-route)
-(declare calendar-route)
-(declare tables-route)
-(declare login-route)
-(declare user-route)
-
-(defroute tables-route "/tables" []
-          (dispatch [:switch-route tables-component (tables-route)]))
-
-(defroute calendar-route "/calendar" []
-          (dispatch [:switch-route calendar-component (calendar-route)]))
-
-(defroute file-manager-route "/file-manager" []
-          (dispatch [:switch-route file-manager-component (file-manager-route)]))
-
-(defroute user-route "/user" []
-          (dispatch [:switch-route user-component (user-route)]))
-
-(defroute login-route "/login" []
-          (dispatch [:switch-route login-component (login-route)]))
-
-(defroute "*" []
-          (dispatch [:switch-route not-found]))
-
-(defn employees-component []
-  (dispatch [:fetch-department-employees "/departments"])
-  (let [deps (subscribe [:departments])]
-    (fn []
-      (if-not (seq @deps)
-        [loader-component]
-        [:div [ev/departments-container @deps]]))))
-
-(defn employee-component []
-  (let [emp (subscribe [:employee])]
-    (fn []
-      (if (not (:is-ready? @emp))
-        [loader-component]
-        (if (:not-found @emp)
-          [ev/employee-not-found]
-          [ev/employee-maintenance-form @emp]
-          )))))
-
-(defroute employees-route "/employees" []
-          (dispatch [:switch-route employees-component (employees-route)]))
-
-(defroute root-route "/" []
-          (utils/set-hash! "#/employees")
-          (dispatch [:switch-route employees-component (employees-route)]))
-
-(defroute employee-route "/employee/:id" [id]
-          (dispatch [:employee-route-switcher employee-component id]))
-
-(defroute employee-add-route "/employees/add" []
-          (dispatch [:employee-route-switcher employee-component 0]))
-
-
-(defn toggle-active-status [token item]
-  (if (= (:path item) token)
+(defn toggle-active-status [nav-bar-id item]
+  (if (= (:id item) nav-bar-id)
     (assoc item :active true)
     (assoc item :active false)))
 
-(defn update-nav-bar [db view-component top-level-menu-text]
+(defn update-nav-bar [db nav-bar-id view-component]
   (let [updated-view (assoc db :view view-component)]
-    (update-in updated-view [:nav-bar] #(map (partial toggle-active-status top-level-menu-text) %))))
+    (update-in updated-view [:nav-bar] #(map (partial toggle-active-status nav-bar-id) %))))
 
 (defn employee-route-switcher-middleware [handler]
   (fn employee-handler
     [db [_ view-component id]]
     (handler db [_ id])
-    (update-nav-bar db view-component (employees-route))))
+    (update-nav-bar db view-component :employees)))
 
 (defn employee-route-switcher-handler
   [db [_ id]]
@@ -111,24 +51,13 @@
 
 (register-handler
   :switch-route
-  (fn [db [_ view-component top-level-menu-text]]
-    (update-nav-bar db view-component top-level-menu-text)))
+  (fn [db [_ nav-bar-id view-component]]
+    (update-nav-bar db nav-bar-id view-component)))
 
 (register-handler
   :initialise-db
-  (fn
-    [__]
-    {:api-root-url "http://localhost:3030/api"
-     :view         employees-component
-     :employee     {:is-ready? false}
-     :nav-bar      [
-                    {:path (employees-route) :text "Employees" :active true}
-                    {:path (file-manager-route) :text "File Manager"}
-                    {:path (calendar-route) :text "Calendar"}
-                    {:path (tables-route) :text "Tables"}
-                    {:path (login-route) :text "Login"}
-                    {:path (user-route) :text "User"}
-                    ]}))
+  (fn [db [_ initial-view]]
+    (assoc db :view initial-view)))
 
 (register-handler
   :process-departments-response
