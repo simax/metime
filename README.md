@@ -5,11 +5,11 @@
 
 To start the api. At the terminal (or command line on Windows), type `lein ring server-headless 3030`.
 
-## REPL
-Start a REPL 
 At the terminal, type: lein figwheel
 in the browser navigate to 'http://localhost:3449'. This will connect to the REPL.
 
+## REPL
+Start a REPL 
 In IntelliJ. 
 Run the Clojurescript REPL
 Once in the REPL window, type:

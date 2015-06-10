@@ -11,8 +11,7 @@
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch
-                                   subscribe]]
-            [metime.db :as db])
+                                   subscribe]])
   (:import goog.History))
 
 (enable-console-print!)
@@ -32,7 +31,7 @@
     (doto h (.setEnabled true))))
 
 (defn main []
-  (dispatch [:initialise-db db/default-db nv/employees-component])
+  (dispatch [:initialise-db nv/employees-component])
   ;; Main app component
   (reagent/render [nv/top-panel] (js/document.getElementById "app-container"))
   (hook-browser-navigation!))
