@@ -11,12 +11,44 @@
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch
-                                   subscribe]])
+                                   subscribe]]
+            [metime.utils :as utils])
   (:import goog.History))
+
 
 (enable-console-print!)
 (secretary/set-config! :prefix "#")
 
+(defroute tables-route "/tables" []
+          (dispatch [:switch-route :tables nv/tables-component]))
+
+(defroute calendar-route "/calendar" []
+          (dispatch [:switch-route :calendar nv/calendar-component]))
+
+(defroute file-manager-route "/file-manager" []
+          (dispatch [:switch-route :file-manager nv/file-manager-component]))
+
+(defroute user-route "/user" []
+          (dispatch [:switch-route :user nv/user-component]))
+
+(defroute login-route "/login" []
+          (dispatch [:switch-route :login nv/login-component]))
+
+(defroute employees-route "/employees" []
+          (dispatch [:switch-route :employees nv/employees-component]))
+
+(defroute root-route "/" []
+          (utils/set-hash! "#/employees")
+          (dispatch [:switch-route :employees nv/employees-component]))
+
+(defroute employee-route "/employee/:id" [id]
+          (dispatch [:employee-route-switcher nv/employee-component id]))
+
+(defroute employee-add-route "/employees/add" []
+          (dispatch [:employee-route-switcher nv/employee-component 0]))
+
+(defroute "*" []
+          (dispatch [:switch-route nv/not-found]))
 
 (defn hook-browser-navigation! []
   "Routing history, back button etc."

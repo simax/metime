@@ -7,8 +7,8 @@
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch
-                                   subscribe]]
-            [metime.utils :as utils])
+                                   subscribe]])
+
   (:import goog.History
            goog.History.EventType))
 
@@ -52,36 +52,6 @@
           [ev/employee-not-found]
           [ev/employee-maintenance-form @emp])))))
 
-(defroute tables-route "/tables" []
-          (dispatch [:switch-route :tables tables-component]))
-
-(defroute calendar-route "/calendar" []
-          (dispatch [:switch-route :calendar calendar-component]))
-
-(defroute file-manager-route "/file-manager" []
-          (dispatch [:switch-route :file-manager file-manager-component]))
-
-(defroute user-route "/user" []
-          (dispatch [:switch-route :user user-component]))
-
-(defroute login-route "/login" []
-          (dispatch [:switch-route :login login-component]))
-
-(defroute employees-route "/employees" []
-          (dispatch [:switch-route :employees employees-component]))
-
-(defroute root-route "/" []
-          (utils/set-hash! "#/employees")
-          (dispatch [:switch-route :employees employees-component]))
-
-(defroute employee-route "/employee/:id" [id]
-          (dispatch [:employee-route-switcher employee-component id]))
-
-(defroute employee-add-route "/employees/add" []
-          (dispatch [:employee-route-switcher employee-component 0]))
-
-(defroute "*" []
-          (dispatch [:switch-route not-found]))
 
 (defn nav-menu-item [item]
   (let [route (:path item)]

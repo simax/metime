@@ -1,7 +1,8 @@
 (ns metime.navigation.handlers
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
                    [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :refer [register-handler
+  (:require [re-frame.core :refer [debug
+                                   register-handler
                                    path
                                    register-sub
                                    dispatch
@@ -18,7 +19,7 @@
     (assoc item :active true)
     (assoc item :active false)))
 
-(defn update-nav-bar [db nav-bar-id view-component]
+(defn update-nav-bar [db view-component nav-bar-id]
   (let [updated-view (assoc db :view view-component)]
     (update-in updated-view [:nav-bar] #(map (partial toggle-active-status nav-bar-id) %))))
 
@@ -47,6 +48,7 @@
 
 (register-handler
   :employee-route-switcher
+  ;;[debug employee-route-switcher-middleware]
   employee-route-switcher-middleware
   employee-route-switcher-handler)
 
