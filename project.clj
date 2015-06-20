@@ -43,12 +43,10 @@
             :plugins [[lein-cljsbuild "1.0.4"]
                       [lein-environ "1.0.0"]
                       [lein-ring "0.9.1"]
-                      [lein-figwheel "0.3.1"]
+                      [lein-figwheel "0.3.3"]
                       [lein-asset-minifier "0.2.2"]]
 
   :source-paths ["src/clj" "src/cljs"]
-
-            :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   ;; Used for data migrations
   :clj-sql-up {:database {:classname "org.sqlite.JDBC"
@@ -63,52 +61,44 @@
 
   :uberjar-name "metime.jar"
             :main metime.server
+            :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
             :cljsbuild {
-                        :builds {:app {:source-paths ["src/cljs"]
+                        :builds [{:id           "dev"
+                                  :source-paths ["src"]
 
-                                       :compiler     {:output-to     "resources/public/js/app.js"
-                                                      :output-dir    "resources/public/js/out"
-                                                      :asset-path    "js/out"
-                                                      :source-map    "resources/public/js/out.js.map"
-                                                      :preamble      ["react/react.min.js"]
-                                                      :externs       ["react/externs/react.js"]
-                                                      :optimizations :none
-                                                      :pretty-print  true}}}}
+                                  :figwheel     {:on-jsload "metime.core/on-js-load"}
 
-            :profiles {:dev     {:repl-options {:init-ns metime.server
-                                                ;;:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
-                                                }
-                                 :dependencies [[ring-mock "0.1.5"]
-                                                [ring/ring-devel "1.3.2"]
-                                                [leiningen "2.5.1"]
-                                                [figwheel "0.3.3"]
-                                                [weasel "0.6.0-SNAPSHOT"]
-                                                [pjstadig/humane-test-output "0.6.0"]]
+                                  :compiler     {:main                 metime.core
+                                                 :asset-path           "js/compiled/out"
+                                                 :output-to            "resources/public/js/compiled/app.js"
+                                                 :output-dir           "resources/public/js/compiled/out"
+                                                 :source-map-timestamp true}}
+                                 {:id           "min"
+                                  :source-paths ["src"]
+                                  :compiler     {:output-to     "resources/public/js/compiled/app.js"
+                                                 :main          metime.core
+                                                 :optimizations :advanced
+                                                 :pretty-print  false}}]}
+            :figwheel {
+                       ;:http-server-root "public"
+                       ;:nrepl-port       7888
+                       ;:port             3449
+                       :css-dirs     ["resources/public/assets/css"]
+                       :ring-handler metime.core/app
 
-                                 :source-paths ["env/dev/clj"]
-                                 :plugins      [[lein-figwheel "0.3.1"]]
+                       ;; To be able to open files in your editor from the heads up display
+                       ;; you will need to put a script on your path.
+                       ;; that script will have to take a file path and a line number
+                       ;; ie. in  ~/bin/myfile-opener
+                       ;; #! /bin/sh
+                       ;; emacsclient -n +$2 $1
+                       ;;
+                       ;; :open-file-command "myfile-opener"
 
-                                 :figwheel     {:http-server-root "public"
-                                                :nrepl-port       7888
-                                                :port             3449
-                                                :css-dirs         ["resources/public/assets/css"]
-                                                :ring-handler     metime.core/app}
+                       ;; if you want to disable the REPL
+                       ;; :repl false
 
-                                 :env          {:dev? true}
-
-                                 :cljsbuild    {:builds {:app {:source-paths ["env/dev/cljs"]
-                                                               :compiler     {:main "metime.dev" :source-map true}}}}}
-
-
-                       :uberjar {:hooks       [leiningen.cljsbuild]
-                                 :env         {:production true}
-                                 :omit-source true
-                                 :aot         :all
-                                 :cljsbuild   {:jar    true
-                                               :builds {:app
-                                                        {:source-paths ["env/prod/cljs"]
-                                                         :compiler
-                                                                       {:optimizations :advanced
-                                                                        :pretty-print  false}}}}}}
-            )
+                       ;; to configure a different figwheel logfile path
+                       ;; :server-logfile "tmp/logs/figwheel-logfile.log"
+                       })

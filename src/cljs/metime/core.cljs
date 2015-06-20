@@ -63,7 +63,12 @@
     (doto h (.setEnabled true))))
 
 (defn main []
-  (dispatch [:initialise-db nv/employees-component])
+  (js/console.log "Reached here")
   ;; Main app component
   (reagent/render [nv/top-panel] (js/document.getElementById "app-container"))
-  (hook-browser-navigation!))
+  (hook-browser-navigation!)
+  (dispatch [:initialise-db nv/employees-component]))
+
+(defn on-js-load [])
+
+(main)

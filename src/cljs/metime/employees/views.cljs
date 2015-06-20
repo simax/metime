@@ -101,7 +101,7 @@
       [:div.col-md-2
        [:h6.col-md-offset-4 "Manager"]
        [:div [utils/gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75}]]
-       [:h5.col-md-offset-2 (str (:manager-firstname employee) " " (:manager-lastname employee))]
+       [:h5.col-md-offset-8 (str (:manager-firstname employee) " " (:manager-lastname employee))]
        ]]
      ]]]
   )
