@@ -55,50 +55,34 @@
                :deps [[org.xerial/sqlite-jdbc "3.7.2"]]}
 
 
-            :ring {:handler metime.core/app :auto-reload? true}
+  :ring {:handler metime.core/app :auto-reload? true}
 
   :min-lein-version "2.5.0"
 
   :uberjar-name "metime.jar"
-            :main metime.server
-            :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  :main metime.server
+  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
-            :cljsbuild {
-                        :builds [{:id           "dev"
-                                  :source-paths ["src"]
+  :cljsbuild {
+              :builds [{:id           "dev"
+                        :source-paths ["src/cljs"]
 
-                                  :figwheel     {:on-jsload "metime.core/on-js-load"}
+                        :figwheel     {:on-jsload "metime.core/mount-root"}
 
-                                  :compiler     {:main                 metime.core
-                                                 :asset-path           "js/compiled/out"
-                                                 :output-to            "resources/public/js/compiled/app.js"
-                                                 :output-dir           "resources/public/js/compiled/out"
-                                                 :source-map-timestamp true}}
-                                 {:id           "min"
-                                  :source-paths ["src"]
-                                  :compiler     {:output-to     "resources/public/js/compiled/app.js"
-                                                 :main          metime.core
-                                                 :optimizations :advanced
-                                                 :pretty-print  false}}]}
-            :figwheel {
-                       ;:http-server-root "public"
-                       ;:nrepl-port       7888
-                       ;:port             3449
-                       :css-dirs     ["resources/public/assets/css"]
-                       :ring-handler metime.core/app
-
-                       ;; To be able to open files in your editor from the heads up display
-                       ;; you will need to put a script on your path.
-                       ;; that script will have to take a file path and a line number
-                       ;; ie. in  ~/bin/myfile-opener
-                       ;; #! /bin/sh
-                       ;; emacsclient -n +$2 $1
-                       ;;
-                       ;; :open-file-command "myfile-opener"
-
-                       ;; if you want to disable the REPL
-                       ;; :repl false
-
-                       ;; to configure a different figwheel logfile path
-                       ;; :server-logfile "tmp/logs/figwheel-logfile.log"
-                       })
+                        :compiler     {:main                 metime.core
+                                       :asset-path           "js/compiled/out"
+                                       :output-to            "resources/public/js/compiled/app.js"
+                                       :output-dir           "resources/public/js/compiled/out"
+                                       :source-map-timestamp true}}
+                       {:id           "min"
+                        :source-paths ["src/cljs"]
+                        :compiler     {:output-to     "resources/public/js/compiled/app.js"
+                                       :main          metime.core
+                                       :optimizations :advanced
+                                       :pretty-print  false}}]}
+  :figwheel {
+             ;:http-server-root "public"
+             ;:nrepl-port       7888
+             ;:port             3449
+             :css-dirs     ["resources/public/assets/css"]
+             :ring-handler metime.core/app})

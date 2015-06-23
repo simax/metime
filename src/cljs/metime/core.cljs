@@ -11,6 +11,7 @@
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch
+                                   dispatch-sync
                                    subscribe]]
             [metime.utils :as utils])
   (:import goog.History))
@@ -62,13 +63,13 @@
     (events/listen h EventType/NAVIGATE f)
     (doto h (.setEnabled true))))
 
-(defn main []
+(defn mount-root []
   (js/console.log "Reached here")
   ;; Main app component
   (reagent/render [nv/top-panel] (js/document.getElementById "app-container"))
+  )
+
+(defn ^:export init []
+  (dispatch-sync [:initialise-db nv/employees-component])
   (hook-browser-navigation!)
-  (dispatch [:initialise-db nv/employees-component]))
-
-(defn on-js-load [])
-
-(main)
+  (mount-root))
