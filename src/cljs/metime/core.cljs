@@ -64,12 +64,10 @@
     (doto h (.setEnabled true))))
 
 (defn mount-root []
-  (js/console.log "Reached here")
   ;; Main app component
-  (reagent/render [nv/top-panel] (js/document.getElementById "app-container"))
-  )
+  (reagent/render [nv/top-panel] (js/document.getElementById "app-container")))
 
 (defn ^:export init []
-  (dispatch-sync [:initialise-db nv/employees-component])
+  (dispatch [:initialise-db nv/employees-component])
   (hook-browser-navigation!)
   (mount-root))

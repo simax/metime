@@ -75,12 +75,19 @@
 
 (defn main-panel []
   (let [db (subscribe [:db-changed?])]
+    (js/console.log (str "(:view @db): " (:view @db)))
     (fn []
       [:div
        ;; Top nav bar
        [nav-bar @db]
-       ;; Components
-       [(:view @db)]])))
+       ;; Switch view
+       [(case (:view @db)
+          :tables (tables-component)
+          :calendar (calendar-component)
+          :file-manager (file-manager-component)
+          :user (user-component)
+          :employess (employee-component)
+          (not-found))]])))
 
 (defn top-panel []
   (let [ready? (subscribe [:initialised?])]
