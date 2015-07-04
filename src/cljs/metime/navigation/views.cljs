@@ -54,8 +54,9 @@
 
 
 (defn nav-menu-item [item]
-  (let [route (:path item)]
-    [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]]))
+  (let [route (:path item)
+        display-text (:text item)]
+    [:li {:class (if (= (:active item) true) "active" "")} [:a {:href route} display-text]]))
 
 (defn nav-bar [nav-bar]
   [:div.navbar-nav.navbar-inverse.navbar-fixed-top
@@ -75,13 +76,15 @@
 
 
 (defn switch-view [view-component]
+  (js/console.log (str "view-component>> " view-component))
   (case view-component
     :tables tables-component
     :calendar calendar-component
     :file-manager file-manager-component
     :user user-component
     :employees employees-component
-    :default not-found))
+    :employee employees-component
+    not-found))
 
 (defn main-panel []
   (let [view-component (subscribe [:view-component])
@@ -92,16 +95,6 @@
        [nav-bar @nav-bars]
        ;; Switch view
        [(switch-view @view-component)]])))
-
-; :h1 (name @view-component)
-
-;(case (:view @db)
-;  :tables (tables-component)
-;  :calendar (calendar-component)
-;  :file-manager (file-manager-component)
-;  :user (user-component)
-;  :employees (employees-component)
-;  (not-found))
 
 
 (defn top-panel []
