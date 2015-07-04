@@ -4,30 +4,35 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-            :dependencies [[org.clojure/clojure "1.6.0"]
-                           [org.clojure/clojurescript "0.0-3211"]
+            :dependencies [[org.clojure/clojure "1.7.0"]
+                           [org.clojure/clojurescript "0.0-3297"]
                            [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                           [figwheel "0.3.6"]
+                           [figwheel-sidecar "0.3.6"]
+
+
                            [cljs-hash "0.0.2"]
                            [com.novemberain/validateur "2.4.2"]
                            [metis "0.3.3"]
-                           [ring-cors "0.1.6"]
-                           [clj-time "0.8.0"]
+                           [ring-cors "0.1.7"]
+                           [clj-time "0.9.0"]
                            [digest "1.4.4"]
 
+
                            ;; Server
-                           [ring "1.3.2"]
-                           [compojure "1.2.0"]
+                           [ring "1.4.0-RC2"]
+                           [compojure "1.3.4"]
                            [cljs-http "0.1.20"]
-                           [yesql "0.5.0-beta2"]
+                           [yesql "0.5.0-rc3"]
                            [org.xerial/sqlite-jdbc "3.7.2"]
-                           [liberator "0.11.0"]
-                           [cheshire "5.3.1"]
-                           [prone "0.8.0"]
+                           [liberator "0.13"]
+                           [cheshire "5.5.0"]
+                           [prone "0.8.2"]
                            [org.clojure/data.json "0.2.5"]
 
                            ;; UI
-                           [reagent "0.5.0-alpha3"]
-                           [re-frame "0.2.0"]
+                           [reagent "0.5.0"]
+                           [re-frame "0.4.1"]
                            [re-com "0.5.4"]
                            [secretary "1.2.3"]
 
@@ -36,17 +41,18 @@
                            [enlive "1.1.5"]
                            [selmer "0.8.0"]
                            [environ "1.0.0"]
-                           [expectations "2.0.9"]
+                           [expectations "2.1.2"]]
 
-                           ]
 
-            :plugins [[lein-cljsbuild "1.0.4"]
-                      [lein-environ "1.0.0"]
-                      [lein-ring "0.9.1"]
-                      [lein-figwheel "0.3.3"]
-                      [lein-asset-minifier "0.2.2"]]
+  :plugins [[lein-figwheel "0.3.7"]
+            [lein-cljsbuild "1.0.5"]
+            [lein-environ "1.0.0"]
+            [lein-ring "0.9.6"]
+            [lein-asset-minifier "0.2.2"]]
 
   :source-paths ["src/clj" "src/cljs"]
+
+  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   ;; Used for data migrations
   :clj-sql-up {:database {:classname "org.sqlite.JDBC"
@@ -61,7 +67,6 @@
 
   :uberjar-name "metime.jar"
   :main metime.server
-  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
               :builds [{:id           "dev"
@@ -85,4 +90,5 @@
              ;:nrepl-port       7888
              ;:port             3449
              :css-dirs     ["resources/public/assets/css"]
-             :ring-handler metime.core/app})
+             :ring-handler metime.core/app
+             })

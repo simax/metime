@@ -12,7 +12,7 @@
             [cljs-http.client :as http]
             [metime.utils :as utils]
             [metime.employees.views]
-            [metime.db :as datab]))
+            [metime.db :as dbase]))
 
 (defn toggle-active-status [nav-bar-id item]
   (if (= (:id item) nav-bar-id)
@@ -60,7 +60,7 @@
 (register-handler
   :initialise-db
   (fn [db [_ initial-view]]
-    (assoc (merge db datab/default-db) :view initial-view)))
+    (assoc (merge db dbase/default-db) :view initial-view)))
 
 (register-handler
   :process-departments-response

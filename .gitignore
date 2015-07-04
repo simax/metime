@@ -10,3 +10,4 @@ pom.xml.asc
 /.nrepl-port
 .DS_Store
 figwheel_server.log
+.idea

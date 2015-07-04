@@ -14,9 +14,14 @@
     (reaction (:employee @db))))
 
 (register-sub
-  :db-changed?
+  :view-component
   (fn [db _]
-    (reaction @db)))
+    (reaction (:view @db))))
+
+(register-sub
+  :nav-bar
+  (fn [db _]
+    (reaction (:nav-bar @db))))
 
 (register-sub
   :initialised?

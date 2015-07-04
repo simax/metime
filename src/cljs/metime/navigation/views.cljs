@@ -57,7 +57,7 @@
   (let [route (:path item)]
     [:li {:class (if (= (:active item) true) "active" "")} [:a {:href (:path item)} (:text item)]]))
 
-(defn nav-bar [{:keys [nav-bar]}]
+(defn nav-bar [nav-bar]
   [:div.navbar-nav.navbar-inverse.navbar-fixed-top
    [:div.container
     [:div.navbar-header
@@ -73,21 +73,36 @@
         ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item])]
      ]]])
 
+
+(defn switch-view [view-component]
+  (case view-component
+    :tables tables-component
+    :calendar calendar-component
+    :file-manager file-manager-component
+    :user user-component
+    :employees employees-component
+    :default not-found))
+
 (defn main-panel []
-  (let [db (subscribe [:db-changed?])]
-    (js/console.log (str "(:view @db): " (:view @db)))
+  (let [view-component (subscribe [:view-component])
+        nav-bars (subscribe [:nav-bar])]
     (fn []
       [:div
        ;; Top nav bar
-       [nav-bar @db]
+       [nav-bar @nav-bars]
        ;; Switch view
-       [(case (:view @db)
-          :tables (tables-component)
-          :calendar (calendar-component)
-          :file-manager (file-manager-component)
-          :user (user-component)
-          :employess (employee-component)
-          (not-found))]])))
+       [(switch-view @view-component)]])))
+
+; :h1 (name @view-component)
+
+;(case (:view @db)
+;  :tables (tables-component)
+;  :calendar (calendar-component)
+;  :file-manager (file-manager-component)
+;  :user (user-component)
+;  :employees (employees-component)
+;  (not-found))
+
 
 (defn top-panel []
   (let [ready? (subscribe [:initialised?])]

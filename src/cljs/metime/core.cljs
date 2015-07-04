@@ -1,4 +1,4 @@
-(ns metime.core
+(ns ^:figwheel-always metime.core
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
                    [reagent.ratom :refer [reaction]])
   (:require [goog.events :as events]
@@ -54,7 +54,7 @@
 (defn hook-browser-navigation! []
   "Routing history, back button etc."
   (let [h (History.)
-        f (fn [he]                                          ;; goog.History.Event
+        f (fn [he] ;; goog.History.Event
             (let [token (.-token he)]
               (if (seq token)
                 (secretary/dispatch! token)
@@ -68,6 +68,7 @@
   (reagent/render [nv/top-panel] (js/document.getElementById "app-container")))
 
 (defn ^:export init []
-  (dispatch [:initialise-db nv/employees-component])
+  (dispatch [:initialise-db :employees])
   (hook-browser-navigation!)
   (mount-root))
+

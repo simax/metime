@@ -1,7 +1,8 @@
 (ns metime.db)
 
-(def default-db
+(defonce default-db
   {:api-root-url "http://localhost:3030/api"
+   :view         :employees
    :employee     {:is-ready? false}
    :nav-bar      [{:id :employees :text "Employees" :active true}
                   {:id :file-manager :text "File Manager"}
