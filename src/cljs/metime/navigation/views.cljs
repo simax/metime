@@ -29,8 +29,8 @@
 (defn user-component []
   [:div {:style {:height "500px"}} [:h1 "User page"]])
 
-(defn login-component []
-  [:div {:style {:height "500px"}} [:h1 "Login page"]])
+;(defn login-component []
+;  [:div {:style {:height "500px"}} [:h1 "Login page"]])
 
 (defn not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
@@ -51,7 +51,6 @@
         (if (:not-found @emp)
           [ev/employee-not-found]
           [ev/employee-maintenance-form @emp])))))
-
 
 (defn nav-menu-item [item current-nav-bar-id]
   (let [route (:path item)
@@ -74,7 +73,6 @@
         ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item current-nav-bar-id])]
      ]]])
 
-
 (defn switch-view [view-component]
   (case view-component
     :tables tables-component
@@ -82,7 +80,7 @@
     :file-manager file-manager-component
     :user user-component
     :employees employees-component
-    :employee employees-component
+    :employee employee-component
     not-found))
 
 (defn main-panel []
@@ -96,7 +94,6 @@
        ;; Switch view
        [(switch-view @view-component-id)]
        ])))
-
 
 (defn top-panel []
   (let [ready? (subscribe [:initialised?])]

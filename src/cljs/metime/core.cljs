@@ -43,10 +43,10 @@
           (dispatch [:switch-route :employees :employees]))
 
 (defroute employee-route "/employee/:id" [id]
-          (dispatch [:employee-route-switcher nv/employee-component id]))
+          (dispatch [:employee-route-switcher :employees :employee id]))
 
 (defroute employee-add-route "/employees/add" []
-          (dispatch [:employee-route-switcher nv/employee-component 0]))
+          (dispatch [:employee-route-switcher :employees :employee 0]))
 
 (defroute "*" []
           (dispatch [:switch-route :employees :not-found]))

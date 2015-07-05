@@ -24,17 +24,6 @@
     ;(update-in updated-view [:nav-bars] #(map (partial toggle-active-status nav-bar-id) %))
     )
 
-(defn employee-route-switcher-middleware [handler]
-  (fn employee-handler
-    [db [_ view-component id]]
-    (handler db [_ id])
-    (update-nav-bar db :employees view-component)))
-
-(defn employee-route-switcher-handler
-  [db [_ id]]
-  (dispatch [:fetch-employee id])
-  db)
-
 (defn fetch-employee
   [db url]
   ;; The following go block will "park" until the http request returns data
@@ -46,6 +35,18 @@
   (go
     ;; The following go block will "park" until the http request returns data
     (dispatch [:process-departments-response (((<! (http/get url)) :body) :departments)])))
+
+(defn employee-route-switcher-middleware [handler]
+  (fn employee-handler
+    [db [_ nav-bar-id view-component-id id]]
+    (handler db [_ _ _ id])
+    (update-nav-bar db nav-bar-id view-component-id)
+    ))
+
+(defn employee-route-switcher-handler
+  [db [_ _ _ id]]
+  (dispatch [:fetch-employee id])
+  db)
 
 (register-handler
   :employee-route-switcher
