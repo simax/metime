@@ -44,9 +44,10 @@
      [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
      ]]])
 
-(defn department-list-item [{:keys [department managerid manager-firstname manager-lastname manager-email employees]}]
+(defn department-list-item [{:keys [:departmentid department managerid manager-firstname manager-lastname manager-email employees]}]
   (let [department-list-item (filter #(not= (:id %) managerid) employees)
-        rows-of-employees (partition 4 4 nil department-list-item)]
+        rows-of-employees (partition 4 4 nil department-list-item)
+        department-name (clojure.string/replace department #"[\s]" "-")]
     [:div#accordian.panel.panel-default.row
      [:div.panel-heading.clearfix.panel-heading
       [:div.col-md-2.col-xs-2
@@ -63,13 +64,13 @@
         [:button {:class       "btn btn-default glyphicon glyphicon-sort"
                   :data-toggle "collapse"
                   :data-parent "accordian"
-                  :data-target (str "#" (clojure.string/replace department #"[\s]" "-"))}]]]]
+                  :data-target (str "#" department-name)}]]]]
 
-     [:div.panel-body.panel-collapse.collapse {:id (clojure.string/replace department #"[\s]" "-") :style {:height "auto"}}
+     [:div.panel-body.panel-collapse.collapse {:id department-name :style {:height "auto"}}
       (if (not-empty rows-of-employees)
         [:div
          [:button {:class    "btn btn-primary glyphicon glyphicon-plus-sign"
-                   :on-click #(dispatch [:employee-add])} " Add employee"]
+                   :on-click #(dispatch [:employee-add :departmentid :managerid])} " Add employee"]
          [:ul {:style {:margin-top "20px"}}
           (for [employee-row rows-of-employees]
             (for [employee-item employee-row]
@@ -89,7 +90,7 @@
 (defn employee-not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "Sorry, we couldn't find that employee."]])
 
-(defn employee-core-heading [employee]
+(defn employee-core-heading [employee dep-id man-id]
   [:div.panel.panel-default
    [:div.panel-body
     ;; Employee gravatar
@@ -278,14 +279,14 @@
     ]]
   )
 
-(defn employee-maintenance-form [employee]
+(defn employee-maintenance-form [employee dep-id man-id]
   [:div.well
 
-   [employee-core-heading employee]
+   [employee-core-heading employee dep-id man-id]
    [:div.well
     [:div.row
      [:div.col-md-8
-      [employee-core-details employee]
+      [employee-core-details employee dep-id man-id]
       ]
      [:div.col-md-4
       [employee-balances employee]

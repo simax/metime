@@ -11,3 +11,14 @@
   :deps
   departments-query)
 
+(register-sub
+  :department-id
+  (fn [db _]
+    (reaction (:department-id @db))))
+
+(register-sub
+  :manager-id
+  (fn [db _]
+    (reaction (:manager-id @db))))
+
+

@@ -54,12 +54,12 @@
 (defn handle-input-change [db [_ property-name new-value]]
   (assoc-in db [:employee property-name] new-value))
 
-(defn handle-employee-add [db _]
+(defn handle-employee-add [db _ department-id manager-id]
   ;; Need to make this better
   (let [url "#/employees/add"]
     (utils/set-hash! url)
     (secretary/dispatch! url))
-  db)
+  (assoc db :department-id department-id :manager-id manager-id))
 
 (defn handle-employee-save [db _]
   (let [employee-id (get-in db [:employee :id])]
