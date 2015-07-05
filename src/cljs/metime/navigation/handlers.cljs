@@ -19,15 +19,16 @@
     (assoc item :active true)
     (assoc item :active false)))
 
-(defn update-nav-bar [db view-component nav-bar-id]
-  (let [updated-view (assoc db :view view-component)]
-    (update-in updated-view [:nav-bar] #(map (partial toggle-active-status nav-bar-id) %))))
+(defn update-nav-bar [db nav-bar-id view-component]
+  (assoc db :nav-bar nav-bar-id :view view-component)
+    ;(update-in updated-view [:nav-bars] #(map (partial toggle-active-status nav-bar-id) %))
+    )
 
 (defn employee-route-switcher-middleware [handler]
   (fn employee-handler
     [db [_ view-component id]]
     (handler db [_ id])
-    (update-nav-bar db view-component :employees)))
+    (update-nav-bar db :employees view-component)))
 
 (defn employee-route-switcher-handler
   [db [_ id]]
@@ -54,13 +55,14 @@
 
 (register-handler
   :switch-route
-  (fn [db [_ nav-bar-id view-component]]
-    (update-nav-bar db nav-bar-id view-component)))
+  (fn [db [_ nav-bar-id view-component-id]]
+    ;(update-nav-bar db nav-bar-id view-component)
+    (assoc db :nav-bar nav-bar-id :view view-component-id)))
 
 (register-handler
   :initialise-db
-  (fn [db [_ initial-view]]
-    (assoc (merge db dbase/default-db) :view initial-view)))
+  (fn [db [_]]
+    (merge db dbase/default-db)))
 
 (register-handler
   :process-departments-response

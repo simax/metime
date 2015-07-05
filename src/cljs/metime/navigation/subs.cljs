@@ -19,9 +19,14 @@
     (reaction (:view @db))))
 
 (register-sub
-  :nav-bar
+  :current-nav-bar
   (fn [db _]
     (reaction (:nav-bar @db))))
+
+(register-sub
+  :nav-bars
+  (fn [db _]
+    (reaction (:nav-bars @db))))
 
 (register-sub
   :initialised?

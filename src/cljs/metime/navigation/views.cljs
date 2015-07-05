@@ -53,12 +53,12 @@
           [ev/employee-maintenance-form @emp])))))
 
 
-(defn nav-menu-item [item view-id]
+(defn nav-menu-item [item current-nav-bar-id]
   (let [route (:path item)
         display-text (:text item)]
-    [:li {:class (if (= (:id item) view-id) "active" "")} [:a {:href route} display-text]]))
+    [:li {:class (if (= (:id item) current-nav-bar-id) "active" "")} [:a {:href route} display-text]]))
 
-(defn nav-bar [nav-bar view-id]
+(defn nav-bar [nav-bar current-nav-bar-id]
   [:div.navbar-nav.navbar-inverse.navbar-fixed-top
    [:div.container
     [:div.navbar-header
@@ -71,12 +71,11 @@
     [:div#nav-bar.navbar-collapse.collapse
      [:ul.nav.navbar-nav
       (for [nav-bar-item nav-bar]
-        ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item view-id])]
+        ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item current-nav-bar-id])]
      ]]])
 
 
 (defn switch-view [view-component]
-  (js/console.log (str "view-component>> " view-component))
   (case view-component
     :tables tables-component
     :calendar calendar-component
@@ -88,13 +87,15 @@
 
 (defn main-panel []
   (let [view-component-id (subscribe [:view-component])
-        nav-bars (subscribe [:nav-bar])]
+        nav-bars (subscribe [:nav-bars])
+        current-nav-bar (subscribe [:current-nav-bar])]
     (fn []
       [:div
        ;; Top nav bar
-       [nav-bar @nav-bars @view-component-id]
+       [nav-bar @nav-bars @current-nav-bar]
        ;; Switch view
-       [(switch-view @view-component-id)]])))
+       [(switch-view @view-component-id)]
+       ])))
 
 
 (defn top-panel []

@@ -21,26 +21,26 @@
 (secretary/set-config! :prefix "#")
 
 (defroute tables-route "/tables" []
-          (dispatch [:switch-route :tables nv/tables-component]))
+          (dispatch [:switch-route :tables :tables]))
 
 (defroute calendar-route "/calendar" []
-          (dispatch [:switch-route :calendar nv/calendar-component]))
+          (dispatch [:switch-route :calendar :calendar]))
 
 (defroute file-manager-route "/file-manager" []
-          (dispatch [:switch-route :file-manager nv/file-manager-component]))
+          (dispatch [:switch-route :file-manager :file-manager]))
 
 (defroute user-route "/user" []
-          (dispatch [:switch-route :user nv/user-component]))
+          (dispatch [:switch-route :user :user]))
 
 (defroute login-route "/login" []
-          (dispatch [:switch-route :login nv/login-component]))
+          (dispatch [:switch-route :login :login]))
 
 (defroute employees-route "/employees" []
-          (dispatch [:switch-route :employees nv/employees-component]))
+          (dispatch [:switch-route :employees :employees]))
 
 (defroute root-route "/" []
           (utils/set-hash! "#/employees")
-          (dispatch [:switch-route :employees nv/employees-component]))
+          (dispatch [:switch-route :employees :employees]))
 
 (defroute employee-route "/employee/:id" [id]
           (dispatch [:employee-route-switcher nv/employee-component id]))
@@ -49,7 +49,7 @@
           (dispatch [:employee-route-switcher nv/employee-component 0]))
 
 (defroute "*" []
-          (dispatch [:switch-route nv/not-found]))
+          (dispatch [:switch-route :employees :not-found]))
 
 (defn hook-browser-navigation! []
   "Routing history, back button etc."
@@ -68,7 +68,7 @@
   (reagent/render [nv/top-panel] (js/document.getElementById "app-container")))
 
 (defn ^:export init []
-  (dispatch [:initialise-db :employees])
+  (dispatch [:initialise-db])
   (hook-browser-navigation!)
   (mount-root))
 
