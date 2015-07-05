@@ -53,12 +53,12 @@
           [ev/employee-maintenance-form @emp])))))
 
 
-(defn nav-menu-item [item]
+(defn nav-menu-item [item view-id]
   (let [route (:path item)
         display-text (:text item)]
-    [:li {:class (if (= (:active item) true) "active" "")} [:a {:href route} display-text]]))
+    [:li {:class (if (= (:id item) view-id) "active" "")} [:a {:href route} display-text]]))
 
-(defn nav-bar [nav-bar]
+(defn nav-bar [nav-bar view-id]
   [:div.navbar-nav.navbar-inverse.navbar-fixed-top
    [:div.container
     [:div.navbar-header
@@ -71,7 +71,7 @@
     [:div#nav-bar.navbar-collapse.collapse
      [:ul.nav.navbar-nav
       (for [nav-bar-item nav-bar]
-        ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item])]
+        ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item view-id])]
      ]]])
 
 
@@ -87,14 +87,14 @@
     not-found))
 
 (defn main-panel []
-  (let [view-component (subscribe [:view-component])
+  (let [view-component-id (subscribe [:view-component])
         nav-bars (subscribe [:nav-bar])]
     (fn []
       [:div
        ;; Top nav bar
-       [nav-bar @nav-bars]
+       [nav-bar @nav-bars @view-component-id]
        ;; Switch view
-       [(switch-view @view-component)]])))
+       [(switch-view @view-component-id)]])))
 
 
 (defn top-panel []
