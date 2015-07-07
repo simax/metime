@@ -14,10 +14,10 @@
             [metime.employees.views]
             [metime.db :as dbase]))
 
-(defn toggle-active-status [nav-bar-id item]
-  (if (= (:id item) nav-bar-id)
-    (assoc item :active true)
-    (assoc item :active false)))
+;(defn toggle-active-status [nav-bar-id item]
+;  (if (= (:id item) nav-bar-id)
+;    (assoc item :active true)
+;    (assoc item :active false)))
 
 (defn update-nav-bar [db nav-bar-id view-component]
   (assoc db :nav-bar nav-bar-id :view view-component)

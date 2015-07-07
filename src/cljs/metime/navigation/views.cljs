@@ -3,6 +3,7 @@
   (:require [metime.navigation.handlers]
             [metime.navigation.subs]
             [metime.employees.views :as ev]
+            [metime.routes :as r]
             [secretary.core :refer-macros [defroute]]
             [re-frame.core :refer [register-handler
                                    path
@@ -57,6 +58,7 @@
 (defn nav-menu-item [item current-nav-bar-id]
   (let [route (:path item)
         display-text (:text item)]
+    ;; TODO: Use Secretary routes here. Remove path from app-db
     [:li {:class (if (= (:id item) current-nav-bar-id) "active" "")} [:a {:href route} display-text]]))
 
 (defn nav-bar [nav-bar current-nav-bar-id]
@@ -68,7 +70,7 @@
       [:span.icon-bar]
       [:span.icon-bar]
       ]
-     [:a.navbar-brand {:href= "/#employees"} [:img {:src "assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
+     [:a.navbar-brand {:href= (r/employees-route)} [:img {:src "assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
     [:div#nav-bar.navbar-collapse.collapse
      [:ul.nav.navbar-nav
       (for [nav-bar-item nav-bar]

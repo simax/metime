@@ -4,6 +4,7 @@
   (:require [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [metime.employees.subs]
             [metime.employees.handlers]
+            [metime.routes :as r]
             [metime.utils :as utils]
             [reagent.core :refer [atom]]
             [re-frame.core :refer [register-handler
@@ -29,7 +30,7 @@
   [:div {:class "col-md-3 col-lg-3"}
    [:div {:class "dash-unit"}
     [:div {:class "thumbnail" :style {:margin-top "20px"}}
-     [:a {:href (str "#/employee/" id) }
+     [:a {:href (str (r/employee-route {:id id}))}
       [:h1 (employee-name firstname lastname)]
       [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
       ]
