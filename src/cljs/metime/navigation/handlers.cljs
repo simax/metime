@@ -14,15 +14,8 @@
             [metime.employees.views]
             [metime.db :as dbase]))
 
-;(defn toggle-active-status [nav-bar-id item]
-;  (if (= (:id item) nav-bar-id)
-;    (assoc item :active true)
-;    (assoc item :active false)))
-
 (defn update-nav-bar [db nav-bar-id view-component]
-  (assoc db :nav-bar nav-bar-id :view view-component)
-    ;(update-in updated-view [:nav-bars] #(map (partial toggle-active-status nav-bar-id) %))
-    )
+  (assoc db :nav-bar nav-bar-id :view view-component))
 
 (defn fetch-employee
   [db url]
@@ -40,8 +33,7 @@
   (fn employee-handler
     [db [_ nav-bar-id view-component-id id]]
     (handler db [_ _ _ id])
-    (update-nav-bar db nav-bar-id view-component-id)
-    ))
+    (update-nav-bar db nav-bar-id view-component-id)))
 
 (defn employee-route-switcher-handler
   [db [_ _ _ id]]

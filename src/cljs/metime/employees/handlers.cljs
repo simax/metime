@@ -55,11 +55,32 @@
 (defn handle-input-change [db [_ property-name new-value]]
   (assoc-in db [:employee property-name] new-value))
 
-(defn handle-employee-add [db _ department-id manager-id]
-  (let [url (r/employee-add-route)]
+(defn handle-employee-add [db [_ departmentid managerid]]
+  (let [url (r/employee-add-route)
+        dep (first (filter #(= (:departmentid %) departmentid) (:deps db)))]
+    (println (:manager-email dep))
     (utils/set-hash! url)
-    (secretary/dispatch! url))
-  (assoc db :department-id department-id :manager-id manager-id))
+    (secretary/dispatch! url)
+    (->
+      (assoc db :department-id departmentid :manager-id managerid)
+      (assoc-in [:employee] {:is-ready?           true
+                             :id                  0
+                             :firstname           ""
+                             :lastname            ""
+                             :email               ""
+                             :dob                 nil
+                             :startdate           nil
+                             :enddate             nil
+                             :this_year_opening   25
+                             :this_year_remaining 25
+                             :next_year_opening   25
+                             :next_year_remaining 25
+                             :departments_id      departmentid
+                             :managerid           managerid
+                             :manager-firstname   (:manager-firstname dep)
+                             :manager-lastname    (:manager-lastname dep)
+                             :manager-email       (:manager-email dep)
+                             }))))
 
 (defn handle-employee-save [db _]
   (let [employee-id (get-in db [:employee :id])]

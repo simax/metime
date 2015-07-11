@@ -47,7 +47,7 @@
 
 
 
-(defn department-list-item [{:keys [:departmentid department managerid manager-firstname manager-lastname manager-email employees]}]
+(defn department-list-item [{:keys [departmentid department managerid manager-firstname manager-lastname manager-email employees]}]
   (let [department-list-item (filter #(not= (:id %) managerid) employees)
         rows-of-employees (partition 4 4 nil department-list-item)
         department-name (clojure.string/replace department #"[\s]" "-")
@@ -71,7 +71,7 @@
       (if (not-empty rows-of-employees)
         [:div
          [:button {:class    "btn btn-primary glyphicon glyphicon-plus-sign"
-                   :on-click #(dispatch [:employee-add :departmentid :managerid])} " Add employee"]
+                   :on-click #(dispatch [:employee-add departmentid managerid])} " Add employee"]
          [:ul {:style {:margin-top "20px"}}
           (for [employee-row rows-of-employees]
             (for [employee-item employee-row]
@@ -91,7 +91,7 @@
 (defn employee-not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "Sorry, we couldn't find that employee."]])
 
-(defn employee-core-heading [employee dep-id man-id]
+(defn employee-core-heading [employee man-id]
   [:div.panel.panel-default
    [:div.panel-body
     ;; Employee gravatar
@@ -283,7 +283,7 @@
 (defn employee-maintenance-form [employee dep-id man-id]
   [:div.well
 
-   [employee-core-heading employee dep-id man-id]
+   [employee-core-heading employee man-id]
    [:div.well
     [:div.row
      [:div.col-md-8
