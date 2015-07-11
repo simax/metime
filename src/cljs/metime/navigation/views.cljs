@@ -15,6 +15,13 @@
 
 (enable-console-print!)
 
+(def nav-bars [{:id :employees :text "Employees" :path (r/employees-route)}
+               {:id :file-manager :text "File Manager" :path (r/file-manager-route)}
+               {:id :calendar :text "Calendar" :path (r/calendar-route)}
+               {:id :tables :text "Tables" :path (r/tables-route)}
+               {:id :user :text "User" :path (r/user-route)}])
+
+
 (defn loader-component []
   [:div.loader-container [:img {:src "assets/img/loader.gif"}]])
 
@@ -29,9 +36,6 @@
 
 (defn user-component []
   [:div {:style {:height "500px"}} [:h1 "User page"]])
-
-;(defn login-component []
-;  [:div {:style {:height "500px"}} [:h1 "Login page"]])
 
 (defn not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
@@ -61,7 +65,7 @@
     ;; TODO: Use Secretary routes here. Remove path from app-db
     [:li {:class (if (= (:id item) current-nav-bar-id) "active" "")} [:a {:href route} display-text]]))
 
-(defn nav-bar [nav-bar current-nav-bar-id]
+(defn nav-bar [current-nav-bar-id]
   [:div.navbar-nav.navbar-inverse.navbar-fixed-top
    [:div.container
     [:div.navbar-header
@@ -73,7 +77,7 @@
      [:a.navbar-brand {:href= (r/employees-route)} [:img {:src "assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
     [:div#nav-bar.navbar-collapse.collapse
      [:ul.nav.navbar-nav
-      (for [nav-bar-item nav-bar]
+      (for [nav-bar-item nav-bars]
         ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item current-nav-bar-id])]
      ]]])
 
@@ -89,12 +93,11 @@
 
 (defn main-panel []
   (let [view-component-id (subscribe [:view-component])
-        nav-bars (subscribe [:nav-bars])
         current-nav-bar (subscribe [:current-nav-bar])]
     (fn []
       [:div
        ;; Top nav bar
-       [nav-bar @nav-bars @current-nav-bar]
+       [nav-bar @current-nav-bar]
        ;; Switch view
        [(switch-view @view-component-id)]
        ])))
