@@ -62,7 +62,6 @@
 (defn nav-menu-item [item current-nav-bar-id]
   (let [route (:path item)
         display-text (:text item)]
-    ;; TODO: Use Secretary routes here. Remove path from app-db
     [:li {:class (if (= (:id item) current-nav-bar-id) "active" "")} [:a {:href route} display-text]]))
 
 (defn nav-bar [current-nav-bar-id]

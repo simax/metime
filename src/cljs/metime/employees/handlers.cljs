@@ -1,5 +1,6 @@
 (ns metime.employees.handlers
   (:require [metime.utils :as utils]
+            [metime.routes :as r]
             [cljs-http.client :as http]
             [secretary.core :as secretary]
             [re-frame.core :refer [register-handler
@@ -55,8 +56,7 @@
   (assoc-in db [:employee property-name] new-value))
 
 (defn handle-employee-add [db _ department-id manager-id]
-  ;; Need to make this better
-  (let [url "#/employees/add"]
+  (let [url (r/employee-add-route)]
     (utils/set-hash! url)
     (secretary/dispatch! url))
   (assoc db :department-id department-id :manager-id manager-id))
@@ -96,3 +96,10 @@
 (register-handler
   :department-change
   handle-department-change)
+
+(register-handler
+  :ui-department-drawer-status-toggle
+  (fn [db [_ department]]
+    (if (= (:department-draw-open-id db) department)
+      (assoc db :department-draw-open-id "")
+      (assoc db :department-draw-open-id department))))

@@ -30,7 +30,7 @@
   [:div {:class "col-md-3 col-lg-3"}
    [:div {:class "dash-unit"}
     [:div {:class "thumbnail" :style {:margin-top "20px"}}
-     [:a {:href (str (r/employee-route) id) }
+     [:a {:href (r/employee-route {:id id})}
       [:h1 (employee-name firstname lastname)]
       [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
       ]
@@ -45,10 +45,13 @@
      [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
      ]]])
 
+
+
 (defn department-list-item [{:keys [:departmentid department managerid manager-firstname manager-lastname manager-email employees]}]
   (let [department-list-item (filter #(not= (:id %) managerid) employees)
         rows-of-employees (partition 4 4 nil department-list-item)
-        department-name (clojure.string/replace department #"[\s]" "-")]
+        department-name (clojure.string/replace department #"[\s]" "-")
+        draw-open-class (subscribe [:department-draw-open-class departmentid])]
     [:div#accordian.panel.panel-default.row
      [:div.panel-heading.clearfix.panel-heading
       [:div.col-md-2.col-xs-2
@@ -63,11 +66,8 @@
         ]
        [:div.col-md-1.col-xs-1
         [:button {:class       "btn btn-default glyphicon glyphicon-sort"
-                  :data-toggle "collapse"
-                  :data-parent "accordian"
-                  :data-target (str "#" department-name)}]]]]
-
-     [:div.panel-body.panel-collapse.collapse {:id department-name :style {:height "auto"}}
+                  :on-click #(dispatch [:ui-department-drawer-status-toggle departmentid])}]]]]
+     [:div {:class @draw-open-class :id department-name :style {:height "auto"}}
       (if (not-empty rows-of-employees)
         [:div
          [:button {:class    "btn btn-primary glyphicon glyphicon-plus-sign"

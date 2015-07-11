@@ -5,7 +5,10 @@
                                    path
                                    dispatch
                                    dispatch-sync
-                                   subscribe]]))
+                                   subscribe]]
+            [secretary.core :as secretary]))
+
+(secretary/set-config! :prefix "#")
 
 (defroute tables-route "/tables" []
           (dispatch [:switch-route :tables :tables]))

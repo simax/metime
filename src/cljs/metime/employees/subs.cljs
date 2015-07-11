@@ -21,4 +21,9 @@
   (fn [db _]
     (reaction (:manager-id @db))))
 
-
+(register-sub
+  :department-draw-open-class
+  (fn [db [_ department-id]]
+    (reaction (if (= (:department-draw-open-id @db) department-id)
+                "panel-body panel-collapse collapse in"
+                "panel-body panel-collapse collapse"))))
