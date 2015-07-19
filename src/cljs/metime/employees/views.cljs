@@ -1,4 +1,5 @@
 (ns metime.employees.views
+  (:refer-clojure :exclude [run!])
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
                    [reagent.ratom :refer [reaction]])
   (:require [cljs.core.async :refer [put! take! <! >! chan timeout]]

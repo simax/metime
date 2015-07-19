@@ -1,4 +1,5 @@
 (ns ^:figwheel-always metime.core
+  (:refer-clojure :exclude [run!])
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
                    [reagent.ratom :refer [reaction]])
   (:require [goog.events :as events]
