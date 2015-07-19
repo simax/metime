@@ -22,7 +22,7 @@
                            ;; Server
                            [ring "1.4.0-RC2"]
                            [compojure "1.3.4"]
-                           [cljs-http "0.1.20"]
+                           [cljs-http "0.1.35"]
                            [yesql "0.5.0-rc3"]
                            [org.xerial/sqlite-jdbc "3.7.2"]
                            [liberator "0.13"]
