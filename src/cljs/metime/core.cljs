@@ -15,7 +15,7 @@
                                    dispatch
                                    dispatch-sync
                                    subscribe]]
-            [metime.utils])
+            [metime.utils :as utils])
   (:import goog.History))
 
 
@@ -40,6 +40,7 @@
 
 (defn ^:export init []
   (dispatch [:initialise-db])
+  (utils/set-hash! "#/employees")
   (hook-browser-navigation!)
   (mount-root))
 

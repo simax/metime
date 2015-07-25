@@ -29,7 +29,7 @@
           (dispatch [:switch-route :employees :employees]))
 
 (defroute root-route "/" []
-          (utils/set-hash! "#/employees")
+          ;(utils/set-hash! "/employees")
           (dispatch [:switch-route :employees :employees]))
 
 (defroute employee-route "/employee/:id" [id]
