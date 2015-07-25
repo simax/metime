@@ -88,6 +88,8 @@
         (http/put endpoint {:form-params (:employee db)}))
       (let [endpoint (utils/api db "/employees")
             data (assoc (:employee db) :password "password1" :password-confirm "password1")]
+        (println (str "endpoint: " endpoint))
+        (println (str "firstname: " (:firstname data)))
         (http/post endpoint {:form-params data})))
     db))
 
