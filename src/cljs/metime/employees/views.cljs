@@ -92,7 +92,7 @@
 (defn employee-not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "Sorry, we couldn't find that employee."]])
 
-(defn employee-core-heading [employee man-id]
+(defn employee-core-heading [employee]
   [:div.panel.panel-default
    [:div.panel-body
     ;; Employee gravatar
@@ -109,7 +109,7 @@
      ]]]
   )
 
-(defn employee-core-details []
+(defn employee-core-details [employee]
   (let [departments (subscribe [:deps])]
     (fn [employee]
       [:div.panel.panel-default
@@ -281,14 +281,14 @@
     ]]
   )
 
-(defn employee-maintenance-form [employee dep-id man-id]
+(defn employee-maintenance-form [employee]
   [:div.well
 
-   [employee-core-heading employee man-id]
+   [employee-core-heading employee]
    [:div.well
     [:div.row
      [:div.col-md-8
-      [employee-core-details employee dep-id man-id]
+      [employee-core-details employee]
       ]
      [:div.col-md-4
       [employee-balances employee]

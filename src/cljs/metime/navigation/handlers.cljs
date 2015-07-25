@@ -38,7 +38,7 @@
 
 (defn employee-route-switcher-handler
   [db [_ _ _ id]]
-  (dispatch [:fetch-employee id])
+  (when (> id 0) (dispatch [:fetch-employee id]))
   db)
 
 (register-handler
@@ -50,7 +50,6 @@
 (register-handler
   :switch-route
   (fn [db [_ nav-bar-id view-component-id]]
-    ;(update-nav-bar db nav-bar-id view-component)
     (assoc db :nav-bar nav-bar-id :view view-component-id)))
 
 (register-handler
@@ -81,20 +80,6 @@
 (register-handler
   :fetch-employee
   (fn [db [_ id]]
-    (if (> id 0)
-      (fetch-employee db (str (utils/api db "/employee/") id))
-      (assoc-in db [:employee] {:is-ready?           true
-                                :id                  0
-                                :firstname           ""
-                                :lastname            ""
-                                :email               ""
-                                :dob                 nil
-                                :startdate           nil
-                                :enddate             nil
-                                :this_year_opening   25
-                                :this_year_remaining 25
-                                :next_year_opening   25
-                                :next_year_remaining 25
-                                :departments_id      0
-                                :managerid           0}))))
+    (when (> id 0)
+      (fetch-employee db (str (utils/api db "/employee/") id)))))
 

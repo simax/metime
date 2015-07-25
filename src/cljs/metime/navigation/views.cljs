@@ -50,14 +50,15 @@
 
 (defn employee-component []
   (let [emp (subscribe [:employee])
-        dep-id (subscribe [:department-id])
-        man-id (subscribe [:manager-id])]
+        ;dep-id (subscribe [:departmentid])
+        ;man-id (subscribe [:managerid])
+        ]
     (fn []
       (if (not (:is-ready? @emp))
         [loader-component]
         (if (:not-found @emp)
           [ev/employee-not-found]
-          [ev/employee-maintenance-form @emp @dep-id @man-id])))))
+          [ev/employee-maintenance-form @emp])))))
 
 (defn nav-menu-item [item current-nav-bar-id]
   (let [route (:path item)
