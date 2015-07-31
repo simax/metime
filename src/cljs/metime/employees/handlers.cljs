@@ -49,7 +49,7 @@
 (defn validate-employee [db _]
   (let [employee (:employee db)
         result (v/valid? employee-validator employee)]
-    (println (str "Errors in employee's firstname: " (errors :firstname (employee-validator employee))))
+    (when result (println (str "Errors in employee's firstname: " (errors :firstname (employee-validator employee)))))
     db))
 
 (defn handle-input-change [db [_ property-name new-value]]
