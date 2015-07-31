@@ -82,16 +82,18 @@
                 }})))
 
 (defn handle-employee-save [db _]
-  (let [employee-id (get-in db [:employee :id])]
+  (let [employee-id (get-in db [:employee :id])
+        endpoint (if (not (is-new-employee? employee-id))
+                   (utils/api db (str "/employee/" employee-id))
+                   (utils/api db "/employees"))
+        data (assoc (:employee db) :password "password1" :password-confirm "password1")]
+    (println (str "endpoint: " endpoint))
     (if (not (is-new-employee? employee-id))
-      (let [endpoint (utils/api db (str "/employee/" employee-id))]
-        (http/put endpoint {:form-params (:employee db)}))
-      (let [endpoint (utils/api db "/employees")
-            data (assoc (:employee db) :password "password1" :password-confirm "password1")]
-        (println (str "endpoint: " endpoint))
-        (println (str "firstname: " (:firstname data)))
-        (http/post endpoint {:form-params data})))
-    db))
+      (http/put endpoint {:form-params data})
+      (http/post endpoint {:form-params data})))
+  (utils/set-hash! (r/employees-route))
+  (dispatch [:switch-route :employees :employees])
+  db)
 
 (defn handle-department-change [db [_ id]]
   (let [deps (:deps db)

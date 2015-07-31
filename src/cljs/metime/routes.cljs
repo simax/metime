@@ -26,6 +26,7 @@
           (dispatch [:switch-route :login :login]))
 
 (defroute employees-route "/employees" []
+          (utils/set-hash! "/employees")
           (dispatch [:switch-route :employees :employees]))
 
 (defroute root-route "/" []
