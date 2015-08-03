@@ -41,7 +41,8 @@
                            [enlive "1.1.5"]
                            [selmer "0.8.0"]
                            [environ "1.0.0"]
-                           [expectations "2.1.2"]]
+                           [expectations "2.1.2"]
+                           [binaryage/devtools "0.3.0"]]
 
 
   :plugins [[lein-figwheel "0.3.7"]
