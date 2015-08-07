@@ -1,5 +1,6 @@
 (ns metime.utils
   (:require [cljs-hash.md5 :as hashgen]
+            [re-com.core :as re-com :refer [h-box v-box box]]
             [re-frame.core :refer [register-handler
                                    path
                                    register-sub
@@ -13,8 +14,8 @@
 (defn gravatar [data]
   (let [email-address (or (:gravatar-email data) "")
         size (or (:gravatar-size data) 100)]
-    [:img.gravatar.img-circle
-     {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?size=" size "&r=PG&d=mm")}]))
+    [box
+     :child [:img.gravatar.img-circle {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?size=" size "&r=PG&d=mm")}]]))
 
 (defn set-hash! [loc]
   "Set the hash portion of the url in the address bar.
@@ -31,9 +32,9 @@
 (defn parse-int [s]
   "Parse the string for an integer"
   (if (nil? s) 0
-    (try
-      (js/parseInt s)
-      (catch js/Object e 0))))
+               (try
+                 (js/parseInt s)
+                 (catch js/Object e 0))))
 
 (defn input-value [component] (-> component .-target .-value))
 

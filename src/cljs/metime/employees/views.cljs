@@ -8,6 +8,8 @@
             [metime.routes :as r]
             [metime.utils :as utils]
             [reagent.core :refer [atom]]
+            [re-com.core :as re-com :refer [h-box v-box box gap]]
+            [re-com.buttons :as buttons]
             [re-frame.core :refer [register-handler
                                    path
                                    debug
@@ -66,7 +68,7 @@
         [:h2 department]
         ]
        [:div.col-md-1.col-xs-1
-        [:button {:class       "btn btn-default glyphicon glyphicon-sort"
+        [:button {:class    "btn btn-default glyphicon glyphicon-sort"
                   :on-click #(dispatch [:ui-department-drawer-status-toggle departmentid])}]]]]
      [:div {:class @draw-open-class :id department-name :style {:height "auto"}}
       (if (not-empty rows-of-employees)
@@ -92,21 +94,53 @@
 (defn employee-not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "Sorry, we couldn't find that employee."]])
 
-(defn employee-core-heading [employee]
-  [:div.panel.panel-default
-   [:div.panel-body
-    ;; Employee gravatar
-    [:div.container-fluid
-     [:div.row
-      [:div.col-md-2 [utils/gravatar {:gravatar-email (:email employee)}]]
-      [:h1.col-md-8 (str (:firstname employee) " " (:lastname employee))]
+(defn employee-gravatar [employee]
+  [box
+   :padding "20px 0 0 0"
+   :child
+   [h-box
+    :justify :start
+    :align :start
+    :gap "20px"
+    :children
+    [
+     [box :child [utils/gravatar {:gravatar-email (:email employee)}]]
+     [box :child [:h1 (str (:firstname employee) " " (:lastname employee))]]]]]
+  )
 
-      [:div.col-md-2
-       [:h6.col-md-offset-4 "Manager"]
-       [:div [utils/gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75}]]
-       [:h5.col-md-offset-2 (str (:manager-firstname employee) " " (:manager-lastname employee))]
-       ]]
-     ]]]
+(defn manager-gravatar [employee]
+  [v-box
+   :justify :start
+   :align :center
+   :children
+   [[box :child [:h6 "Manager"]]
+    [box :child [utils/gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75}]]
+    [box :child [:h5 (str (:manager-firstname employee) " " (:manager-lastname employee))]]
+    ]])
+
+(defn employee-core-heading [employee]
+  [h-box
+   :justify :start
+   :align :start
+   :padding "20px"
+   :class "panel panel-default"
+   :children [[box :child [employee-gravatar employee]]
+              [gap :size "1"]
+              [box :child [manager-gravatar employee]]
+              ]]
+
+  ;[:div.container-fluid
+  ; [:div.row
+  ;  [:div.col-md-2 [utils/gravatar {:gravatar-email (:email employee)}]]
+  ;  [:h1.col-md-8 (str (:firstname employee) " " (:lastname employee))]
+  ;
+  ;  [:div.col-md-2
+  ;   [:h6.col-md-offset-4 "Manager"]
+  ;   [:div [utils/gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75}]]
+  ;   [:h5.col-md-offset-2 (str (:manager-firstname employee) " " (:manager-lastname employee))]
+  ;   ]]
+  ; ]
+
   )
 
 (defn employee-core-details [employee]
@@ -282,27 +316,32 @@
   )
 
 (defn employee-maintenance-form [employee]
-  [:div.well
+  [v-box
+   :size "auto"
+   :justify :start
+   :children [[employee-core-heading employee]
+              ;; [employee-core-details employee]
+              ]
 
-   [employee-core-heading employee]
-   [:div.well
-    [:div.row
-     [:div.col-md-8
-      [employee-core-details employee]
-      ]
-     [:div.col-md-4
-      [employee-balances employee]
-      ]
-     ]
-    ]
+   ;
+   ;[:div.well
+   ; [:div.row
+   ;  [:div.col-md-8
+   ;   [employee-core-details employee]
+   ;   ]
+   ;  [:div.col-md-4
+   ;   [employee-balances employee]
+   ;   ]
+   ;  ]
+   ; ]
 
    ;; Save button
-   [:div.well
-    [:form.form-horizontal
-     [:div.form-group
-      [:div.col-md-offset-2.col-md-4
-       [:button#save.btn.btn-primary {:type "button" :on-click #(dispatch [:employee-save])} "Save"]]]]
-    ]
+   ;[:div.well
+   ; [:form.form-horizontal
+   ;  [:div.form-group
+   ;   [:div.col-md-offset-2.col-md-4
+   ;    [:button#save.btn.btn-primary {:type "button" :on-click #(dispatch [:employee-save])} "Save"]]]]
+   ; ]
    ])
 
 
