@@ -16,10 +16,10 @@
                                    dispatch-sync
                                    subscribe]]
             [metime.utils :as utils]
-            [devtools.core :as devtools])
+            [devtools.core :as dt :refer [install!]])
   (:import goog.History))
 
-(devtools/install!)
+(dt/install!)
 (enable-console-print!)
 (secretary/set-config! :prefix "#")
 
