@@ -332,9 +332,9 @@
        [
         [title :class "panel-heading panel-title" :label "Employee" :level :level3]
         [h-box
+         :class "panel-body"
          :children
          [[v-box
-           :class "panel-body"
            :gap "10px"
            :children
            [
@@ -354,7 +354,7 @@
    :class "panel panel-default"
    :children
    [
-    [title :class "panel-heading panel-title" :label "Employee" :level :level3]
+    [title :class "panel-heading panel-title" :label "Balances" :level :level3]
     [h-box
      :children
      [[v-box
@@ -375,11 +375,12 @@
   [v-box
    :children [[employee-core-heading employee]
               [h-box
+               :class "panel"
                :children
                [
-                [box :size "auto" :child [employee-core-details employee]]
-                ;[gap :size "1"]
-                [box :size "auto" :child [employee-balances employee]]
+                [box :class "panel panel-body" :size "auto" :child [employee-core-details employee]]
+                [gap :size "1"]
+                [box :class "panel panel-body" :size "auto" :child [employee-balances employee]]
                 ]]
               ]
    ])
