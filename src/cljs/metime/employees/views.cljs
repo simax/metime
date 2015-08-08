@@ -102,8 +102,6 @@
    :padding "20px 0 0 0"
    :child
    [h-box
-    :justify :start
-    :align :start
     :gap "20px"
     :children
     [
@@ -123,14 +121,13 @@
 
 (defn employee-core-heading [employee]
   [h-box
-   :justify :start
-   :align :start
    :padding "20px"
    :class "panel panel-default"
-   :children [[box :child [employee-gravatar employee]]
+   :children [[employee-gravatar employee]
               [gap :size "1"]
-              [box :child [manager-gravatar employee]]
-              ]])
+              [manager-gravatar employee]
+              ]]
+  )
 
 
 (defn department-list-choices [departments]
@@ -143,9 +140,9 @@
   [h-box
    :children
    [
-    [label :class "control-label" :width "150px" :label "Department"]
+    [label :class "control-label" :label "Department"]
+    [gap :size "1"]
     [single-dropdown
-     :width "300px"
      :model (:departments_id employee)
      :choices (department-list-choices departments)
      :on-change #(dispatch-sync [:department-change (utils/input-value %)])
@@ -156,9 +153,9 @@
   [h-box
    :children
    [
-    [label :class "control-label" :width "150px" :label "First name"]
+    [label :label "First name"]
+    [gap :size "1"]
     [input-text
-     :width "300px"
      :model (:firstname employee)
      ;:status nil
      ;:status-icon? false
@@ -173,9 +170,9 @@
   [h-box
    :children
    [
-    [label :class "control-label" :width "150px" :label "Last name"]
+    [label :label "Last name"]
+    [gap :size "1"]
     [input-text
-     :width "300px"
      :model (:lastname employee)
      ;:status nil
      ;:status-icon? false
@@ -190,9 +187,9 @@
   [h-box
    :children
    [
-    [label :class "control-label" :width "150px" :label "Email"]
+    [label :label "Email"]
+    [gap :size "1"]
     [input-text
-     :width "300px"
      :model (:email employee)
      ;:status nil
      ;:status-icon? false
@@ -211,7 +208,8 @@
   [h-box
    :children
    [
-    [label :class "control-label" :width "150px" :label "Date of birth"]
+    [label :label "Date of birth"]
+    [gap :size "1"]
     [datepicker-dropdown
      :model (reagent/atom (iso8601->date (prep-date (:dob employee))))
      ;:status nil
@@ -229,7 +227,8 @@
   [h-box
    :children
    [
-    [label :class "control-label" :width "150px" :label "Start date"]
+    [label :label "Start date"]
+    [gap :size "1"]
     [datepicker-dropdown
      :model (reagent/atom (iso8601->date (prep-date (:startdate employee))))
      :show-today? true
@@ -245,7 +244,8 @@
   [h-box
    :children
    [
-    [label :class "control-label" :width "150px" :label "End date"]
+    [label :label "End date"]
+    [gap :size "1"]
     [datepicker-dropdown
      :model (reagent/atom (iso8601->date (prep-date (:enddate employee))))
      :show-today? true
@@ -265,19 +265,22 @@
        :children
        [
         [title :class "panel-heading panel-title" :label "Employee" :level :level3]
-        [v-box
-         :class "panel-body"
-         :gap "10px"
+        [h-box
          :children
-         [
-          [department-drop-down-list employee departments]
-          [employee-first-name employee]
-          [employee-last-name employee]
-          [employee-email employee]
-          [employee-dob employee]
-          [employee-start-date employee]
-          [employee-end-date employee]
-          ]]]]
+         [[v-box
+          :class "panel-body"
+          :gap "10px"
+          :children
+          [
+           [department-drop-down-list employee departments]
+           [employee-first-name employee]
+           [employee-last-name employee]
+           [employee-email employee]
+           [employee-dob employee]
+           [employee-start-date employee]
+           [employee-end-date employee]
+           ]]]]
+        ]]
       )))
 
 (defn employee-balances [employee]
@@ -348,32 +351,36 @@
 
 (defn employee-maintenance-form [employee]
   [v-box
-   :size "auto"
-   :justify :start
    :children [[employee-core-heading employee]
-              [employee-core-details employee]
+              [h-box
+               :children
+               [
+                [box :child [employee-core-details employee]]
+                [gap :size "1"]
+                [box :child [employee-balances employee]]
+                ]]
               ]
-
-   ;
-   ;[:div.well
-   ; [:div.row
-   ;  [:div.col-md-8
-   ;   [employee-core-details employee]
-   ;   ]
-   ;  [:div.col-md-4
-   ;   [employee-balances employee]
-   ;   ]
-   ;  ]
-   ; ]
-
-   ;; Save button
-   ;[:div.well
-   ; [:form.form-horizontal
-   ;  [:div.form-group
-   ;   [:div.col-md-offset-2.col-md-4
-   ;    [:button#save.btn.btn-primary {:type "button" :on-click #(dispatch [:employee-save])} "Save"]]]]
-   ; ]
    ])
+
+;
+;[:div.well
+; [:div.row
+;  [:div.col-md-8
+;   [employee-core-details employee]
+;   ]
+;  [:div.col-md-4
+;   [employee-balances employee]
+;   ]
+;  ]
+; ]
+
+;; Save button
+;[:div.well
+; [:form.form-horizontal
+;  [:div.form-group
+;   [:div.col-md-offset-2.col-md-4
+;    [:button#save.btn.btn-primary {:type "button" :on-click #(dispatch [:employee-save])} "Save"]]]]
+; ]
 
 
 
