@@ -257,6 +257,71 @@
     ]]
   )
 
+(defn employee-this-year-opening [employee]
+  [h-box
+   :children
+   [
+    [label :label "This year opening"]
+    [gap :size "1"]
+    [input-text
+     :model (str (:this_year_opening employee))
+     ;:status nil
+     ;:status-icon? false
+     ;:status-tooltip ""
+     :on-change #(dispatch [:input-change :this_year_opening (utils/input-value %)])
+     :change-on-blur? false]
+    ]]
+  )
+
+(defn employee-this-year-remaining [employee]
+  [h-box
+   :children
+   [
+    [label :label "This year remaining"]
+    [gap :size "1"]
+    [input-text
+     :model (str (:this_year_remaining employee))
+     ;:status nil
+     ;:status-icon? false
+     ;:status-tooltip ""
+     :on-change #(dispatch [:input-change :this_year_remaining (utils/input-value %)])
+     :change-on-blur? false]
+    ]]
+  )
+
+(defn employee-next-year-opening [employee]
+  [h-box
+   :children
+   [
+    [label :label "Next year opening"]
+    [gap :size "1"]
+    [input-text
+     :model (str (:next_year_opening employee))
+     ;:status nil
+     ;:status-icon? false
+     ;:status-tooltip ""
+     :on-change #(dispatch [:input-change :next_year_opening (utils/input-value %)])
+     :change-on-blur? false]
+    ]]
+  )
+
+(defn employee-next-year-remaining [employee]
+  [h-box
+   :children
+   [
+    [label :label "Next year remaining"]
+    [gap :size "1"]
+    [input-text
+     :model (str (:next_year_remaining employee))
+     ;:status nil
+     ;:status-icon? false
+     ;:status-tooltip ""
+     :on-change #(dispatch [:input-change :next_year_remaining (utils/input-value %)])
+     :change-on-blur? false]
+    ]]
+  )
+
+
 (defn employee-core-details []
   (let [departments (subscribe [:deps])]
     (fn [employee]
@@ -268,85 +333,41 @@
         [h-box
          :children
          [[v-box
-          :class "panel-body"
-          :gap "10px"
-          :children
-          [
-           [department-drop-down-list employee departments]
-           [employee-first-name employee]
-           [employee-last-name employee]
-           [employee-email employee]
-           [employee-dob employee]
-           [employee-start-date employee]
-           [employee-end-date employee]
-           ]]]]
+           :class "panel-body"
+           :gap "10px"
+           :children
+           [
+            [department-drop-down-list employee departments]
+            [employee-first-name employee]
+            [employee-last-name employee]
+            [employee-email employee]
+            [employee-dob employee]
+            [employee-start-date employee]
+            [employee-end-date employee]
+            ]]]]
         ]]
       )))
 
 (defn employee-balances [employee]
-  [:div.panel.panel-default
-   [:div.panel-heading [:h3.panel-title "Balances"]]
-   [:div.panel-body
-
-    [:form.form-horizontal
-
-     ;; this_year_opening
-     [:div.form-group
-      [:label.col-md-6.control-label {:for "this_year_opening"} "This year opening"]
-      [:div.col-md-4
-       [utils/input-element
-        {:id            "this_year_opening"
-         :name          "this_year_opening"
-         :type          "number"
-         :placeholder   ""
-         :default-value (utils/parse-int (:this_year_opening employee))
-         :on-blur       #(dispatch [:input-change :this_year_opening (utils/input-value %)])
-         }]]
-      ]
-
-     ;; this_year_remaining
-     [:div.form-group
-      [:label.col-md-6.control-label {:for "this_year_remaining"} "This year remaining"]
-      [:div.col-md-4
-       [utils/input-element
-        {:id            "this_year_remaining"
-         :name          "this_year_remaining"
-         :type          "number"
-         :placeholder   ""
-         :default-value (utils/parse-int (:this_year_remaining employee))
-         :on-blur       #(dispatch [:input-change :this_year_remaining (utils/input-value %)])
-         }]]
-      ]
-
-     ;; next_year_opening
-     [:div.form-group
-      [:label.col-md-6.control-label {:for "next_year_opening"} "Next year opening"]
-      [:div.col-md-4
-       [utils/input-element
-        {:id            "next_year_opening"
-         :name          "next_year_opening"
-         :type          "number"
-         :placeholder   ""
-         :default-value (utils/parse-int (:next_year_opening employee))
-         :on-blur       #(dispatch [:input-change :next_year_opening (utils/input-value %)])
-         }]]
-      ]
-
-     ;; next_year_remaining
-     [:div.form-group
-      [:label.col-md-6.control-label {:for "next_year_remaining"} "Next year remaining"]
-      [:div.col-md-4
-       [utils/input-element
-        {:id            "next_year_remaining"
-         :name          "next_year_remaining"
-         :type          "number"
-         :placeholder   ""
-         :default-value (utils/parse-int (:next_year_remaining employee))
-         :on-blur       #(dispatch [:input-change :next_year_remaining (utils/input-value %)])
-         }]]
-      ]
-     ]
+  [v-box
+   :class "panel panel-default"
+   :children
+   [
+    [title :class "panel-heading panel-title" :label "Employee" :level :level3]
+    [h-box
+     :children
+     [[v-box
+       :class "panel-body"
+       :gap "10px"
+       :children
+       [
+        [employee-this-year-opening employee]
+        [employee-this-year-remaining employee]
+        [employee-next-year-opening employee]
+        [employee-next-year-remaining employee]
+        ]]]]
     ]]
+
   )
 
 (defn employee-maintenance-form [employee]
@@ -355,24 +376,12 @@
               [h-box
                :children
                [
-                [box :child [employee-core-details employee]]
-                [gap :size "1"]
-                [box :child [employee-balances employee]]
+                [box :size "auto" :child [employee-core-details employee]]
+                ;[gap :size "1"]
+                [box :size "auto" :child [employee-balances employee]]
                 ]]
               ]
    ])
-
-;
-;[:div.well
-; [:div.row
-;  [:div.col-md-8
-;   [employee-core-details employee]
-;   ]
-;  [:div.col-md-4
-;   [employee-balances employee]
-;   ]
-;  ]
-; ]
 
 ;; Save button
 ;[:div.well
