@@ -122,10 +122,11 @@
 (defn employee-core-heading [employee]
   [h-box
    :padding "20px"
+   :align :center
    :class "panel panel-default"
-   :children [[employee-gravatar employee]
+   :children [[box :child [employee-gravatar employee]]
               [gap :size "1"]
-              [manager-gravatar employee]
+              [box :child [manager-gravatar employee]]
               ]]
   )
 
