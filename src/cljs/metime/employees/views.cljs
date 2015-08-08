@@ -8,8 +8,9 @@
             [metime.routes :as r]
             [metime.utils :as utils]
             [reagent.core :refer [atom]]
-            [re-com.core :refer [h-box v-box box gap title single-dropdown label input-text]]
-            [re-com.buttons :as buttons]
+            [re-com.core :refer [h-box v-box box gap title single-dropdown label input-text datepicker-dropdown]]
+            [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
+            [cljs-time.coerce :as tc]
             [devtools.core :as dt]
             [re-frame.core :refer [register-handler
                                    path
@@ -19,7 +20,8 @@
                                    register-sub
                                    dispatch
                                    dispatch-sync
-                                   subscribe]])
+                                   subscribe]]
+            [reagent.core :as reagent])
   (:import goog.History
            goog.History.EventType))
 
@@ -49,7 +51,6 @@
      ;; For now, just simulate the number of days remaining
      [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
      ]]])
-
 
 
 (defn department-list-item [{:keys [departmentid department managerid manager-firstname manager-lastname manager-email employees]}]
@@ -166,19 +167,6 @@
      :on-change #(dispatch [:input-change :firstname (utils/input-value %)])
      :change-on-blur? false]
     ]]
-
-  ;[:div.form-group
-  ; [:label.col-md-4.control-label {:for "firstname"} "First name"]
-  ; [:div.col-md-7
-  ;  [utils/input-element
-  ;   {:id            "firstname"
-  ;    :name          "firstname"
-  ;    :type          "text"
-  ;    :placeholder   "First name"
-  ;    :default-value (:firstname employee)
-  ;    :on-blur       #(dispatch [:input-change :firstname (utils/input-value %)])
-  ;    }]
-  ;  ]]
   )
 
 (defn employee-last-name [employee]
@@ -196,18 +184,6 @@
      :on-change #(dispatch [:input-change :lastname (utils/input-value %)])
      :change-on-blur? false]
     ]]
-
-  ;[:div.form-group
-  ; [:label.col-md-4.control-label {:for "lastname"} "Last name"]
-  ; [:div.col-md-7
-  ;  [utils/input-element
-  ;   {:id            "lastname"
-  ;    :name          "lastname"
-  ;    :type          "text"
-  ;    :placeholder   "Last name"
-  ;    :default-value (:lastname employee)
-  ;    :on-blur       #(dispatch [:input-change :lastname (utils/input-value %)])
-  ;    }]]]
   )
 
 (defn employee-email [employee]
@@ -225,46 +201,28 @@
      :on-change #(dispatch [:input-change :email (utils/input-value %)])
      :change-on-blur? false]
     ]]
-
-  ;[:div.form-group
-  ; [:label.col-md-4.control-label {:for "email"} "Email"]
-  ; [:div.col-md-7
-  ;  [utils/input-element
-  ;   {:id            "email"
-  ;    :name          "email"
-  ;    :type          "email"
-  ;    :placeholder   "Email address"
-  ;    :default-value (:email employee)
-  ;    :on-blur       #(dispatch [:input-change :email (utils/input-value %)])
-  ;    }]]]
   )
+
+(defn prep-date [date-str]
+  (println date-str)
+  (if (empty? date-str) "19000101" (clojure.string/replace date-str "-" "")))
 
 (defn employee-dob [employee]
   [h-box
    :children
    [
     [label :class "control-label" :width "150px" :label "Date of birth"]
-    [input-text
-     :width "300px"
-     :model (:dob employee)
+    [datepicker-dropdown
+     :model (reagent/atom (iso8601->date (prep-date (:dob employee))))
      ;:status nil
      ;:status-icon? false
      ;:status-tooltip ""
-     :placeholder "Employees date of birth"
-     :on-change #(dispatch [:input-change :email (utils/input-value %)])
-     :change-on-blur? false]
+     :show-today? true
+     ;:minimum (goog.date.UtcDateTime. "1900-01-01")
+     ;:maximum (goog.date.UtcDateTime. "2010-01-01")
+     :on-change #(dispatch [:input-change :dob (utils/input-value %)])
+     ]
     ]]
-  ;[:div.form-group
-  ; [:label.col-md-4.control-label {:for "dob"} "Date of birth"]
-  ; [:div.col-md-4
-  ;  [utils/input-element
-  ;   {:id            "dob"
-  ;    :name          "dob"
-  ;    :type          "date"
-  ;    :placeholder   "Dob"
-  ;    :default-value (:dob employee)
-  ;    :on-blur       #(dispatch [:input-change :dob (utils/input-value %)])
-  ;    }]]]
   )
 
 (defn employee-start-date [employee]
@@ -272,27 +230,15 @@
    :children
    [
     [label :class "control-label" :width "150px" :label "Start date"]
-    [input-text
-     :width "300px"
-     :model (:startdate employee)
+    [datepicker-dropdown
+     :model (reagent/atom (iso8601->date (prep-date (:startdate employee))))
+     :show-today? true
      ;:status nil
      ;:status-icon? false
      ;:status-tooltip ""
-     :placeholder "Employees start date"
-     :on-change #(dispatch [:input-change :email (utils/input-value %)])
-     :change-on-blur? false]
+     :on-change #(dispatch [:input-change :startdate (utils/input-value %)])
+     ]
     ]]
-  ;[:div.form-group
-  ; [:label.col-md-4.control-label {:for "startdate"} "Start date"]
-  ; [:div.col-md-4
-  ;  [utils/input-element
-  ;   {:id            "startdate"
-  ;    :name          "startdate"
-  ;    :type          "date"
-  ;    :placeholder   "Start date"
-  ;    :default-value (:startdate employee)
-  ;    :on-blur       #(dispatch [:input-change :startdate (utils/input-value %)])
-  ;    }]]]
   )
 
 (defn employee-end-date [employee]
@@ -300,27 +246,15 @@
    :children
    [
     [label :class "control-label" :width "150px" :label "End date"]
-    [input-text
-     :width "300px"
-     :model (:enddate employee)
+    [datepicker-dropdown
+     :model (reagent/atom (iso8601->date (prep-date (:enddate employee))))
+     :show-today? true
      ;:status nil
      ;:status-icon? false
      ;:status-tooltip ""
-     :placeholder "Employees end date"
-     :on-change #(dispatch [:input-change :email (utils/input-value %)])
-     :change-on-blur? false]
+     :on-change #(dispatch [:input-change :enddate (utils/input-value %)])
+     ]
     ]]
-  ;[:div.form-group
-  ; [:label.col-md-4.control-label {:for "enddate"} "End date"]
-  ; [:div.col-md-4
-  ;  [utils/input-element
-  ;   {:id            "enddate"
-  ;    :name          "enddate"
-  ;    :type          "date"
-  ;    :placeholder   "End date"
-  ;    :default-value (:enddate employee)
-  ;    :on-blur       #(dispatch [:input-change :enddate (utils/input-value %)])
-  ;    }]]]
   )
 
 (defn employee-core-details []

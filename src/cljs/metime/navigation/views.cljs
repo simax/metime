@@ -5,6 +5,7 @@
             [metime.employees.views :as ev]
             [metime.routes :as r]
             [secretary.core :refer-macros [defroute]]
+            [re-com.core :refer [box throbber]]
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch
@@ -23,7 +24,12 @@
 
 
 (defn loader-component []
-  [:div.loader-container [:img {:src "assets/img/loader.gif"}]])
+  ;; [:div.loader-container [:img {:src "assets/img/loader.gif"}]]
+  (box
+    :size "auto"
+    :align :center
+    :justify :center
+    :child [:div.loader-container (throbber :size :large :color "lime")]))
 
 (defn calendar-component []
   [:div {:style {:height "500px"}} [:h1 "Calendar page"]])

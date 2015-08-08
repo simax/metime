@@ -16,6 +16,7 @@
                            [metis "0.3.3"]
                            [ring-cors "0.1.7"]
                            [clj-time "0.9.0"]
+                           [com.andrewmcveigh/cljs-time "0.3.11"]
                            [digest "1.4.4"]
 
 
