@@ -139,6 +139,7 @@
 (defn department-drop-down-list [employee departments]
   "Departments drop down list"
   [h-box
+   :justify :between
    :children
    [
     [label :class "control-label" :label "Department"]
@@ -327,6 +328,7 @@
   (let [departments (subscribe [:deps])]
     (fn [employee]
       [v-box
+       :style {:border "solid red 5px"}
        :class "panel panel-default"
        :children
        [
@@ -335,6 +337,7 @@
          :class "panel-body"
          :children
          [[v-box
+           :min-width "450px"
            :gap "10px"
            :children
            [
@@ -378,9 +381,9 @@
                :class "panel"
                :children
                [
-                [box :class "panel panel-body" :size "auto" :child [employee-core-details employee]]
-                [gap :size "1"]
-                [box :class "panel panel-body" :size "auto" :child [employee-balances employee]]
+                [box :style {:border "solid red 5px"} :class "panel panel-body" :size "auto" :child [employee-core-details employee]]
+                [gap :style {:border "solid red 5px"} :size  "1"]
+                [box :style {:border "solid red 5px"} :class "panel panel-body" :size "auto" :child [employee-balances employee]]
                 ]]
               ]
    ])
