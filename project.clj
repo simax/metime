@@ -34,7 +34,7 @@
                            ;; UI
                            [reagent "0.5.0"]
                            [re-frame "0.4.1"]
-                           [re-com "0.5.4"]
+                           [re-com "0.6.1"]
                            [secretary "1.2.3"]
 
                            ;; Dev

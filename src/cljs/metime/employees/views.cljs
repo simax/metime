@@ -139,66 +139,69 @@
 (defn department-drop-down-list [employee departments]
   "Departments drop down list"
   [h-box
-   :justify :between
+   :justify :start
    :children
    [
-    [label :class "control-label" :label "Department"]
-    [gap :size "1"]
-    [single-dropdown
-     :model (:departments_id employee)
-     :choices (department-list-choices departments)
-     :on-change #(dispatch-sync [:department-change (utils/input-value %)])
-     ]]
+    [box :width "150px" :child [label :class "control-label" :label "Department"]]
+    [box :size "auto" :child [single-dropdown
+                              :model (:departments_id employee)
+                              :choices (department-list-choices departments)
+                              :on-change #(dispatch-sync [:department-change (utils/input-value %)])
+                              ]]]
    ])
 
 (defn employee-first-name [employee]
   [h-box
+   :justify :between
    :children
    [
-    [label :label "First name"]
-    [gap :size "1"]
-    [input-text
-     :model (:firstname employee)
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :placeholder "Employees first name"
-     :on-change #(dispatch [:input-change :firstname (utils/input-value %)])
-     :change-on-blur? false]
+    [box :width "150px" :child [label :label "First name"]]
+    [box :size "auto" :child [input-text
+                              :width "300px"
+                              :model (:firstname employee)
+                              ;:status nil
+                              ;:status-icon? false
+                              ;:status-tooltip ""
+                              :placeholder "Employees first name"
+                              :on-change #(dispatch [:input-change :firstname (utils/input-value %)])
+                              :change-on-blur? false]]
     ]]
   )
 
+
 (defn employee-last-name [employee]
   [h-box
+   :justify :start
    :children
    [
-    [label :label "Last name"]
-    [gap :size "1"]
-    [input-text
-     :model (:lastname employee)
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :placeholder "Employees last name"
-     :on-change #(dispatch [:input-change :lastname (utils/input-value %)])
-     :change-on-blur? false]
+    [box :width "150px" :child [label :label "Last name"]]
+    [box :size "auto" :child [input-text
+                              :width "300px"
+                              :model (:lastname employee)
+                              ;:status nil
+                              ;:status-icon? false
+                              ;:status-tooltip ""
+                              :placeholder "Employees last name"
+                              :on-change #(dispatch [:input-change :lastname (utils/input-value %)])
+                              :change-on-blur? false]]
     ]]
   )
 
 (defn employee-email [employee]
   [h-box
+   :justify :between
    :children
    [
-    [label :label "Email"]
-    [gap :size "1"]
-    [input-text
-     :model (:email employee)
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :placeholder "Employees email address"
-     :on-change #(dispatch [:input-change :email (utils/input-value %)])
-     :change-on-blur? false]
+    [box :width "150px" :child [label :label "Email"]]
+    [box :size "auto" :child [input-text
+                              :width "300px"
+                              :model (:email employee)
+                              ;:status nil
+                              ;:status-icon? false
+                              ;:status-tooltip ""
+                              :placeholder "Employees email address"
+                              :on-change #(dispatch [:input-change :email (utils/input-value %)])
+                              :change-on-blur? false]]
     ]]
   )
 
@@ -208,118 +211,122 @@
 
 (defn employee-dob [employee]
   [h-box
+   :justify :start
    :children
    [
-    [label :label "Date of birth"]
-    [gap :size "1"]
-    [datepicker-dropdown
-     :model (reagent/atom (iso8601->date (prep-date (:dob employee))))
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :show-today? true
-     ;:minimum (goog.date.UtcDateTime. "1900-01-01")
-     ;:maximum (goog.date.UtcDateTime. "2010-01-01")
-     :on-change #(dispatch [:input-change :dob (utils/input-value %)])
-     ]
+    [box :width "150px" :child [label :label "Date of birth"]]
+    [box :child [datepicker-dropdown
+                 :model (reagent/atom (iso8601->date (prep-date (:dob employee))))
+                 ;:status nil
+                 ;:status-icon? false
+                 ;:status-tooltip ""
+                 :show-today? true
+                 ;:minimum (goog.date.UtcDateTime. "1900-01-01")
+                 ;:maximum (goog.date.UtcDateTime. "2010-01-01")
+                 :on-change #(dispatch [:input-change :dob (utils/input-value %)])
+                 ]]
     ]]
   )
 
 (defn employee-start-date [employee]
   [h-box
+   :justify :start
    :children
    [
-    [label :label "Start date"]
-    [gap :size "1"]
-    [datepicker-dropdown
+    [box :width "150px" :child [label :label "Start date"]]
+    [box :child [datepicker-dropdown
      :model (reagent/atom (iso8601->date (prep-date (:startdate employee))))
      :show-today? true
      ;:status nil
      ;:status-icon? false
      ;:status-tooltip ""
      :on-change #(dispatch [:input-change :startdate (utils/input-value %)])
-     ]
+     ]]
     ]]
   )
 
 (defn employee-end-date [employee]
   [h-box
+   :justify :start
    :children
    [
-    [label :label "End date"]
-    [gap :size "1"]
-    [datepicker-dropdown
+    [box :width "150px" :child [label :label "End date"]]
+    [box :child [datepicker-dropdown
      :model (reagent/atom (iso8601->date (prep-date (:enddate employee))))
      :show-today? true
      ;:status nil
      ;:status-icon? false
      ;:status-tooltip ""
      :on-change #(dispatch [:input-change :enddate (utils/input-value %)])
-     ]
+     ]]
     ]]
   )
 
 (defn employee-this-year-opening [employee]
   [h-box
+   :justify :between
    :children
    [
-    [label :label "This year opening"]
-    [gap :size "1"]
-    [input-text
-     :model (str (:this_year_opening employee))
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :on-change #(dispatch [:input-change :this_year_opening (utils/input-value %)])
-     :change-on-blur? false]
+    [box :child [label :label "This year opening"]]
+    [box :child [input-text
+                 :width "50px"
+                 :model (str (:this_year_opening employee))
+                 ;:status nil
+                 ;:status-icon? false
+                 ;:status-tooltip ""
+                 :on-change #(dispatch [:input-change :this_year_opening (utils/input-value %)])
+                 :change-on-blur? false]]
     ]]
   )
 
 (defn employee-this-year-remaining [employee]
   [h-box
+   :justify :between
    :children
    [
-    [label :label "This year remaining"]
-    [gap :size "1"]
-    [input-text
-     :model (str (:this_year_remaining employee))
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :on-change #(dispatch [:input-change :this_year_remaining (utils/input-value %)])
-     :change-on-blur? false]
+    [box :child [label :label "This year remaining"]]
+    [box :child [input-text
+                 :width "50px"
+                 :model (str (:this_year_remaining employee))
+                 ;:status nil
+                 ;:status-icon? false
+                 ;:status-tooltip ""
+                 :on-change #(dispatch [:input-change :this_year_remaining (utils/input-value %)])
+                 :change-on-blur? false]]
     ]]
   )
 
 (defn employee-next-year-opening [employee]
   [h-box
+   :justify :between
    :children
    [
-    [label :label "Next year opening"]
-    [gap :size "1"]
-    [input-text
-     :model (str (:next_year_opening employee))
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :on-change #(dispatch [:input-change :next_year_opening (utils/input-value %)])
-     :change-on-blur? false]
+    [box :child [label :label "Next year opening"]]
+    [box :child [input-text
+                 :width "50px"
+                 :model (str (:next_year_opening employee))
+                 ;:status nil
+                 ;:status-icon? false
+                 ;:status-tooltip ""
+                 :on-change #(dispatch [:input-change :next_year_opening (utils/input-value %)])
+                 :change-on-blur? false]]
     ]]
   )
 
 (defn employee-next-year-remaining [employee]
   [h-box
+   :justify :between
    :children
    [
-    [label :label "Next year remaining"]
-    [gap :size "1"]
-    [input-text
-     :model (str (:next_year_remaining employee))
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :on-change #(dispatch [:input-change :next_year_remaining (utils/input-value %)])
-     :change-on-blur? false]
+    [box :child [label :label "Next year remaining"]]
+    [box :child [input-text
+                 :width "50px"
+                 :model (str (:next_year_remaining employee))
+                 ;:status nil
+                 ;:status-icon? false
+                 ;:status-tooltip ""
+                 :on-change #(dispatch [:input-change :next_year_remaining (utils/input-value %)])
+                 :change-on-blur? false]]
     ]]
   )
 
@@ -328,7 +335,7 @@
   (let [departments (subscribe [:deps])]
     (fn [employee]
       [v-box
-       :style {:border "solid red 5px"}
+       :width "500px"
        :class "panel panel-default"
        :children
        [
@@ -337,7 +344,7 @@
          :class "panel-body"
          :children
          [[v-box
-           :min-width "450px"
+           :size "auto"
            :gap "10px"
            :children
            [
@@ -354,6 +361,8 @@
 
 (defn employee-balances [employee]
   [v-box
+   :size "auto"
+   :width "350px"
    :class "panel panel-default"
    :children
    [
@@ -361,6 +370,7 @@
     [h-box
      :children
      [[v-box
+       :size "auto"
        :class "panel-body"
        :gap "10px"
        :children
@@ -378,12 +388,13 @@
   [v-box
    :children [[employee-core-heading employee]
               [h-box
+               :style {:flex-flow "row wrap"}
                :class "panel"
+               :justify :between
                :children
                [
-                [box :style {:border "solid red 5px"} :class "panel panel-body" :size "auto" :child [employee-core-details employee]]
-                [gap :style {:border "solid red 5px"} :size  "1"]
-                [box :style {:border "solid red 5px"} :class "panel panel-body" :size "auto" :child [employee-balances employee]]
+                [box :class "panel panel-body" :child [employee-core-details employee]]
+                [box :class "panel panel-body" :child [employee-balances employee]]
                 ]]
               ]
    ])

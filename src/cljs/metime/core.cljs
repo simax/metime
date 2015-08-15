@@ -19,7 +19,8 @@
             [devtools.core :as dt :refer [install!]])
   (:import goog.History))
 
-(dt/install!)
+
+(defonce installonce (dt/install!))
 (enable-console-print!)
 (secretary/set-config! :prefix "#")
 
