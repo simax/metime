@@ -24,12 +24,12 @@
 
 
 (defn loader-component []
-  ;; [:div.loader-container [:img {:src "assets/img/loader.gif"}]]
-  (box
-    :size "auto"
-    :align :center
-    :justify :center
-    :child [:div.loader-container (throbber :size :large :color "lime")]))
+  [box
+   :height "650px"
+   :size "auto"
+   :align :center
+   :justify :center
+   :child [:div (throbber :size :large :color "lime")]])
 
 (defn calendar-component []
   [:div {:style {:height "500px"}} [:h1 "Calendar page"]])

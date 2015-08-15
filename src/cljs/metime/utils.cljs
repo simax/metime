@@ -14,8 +14,7 @@
 (defn gravatar [data]
   (let [email-address (or (:gravatar-email data) "")
         size (or (:gravatar-size data) 100)]
-    [box
-     :child [:img.gravatar.img-circle {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?size=" size "&r=PG&d=mm")}]]))
+    [:img.gravatar.img-circle {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?size=" size "&r=PG&d=mm")}]))
 
 (defn set-hash! [loc]
   "Set the hash portion of the url in the address bar.

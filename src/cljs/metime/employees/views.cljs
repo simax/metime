@@ -103,13 +103,15 @@
    :child
    [h-box
     :gap "20px"
+    :height "150px"
     :children
     [
-     [box :child [utils/gravatar {:gravatar-email (:email employee)}]]
+     [box :child [utils/gravatar {:gravatar-email (:email employee) :gravatar-size 150}]]
      [v-box
+      :justify :center
       :children
       [[box :child [:h1 (str (:firstname employee) " " (:lastname employee))]]
-       [:h4 {:style {:color "grey"}} (:department employee)]
+       [:h2 {:style {:color "grey"}} (:department employee)]
        ]]]]]
   )
 
@@ -141,7 +143,6 @@
           {:id (:departments_id m) :label (:department m)})))
 
 (defn department-drop-down-list [employee departments]
-  "Departments drop down list"
   [h-box
    :justify :start
    :children
