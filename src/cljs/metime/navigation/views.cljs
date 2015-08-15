@@ -55,10 +55,7 @@
         [:div [ev/departments-container @deps]]))))
 
 (defn employee-component []
-  (let [emp (subscribe [:employee])
-        ;dep-id (subscribe [:departmentid])
-        ;man-id (subscribe [:managerid])
-        ]
+  (let [emp (subscribe [:employee])]
     (fn []
       (if (not (:is-ready? @emp))
         [loader-component]

@@ -106,7 +106,11 @@
     :children
     [
      [box :child [utils/gravatar {:gravatar-email (:email employee)}]]
-     [box :child [:h1 (str (:firstname employee) " " (:lastname employee))]]]]]
+     [v-box
+      :children
+      [[box :child [:h1 (str (:firstname employee) " " (:lastname employee))]]
+       [:h4 {:style {:color "grey"}} (:department employee)]
+       ]]]]]
   )
 
 (defn manager-gravatar [employee]
@@ -235,13 +239,13 @@
    [
     [box :width "150px" :child [label :label "Start date"]]
     [box :child [datepicker-dropdown
-     :model (reagent/atom (iso8601->date (prep-date (:startdate employee))))
-     :show-today? true
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :on-change #(dispatch [:input-change :startdate (utils/input-value %)])
-     ]]
+                 :model (reagent/atom (iso8601->date (prep-date (:startdate employee))))
+                 :show-today? true
+                 ;:status nil
+                 ;:status-icon? false
+                 ;:status-tooltip ""
+                 :on-change #(dispatch [:input-change :startdate (utils/input-value %)])
+                 ]]
     ]]
   )
 
@@ -252,13 +256,13 @@
    [
     [box :width "150px" :child [label :label "End date"]]
     [box :child [datepicker-dropdown
-     :model (reagent/atom (iso8601->date (prep-date (:enddate employee))))
-     :show-today? true
-     ;:status nil
-     ;:status-icon? false
-     ;:status-tooltip ""
-     :on-change #(dispatch [:input-change :enddate (utils/input-value %)])
-     ]]
+                 :model (reagent/atom (iso8601->date (prep-date (:enddate employee))))
+                 :show-today? true
+                 ;:status nil
+                 ;:status-icon? false
+                 ;:status-tooltip ""
+                 :on-change #(dispatch [:input-change :enddate (utils/input-value %)])
+                 ]]
     ]]
   )
 

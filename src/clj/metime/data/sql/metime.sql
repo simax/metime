@@ -82,10 +82,13 @@ select * from employees order by lastname
 select
 -- Employee info
 e.*,
+d.department as 'department',
 -- Manager info
 m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
 
-from employees e left join employees m on e.managerid = m.id
+from employees e
+  left join employees m on e.managerid = m.id
+  left join departments d on e.departments_id = d.id
 where e.id = :id
 
 -- name: db-insert-employee<!
