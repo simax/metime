@@ -151,7 +151,7 @@
     [box :size "auto" :child [single-dropdown
                               :model (:departments_id employee)
                               :choices (department-list-choices departments)
-                              :on-change #(dispatch-sync [:department-change (utils/input-value %)])
+                              :on-change #(dispatch-sync [:department-change %])
                               ]]]
    ])
 
@@ -168,7 +168,7 @@
                               ;:status-icon? false
                               ;:status-tooltip ""
                               :placeholder "Employees first name"
-                              :on-change #(dispatch [:input-change :firstname (utils/input-value %)])
+                              :on-change #(dispatch [:input-change :firstname %])
                               :change-on-blur? false]]
     ]]
   )
@@ -187,7 +187,7 @@
                               ;:status-icon? false
                               ;:status-tooltip ""
                               :placeholder "Employees last name"
-                              :on-change #(dispatch [:input-change :lastname (utils/input-value %)])
+                              :on-change #(dispatch [:input-change :lastname %])
                               :change-on-blur? false]]
     ]]
   )
@@ -205,7 +205,7 @@
                               ;:status-icon? false
                               ;:status-tooltip ""
                               :placeholder "Employees email address"
-                              :on-change #(dispatch [:input-change :email (utils/input-value %)])
+                              :on-change #(dispatch [:input-change :email %])
                               :change-on-blur? false]]
     ]]
   )
@@ -228,7 +228,7 @@
                  :show-today? true
                  ;:minimum (goog.date.UtcDateTime. "1900-01-01")
                  ;:maximum (goog.date.UtcDateTime. "2010-01-01")
-                 :on-change #(dispatch [:input-change :dob (utils/input-value %)])
+                 :on-change #(dispatch [:input-change :dob %])
                  ]]
     ]]
   )
@@ -245,7 +245,7 @@
                  ;:status nil
                  ;:status-icon? false
                  ;:status-tooltip ""
-                 :on-change #(dispatch [:input-change :startdate (utils/input-value %)])
+                 :on-change #(dispatch [:input-change :startdate %])
                  ]]
     ]]
   )
@@ -262,7 +262,7 @@
                  ;:status nil
                  ;:status-icon? false
                  ;:status-tooltip ""
-                 :on-change #(dispatch [:input-change :enddate (utils/input-value %)])
+                 :on-change #(dispatch [:input-change :enddate %])
                  ]]
     ]]
   )
@@ -279,7 +279,7 @@
                  ;:status nil
                  ;:status-icon? false
                  ;:status-tooltip ""
-                 :on-change #(dispatch [:input-change :this_year_opening (utils/input-value %)])
+                 :on-change #(dispatch [:input-change :this_year_opening %])
                  :change-on-blur? false]]
     ]]
   )
@@ -296,7 +296,7 @@
                  ;:status nil
                  ;:status-icon? false
                  ;:status-tooltip ""
-                 :on-change #(dispatch [:input-change :this_year_remaining (utils/input-value %)])
+                 :on-change #(dispatch [:input-change :this_year_remaining %])
                  :change-on-blur? false]]
     ]]
   )
@@ -313,7 +313,7 @@
                  ;:status nil
                  ;:status-icon? false
                  ;:status-tooltip ""
-                 :on-change #(dispatch [:input-change :next_year_opening (utils/input-value %)])
+                 :on-change #(dispatch [:input-change :next_year_opening %])
                  :change-on-blur? false]]
     ]]
   )
@@ -330,7 +330,7 @@
                  ;:status nil
                  ;:status-icon? false
                  ;:status-tooltip ""
-                 :on-change #(dispatch [:input-change :next_year_remaining (utils/input-value %)])
+                 :on-change #(dispatch [:input-change :next_year_remaining %])
                  :change-on-blur? false]]
     ]]
   )
