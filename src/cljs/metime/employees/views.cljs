@@ -164,9 +164,9 @@
     [box :size "auto" :child [input-text
                               :width "300px"
                               :model (:firstname employee)
-                              ;:status nil
-                              ;:status-icon? false
-                              ;:status-tooltip ""
+                              :status :error
+                              :status-icon? true
+                              :status-tooltip "First name tool-tip"
                               :placeholder "Employees first name"
                               :on-change #(dispatch [:input-change :firstname %])
                               :change-on-blur? false]]
@@ -183,9 +183,9 @@
     [box :size "auto" :child [input-text
                               :width "300px"
                               :model (:lastname employee)
-                              ;:status nil
-                              ;:status-icon? false
-                              ;:status-tooltip ""
+                              :status :warning
+                              :status-icon? true
+                              :status-tooltip "Tooltip"
                               :placeholder "Employees last name"
                               :on-change #(dispatch [:input-change :lastname %])
                               :change-on-blur? false]]
@@ -201,9 +201,9 @@
     [box :size "auto" :child [input-text
                               :width "300px"
                               :model (:email employee)
-                              ;:status nil
-                              ;:status-icon? false
-                              ;:status-tooltip ""
+                              :status :warning
+                              :status-icon? true
+                              :status-tooltip "Tooltip"
                               :placeholder "Employees email address"
                               :on-change #(dispatch [:input-change :email %])
                               :change-on-blur? false]]
@@ -222,9 +222,6 @@
     [box :width "150px" :child [label :label "Date of birth"]]
     [box :child [datepicker-dropdown
                  :model (reagent/atom (iso8601->date (prep-date (:dob employee))))
-                 ;:status nil
-                 ;:status-icon? false
-                 ;:status-tooltip ""
                  :show-today? true
                  ;:minimum (goog.date.UtcDateTime. "1900-01-01")
                  ;:maximum (goog.date.UtcDateTime. "2010-01-01")
@@ -242,9 +239,6 @@
     [box :child [datepicker-dropdown
                  :model (reagent/atom (iso8601->date (prep-date (:startdate employee))))
                  :show-today? true
-                 ;:status nil
-                 ;:status-icon? false
-                 ;:status-tooltip ""
                  :on-change #(dispatch [:input-change :startdate %])
                  ]]
     ]]
@@ -259,9 +253,6 @@
     [box :child [datepicker-dropdown
                  :model (reagent/atom (iso8601->date (prep-date (:enddate employee))))
                  :show-today? true
-                 ;:status nil
-                 ;:status-icon? false
-                 ;:status-tooltip ""
                  :on-change #(dispatch [:input-change :enddate %])
                  ]]
     ]]
@@ -276,9 +267,9 @@
     [box :child [input-text
                  :width "50px"
                  :model (str (:this_year_opening employee))
-                 ;:status nil
-                 ;:status-icon? false
-                 ;:status-tooltip ""
+                 :status :warning
+                 :status-icon? true
+                 :status-tooltip "Tooltip"
                  :on-change #(dispatch [:input-change :this_year_opening %])
                  :change-on-blur? false]]
     ]]
@@ -293,9 +284,9 @@
     [box :child [input-text
                  :width "50px"
                  :model (str (:this_year_remaining employee))
-                 ;:status nil
-                 ;:status-icon? false
-                 ;:status-tooltip ""
+                 :status :warning
+                 :status-icon? true
+                 :status-tooltip "Tooltip"
                  :on-change #(dispatch [:input-change :this_year_remaining %])
                  :change-on-blur? false]]
     ]]
@@ -310,9 +301,9 @@
     [box :child [input-text
                  :width "50px"
                  :model (str (:next_year_opening employee))
-                 ;:status nil
-                 ;:status-icon? false
-                 ;:status-tooltip ""
+                 :status :warning
+                 :status-icon? true
+                 :status-tooltip "Tooltip"
                  :on-change #(dispatch [:input-change :next_year_opening %])
                  :change-on-blur? false]]
     ]]
@@ -327,9 +318,9 @@
     [box :child [input-text
                  :width "50px"
                  :model (str (:next_year_remaining employee))
-                 ;:status nil
-                 ;:status-icon? false
-                 ;:status-tooltip ""
+                 :status :warning
+                 :status-icon? true
+                 :status-tooltip "Tooltip"
                  :on-change #(dispatch [:input-change :next_year_remaining %])
                  :change-on-blur? false]]
     ]]
