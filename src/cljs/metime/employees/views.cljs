@@ -203,7 +203,7 @@
                               :model (:email employee)
                               :status (when (seq (get-in employee [:validation-errors :email])) :error)
                               :status-icon? (seq (get-in employee [:validation-errors :email]))
-                              :status-tooltip (get-in employee [:validation-errors :email])
+                              :status-tooltip (apply str (get-in employee [:validation-errors :email]))
                               :placeholder "Employee email address"
                               :on-change #(dispatch [:input-change :email %])
                               :change-on-blur? false]]
