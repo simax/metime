@@ -30,10 +30,11 @@
 
 (defn parse-int [s]
   "Parse the string for an integer"
-  (if (nil? s) 0
-               (try
-                 (js/parseInt s)
-                 (catch js/Object e 0))))
+  (if (nil? s)
+    0
+    (try
+      (js/parseInt s)
+      (catch js/Object e 0))))
 
 (defn input-value [component] (-> component .-target .-value))
 

@@ -15,40 +15,23 @@
             [bouncer.validators :as v]
             ))
 
-;;TODO: Need to work out how to make sure confirmation is same as password
-;(validation-set
-;  (length-of :firstname :within (range 1 31))
-;  (length-of :lastname :within (range 1 31))
-;  (presence-of :email)
-;  (numericality-of :departments_id :only-integer true :gt 0 :messages {:blank "Must be greater then 0"})
-;  (numericality-of :managerid :only-integer true :gt 0 :messages {:blank "Must be greater then 0"})
-;  (length-of :password :within (range 8 100))
-;  (validate-when #(contains? % :password) (presence-of :confirmation)))
-
-;(defvalidator employee-validator
-;  [:firstname :length {:greater-than 0 :less-than 31}]
-;  [:lastname :length {:greater-than 0 :less-than 31}]
-;  [:email :email {:greater-than 0 :less-than 31}]
-;  [:departments_id :numericality {:only-integer true :greater-than 0}]
-;  [:managerid :numericality {:only-integer true :greater-than 0}]
-;  [:password [:length {:greater-than-or-equal-to 8}
-;              :formatted {:pattern #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}"
-;                          :message "alpha numeric, at least one number"}
-;              :confirmation {:confirm :password-confirm}]]
-;  [:dob :date])
-
 (defn is-new-employee? [id]
   (zero? id))
 
+
+(def employee-validation-rules
+  [:firstname [[v/required :message "First name is required"]]
+   :lastname [[v/required :message "Last name is required"]]
+   :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
+   :this_year_opening   [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
+   :this_year_remaining [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
+   :next_year_opening   [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
+   :next_year_remaining [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]])
+
 (defn validate-employee [db _]
   (let [employee (:employee db)
-        result (b/validate employee
-                           :firstname v/required
-                           :lastname v/required
-                           :email [v/required v/email])
-
+        result (apply b/validate employee employee-validation-rules)
         errors (first result)]
-
     (when result (println (str "Validation: " errors)))
     (assoc-in db [:employee :validation-errors] errors)))
 
@@ -56,10 +39,12 @@
 (defn handle-input-change [db [_ property-name new-value]]
   (assoc-in db [:employee property-name] new-value))
 
+(defn handle-input-change-balances [db [_ property-name new-value]]
+  (assoc-in db [:employee property-name] (utils/parse-int new-value)))
+
 (defn handle-employee-add [db [_ departmentid managerid]]
   (let [url (r/employee-add-route)
         dep (first (filter #(= (:departmentid %) departmentid) (:deps db)))]
-    (println (str "departmentid : " departmentid))
     (utils/set-hash! url)
     (secretary/dispatch! url)
     (merge db {:employee
@@ -109,6 +94,11 @@
   :input-change
   (enrich validate-employee)
   handle-input-change)
+
+(register-handler
+  :input-change-balances
+  (enrich validate-employee)
+  handle-input-change-balances)
 
 (register-handler
   :employee-add

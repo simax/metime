@@ -269,8 +269,9 @@
                  :model (str (:this_year_opening employee))
                  :status (when (seq (get-in employee [:validation-errors :this_year_opening])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_opening]))
-                 :status-tooltip (get-in employee [:validation-errors :this_year_opening])
-                 :on-change #(dispatch [:input-change :this_year_opening %])
+                 :status-tooltip (apply str (get-in employee [:validation-errors :this_year_opening]))
+                 :on-change #(dispatch [:input-change-balances :this_year_opening %])
+                 :validation-regex #"\d+"
                  :change-on-blur? false]]
     ]]
   )
@@ -286,8 +287,8 @@
                  :model (str (:this_year_remaining employee))
                  :status (when (seq (get-in employee [:validation-errors :this_year_remaining])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_remaining]))
-                 :status-tooltip (apply str (get-in employee [:validation-errors :this_year_opening]))
-                 :on-change #(dispatch [:input-change :this_year_remaining %])
+                 :status-tooltip (apply str (get-in employee [:validation-errors :this_year_remaining]))
+                 :on-change #(dispatch [:input-change-balances :this_year_remaining %])
                  :change-on-blur? false]]
     ]]
   )
@@ -303,8 +304,8 @@
                  :model (str (:next_year_opening employee))
                  :status (when (seq (get-in employee [:validation-errors :next_year_opening])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_opening]))
-                 :status-tooltip (apply str (get-in employee [:validation-errors :this_year_opening]))
-                 :on-change #(dispatch [:input-change :next_year_opening %])
+                 :status-tooltip (apply str (get-in employee [:validation-errors :next_year_opening]))
+                 :on-change #(dispatch [:input-change-balances :next_year_opening %])
                  :change-on-blur? false]]
     ]]
   )
@@ -320,8 +321,8 @@
                  :model (str (:next_year_remaining employee))
                  :status (when (seq (get-in employee [:validation-errors :next_year_remaining])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_remaining]))
-                 :status-tooltip (get-in employee [:validation-errors :next_year_remaining])
-                 :on-change #(dispatch [:input-change :next_year_remaining %])
+                 :status-tooltip (apply str (get-in employee [:validation-errors :next_year_remaining]))
+                 :on-change #(dispatch [:input-change-balances :next_year_remaining %])
                  :change-on-blur? false]]
     ]]
   )
@@ -346,14 +347,6 @@
                 ]]
               ]
    ])
-;
-;[:div.well
-; [:form.form-horizontal
-;  [:div.form-group
-;   [:div.col-md-offset-2.col-md-4
-;    ]]]
-; ]
-
 
 
 (defn employee-core-details []
