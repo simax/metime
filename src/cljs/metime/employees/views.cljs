@@ -166,8 +166,8 @@
                               :model (:firstname employee)
                               :status (when (seq (get-in employee [:validation-errors :firstname])) :error)
                               :status-icon? (seq (get-in employee [:validation-errors :firstname]))
-                              :status-tooltip (get-in employee [:validation-errors :firstname])
-                              :placeholder "Employees first name"
+                              :status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
+                              :placeholder "Employee first name"
                               :on-change #(dispatch [:input-change :firstname %])
                               :change-on-blur? false]]
     ]]
@@ -185,8 +185,8 @@
                               :model (:lastname employee)
                               :status (when (seq (get-in employee [:validation-errors :lastname])) :error)
                               :status-icon? (seq (get-in employee [:validation-errors :lastname]))
-                              :status-tooltip (get-in employee [:validation-errors :lastname])
-                              :placeholder "Employees last name"
+                              :status-tooltip (apply str (get-in employee [:validation-errors :lastname]))
+                              :placeholder "Employee last name"
                               :on-change #(dispatch [:input-change :lastname %])
                               :change-on-blur? false]]
     ]]
@@ -204,14 +204,14 @@
                               :status (when (seq (get-in employee [:validation-errors :email])) :error)
                               :status-icon? (seq (get-in employee [:validation-errors :email]))
                               :status-tooltip (get-in employee [:validation-errors :email])
-                              :placeholder "Employees email address"
+                              :placeholder "Employee email address"
                               :on-change #(dispatch [:input-change :email %])
                               :change-on-blur? false]]
     ]]
   )
 
 (defn prep-date [date-str]
-  (println date-str)
+  ;(println date-str)
   (if (empty? date-str) "19000101" (clojure.string/replace date-str "-" "")))
 
 (defn employee-dob [employee]
@@ -269,7 +269,7 @@
                  :model (str (:this_year_opening employee))
                  :status (when (seq (get-in employee [:validation-errors :this_year_opening])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_opening]))
-                 :status-tooltip (get-in employee    [:validation-errors :this_year_opening])
+                 :status-tooltip (get-in employee [:validation-errors :this_year_opening])
                  :on-change #(dispatch [:input-change :this_year_opening %])
                  :change-on-blur? false]]
     ]]
@@ -286,7 +286,7 @@
                  :model (str (:this_year_remaining employee))
                  :status (when (seq (get-in employee [:validation-errors :this_year_remaining])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_remaining]))
-                 :status-tooltip (get-in employee [:validation-errors    :this_year_remaining])
+                 :status-tooltip (apply str (get-in employee [:validation-errors :this_year_opening]))
                  :on-change #(dispatch [:input-change :this_year_remaining %])
                  :change-on-blur? false]]
     ]]
@@ -303,7 +303,7 @@
                  :model (str (:next_year_opening employee))
                  :status (when (seq (get-in employee [:validation-errors :next_year_opening])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_opening]))
-                 :status-tooltip (get-in employee [:validation-errors    :next_year_opening])
+                 :status-tooltip (apply str (get-in employee [:validation-errors :this_year_opening]))
                  :on-change #(dispatch [:input-change :next_year_opening %])
                  :change-on-blur? false]]
     ]]
@@ -320,7 +320,7 @@
                  :model (str (:next_year_remaining employee))
                  :status (when (seq (get-in employee [:validation-errors :next_year_remaining])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_remaining]))
-                 :status-tooltip (get-in employee [:validation-errors    :next_year_remaining])
+                 :status-tooltip (get-in employee [:validation-errors :next_year_remaining])
                  :on-change #(dispatch [:input-change :next_year_remaining %])
                  :change-on-blur? false]]
     ]]

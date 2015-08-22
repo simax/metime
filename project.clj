@@ -12,7 +12,7 @@
 
 
                            [cljs-hash "0.0.2"]
-                           [com.novemberain/validateur "2.4.2"]
+                           [bouncer "0.3.3"]
                            [metis "0.3.3"]
                            [ring-cors "0.1.7"]
                            [clj-time "0.9.0"]

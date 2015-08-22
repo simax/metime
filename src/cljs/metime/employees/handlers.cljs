@@ -11,25 +11,19 @@
                                    register-sub
                                    dispatch
                                    subscribe]]
-            [validateur.validation :refer [numericality-of
-                                           errors
-                                           validation-set
-                                           valid?
-                                           invalid?
-                                           presence-of
-                                           length-of
-                                           validate-when] :as v]))
+            [bouncer.core :as b]
+            [bouncer.validators :as v]
+            ))
 
 ;;TODO: Need to work out how to make sure confirmation is same as password
-(def employee-validator
-  (validation-set
-    (length-of :firstname :within (range 1 31))
-    (length-of :lastname :within (range 1 31))
-    (presence-of :email)
-    (numericality-of :departments_id :only-integer true :gt 0 :messages {:blank "Must be greater then 0"})
-    (numericality-of :managerid :only-integer true :gt 0 :messages {:blank "Must be greater then 0"})
-    (length-of :password :within (range 8 100))
-    (validate-when #(contains? % :password) (presence-of :confirmation))))
+;(validation-set
+;  (length-of :firstname :within (range 1 31))
+;  (length-of :lastname :within (range 1 31))
+;  (presence-of :email)
+;  (numericality-of :departments_id :only-integer true :gt 0 :messages {:blank "Must be greater then 0"})
+;  (numericality-of :managerid :only-integer true :gt 0 :messages {:blank "Must be greater then 0"})
+;  (length-of :password :within (range 8 100))
+;  (validate-when #(contains? % :password) (presence-of :confirmation)))
 
 ;(defvalidator employee-validator
 ;  [:firstname :length {:greater-than 0 :less-than 31}]
@@ -47,21 +41,15 @@
   (zero? id))
 
 (defn validate-employee [db _]
-  ;(let [employee (:employee db)
-  ;      result (v/valid? employee-validator employee)]
-  ;  (when result (println (str "Errors in employee's firstname: " (errors :firstname (employee-validator employee)))))
-  ;  db)
-  (let [errors {:firstname           "Firstname required"
-                :lastname            nil
-                :email               "Must be unique"
-                :dob                 nil
-                :startdate           nil
-                :enddate             nil
-                :this_year_opening   "This year remaining should be set to something to prevent THIS error"
-                :this_year_remaining nil
-                :next_year_opening   nil
-                :next_year_remaining nil
-                }]
+  (let [employee (:employee db)
+        result (b/validate employee
+                           :firstname v/required
+                           :lastname v/required
+                           :email [v/required v/email])
+
+        errors (first result)]
+
+    (when result (println (str "Validation: " errors)))
     (assoc-in db [:employee :validation-errors] errors)))
 
 
