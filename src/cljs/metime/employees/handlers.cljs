@@ -47,10 +47,23 @@
   (zero? id))
 
 (defn validate-employee [db _]
-  (let [employee (:employee db)
-        result (v/valid? employee-validator employee)]
-    (when result (println (str "Errors in employee's firstname: " (errors :firstname (employee-validator employee)))))
-    db))
+  ;(let [employee (:employee db)
+  ;      result (v/valid? employee-validator employee)]
+  ;  (when result (println (str "Errors in employee's firstname: " (errors :firstname (employee-validator employee)))))
+  ;  db)
+  (let [errors {:firstname           "Firstname required"
+                :lastname            nil
+                :email               "Must be unique"
+                :dob                 nil
+                :startdate           nil
+                :enddate             nil
+                :this_year_opening   "This year remaining should be set to something to prevent THIS error"
+                :this_year_remaining nil
+                :next_year_opening   nil
+                :next_year_remaining nil
+                }]
+    (assoc-in db [:employee :validation-errors] errors)))
+
 
 (defn handle-input-change [db [_ property-name new-value]]
   (assoc-in db [:employee property-name] new-value))

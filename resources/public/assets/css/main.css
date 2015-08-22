@@ -295,8 +295,10 @@ input[type=submit] {
           border-radius: 4px;
 
 }
+
+/*
+
 input[type=text], textarea {
-/* 	background: #cdcbcc; */
 	font-size: 13px;
 	display: block;
 	width: 100%;
@@ -306,7 +308,6 @@ input[type=text], textarea {
 	line-height: 18px;
 	padding: 0;
 	text-indent: 18px;
-/* 	margin: 0 0 18px; */
 }
 textarea {
 	line-height: 18px;
@@ -314,6 +315,9 @@ textarea {
 	width: 100%;
 	text-indent: 0;
 }
+
+*/
+
 .textarea-container { margin: 0 18px; }
 .textarea-container textarea { margin-left: -18px; }
 #contact textarea { width: 100%; height: 45px; }

@@ -8,7 +8,7 @@
             [metime.routes :as r]
             [metime.utils :as utils]
             [reagent.core :refer [atom]]
-            [re-com.core :refer [h-box v-box box gap title single-dropdown label input-text datepicker-dropdown]]
+            [re-com.core :refer [h-box v-box box gap title single-dropdown label input-text datepicker-dropdown button]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
             [cljs-time.coerce :as tc]
             [devtools.core :as dt]
@@ -162,11 +162,11 @@
    [
     [box :width "150px" :child [label :label "First name"]]
     [box :size "auto" :child [input-text
-                              :width "300px"
+                              :width "315px"
                               :model (:firstname employee)
-                              :status :error
-                              :status-icon? true
-                              :status-tooltip "First name tool-tip"
+                              :status (when (seq (get-in employee [:validation-errors :firstname])) :error)
+                              :status-icon? (seq (get-in employee [:validation-errors :firstname]))
+                              :status-tooltip (get-in employee [:validation-errors :firstname])
                               :placeholder "Employees first name"
                               :on-change #(dispatch [:input-change :firstname %])
                               :change-on-blur? false]]
@@ -181,11 +181,11 @@
    [
     [box :width "150px" :child [label :label "Last name"]]
     [box :size "auto" :child [input-text
-                              :width "300px"
+                              :width "315px"
                               :model (:lastname employee)
-                              :status :warning
-                              :status-icon? true
-                              :status-tooltip "Tooltip"
+                              :status (when (seq (get-in employee [:validation-errors :lastname])) :error)
+                              :status-icon? (seq (get-in employee [:validation-errors :lastname]))
+                              :status-tooltip (get-in employee [:validation-errors :lastname])
                               :placeholder "Employees last name"
                               :on-change #(dispatch [:input-change :lastname %])
                               :change-on-blur? false]]
@@ -199,11 +199,11 @@
    [
     [box :width "150px" :child [label :label "Email"]]
     [box :size "auto" :child [input-text
-                              :width "300px"
+                              :width "315px"
                               :model (:email employee)
-                              :status :warning
-                              :status-icon? true
-                              :status-tooltip "Tooltip"
+                              :status (when (seq (get-in employee [:validation-errors :email])) :error)
+                              :status-icon? (seq (get-in employee [:validation-errors :email]))
+                              :status-tooltip (get-in employee [:validation-errors :email])
                               :placeholder "Employees email address"
                               :on-change #(dispatch [:input-change :email %])
                               :change-on-blur? false]]
@@ -265,11 +265,11 @@
    [
     [box :child [label :label "This year opening"]]
     [box :child [input-text
-                 :width "50px"
+                 :width "100px"
                  :model (str (:this_year_opening employee))
-                 :status :warning
-                 :status-icon? true
-                 :status-tooltip "Tooltip"
+                 :status (when (seq (get-in employee [:validation-errors :this_year_opening])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :this_year_opening]))
+                 :status-tooltip (get-in employee    [:validation-errors :this_year_opening])
                  :on-change #(dispatch [:input-change :this_year_opening %])
                  :change-on-blur? false]]
     ]]
@@ -282,11 +282,11 @@
    [
     [box :child [label :label "This year remaining"]]
     [box :child [input-text
-                 :width "50px"
+                 :width "100px"
                  :model (str (:this_year_remaining employee))
-                 :status :warning
-                 :status-icon? true
-                 :status-tooltip "Tooltip"
+                 :status (when (seq (get-in employee [:validation-errors :this_year_remaining])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :this_year_remaining]))
+                 :status-tooltip (get-in employee [:validation-errors    :this_year_remaining])
                  :on-change #(dispatch [:input-change :this_year_remaining %])
                  :change-on-blur? false]]
     ]]
@@ -299,11 +299,11 @@
    [
     [box :child [label :label "Next year opening"]]
     [box :child [input-text
-                 :width "50px"
+                 :width "100px"
                  :model (str (:next_year_opening employee))
-                 :status :warning
-                 :status-icon? true
-                 :status-tooltip "Tooltip"
+                 :status (when (seq (get-in employee [:validation-errors :next_year_opening])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :next_year_opening]))
+                 :status-tooltip (get-in employee [:validation-errors    :next_year_opening])
                  :on-change #(dispatch [:input-change :next_year_opening %])
                  :change-on-blur? false]]
     ]]
@@ -316,15 +316,44 @@
    [
     [box :child [label :label "Next year remaining"]]
     [box :child [input-text
-                 :width "50px"
+                 :width "100px"
                  :model (str (:next_year_remaining employee))
-                 :status :warning
-                 :status-icon? true
-                 :status-tooltip "Tooltip"
+                 :status (when (seq (get-in employee [:validation-errors :next_year_remaining])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :next_year_remaining]))
+                 :status-tooltip (get-in employee [:validation-errors    :next_year_remaining])
                  :on-change #(dispatch [:input-change :next_year_remaining %])
                  :change-on-blur? false]]
     ]]
   )
+
+;; Save button
+(defn save-button []
+  [v-box
+   :children [
+              [h-box
+               :style {:flex-flow "row wrap"}
+               :class "panel"
+               :justify :between
+               :children
+               [
+                [box
+                 :class "panel panel-body"
+                 :child [button
+                         :class "btn btn-primary"
+                         :on-click #(dispatch [:employee-save])
+                         :label "Save"]
+                 ]
+                ]]
+              ]
+   ])
+;
+;[:div.well
+; [:form.form-horizontal
+;  [:div.form-group
+;   [:div.col-md-offset-2.col-md-4
+;    ]]]
+; ]
+
 
 
 (defn employee-core-details []
@@ -391,17 +420,11 @@
                [
                 [box :class "panel panel-body" :child [employee-core-details employee]]
                 [box :class "panel panel-body" :child [employee-balances employee]]
+                [box :class "panel panel-body" :child [save-button]]
                 ]]
               ]
    ])
 
-;; Save button
-;[:div.well
-; [:form.form-horizontal
-;  [:div.form-group
-;   [:div.col-md-offset-2.col-md-4
-;    [:button#save.btn.btn-primary {:type "button" :on-click #(dispatch [:employee-save])} "Save"]]]]
-; ]
 
 
 
