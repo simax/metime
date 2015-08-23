@@ -23,9 +23,9 @@
   [:firstname [[v/required :message "First name is required"]]
    :lastname [[v/required :message "Last name is required"]]
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
-   :this_year_opening   [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
+   :this_year_opening [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
    :this_year_remaining [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
-   :next_year_opening   [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
+   :next_year_opening [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
    :next_year_remaining [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]])
 
 (defn validate-employee [db _]
@@ -86,8 +86,11 @@
         dep (first (filter #(= (:departmentid %) (js/parseInt id)) deps))
         updated-emp (assoc (:employee db)
                       :departments_id id
+                      :department (:department dep)
                       :managerid (:managerid dep)
-                      :manager-email (:manager-email dep))]
+                      :manager-email (:manager-email dep)
+                      :manager-firstname (:manager-firstname dep)
+                      :manager-lastname (:manager-lastname dep))]
     (assoc db :employee updated-emp)))
 
 (register-handler
