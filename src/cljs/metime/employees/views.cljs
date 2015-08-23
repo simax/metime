@@ -270,10 +270,12 @@
                  :status (when (seq (get-in employee [:validation-errors :this_year_opening])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_opening]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :this_year_opening]))
-                 :on-change #(dispatch [:input-change-balances :this_year_opening %])
-                 :validation-regex #"\d+"
-                 :change-on-blur? false]]
+                 :on-change #(dispatch-sync [:input-change-balances :this_year_opening %])
+                 ;:validation-regex #"^(-{0,1})(\d{0,2})$"
+                 :validation-regex #"^-(?=\\d)|\\d{1,2}$"
+                 :change-on-blur? true]]
     ]]
+  ;; This appears to work in regExr ... -(?=\d)|\d{1,2}
   )
 
 (defn employee-this-year-remaining [employee]

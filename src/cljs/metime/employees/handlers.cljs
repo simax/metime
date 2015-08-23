@@ -23,10 +23,10 @@
   [:firstname [[v/required :message "First name is required"]]
    :lastname [[v/required :message "Last name is required"]]
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
-   :this_year_opening [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
-   :this_year_remaining [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
-   :next_year_opening [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]
-   :next_year_remaining [[v/number :message "Must be a number"] [v/integer :message "Must be an integer"]]])
+     :this_year_opening [[v/integer :message "Must be an integer"]]
+   :this_year_remaining [[v/integer :message "Must be an integer"]]
+   :next_year_opening   [[v/integer :message "Must be an integer"]]
+   :next_year_remaining [[v/integer :message "Must be an integer"]]])
 
 (defn validate-employee [db _]
   (let [employee (:employee db)
@@ -100,7 +100,7 @@
 
 (register-handler
   :input-change-balances
-  (enrich validate-employee)
+  ;(enrich validate-employee)
   handle-input-change-balances)
 
 (register-handler

@@ -28,13 +28,19 @@
 (defn api [db endpoint]
   (str (:api-root-url db) endpoint))
 
+(defn isNaN [node]
+  (and (= (.call js/toString node) (str "[object Number]"))
+       (js/eval (str node " != +" node ))))
+
 (defn parse-int [s]
   "Parse the string for an integer"
-  (if (nil? s)
+  (if (or (nil? s) (empty? s))
     0
     (try
-      (js/parseInt s)
-      (catch js/Object e 0))))
+      (if (isNaN (js/parseInt s)) 0 (js/parseInt s))
+      (catch js/Error e 0)
+      (catch js/Object e 0)
+      )))
 
 (defn input-value [component] (-> component .-target .-value))
 
