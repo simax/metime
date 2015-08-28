@@ -120,8 +120,8 @@
 
 (defn manager-gravatar [employee]
   [v-box
-   :justify :start
    :align :center
+   :width "150px"
    :children
    [[box :child [:h6 "Manager"]]
     [box :child [utils/gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75}]]
@@ -219,8 +219,6 @@
 
 (defn employee-dob [employee]
   (let [dob (reagent/atom (iso8601->date (prep-date (:dob employee))))]
-    (println (str "goog.date.UtcDateTime? " (instance? goog.date.UtcDateTime dob)))
-    ;(println (str "Date-of-birth: " (clojure.string/replace (:dob employee) "-" "")))
     [h-box
      :justify :start
      :children
@@ -231,36 +229,40 @@
                    :show-today? true
                    ;:selectable-fn selectable-pred
                    :format "dd-MM-yyyy"
-                   :on-change #(dispatch [:input-change-dates :dob %]) ;#(reset! dob %)
+                   :on-change #(dispatch [:input-change-dates :dob %])
                    ]]
       ]]))
 
 (defn employee-start-date [employee]
-  [h-box
-   :justify :start
-   :children
-   [
-    [box :width "150px" :child [label :label "Start date"]]
-    [box :child [datepicker-dropdown
-                 :model (reagent/atom (iso8601->date (prep-date (:startdate employee))))
-                 :show-today? true
-                 :on-change #(dispatch [:input-change :startdate %])
-                 ]]
-    ]]
+  (let [start-date (reagent/atom (iso8601->date (prep-date (:startdate employee))))]
+    [h-box
+     :justify :start
+     :children
+     [
+      [box :width "150px" :child [label :label "Start date"]]
+      [box :child [datepicker-dropdown
+                   :model start-date
+                   :show-today? true
+                   :format "dd-MM-yyyy"
+                   :on-change #(dispatch [:input-change-dates :startdate %])
+                   ]]
+      ]])
   )
 
 (defn employee-end-date [employee]
-  [h-box
-   :justify :start
-   :children
-   [
-    [box :width "150px" :child [label :label "End date"]]
-    [box :child [datepicker-dropdown
-                 :model (reagent/atom (iso8601->date (prep-date (:enddate employee))))
-                 :show-today? true
-                 :on-change #(dispatch [:input-change :enddate %])
-                 ]]
-    ]]
+  (let [end-date (reagent/atom (iso8601->date (prep-date (:enddate employee))))]
+    [h-box
+     :justify :start
+     :children
+     [
+      [box :width "150px" :child [label :label "End date"]]
+      [box :child [datepicker-dropdown
+                   :model end-date
+                   :show-today? true
+                   :format "dd-MM-yyyy"
+                   :on-change #(dispatch [:input-change-dates :enddate %])
+                   ]]
+      ]])
   )
 
 (defn employee-this-year-opening [employee]
@@ -379,8 +381,8 @@
             [employee-last-name employee]
             [employee-email employee]
             [employee-dob employee]
-            ;[employee-start-date employee]
-            ;[employee-end-date employee]
+            [employee-start-date employee]
+            [employee-end-date employee]
             ]]]]
         ]]
       )))
