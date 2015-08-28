@@ -87,9 +87,10 @@
             data (assoc (:employee db) :password "password1" :password-confirm "password1")
             response (<! (apply (:verb endpoint) [(:url endpoint) {:form-params data}]))]
 
-        (println response)
+        (println (str "Response from http... " response))
 
-        (if (= (get-in response [:body :status]) 403)
+        ;TODO: Need to improve this
+        (if (or (= (get-in response [:body :status]) 403) (= (:status response) 500))
           (dispatch [:show-failed-save-attempt {:email '("Another employee has already been registered with this email address")}])
           (do (utils/set-hash! (r/employees-route))
               (dispatch [:switch-route :employees :employees])))))
