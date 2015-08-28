@@ -8,9 +8,12 @@
             [metime.routes :as r]
             [metime.utils :as utils]
             [reagent.core :refer [atom]]
-            [re-com.core :refer [h-box v-box box gap title single-dropdown label input-text datepicker-dropdown button]]
+            [re-com.core :refer [h-box v-box box gap title single-dropdown label input-text datepicker datepicker-dropdown button]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
+            [cljs-time.core :refer [date-time now days minus day-of-week]]
+            [cljs-time.format :refer [formatter parse unparse]]
             [cljs-time.coerce :as tc]
+            [goog.date]
             [devtools.core :as dt]
             [re-frame.core :refer [register-handler
                                    path
@@ -211,24 +214,26 @@
   )
 
 (defn prep-date [date-str]
-  ;(println date-str)
+  "Default blank dates to 19000101 and remove dashes (-) from date stringd like 01-01-1900"
   (if (empty? date-str) "19000101" (clojure.string/replace date-str "-" "")))
 
 (defn employee-dob [employee]
-  [h-box
-   :justify :start
-   :children
-   [
-    [box :width "150px" :child [label :label "Date of birth"]]
-    [box :child [datepicker-dropdown
-                 :model (reagent/atom (iso8601->date (prep-date (:dob employee))))
-                 :show-today? true
-                 ;:minimum (goog.date.UtcDateTime. "1900-01-01")
-                 ;:maximum (goog.date.UtcDateTime. "2010-01-01")
-                 :on-change #(dispatch [:input-change :dob %])
-                 ]]
-    ]]
-  )
+  (let [dob (reagent/atom (iso8601->date (prep-date (:dob employee))))]
+    (println (str "goog.date.UtcDateTime? " (instance? goog.date.UtcDateTime dob)))
+    ;(println (str "Date-of-birth: " (clojure.string/replace (:dob employee) "-" "")))
+    [h-box
+     :justify :start
+     :children
+     [
+      [box :width "150px" :child [label :label "Date of birth"]]
+      [box :child [datepicker-dropdown
+                   :model dob
+                   :show-today? true
+                   ;:selectable-fn selectable-pred
+                   :format "dd-MM-yyyy"
+                   :on-change #(dispatch [:input-change-dates :dob %]) ;#(reset! dob %)
+                   ]]
+      ]]))
 
 (defn employee-start-date [employee]
   [h-box
@@ -271,11 +276,9 @@
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_opening]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :this_year_opening]))
                  :on-change #(dispatch-sync [:input-change-balances :this_year_opening %])
-                 ;:validation-regex #"^(-{0,1})(\d{0,2})$"
-                 :validation-regex #"^-(?=\\d)|\\d{1,2}$"
+                 :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? true]]
     ]]
-  ;; This appears to work in regExr ... -(?=\d)|\d{1,2}
   )
 
 (defn employee-this-year-remaining [employee]
@@ -291,6 +294,7 @@
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_remaining]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :this_year_remaining]))
                  :on-change #(dispatch [:input-change-balances :this_year_remaining %])
+                 :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
   )
@@ -308,6 +312,7 @@
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_opening]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :next_year_opening]))
                  :on-change #(dispatch [:input-change-balances :next_year_opening %])
+                 :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
   )
@@ -325,6 +330,7 @@
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_remaining]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :next_year_remaining]))
                  :on-change #(dispatch [:input-change-balances :next_year_remaining %])
+                 :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
   )
@@ -373,8 +379,8 @@
             [employee-last-name employee]
             [employee-email employee]
             [employee-dob employee]
-            [employee-start-date employee]
-            [employee-end-date employee]
+            ;[employee-start-date employee]
+            ;[employee-end-date employee]
             ]]]]
         ]]
       )))

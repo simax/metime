@@ -3,6 +3,8 @@
             [metime.routes :as r]
             [cljs-http.client :as http]
             [secretary.core :as secretary]
+            [cljs-time.core :refer [date-time now days minus day-of-week]]
+            [cljs-time.format :refer [formatter parse unparse]]
             [re-frame.core :refer [register-handler
                                    path
                                    debug
@@ -23,9 +25,9 @@
   [:firstname [[v/required :message "First name is required"]]
    :lastname [[v/required :message "Last name is required"]]
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
-     :this_year_opening [[v/integer :message "Must be an integer"]]
+   :this_year_opening [[v/integer :message "Must be an integer"]]
    :this_year_remaining [[v/integer :message "Must be an integer"]]
-   :next_year_opening   [[v/integer :message "Must be an integer"]]
+   :next_year_opening [[v/integer :message "Must be an integer"]]
    :next_year_remaining [[v/integer :message "Must be an integer"]]])
 
 (defn validate-employee [db _]
@@ -41,6 +43,10 @@
 
 (defn handle-input-change-balances [db [_ property-name new-value]]
   (assoc-in db [:employee property-name] (utils/parse-int new-value)))
+
+(defn handle-input-change-dates [db [_ property-name new-value]]
+  (let [date-value (unparse (formatter "yyyy-MM-dd") new-value)] ;"dd MMM, yyyy"
+    (assoc-in db [:employee property-name] date-value)))
 
 (defn handle-employee-add [db [_ departmentid managerid]]
   (let [url (r/employee-add-route)
@@ -97,6 +103,11 @@
   :input-change
   (enrich validate-employee)
   handle-input-change)
+
+(register-handler
+  :input-change-dates
+  ;(enrich validate-employee)
+  handle-input-change-dates)
 
 (register-handler
   :input-change-balances
