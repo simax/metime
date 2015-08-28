@@ -1,5 +1,7 @@
 (ns metime.employees.handlers
-  (:require [metime.utils :as utils]
+  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require [cljs.core.async :refer [put! take! <! >! chan timeout]]
+            [metime.utils :as utils]
             [metime.routes :as r]
             [cljs-http.client :as http]
             [secretary.core :as secretary]
@@ -78,13 +80,19 @@
     {:url (utils/api db (str "/employee/" employee-id)) :verb http/put}
     {:url (utils/api db "/employees") :verb http/post}))
 
+
 (defn handle-employee-save [db _]
-  (let [employee-id (get-in db [:employee :id])
-        endpoint (get-employee-save-endpoint db employee-id)
-        data (assoc (:employee db) :password "password1" :password-confirm "password1")]
-    (apply (:verb endpoint) [(:url endpoint) {:form-params data}])
-    (utils/set-hash! (r/employees-route))
-    (dispatch [:switch-route :employees :employees]))
+  (go (let [employee-id (get-in db [:employee :id])
+            endpoint (get-employee-save-endpoint db employee-id)
+            data (assoc (:employee db) :password "password1" :password-confirm "password1")
+            response (<! (apply (:verb endpoint) [(:url endpoint) {:form-params data}]))]
+
+        (println response)
+
+        (if (= (get-in response [:body :status]) 403)
+          (dispatch [:show-failed-save-attempt {:email '("Another employee has already been registered with this email address")}])
+          (do (utils/set-hash! (r/employees-route))
+              (dispatch [:switch-route :employees :employees])))))
   db)
 
 (defn handle-department-change [db [_ id]]
@@ -132,3 +140,8 @@
     (if (= (:department-draw-open-id db) department)
       (assoc db :department-draw-open-id "")
       (assoc db :department-draw-open-id department))))
+
+(register-handler
+  :show-failed-save-attempt
+  (fn [db [_ errors]]
+    (assoc-in db [:employee :validation-errors] errors)))

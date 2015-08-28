@@ -337,7 +337,6 @@
     ]]
   )
 
-;; Save button
 (defn save-button []
   [v-box
    :children [
