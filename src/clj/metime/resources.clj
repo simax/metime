@@ -222,7 +222,7 @@
                         (try
                           (when-let [new-id (emps/insert-employee! (make-keyword-map (get-form-params ctx)))]
                             {::location (str "http://localhost:3030/api/employees/" new-id)})
-                          (catch Exception e {::failure-message "Employee already exists"}))))
+                          (catch Exception e {::failure-message "Employee already registered with given email address"}))))
 
              :post-redirect? false
              :handle-created (fn [ctx]
@@ -249,6 +249,13 @@
                                  [true {::employee employee}]
                                  false)
                                true))
+
+             :conflict? (fn [ctx]
+                          (let [new-employee (:employee (make-keyword-map (get-form-params ctx)))
+                                existing-employee (first (emps/get-employee-by-email (:email new-employee)))]
+                            (and (not (nil? existing-employee)) (= (:id new-employee) (str (:id existing-employee))))))
+
+             :handle-conflict {:employee ["Employee already registered with given email address"]}
 
              :delete! (fn [ctx]
                         (emps/delete-employee! id))

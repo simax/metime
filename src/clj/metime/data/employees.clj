@@ -27,6 +27,10 @@
 (defn get-employee-by-id [id]
   (first (db-get-employee-by-id {:id id} {:connection db/db-spec})))
 
+(defn get-employee-by-email [email]
+  (first (db-get-employee-by-email {:email email} {:connection db/db-spec})))
+
+
 (defn insert-employee! [data]
     ;; Needed to use this syntax here rather than :keyword lookup
     ;; Because sqlite returns a key of last_insert_rowid().

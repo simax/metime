@@ -91,6 +91,20 @@ from employees e
   left join departments d on e.departments_id = d.id
 where e.id = :id
 
+-- name: db-get-employee-by-email
+-- Get the employee with the given email address
+select
+-- Employee info
+e.*,
+d.department as 'department',
+-- Manager info
+m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
+
+from employees e
+  left join employees m on e.managerid = m.id
+  left join departments d on e.departments_id = d.id
+where e.email = :email
+
 -- name: db-insert-employee<!
 -- Insert a new employee
 insert into employees (firstname,lastname,email,startdate,enddate,departments_id,managerid,dob,salt,password,this_year_opening,this_year_remaining,next_year_opening,next_year_remaining)
