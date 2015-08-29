@@ -90,8 +90,8 @@
         (println (str "Response from http... " response))
 
         ;TODO: Need to improve this
-        (if (or (= (get-in response [:body :status]) 403) (= (:status response) 500))
-          (dispatch [:show-failed-save-attempt {:email '("Another employee has already been registered with this email address")}])
+        (if (= (:status response) 409)                      ;; Conflict
+          (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
           (do (utils/set-hash! (r/employees-route))
               (dispatch [:switch-route :employees :employees])))))
   db)
