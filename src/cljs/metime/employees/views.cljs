@@ -171,7 +171,7 @@
                               :status-icon? (seq (get-in employee [:validation-errors :firstname]))
                               :status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
                               :placeholder "Employee first name"
-                              :on-change #(dispatch [:input-change :firstname %])
+                              :on-change #(dispatch-sync [:input-change :firstname %])
                               :change-on-blur? false]]
     ]]
   )
@@ -190,7 +190,7 @@
                               :status-icon? (seq (get-in employee [:validation-errors :lastname]))
                               :status-tooltip (apply str (get-in employee [:validation-errors :lastname]))
                               :placeholder "Employee last name"
-                              :on-change #(dispatch [:input-change :lastname %])
+                              :on-change #(dispatch-sync [:input-change :lastname %])
                               :change-on-blur? false]]
     ]]
   )
@@ -208,7 +208,7 @@
                               :status-icon? (seq (get-in employee [:validation-errors :email]))
                               :status-tooltip (apply str (get-in employee [:validation-errors :email]))
                               :placeholder "Employee email address"
-                              :on-change #(dispatch [:input-change :email %])
+                              :on-change #(dispatch-sync [:input-change :email %])
                               :change-on-blur? false]]
     ]]
   )
@@ -295,7 +295,7 @@
                  :status (when (seq (get-in employee [:validation-errors :this_year_remaining])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_remaining]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :this_year_remaining]))
-                 :on-change #(dispatch [:input-change-balances :this_year_remaining %])
+                 :on-change #(dispatch-sync [:input-change-balances :this_year_remaining %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
@@ -313,7 +313,7 @@
                  :status (when (seq (get-in employee [:validation-errors :next_year_opening])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_opening]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :next_year_opening]))
-                 :on-change #(dispatch [:input-change-balances :next_year_opening %])
+                 :on-change #(dispatch-sync [:input-change-balances :next_year_opening %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
@@ -331,7 +331,7 @@
                  :status (when (seq (get-in employee [:validation-errors :next_year_remaining])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_remaining]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :next_year_remaining]))
-                 :on-change #(dispatch [:input-change-balances :next_year_remaining %])
+                 :on-change #(dispatch-sync [:input-change-balances :next_year_remaining %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]

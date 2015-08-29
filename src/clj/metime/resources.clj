@@ -141,7 +141,6 @@
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :delete :put]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
-
              :can-put-to-missing? false
              :exists? (fn [ctx]
                         (if (or (requested-method ctx :get) (requested-method ctx :put))
@@ -240,8 +239,12 @@
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :can-put-to-missing? false
              :exists? (fn [ctx]
-                        (let [employee (emps/get-employee-by-id id)]
-                          [(not (empty? employee)) {::employee employee}]))
+                        (if (or (requested-method ctx :get) (requested-method ctx :put))
+                          (let [employee (emps/get-employee-by-id id)]
+                            (if (empty? employee)
+                              false
+                              [(not (empty? employee)) {::employee employee}]))
+                          true))
 
              :processable? (fn [ctx]
                              (if (or (requested-method ctx :delete) (requested-method ctx :put))
@@ -250,10 +253,21 @@
                                  false)
                                true))
 
+             :malformed? (fn [ctx]
+                           (if (requested-method ctx :put)
+                             (let [form-data (make-keyword-map (get-form-params ctx))
+                                   validation-result (employee-validator form-data :updating)]
+                               (if (seq validation-result)
+                                 [true {::failure-message (str validation-result)}]
+                                 false))
+                             false))
+
+             :handle-malformed ::failure-message
+
              :conflict? (fn [ctx]
-                          (let [new-employee (:employee (make-keyword-map (get-form-params ctx)))
-                                existing-employee (first (emps/get-employee-by-email (:email new-employee)))]
-                            (and (not (nil? existing-employee)) (= (:id new-employee) (str (:id existing-employee))))))
+                          (let [new-employee (make-keyword-map (get-form-params ctx))
+                                existing-employee (emps/get-employee-by-email (:email new-employee))]
+                            (and (not (nil? existing-employee)) (not= (:id new-employee) (str (:id existing-employee))))))
 
              :handle-conflict {:employee ["Employee already registered with given email address"]}
 
@@ -270,6 +284,5 @@
              :new? (fn [ctx] (nil? ::employee))
              :respond-with-entity? (fn [ctx] (not (empty? (::employee ctx))))
              :multiple-representations? false
-
              :handle-ok ::employee
              :handle-not-found "Employee not found")
