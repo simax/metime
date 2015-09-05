@@ -214,7 +214,7 @@
   )
 
 (defn prep-date [date-str]
-  "Default blank dates to 19000101 and remove dashes (-) from date stringd like 01-01-1900"
+  "Default blank dates to 19000101 and remove dashes (-) from date string like 01-01-1900"
   (if (empty? date-str) "19000101" (clojure.string/replace date-str "-" "")))
 
 (defn employee-dob [employee]

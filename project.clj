@@ -6,14 +6,11 @@
 
             :dependencies [
                            [org.clojure/clojure "1.7.0"]
-                           [org.clojure/clojurescript "0.0-3297"]
-
-                           ;[org.clojure/clojure "1.6.0"]
-                           ;[org.clojure/clojurescript "0.0-3211"]
+                           [org.clojure/clojurescript "1.7.48"]
 
                            [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                           [figwheel "0.3.6"]
-                           [figwheel-sidecar "0.3.6"]
+                           [figwheel "0.3.9"]
+                           [figwheel-sidecar "0.3.9"]
 
 
                            [cljs-hash "0.0.2"]
@@ -21,7 +18,7 @@
                            [metis "0.3.3"]
                            [ring-cors "0.1.7"]
                            [clj-time "0.9.0"]
-                           [com.andrewmcveigh/cljs-time "0.3.11"]
+                           [com.andrewmcveigh/cljs-time "0.3.13"]
                            [digest "1.4.4"]
 
 
@@ -51,7 +48,8 @@
                            [binaryage/devtools "0.3.0"]]
 
 
-  :plugins [[lein-figwheel "0.3.7"]
+  :plugins [
+            [lein-figwheel "0.3.9"]
             [lein-cljsbuild "1.0.5"]
             [lein-environ "1.0.0"]
             [lein-ring "0.9.6"]
@@ -79,9 +77,9 @@
               :builds [{:id           "dev"
                         :source-paths ["src/cljs"]
 
-                        :figwheel     {:on-jsload "metime.core/mount-root"}
+                        :figwheel     {:on-jsload "metime.client/mount-root"}
 
-                        :compiler     {:main                 metime.core
+                        :compiler     {:main                 metime.client
                                        :asset-path           "js/compiled/out"
                                        :output-to            "resources/public/js/compiled/app.js"
                                        :output-dir           "resources/public/js/compiled/out"
@@ -89,11 +87,11 @@
                        {:id           "min"
                         :source-paths ["src/cljs"]
                         :compiler     {:output-to     "resources/public/js/compiled/app.js"
-                                       :main          metime.core
+                                       :main          metime.client
                                        :optimizations :advanced
                                        :pretty-print  false}}]}
   :figwheel {
-             ;:http-server-root "public"
+             ;:http-server-root "public" note: This is the default
              ;:nrepl-port       7888
              ;:port             3449
              :css-dirs     ["resources/public/assets/css"]
