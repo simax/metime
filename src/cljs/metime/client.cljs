@@ -1,4 +1,4 @@
-(ns ^:figwheel-always metime.client
+(ns metime.client
   ;(:refer-clojure :exclude [run!])
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
                    [reagent.ratom :refer [reaction]])
