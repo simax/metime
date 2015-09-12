@@ -82,19 +82,22 @@
 
 
 (defn handle-employee-save [db _]
-  (go (let [employee-id (get-in db [:employee :id])
-            endpoint (get-employee-save-endpoint db employee-id)
-            data (assoc (:employee db) :password "password1" :password-confirm "password1")
-            response (<! (apply (:verb endpoint) [(:url endpoint) {:form-params data}]))]
 
-        (println (str "Response from http... " response))
+  (if (apply b/valid? (:employee db) employee-validation-rules)
+    (go (let [employee-id (get-in db [:employee :id])
+              endpoint (get-employee-save-endpoint db employee-id)
+              data (assoc (:employee db) :password "password1" :password-confirm "password1")
+              response (<! (apply (:verb endpoint) [(:url endpoint) {:form-params data}]))]
 
-        ;TODO: Need to improve this
-        (if (= (:status response) 409)                      ;; Conflict
-          (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
-          (do (utils/set-hash! (r/employees-route))
-              (dispatch [:switch-route :employees :employees])))))
-  db)
+          (println (str "Response from http... " response))
+
+          ;TODO: Need to improve this
+          (if (= (:status response) 409)                    ;; Conflict
+            (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
+            (do (utils/set-hash! (r/employees-route))
+                (dispatch [:switch-route :employees :employees])))))
+    (validate-employee db _)))
+
 
 (defn handle-department-change [db [_ id]]
   (let [deps (:deps db)
