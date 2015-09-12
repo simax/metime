@@ -33,24 +33,24 @@
 (defn employee-route-switcher-middleware [handler]
   (fn employee-handler
     [db [_ nav-bar-id view-component-id id]]
-    (handler db [_ _ _ id])
-    (update-nav-bar db nav-bar-id view-component-id)))
+    ;(println "Reached here!!!")
+    (handler (update-nav-bar db nav-bar-id view-component-id) [_ _ _ id])))
 
 (defn employee-route-switcher-handler
   [db [_ _ _ id]]
-  (when (> id 0) (dispatch [:fetch-employee id]))
+  (if (> id 0) (dispatch [:fetch-employee id])
+               (dispatch [:employee-add]))
   db)
 
 (register-handler
   :employee-route-switcher
-  ;;[debug employee-route-switcher-middleware]
   employee-route-switcher-middleware
   employee-route-switcher-handler)
 
 (register-handler
   :switch-route
   (fn [db [_ nav-bar-id view-component-id]]
-    (assoc db :nav-bar nav-bar-id :view view-component-id)))
+    (update-nav-bar db nav-bar-id view-component-id)))
 
 (register-handler
   :initialise-db

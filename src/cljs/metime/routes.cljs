@@ -10,6 +10,10 @@
 
 (secretary/set-config! :prefix "#")
 
+(defroute root-route "/" []
+          ;(utils/set-hash! "/employees")
+          (dispatch [:switch-route :employees :employees]))
+
 (defroute tables-route "/tables" []
           (dispatch [:switch-route :tables :tables]))
 
@@ -25,19 +29,17 @@
 (defroute login-route "/login" []
           (dispatch [:switch-route :login :login]))
 
-(defroute employees-route "/employees" []
-          (utils/set-hash! "/employees")
-          (dispatch [:switch-route :employees :employees]))
+(defroute employee-add-route "/employees/add" []
+          (println (str "route: " "/employees/add"))
+          (dispatch [:switch-route :employees :employee 0]))
 
-(defroute root-route "/" []
+(defroute employees-route "/employees" []
+          ;(println (str "route: " "/employees"))
           ;(utils/set-hash! "/employees")
           (dispatch [:switch-route :employees :employees]))
 
 (defroute employee-route "/employee/:id" [id]
           (dispatch [:employee-route-switcher :employees :employee id]))
-
-(defroute employee-add-route "/employees/add" []
-          (dispatch [:employee-route-switcher :employees :employee 0]))
 
 (defroute "*" []
           (dispatch [:switch-route :employees :not-found]))
