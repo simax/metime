@@ -4,7 +4,6 @@
             [metime.utils :as utils]
             [metime.routes :as r]
             [cljs-http.client :as http]
-            [secretary.core :as secretary]
             [cljs-time.core :refer [date-time now days minus day-of-week]]
             [cljs-time.format :refer [formatter parse unparse]]
             [re-frame.core :refer [register-handler
@@ -16,8 +15,7 @@
                                    dispatch
                                    subscribe]]
             [bouncer.core :as b]
-            [bouncer.validators :as v]
-            ))
+            [bouncer.validators :as v]))
 
 (defn is-new-employee? [id]
   (zero? id))
@@ -51,29 +49,29 @@
     (assoc-in db [:employee property-name] date-value)))
 
 (defn handle-employee-add [db [_ departmentid managerid]]
-  (let [url (r/employee-add-route)
-        dep (first (filter #(= (:departmentid %) departmentid) (:deps db)))]
-    (utils/set-hash! url)
-    (secretary/dispatch! url)
-    (merge db {:employee
-               {:is-ready?           true
-                :id                  0
-                :firstname           ""
-                :lastname            ""
-                :email               ""
-                :dob                 nil
-                :startdate           nil
-                :enddate             nil
-                :this_year_opening   25
-                :this_year_remaining 25
-                :next_year_opening   25
-                :next_year_remaining 25
-                :departments_id      departmentid
-                :managerid           managerid
-                :manager-firstname   (:manager-firstname dep)
-                :manager-lastname    (:manager-lastname dep)
-                :manager-email       (:manager-email dep)
-                }})))
+  (let [dep (first (filter #(= (:departmentid %) departmentid) (:deps db)))]
+    (utils/set-hash! (r/employee-add-route))
+    (merge db
+           (assoc db :nav-bar :employees :view :employee)
+           {:employee
+            {:is-ready?           true
+             :id                  0
+             :firstname           ""
+             :lastname            ""
+             :email               ""
+             :dob                 nil
+             :startdate           nil
+             :enddate             nil
+             :this_year_opening   25
+             :this_year_remaining 25
+             :next_year_opening   25
+             :next_year_remaining 25
+             :departments_id      departmentid
+             :managerid           managerid
+             :manager-firstname   (:manager-firstname dep)
+             :manager-lastname    (:manager-lastname dep)
+             :manager-email       (:manager-email dep)
+             }})))
 
 (defn get-employee-save-endpoint [db employee-id]
   (if (not (is-new-employee? employee-id))
@@ -82,17 +80,18 @@
 
 
 (defn handle-employee-save [db _]
-
   (if (apply b/valid? (:employee db) employee-validation-rules)
-    (go (let [employee-id (get-in db [:employee :id])
-              endpoint (get-employee-save-endpoint db employee-id)
-              data (assoc (:employee db) :password "password1" :password-confirm "password1")
-              response (<! (apply (:verb endpoint) [(:url endpoint) {:form-params data}]))]
+    (let [employee-id (get-in db [:employee :id])
+          endpoint (get-employee-save-endpoint db employee-id)
+          data (assoc (:employee db) :password "password1" :password-confirm "password1")
+          response (go (<! (apply (:verb endpoint) [(:url endpoint) {:form-params data}])))]
 
-          (if (= (:status response) 409)                    ;; Conflict
-            (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
-            (do (utils/set-hash! (r/employees-route))
-                (dispatch [:switch-route :employees :employees])))))
+      (if (= (:status response) 409)                        ;; Conflict
+        (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
+        (do
+          (utils/set-hash! (r/employees-route))
+          (dispatch [:set-active-view :employees :employees])
+          db)))
     (validate-employee db _)))
 
 
@@ -115,12 +114,10 @@
 
 (register-handler
   :input-change-dates
-  ;(enrich validate-employee)
   handle-input-change-dates)
 
 (register-handler
   :input-change-balances
-  ;(enrich validate-employee)
   handle-input-change-balances)
 
 (register-handler

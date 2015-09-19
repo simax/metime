@@ -15,8 +15,8 @@
             [metime.employees.views]
             [metime.db :as dbase]))
 
-(defn update-nav-bar [db nav-bar-id view-component]
-  (assoc db :nav-bar nav-bar-id :view view-component))
+(defn update-active-view [db nav-bar view-component]
+  (assoc db :nav-bar nav-bar :view view-component))
 
 (defn fetch-employee
   [db url]
@@ -30,27 +30,19 @@
     ;; The following go block will "park" until the http request returns data
     (dispatch [:process-departments-response (((<! (http/get url)) :body) :departments)])))
 
-(defn employee-route-switcher-middleware [handler]
-  (fn employee-handler
-    [db [_ nav-bar-id view-component-id id]]
-    ;(println "Reached here!!!")
-    (handler (update-nav-bar db nav-bar-id view-component-id) [_ _ _ id])))
-
-(defn employee-route-switcher-handler
-  [db [_ _ _ id]]
-  (if (> id 0) (dispatch [:fetch-employee id])
-               (dispatch [:employee-add]))
-  db)
+(defn employee-edit-handler
+  [db [_ id]]
+  (dispatch [:fetch-employee id])
+  (merge db (assoc db :nav-bar :employees :view :employee)))
 
 (register-handler
-  :employee-route-switcher
-  employee-route-switcher-middleware
-  employee-route-switcher-handler)
+  :employee-edit
+  employee-edit-handler)
 
 (register-handler
-  :switch-route
-  (fn [db [_ nav-bar-id view-component-id]]
-    (update-nav-bar db nav-bar-id view-component-id)))
+  :set-active-view
+  (fn [db [_ nav-bar view-component-id]]
+    (update-active-view db nav-bar view-component-id)))
 
 (register-handler
   :initialise-db

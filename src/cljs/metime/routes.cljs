@@ -11,35 +11,31 @@
 (secretary/set-config! :prefix "#")
 
 (defroute root-route "/" []
-          ;(utils/set-hash! "/employees")
-          (dispatch [:switch-route :employees :employees]))
-
-(defroute tables-route "/tables" []
-          (dispatch [:switch-route :tables :tables]))
-
-(defroute calendar-route "/calendar" []
-          (dispatch [:switch-route :calendar :calendar]))
-
-(defroute file-manager-route "/file-manager" []
-          (dispatch [:switch-route :file-manager :file-manager]))
-
-(defroute user-route "/user" []
-          (dispatch [:switch-route :user :user]))
-
-(defroute login-route "/login" []
-          (dispatch [:switch-route :login :login]))
-
-(defroute employee-add-route "/employees/add" []
-          (println (str "route: " "/employees/add"))
-          (dispatch [:switch-route :employees :employee 0]))
+          (dispatch [:set-active-view :employees :employees]))
 
 (defroute employees-route "/employees" []
-          ;(println (str "route: " "/employees"))
-          ;(utils/set-hash! "/employees")
-          (dispatch [:switch-route :employees :employees]))
+          (dispatch [:set-active-view :employees :employees]))
+
+(defroute tables-route "/tables" []
+          (dispatch [:set-active-view :tables :tables]))
+
+(defroute calendar-route "/calendar" []
+          (dispatch [:set-active-view :calendar :calendar]))
+
+(defroute file-manager-route "/file-manager" []
+          (dispatch [:set-active-view :file-manager :file-manager]))
+
+(defroute user-route "/user" []
+          (dispatch [:set-active-view :user :user]))
+
+(defroute login-route "/login" []
+          (dispatch [:set-active-view :login :login]))
+
+(defroute employee-add-route "/employees/add" []
+          (dispatch [:employee-add]))
 
 (defroute employee-route "/employee/:id" [id]
-          (dispatch [:employee-route-switcher :employees :employee id]))
+          (dispatch [:employee-edit id]))
 
 (defroute "*" []
-          (dispatch [:switch-route :employees :not-found]))
+          (dispatch [:set-active-view nil :not-found]))
