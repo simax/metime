@@ -8,7 +8,10 @@
             [metime.routes :as r]
             [metime.utils :as utils]
             [reagent.core :refer [atom]]
-            [re-com.core :refer [h-box v-box box gap title single-dropdown label input-text datepicker datepicker-dropdown button]]
+            [re-com.core :refer [h-box v-box box gap
+                                 title  single-dropdown label
+                                 input-text datepicker datepicker-dropdown button
+                                 popover-anchor-wrapper popover-content-wrapper]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
             [cljs-time.core :refer [date-time now days minus day-of-week]]
             [cljs-time.format :refer [formatter parse unparse]]
@@ -217,21 +220,54 @@
   "Default blank dates to 19000101 and remove dashes (-) from date string like 01-01-1900"
   (if (empty? date-str) "19000101" (clojure.string/replace date-str "-" "")))
 
+;[datepicker-dropdown
+; :model dob
+; :show-today? true
+; ;:selectable-fn selectable-pred
+; :format "dd-MM-yyyy"
+; :on-change #(dispatch [:input-change-dates :dob %])
+; ]
+;
+
 (defn employee-dob [employee]
-  (let [dob (reagent/atom (iso8601->date (prep-date (:dob employee))))]
+  (let [showing?  (reagent/atom false)
+        dob (reagent/atom (iso8601->date (prep-date (:dob employee))))]
     [h-box
      :justify :start
      :children
      [
       [box :width "150px" :child [label :label "Date of birth"]]
-      [box :child [datepicker-dropdown
-                   :model dob
-                   :show-today? true
-                   ;:selectable-fn selectable-pred
-                   :format "dd-MM-yyyy"
-                   :on-change #(dispatch [:input-change-dates :dob %])
-                   ]]
-      ]]))
+      [box :child [input-text
+                   :model (str dob)
+                   :width "200px"
+                   :status (when (seq (get-in employee [:validation-errors :dob])) :error)
+                   :status-icon? (seq (get-in employee [:validation-errors :dob]))
+                   :status-tooltip (apply str (get-in employee [:validation-errors :dob]))
+                   :on-change #(dispatch [:input-change-dates :dob %])]]
+
+      [popover-anchor-wrapper
+       :showing? showing?
+       :position :above-left
+       :anchor   [button
+                  :label "..."
+                  :on-click #(swap! showing? not)
+                  :class "btn"]
+       :popover  [popover-content-wrapper
+                  :showing?         showing?
+                  :position         :above-center
+                  :width            "250px"
+                  :no-clip?         true
+                  ;:backdrop-opacity (when @backdrop-opacity? 0.3)
+                  ;:on-cancel        (when @on-cancel? cancel-popover)
+                  :title            "Date of birth"
+                  :close-button?    true
+                  :body             [datepicker
+                                     :model dob
+                                     :show-today? true
+                                     ;:format "dd-MM-yyyy"
+                                     :on-change #(dispatch [:input-change-dates :dob %])
+                                     ]
+      ]]]]))
 
 (defn employee-start-date [employee]
   (let [start-date (reagent/atom (iso8601->date (prep-date (:startdate employee))))]
