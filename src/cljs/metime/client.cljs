@@ -38,8 +38,10 @@
   (reagent/render [nv/top-panel] (js/document.getElementById "app-container")))
 
 (defn ^:export init []
-  (dispatch [:initialise-db])
-  (utils/set-hash! "#/employees")
-  (hook-browser-navigation!)
-  (mount-root))
+  (let [current-location (utils/get-current-location)]
+    (dispatch [:initialise-db])
+    (when (or (= current-location "") (= current-location "#/")) (utils/set-hash! "#/employees"))
+    (println (str "Current loc: " current-location))
+    (hook-browser-navigation!)
+    (mount-root)))
 
