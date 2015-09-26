@@ -16,27 +16,27 @@
 
 (defroutes app-routes
            (GET "/" [] (render-file "index.html" {:dev (env :dev?)}))
-  (context "/api" []
-    (ANY "/departments"  [] (departments))
-    (ANY "/department/:id" [id] (department id))
-    (ANY "/employees" [] (employees))
-    ;; Is this route needed?
-    (ANY "/employees/add" [] (employees))
-    (ANY "/employee/:id" [id] (employee id))
-    (route/resources "/")
-    (route/not-found "Not Found")))
+           (context "/api" []
+             (ANY "/departments" [] (departments))
+             (ANY "/department/:id" [id] (department id))
+             (ANY "/employees" [] (employees))
+             ;; Is this route needed?
+             (ANY "/employees/add" [] (employees))
+             (ANY "/employee/:id" [id] (employee id))
+             (route/resources "/")
+             (route/not-found "Not Found")))
 
 (def app
   (->
-     (routes app-routes)
-     (prone/wrap-exceptions)
-     (handler/site)
-     (wrap-cors
+    (routes app-routes)
+    (prone/wrap-exceptions)
+    (handler/site)
+    (wrap-cors
       :access-control-allow-credentials "true"
       :access-control-allow-origin [#".*"]
       :access-control-allow-methods [:get :put :post :delete])
-     (wrap-base-url)
-     #_(liberator.dev/wrap-trace :header :ui)
-   ))
+    (wrap-base-url)
+    #_(liberator.dev/wrap-trace :header :ui)
+    ))
 
 

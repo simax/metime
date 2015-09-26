@@ -6,11 +6,11 @@
 
             :dependencies [
                            [org.clojure/clojure "1.7.0"]
-                           [org.clojure/clojurescript "1.7.48"]
+                           [org.clojure/clojurescript "1.7.122"]
 
                            [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                           [figwheel "0.3.9"]
-                           [figwheel-sidecar "0.3.9"]
+                           ;[figwheel "0.3.9"]
+                           [figwheel-sidecar "0.4.0"]
 
 
                            [cljs-hash "0.0.2"]
@@ -49,8 +49,8 @@
 
 
   :plugins [
-            [lein-figwheel "0.3.9"]
-            [lein-cljsbuild "1.0.5"]
+            ;[lein-figwheel "0.3.9"]
+            [lein-cljsbuild "1.1.0"]
             [lein-environ "1.0.0"]
             [lein-ring "0.9.6"]
             [lein-asset-minifier "0.2.2"]]
@@ -95,5 +95,5 @@
              ;:nrepl-port       7888
              ;:port             3449
              :css-dirs     ["resources/public/assets/css"]
-             :ring-handler metime.core/app
+             ;:ring-handler metime.core/app
              })
