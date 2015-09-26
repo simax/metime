@@ -91,9 +91,5 @@
                                        :optimizations :advanced
                                        :pretty-print  false}}]}
   :figwheel {
-             ;:http-server-root "public" note: This is the default
-             ;:nrepl-port       7888
-             ;:port             3449
              :css-dirs     ["resources/public/assets/css"]
-             ;:ring-handler metime.core/app
              })
