@@ -9,7 +9,7 @@
             [metime.utils :as utils]
             [reagent.core :refer [atom]]
             [re-com.core :refer [h-box v-box box gap
-                                 title  single-dropdown label
+                                 title single-dropdown label
                                  input-text datepicker datepicker-dropdown button
                                  popover-anchor-wrapper popover-content-wrapper]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
@@ -216,30 +216,30 @@
     ]]
   )
 
-(defn prep-date [date-str]
-  "Default blank dates to 19000101 and remove dashes (-) from date string like 01-01-1900"
-  (if (empty? date-str) "19000101" (clojure.string/replace date-str "-" "")))
+(defn formatted-date [date-str]
+  "Returns a correctly formatted date string like 01-01-2015"
+  (if (empty? date-str)
+    ""
+    (unparse (formatter "dd-MM-yyyy") (iso8601->date (clojure.string/replace date-str "-" "")))))
 
-;[datepicker-dropdown
-; :model dob
-; :show-today? true
-; ;:selectable-fn selectable-pred
-; :format "dd-MM-yyyy"
-; :on-change #(dispatch [:input-change-dates :dob %])
-; ]
-;
+(defn str->date [date-str]
+  "Returns a date object from date-str. Returns todays date if date-str is empty"
+  (if (empty? date-str)
+    (now)
+    (iso8601->date (clojure.string/replace date-str "-" ""))))
+
 
 (defn employee-dob [employee]
-  (let [showing?  (reagent/atom false)
-        dob (reagent/atom (iso8601->date (prep-date (:dob employee))))]
+  (let [showing? (reagent/atom false)]
     [h-box
      :justify :start
      :children
      [
       [box :width "150px" :child [label :label "Date of birth"]]
       [box :child [input-text
-                   :model (str dob)
-                   :width "200px"
+                   :placeholder "Date of Birth"
+                   :model (formatted-date (:dob employee))
+                   :width "120px"
                    :status (when (seq (get-in employee [:validation-errors :dob])) :error)
                    :status-icon? (seq (get-in employee [:validation-errors :dob]))
                    :status-tooltip (apply str (get-in employee [:validation-errors :dob]))
@@ -247,59 +247,102 @@
 
       [popover-anchor-wrapper
        :showing? showing?
-       :position :above-left
-       :anchor   [button
-                  :label "..."
-                  :on-click #(swap! showing? not)
-                  :class "btn"]
-       :popover  [popover-content-wrapper
-                  :showing?         showing?
-                  :position         :above-center
-                  :width            "250px"
-                  :no-clip?         true
-                  ;:backdrop-opacity (when @backdrop-opacity? 0.3)
-                  ;:on-cancel        (when @on-cancel? cancel-popover)
-                  :title            "Date of birth"
-                  :close-button?    true
-                  :body             [datepicker
-                                     :model dob
-                                     :show-today? true
-                                     ;:format "dd-MM-yyyy"
-                                     :on-change #(dispatch [:input-change-dates :dob %])
-                                     ]
-      ]]]]))
+       :position :above-center
+       :anchor [button
+                :label [:i {:class "zmdi zmdi-apps"}]
+                :on-click #(swap! showing? not)
+                :class "btn"]
+       :popover [popover-content-wrapper
+                 :showing? showing?
+                 :position :left-below
+                 :width "250px"
+                 :no-clip? true
+                 :arrow-length 0
+                 :arrow-width 0
+                 :title "Date of birth"
+                 :close-button? true
+                 :body [datepicker
+                        :model (reagent/atom (str->date (:dob employee)))
+                        :show-today? true
+                        ;:format "dd-MM-yyyy"
+                        :on-change #(dispatch [:input-change-dates :dob %])]
+                 ]]]]))
 
 (defn employee-start-date [employee]
-  (let [start-date (reagent/atom (iso8601->date (prep-date (:startdate employee))))]
+  (let [showing? (reagent/atom false)]
     [h-box
      :justify :start
      :children
      [
       [box :width "150px" :child [label :label "Start date"]]
-      [box :child [datepicker-dropdown
-                   :model start-date
-                   :show-today? true
-                   :format "dd-MM-yyyy"
-                   :on-change #(dispatch [:input-change-dates :startdate %])
-                   ]]
-      ]])
-  )
+      [box :child [input-text
+                   :placeholder "Start date"
+                   :model (formatted-date (:startdate employee))
+                   :width "120px"
+                   :status (when (seq (get-in employee [:validation-errors :startdate])) :error)
+                   :status-icon? (seq (get-in employee [:validation-errors :startdate]))
+                   :status-tooltip (apply str (get-in employee [:validation-errors :startdate]))
+                   :on-change #(dispatch [:input-change-dates :dob %])]]
+
+      [popover-anchor-wrapper
+       :showing? showing?
+       :position :above-center
+       :anchor [button
+                :label [:i {:class "zmdi zmdi-apps"}]
+                :on-click #(swap! showing? not)
+                :class "btn"]
+       :popover [popover-content-wrapper
+                 :showing? showing?
+                 :position :left-below
+                 :width "250px"
+                 :no-clip? true
+                 :arrow-length 0
+                 :arrow-width 0
+                 :title "Date of birth"
+                 :close-button? true
+                 :body [datepicker
+                        :model (reagent/atom (str->date (:startdate employee)))
+                        :show-today? true
+                        :on-change #(dispatch [:input-change-dates :startdate %])]
+                 ]]]]))
 
 (defn employee-end-date [employee]
-  (let [end-date (reagent/atom (iso8601->date (prep-date (:enddate employee))))]
+  (let [showing? (reagent/atom false)]
     [h-box
      :justify :start
      :children
      [
       [box :width "150px" :child [label :label "End date"]]
-      [box :child [datepicker-dropdown
-                   :model end-date
-                   :show-today? true
-                   :format "dd-MM-yyyy"
-                   :on-change #(dispatch [:input-change-dates :enddate %])
-                   ]]
-      ]])
-  )
+      [box :child [input-text
+                   :placeholder "End date"
+                   :model (formatted-date (:enddate employee))
+                   :width "120px"
+                   :status (when (seq (get-in employee [:validation-errors :enddate])) :error)
+                   :status-icon? (seq (get-in employee [:validation-errors :enddate]))
+                   :status-tooltip (apply str (get-in employee [:validation-errors :enddate]))
+                   :on-change #(dispatch [:input-change-dates :enddate %])]]
+
+      [popover-anchor-wrapper
+       :showing? showing?
+       :position :above-center
+       :anchor [button
+                :label [:i {:class "zmdi zmdi-apps"}]
+                :on-click #(swap! showing? not)
+                :class "btn"]
+       :popover [popover-content-wrapper
+                 :showing? showing?
+                 :position :left-below
+                 :width "250px"
+                 :no-clip? true
+                 :arrow-length 0
+                 :arrow-width 0
+                 :title "Date of birth"
+                 :close-button? true
+                 :body [datepicker
+                        :model (reagent/atom (str->date (:enddate employee)))
+                        :show-today? true
+                        :on-change #(dispatch [:input-change-dates :enddate %])]
+                 ]]]]))
 
 (defn employee-this-year-opening [employee]
   [h-box
