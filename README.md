@@ -8,6 +8,8 @@ To start the api. At the terminal (or command line on Windows), type `lein ring 
 At the terminal, type: lein figwheel
 in the browser navigate to 'http://localhost:3449'. This will connect to the REPL.
 
+Note: Global app state is held in the re-frame.db/app-db atom. @re-frame.db/app-db  
+
 ## REPL
 Start a REPL 
 In IntelliJ. 
