@@ -7,9 +7,6 @@
     <setting name="jvmArgs" value="" />
     <setting name="parameters" value="" />
     <setting name="workingDir" value="$PROJECT_DIR$" />
-    <method>
-      <option name="Synchronize Leiningen" enabled="true" />
-      <option name="Make" enabled="true" />
-    </method>
+    <method />
   </configuration>
 </component>

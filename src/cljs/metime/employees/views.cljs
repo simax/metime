@@ -216,16 +216,21 @@
   )
 
 (defn formatted-date [date-str]
-  "Returns a correctly formatted date string like 01-01-2015"
+  "If date-str is a valid date, returns a correctly formatted date string like 01-01-2015.
+   Otherwise returns date-str."
   (if (empty? date-str)
     ""
-    (unparse (formatter "dd-MM-yyyy") (iso8601->date (clojure.string/replace date-str "-" "")))))
+    (let [formatted-date-str (try (unparse (formatter "yyyy-MM-dd") (iso8601->date (clojure.string/replace date-str "-" "")))
+               (catch :default e date-str))]
+      formatted-date-str)
+    ))
 
 (defn str->date [date-str]
   "Returns a date object from date-str. Returns todays date if date-str is empty"
   (if (empty? date-str)
     (now)
-    (iso8601->date (clojure.string/replace date-str "-" ""))))
+    (try (iso8601->date (clojure.string/replace date-str "-" ""))
+         (catch :default e (now)))))
 
 
 (defn date-input-with-popup [date-field date showing? title]
@@ -252,7 +257,6 @@
              :body [datepicker
                     :model (reagent/atom (str->date date))
                     :show-today? true
-                    ;:format "dd-MM-yyyy"
                     :on-change #(dispatch [:input-change-dates date-field %])]
              ]])
 
@@ -283,7 +287,6 @@
      [
       [box :width "150px" :child [label :label "Start date"]]
       [box :child [input-text
-                   :style {:border-radius "4px 0 0 4px"}
                    :placeholder "Start date"
                    :model (formatted-date (:startdate employee))
                    :width "120px"
@@ -302,7 +305,6 @@
      [
       [box :width "150px" :child [label :label "End date"]]
       [box :child [input-text
-                   :style {:border-radius "4px 0 0 4px"}
                    :placeholder "End date"
                    :model (formatted-date (:enddate employee))
                    :width "120px"

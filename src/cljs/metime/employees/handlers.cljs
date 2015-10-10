@@ -5,7 +5,7 @@
             [metime.routes :as r]
             [cljs-http.client :as http]
             [cljs-time.core :refer [date-time now days minus day-of-week]]
-            [cljs-time.format :refer [formatter parse unparse show-formatters]]
+            [cljs-time.format :refer [formatter parse unparse]]
             [re-frame.core :refer [register-handler
                                    path
                                    debug
@@ -25,7 +25,7 @@
   [:firstname [[v/required :message "First name is required"]]
    :lastname [[v/required :message "Last name is required"]]
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
-   :dob [[v/datetime :message "Must be a valid date" ]]
+   :dob [[v/datetime :pre (comp seq :dob) :message "Must be a valid date"]]
    :this_year_opening [[v/integer :message "Must be an integer"]]
    :this_year_remaining [[v/integer :message "Must be an integer"]]
    :next_year_opening [[v/integer :message "Must be an integer"]]
@@ -35,7 +35,7 @@
   (let [employee (:employee db)
         result (apply b/validate employee employee-validation-rules)
         errors (first result)]
-    (when result (println (str "Validation: " errors)))
+    (when (seq result) (println (str "Validation: " errors)))
     (assoc-in db [:employee :validation-errors] errors)))
 
 
