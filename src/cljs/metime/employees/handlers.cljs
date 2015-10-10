@@ -26,6 +26,8 @@
    :lastname [[v/required :message "Last name is required"]]
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
    :dob [[v/datetime :pre (comp seq :dob) :message "Must be a valid date"]]
+   :startdate [[v/datetime :pre (comp seq :startdate) :message "Must be a valid date"]]
+   :enddate [[v/datetime :pre (comp seq :enddate) :message "Must be a valid date"]]
    :this_year_opening [[v/integer :message "Must be an integer"]]
    :this_year_remaining [[v/integer :message "Must be an integer"]]
    :next_year_opening [[v/integer :message "Must be an integer"]]

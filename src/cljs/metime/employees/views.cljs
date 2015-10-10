@@ -293,7 +293,7 @@
                    :status (when (seq (get-in employee [:validation-errors :startdate])) :error)
                    :status-icon? (seq (get-in employee [:validation-errors :startdate]))
                    :status-tooltip (apply str (get-in employee [:validation-errors :startdate]))
-                   :on-change #(dispatch [:input-change-dates :dob %])]]
+                   :on-change #(dispatch [:input-change-dates :startdate %])]]
 
       (date-input-with-popup :startdate (:startdate employee) showing? "Start date")]]))
 
