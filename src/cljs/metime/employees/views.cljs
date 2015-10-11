@@ -268,6 +268,7 @@
      [
       [box :width "150px" :child [label :label "Date of birth"]]
       [box :child [input-text
+                   :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"           ;#"^(-{0,1})(\d{0,2})$"
                    :style {:border-radius "4px 0 0 4px"}
                    :placeholder "Date of Birth"
                    :model (formatted-date (:dob employee))
