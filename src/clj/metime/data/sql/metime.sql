@@ -74,14 +74,44 @@ delete from departments
 
 -- name: db-get-all-employees
 -- Get all employees
-select * from employees order by lastname
+select
+id,
+firstname,
+lastname,
+email,
+departments_id,
+managerid,
+strftime('%d-%m-%Y', dob) as 'dob',
+strftime('%d-%m-%Y', startdate) as 'startdate',
+strftime('%d-%m-%Y', enddate) as 'enddate',
+salt,
+password,
+this_year_opening,
+this_year_remaining,
+next_year_opening,
+next_year_remaining
+from employees order by lastname
 
 
 -- name: db-get-employee-by-id
 -- Get the employee with the given id
 select
 -- Employee info
-e.*,
+e.id,
+e.firstname,
+e.lastname,
+e.email,
+e.departments_id,
+e.managerid,
+strftime('%d-%m-%Y', e.dob) as dob,
+strftime('%d-%m-%Y', e.startdate) as startdate,
+strftime('%d-%m-%Y', e.enddate) as enddate,
+e.salt,
+e.password,
+e.this_year_opening,
+e.this_year_remaining,
+e.next_year_opening,
+e.next_year_remaining,
 d.department as 'department',
 -- Manager info
 m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
@@ -95,7 +125,21 @@ where e.id = :id
 -- Get the employee with the given email address
 select
 -- Employee info
-e.*,
+e.id,
+e.firstname,
+e.lastname,
+e.email,
+e.departments_id,
+e.managerid,
+e.strftime('%d-%m-%Y', dob) as e.dob,
+e.strftime('%d-%m-%Y', startdate) as e.startdate,
+e.strftime('%d-%m-%Y', enddate) as e.enddate,
+e.salt,
+e.password,
+e.this_year_opening,
+e.this_year_remaining,
+e.next_year_opening,
+e.next_year_remaining
 d.department as 'department',
 -- Manager info
 m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'

@@ -5,7 +5,7 @@
             [metime.routes :as r]
             [cljs-http.client :as http]
             [cljs-time.core :refer [date-time now days minus day-of-week]]
-            [cljs-time.format :refer [formatter parse unparse]]
+            [cljs-time.format :as f :refer [formatter parse unparse]]
             [re-frame.core :refer [register-handler
                                    path
                                    debug
@@ -20,14 +20,15 @@
 (defn is-new-employee? [id]
   (zero? id))
 
+(def british-date-format (f/formatter "dd-MM-yyyy"))
 
 (def employee-validation-rules
   [:firstname [[v/required :message "First name is required"]]
    :lastname [[v/required :message "Last name is required"]]
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
-   :dob [[v/datetime :pre (comp seq :dob) :message "Must be a valid date"]]
-   :startdate [[v/datetime :pre (comp seq :startdate) :message "Must be a valid date"]]
-   :enddate [[v/datetime :pre (comp seq :enddate) :message "Must be a valid date"]]
+   :dob [[v/datetime british-date-format :pre (comp seq :dob) :message "Must be a valid date"]]
+   :startdate [[v/datetime british-date-format :pre (comp seq :startdate) :message "Must be a valid date"]]
+   :enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
    :this_year_opening [[v/integer :message "Must be an integer"]]
    :this_year_remaining [[v/integer :message "Must be an integer"]]
    :next_year_opening [[v/integer :message "Must be an integer"]]
@@ -48,7 +49,7 @@
   (assoc-in db [:employee property-name] (utils/parse-int new-value)))
 
 (defn handle-input-change-dates [db [_ property-name new-value]]
-  (let [date-value (try (unparse (formatter "yyyy-MM-dd") new-value)
+  (let [date-value (try (unparse british-date-format new-value)
                         (catch :default e new-value))]
     (assoc-in db [:employee property-name] date-value)))
 
