@@ -11,7 +11,9 @@
             [re-com.core :refer [h-box v-box box gap
                                  title single-dropdown label
                                  input-text datepicker datepicker-dropdown button
-                                 popover-anchor-wrapper popover-content-wrapper]]
+                                 popover-anchor-wrapper popover-content-wrapper
+                                 popover-tooltip md-circle-icon-button]
+             :refer-macros [handler-fn]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
             [cljs-time.core :refer [date-time now days minus day-of-week]]
             [cljs-time.format :refer [formatter parse unparse]]
@@ -221,7 +223,7 @@
   (if (empty? date-str)
     ""
     (let [formatted-date-str (try (unparse (formatter "yyyy-MM-dd") (iso8601->date (clojure.string/replace date-str "-" "")))
-               (catch :default e date-str))]
+                                  (catch :default e date-str))]
       formatted-date-str)
     ))
 
@@ -241,8 +243,7 @@
             :style {:border-radius "0 4px 4px 0"}
             :attr {:tab-index -1}
             :label [:i {:class "zmdi zmdi-apps"}]
-            :on-click #(swap! showing? not)
-            ]
+            :on-click #(swap! showing? not)]
    :popover [popover-content-wrapper
              :showing? showing?
              :title title
@@ -257,28 +258,46 @@
              :body [datepicker
                     :model (reagent/atom (str->date date))
                     :show-today? true
-                    :on-change #(dispatch [:input-change-dates date-field %])]
-             ]])
+                    :on-change #(dispatch [:input-change-dates date-field %])]]])
 
 (defn employee-dob [employee]
-  (let [showing? (reagent/atom false)]
+  (let [showing? (reagent/atom false)
+        showing-tooltip? (reagent/atom false)
+        ]
     [h-box
      :justify :start
      :children
      [
       [box :width "150px" :child [label :label "Date of birth"]]
       [box :child [input-text
-                   :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"           ;#"^(-{0,1})(\d{0,2})$"
+                   :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$" ;#"^(-{0,1})(\d{0,2})$"
                    :style {:border-radius "4px 0 0 4px"}
                    :placeholder "Date of Birth"
                    :model (formatted-date (:dob employee))
                    :width "120px"
                    :status (when (seq (get-in employee [:validation-errors :dob])) :error)
-                   :status-icon? (seq (get-in employee [:validation-errors :dob]))
+                   ;:status-icon? (seq (get-in employee [:validation-errors :dob]))
                    :status-tooltip (apply str (get-in employee [:validation-errors :dob]))
                    :on-change #(dispatch [:input-change-dates :dob %])]]
 
-      (date-input-with-popup :dob (:dob employee) showing? "Date of birth")]]))
+      (date-input-with-popup :dob (:dob employee) showing? "Date of birth")
+      ; TODO: Need to make visibility conditional on error
+      [popover-tooltip
+       :label "This is a tooltip"
+       :position :right-center
+       :showing? showing-tooltip?
+       :status :error
+       :width "150px"
+       :anchor [:i
+                {:class         "zmdi zmdi-alert-circle"
+                 :on-mouse-over (handler-fn (reset! showing-tooltip? true))
+                 :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
+                 :style         {:color     "red"
+                                 :font-size "130%"}}]
+       ]]]))
+
+
+
 
 (defn employee-start-date [employee]
   (let [showing? (reagent/atom false)]
@@ -295,7 +314,6 @@
                    :status-icon? (seq (get-in employee [:validation-errors :startdate]))
                    :status-tooltip (apply str (get-in employee [:validation-errors :startdate]))
                    :on-change #(dispatch [:input-change-dates :startdate %])]]
-
       (date-input-with-popup :startdate (:startdate employee) showing? "Start date")]]))
 
 (defn employee-end-date [employee]
