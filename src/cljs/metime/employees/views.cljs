@@ -261,9 +261,9 @@
                     :on-change #(dispatch [:input-change-dates date-field %])]]])
 
 (defn employee-dob [employee]
-  (let [showing? (reagent/atom false)
-        showing-tooltip? (reagent/atom false)
-        ]
+  (let [showing-date-popup? (reagent/atom false)
+        showing-error-icon? (subscribe [:error-employee-dob])
+        showing-tooltip? (reagent/atom false)]
     [h-box
      :justify :start
      :children
@@ -279,22 +279,21 @@
                    ;:status-icon? (seq (get-in employee [:validation-errors :dob]))
                    :status-tooltip (apply str (get-in employee [:validation-errors :dob]))
                    :on-change #(dispatch [:input-change-dates :dob %])]]
-
-      (date-input-with-popup :dob (:dob employee) showing? "Date of birth")
-      ; TODO: Need to make visibility conditional on error
-      [popover-tooltip
-       :label "This is a tooltip"
-       :position :right-center
-       :showing? showing-tooltip?
-       :status :error
-       :width "150px"
-       :anchor [:i
-                {:class         "zmdi zmdi-alert-circle"
-                 :on-mouse-over (handler-fn (reset! showing-tooltip? true))
-                 :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
-                 :style         {:color     "red"
-                                 :font-size "130%"}}]
-       ]]]))
+      (println (str "showing-error-icon? " @showing-error-icon?))
+      (date-input-with-popup :dob (:dob employee) showing-date-popup? "Date of birth")
+      (when @showing-error-icon? [popover-tooltip
+                      :label "This is a tooltip"
+                      :position :right-center
+                      :showing? showing-tooltip?
+                      :status :error
+                      :width "150px"
+                      :anchor [:i
+                               {:class         "zmdi zmdi-alert-circle"
+                                :on-mouse-over (handler-fn (reset! showing-tooltip? true))
+                                :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
+                                :style         {:color     "red"
+                                                :font-size "130%"}}]
+                      ])]]))
 
 
 

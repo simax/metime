@@ -18,6 +18,16 @@
     (reaction (:department-id @db))))
 
 (register-sub
+  :error-employee-dob
+  (fn [db _]
+    (reaction (seq (get-in @db [:employee :validation-errors :dob])))))
+
+(register-sub
+  :department-id
+  (fn [db _]
+    (reaction (:department-id @db))))
+
+(register-sub
   :manager-id
   (fn [db _]
     (reaction (:manager-id @db))))
