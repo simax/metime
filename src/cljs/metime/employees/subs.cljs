@@ -18,9 +18,16 @@
     (reaction (:department-id @db))))
 
 (register-sub
-  :error-employee-dob
+  :employee-dob-show-error
   (fn [db _]
-    (reaction (seq (get-in @db [:employee :validation-errors :dob])))))
+    (reaction (not (empty? (seq (get-in @db [:employee :validation-errors :dob])))))))
+
+(register-sub
+  :employee-dob-error-message
+  (fn [db _]
+    (reaction (if-let [errors (seq (get-in @db [:employee :validation-errors :dob]))]
+                (first errors)
+                ""))))
 
 (register-sub
   :department-id

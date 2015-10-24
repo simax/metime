@@ -271,7 +271,14 @@
      [
       [box :width "150px" :child [label :label "Date of birth"]]
       [h-box
-       :style (when @showing-error-icon? {:border-color "red" :border-style "solid" :border-width "1px"})
+       :style (if @showing-error-icon? {:border-radius "4px 4px 4px 4px"
+                                        :border-color "red"
+                                        :border-style "solid"
+                                        :border-width "1px"}
+                                       {:border-radius "4px 4px 4px 4px"
+                                        :border-color "white"
+                                        :border-style "solid"
+                                        :border-width "1px"})
        :children
        [
         [box :child [input-text
@@ -280,7 +287,6 @@
                      :placeholder "Date of Birth"
                      :model (formatted-date (:dob employee))
                      :width "120px"
-                     ;:status (when @showing-error-icon? :error)
                      :on-change #(dispatch [:input-change-dates :dob %])]]
         (date-input-with-popup :dob (:dob employee) showing-date-popup? "Date of birth")
         ]]
