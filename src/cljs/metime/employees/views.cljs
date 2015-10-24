@@ -261,39 +261,45 @@
                     :on-change #(dispatch [:input-change-dates date-field %])]]])
 
 (defn employee-dob [employee]
-  (let [showing-date-popup? (reagent/atom false)
-        showing-error-icon? (subscribe [:error-employee-dob])
-        showing-tooltip? (reagent/atom false)]
+  (let [error-message (subscribe [:employee-dob-error-message])
+        showing-date-popup? (reagent/atom false)
+        showing-tooltip? (reagent/atom false)
+        showing-error-icon? (subscribe [:employee-dob-show-error])]
     [h-box
      :justify :start
      :children
      [
       [box :width "150px" :child [label :label "Date of birth"]]
-      [box :child [input-text
-                   :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$" ;#"^(-{0,1})(\d{0,2})$"
-                   :style {:border-radius "4px 0 0 4px"}
-                   :placeholder "Date of Birth"
-                   :model (formatted-date (:dob employee))
-                   :width "120px"
-                   :status (when (seq (get-in employee [:validation-errors :dob])) :error)
-                   ;:status-icon? (seq (get-in employee [:validation-errors :dob]))
-                   :status-tooltip (apply str (get-in employee [:validation-errors :dob]))
-                   :on-change #(dispatch [:input-change-dates :dob %])]]
-      (println (str "showing-error-icon? " @showing-error-icon?))
-      (date-input-with-popup :dob (:dob employee) showing-date-popup? "Date of birth")
-      (when @showing-error-icon? [popover-tooltip
-                      :label "This is a tooltip"
-                      :position :right-center
-                      :showing? showing-tooltip?
-                      :status :error
-                      :width "150px"
-                      :anchor [:i
-                               {:class         "zmdi zmdi-alert-circle"
-                                :on-mouse-over (handler-fn (reset! showing-tooltip? true))
-                                :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
-                                :style         {:color     "red"
-                                                :font-size "130%"}}]
-                      ])]]))
+      [h-box
+       :style (when @showing-error-icon? {:border-color "red" :border-style "solid" :border-width "1px"})
+       :children
+       [
+        [box :child [input-text
+                     :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$" ;#"^(-{0,1})(\d{0,2})$"
+                     :style {:border-radius "4px 0 0 4px"}
+                     :placeholder "Date of Birth"
+                     :model (formatted-date (:dob employee))
+                     :width "120px"
+                     ;:status (when @showing-error-icon? :error)
+                     :on-change #(dispatch [:input-change-dates :dob %])]]
+        (date-input-with-popup :dob (:dob employee) showing-date-popup? "Date of birth")
+        ]]
+        (when @showing-error-icon? [popover-tooltip
+                                    :label @error-message
+                                    :position :right-center
+                                    :showing? showing-tooltip?
+                                    :status :error
+                                    :width "150px"
+                                    :anchor [:i
+                                             {:class         "zmdi zmdi-alert-circle"
+                                              :on-mouse-over (handler-fn (reset! showing-tooltip? true))
+                                              :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
+                                              :style         {:color     "red"
+                                                              :font-size "130%"}}]
+                                    ]
+                                   )
+
+      ]]))
 
 
 
