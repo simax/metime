@@ -13,12 +13,12 @@
                                    dispatch-sync
                                    subscribe]]
             [metime.utils :as utils]
-            [devtools.core :as dt :refer [install!]])
+            [devtools.core :as dt])
   (:import goog.History))
 
 
 (defonce installonce (dt/install!))
-(enable-console-print!)
+;(enable-console-print!)
 (secretary/set-config! :prefix "#")
 
 (defn hook-browser-navigation! []
@@ -41,7 +41,7 @@
   (let [current-location (utils/get-current-location)]
     (dispatch [:initialise-db])
     (when (or (= current-location "") (= current-location "#/")) (utils/set-hash! "#/employees"))
-    (println (str "Current loc: " current-location))
+    (.log js/console (str "Current loc: " current-location))
     (hook-browser-navigation!)
     (mount-root)))
 

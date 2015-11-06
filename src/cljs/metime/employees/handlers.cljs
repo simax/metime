@@ -38,7 +38,7 @@
   (let [employee (:employee db)
         result (apply b/validate employee employee-validation-rules)
         errors (first result)]
-    (when (seq result) (println (str "Validation: " errors)))
+    (when (seq result) (.log js/console db))
     (assoc-in db [:employee :validation-errors] errors)))
 
 
