@@ -286,16 +286,15 @@
                               ]
                              ))
 
-(defn employee-dob [employee]
-  (let [error-message (subscribe [:employee-dob-error-message])
-        showing-error-icon? (subscribe [:employee-dob-show-error])
-        showing-date-popup? (reagent/atom false)
+
+(defn date-component [employee date-field date-label place-holder error-message showing-error-icon?]
+  (let [showing-date-popup? (reagent/atom false)
         showing-tooltip? (reagent/atom false)]
     [h-box
      :justify :start
      :children
      [
-      [box :width "150px" :child [label :label "Date of birth"]]
+      [box :width "150px" :child [label :label date-label]]
       [h-box
        :style (if @showing-error-icon? inavlid-date-style valid-date-style)
        :children
@@ -303,65 +302,31 @@
         [box :child [input-text
                      :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
                      :style {:border-radius "4px 0 0 4px"}
-                     :placeholder "Date of Birth"
-                     :model (formatted-date (:dob employee))
+                     :placeholder place-holder
+                     :model (formatted-date (date-field employee))
                      :width "120px"
-                     :on-change #(dispatch [:input-change-dates :dob %])]]
-        (date-input-with-popup :dob (:dob employee) showing-date-popup? "Date of birth")
+                     :on-change #(dispatch [:input-change-dates date-field %])]]
+        (date-input-with-popup date-field (date-field employee) showing-date-popup? place-holder)
         ]]
       (show-date-error error-message showing-error-icon? showing-tooltip?)]]))
+
+
+(defn employee-dob [employee]
+  (let [error-message (subscribe [:employee-dob-error-message])
+        showing-error-icon? (subscribe [:employee-dob-show-error])]
+    (date-component employee :dob "Date of birth" "Date of birth" error-message showing-error-icon?)))
 
 
 (defn employee-start-date [employee]
   (let [error-message (subscribe [:employee-startdate-error-message])
-        showing-error-icon? (subscribe [:employee-startdate-show-error])
-        showing-date-popup? (reagent/atom false)
-        showing-tooltip? (reagent/atom false)]
-    [h-box
-     :justify :start
-     :children
-     [
-      [box :width "150px" :child [label :label "Start Date"]]
-      [h-box
-       :style (if @showing-error-icon? inavlid-date-style valid-date-style)
-       :children
-       [
-        [box :child [input-text
-                     :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
-                     :style {:border-radius "4px 0 0 4px"}
-                     :placeholder "Start date"
-                     :model (formatted-date (:startdate employee))
-                     :width "120px"
-                     :on-change #(dispatch [:input-change-dates :startdate %])]]
-        (date-input-with-popup :startdate (:startdate employee) showing-date-popup? "Start date")
-        ]]
-      (show-date-error error-message showing-error-icon? showing-tooltip?)]]))
+        showing-error-icon? (subscribe [:employee-startdate-show-error])]
+    (date-component employee :startdate "Start date" "Start date" error-message showing-error-icon?)))
 
 
 (defn employee-end-date [employee]
   (let [error-message (subscribe [:employee-enddate-error-message])
-        showing-error-icon? (subscribe [:employee-enddate-show-error])
-        showing-date-popup? (reagent/atom false)
-        showing-tooltip? (reagent/atom false)]
-    [h-box
-     :justify :start
-     :children
-     [
-      [box :width "150px" :child [label :label "End Date"]]
-      [h-box
-       :style (if @showing-error-icon? inavlid-date-style valid-date-style)
-       :children
-       [
-        [box :child [input-text
-                     :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
-                     :style {:border-radius "4px 0 0 4px"}
-                     :placeholder "End date"
-                     :model (formatted-date (:enddate employee))
-                     :width "120px"
-                     :on-change #(dispatch [:input-change-dates :enddate %])]]
-        (date-input-with-popup :enddate (:enddate employee) showing-date-popup? "End date")
-        ]]
-      (show-date-error error-message showing-error-icon? showing-tooltip?)]]))
+        showing-error-icon? (subscribe [:employee-enddate-show-error])]
+    (date-component employee :enddate "End date" "End date" error-message showing-error-icon?)))
 
 (defn employee-this-year-opening [employee]
   [h-box
