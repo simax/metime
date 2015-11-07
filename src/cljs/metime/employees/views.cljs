@@ -235,6 +235,7 @@
 
 
 (defn date-input-with-popup [date-field date showing? title]
+  "Displays a popup for the given date field"
   [popover-anchor-wrapper
    :showing? showing?
    :position :above-center
@@ -287,14 +288,15 @@
                              ))
 
 
-(defn date-component [employee date-field date-label place-holder error-message showing-error-icon?]
+(defn date-component [db-model field field-label place-holder error-message showing-error-icon?]
+  "A generic date input box with popup and validation features"
   (let [showing-date-popup? (reagent/atom false)
         showing-tooltip? (reagent/atom false)]
     [h-box
      :justify :start
      :children
      [
-      [box :width "150px" :child [label :label date-label]]
+      [box :width "150px" :child [label :label field-label]]
       [h-box
        :style (if @showing-error-icon? inavlid-date-style valid-date-style)
        :children
@@ -303,10 +305,10 @@
                      :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
                      :style {:border-radius "4px 0 0 4px"}
                      :placeholder place-holder
-                     :model (formatted-date (date-field employee))
+                     :model (formatted-date (field db-model))
                      :width "120px"
-                     :on-change #(dispatch [:input-change-dates date-field %])]]
-        (date-input-with-popup date-field (date-field employee) showing-date-popup? place-holder)
+                     :on-change #(dispatch [:input-change-dates field %])]]
+        (date-input-with-popup field (field db-model) showing-date-popup? place-holder)
         ]]
       (show-date-error error-message showing-error-icon? showing-tooltip?)]]))
 
