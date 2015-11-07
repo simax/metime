@@ -14,8 +14,6 @@
   (:import goog.History
            goog.History.EventType))
 
-(enable-console-print!)
-
 (def nav-bars [{:id :employees :text "Employees" :path (r/employees-route)}
                {:id :file-manager :text "File Manager" :path (r/file-manager-route)}
                {:id :calendar :text "Calendar" :path (r/calendar-route)}

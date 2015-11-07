@@ -9,8 +9,6 @@
   (:import goog.History
            goog.History.EventType))
 
-(enable-console-print!)
-
 (defn gravatar [data]
   (let [email-address (or (:gravatar-email data) "")
         size (or (:gravatar-size data) 100)]

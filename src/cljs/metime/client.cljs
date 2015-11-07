@@ -18,7 +18,6 @@
 
 
 (defonce installonce (dt/install!))
-;(enable-console-print!)
 (secretary/set-config! :prefix "#")
 
 (defn hook-browser-navigation! []

@@ -17,7 +17,7 @@
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
             [cljs-time.core :refer [date-time now days minus day-of-week]]
             [cljs-time.format :refer [formatter parse unparse]]
-            [cljs-time.coerce :as tc]
+            [cljs-time.coerce]
             [goog.date]
             [re-frame.core :refer [register-handler
                                    path
@@ -32,8 +32,6 @@
   (:import goog.History
            goog.History.EventType))
 
-
-(enable-console-print!)
 
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
@@ -176,8 +174,7 @@
                               :placeholder "Employee first name"
                               :on-change #(dispatch [:input-change :firstname %])
                               :change-on-blur? false]]
-    ]]
-  )
+    ]])
 
 
 (defn employee-last-name [employee]
@@ -195,8 +192,7 @@
                               :placeholder "Employee last name"
                               :on-change #(dispatch [:input-change :lastname %])
                               :change-on-blur? false]]
-    ]]
-  )
+    ]])
 
 (defn employee-email [employee]
   [h-box
@@ -213,11 +209,10 @@
                               :placeholder "Employee email address"
                               :on-change #(dispatch [:input-change :email %])
                               :change-on-blur? false]]
-    ]]
-  )
+    ]])
 
 (defn formatted-date [date-str]
-  "If date-str is a valid date, returns a correctly formatted date string like 01-01-2015.
+  "If passed a valid date, returns a correctly formatted date string like 01-01-2015.
    Otherwise returns date-str."
   (if (empty? date-str)
     ""
@@ -234,7 +229,7 @@
          (catch :default e (now)))))
 
 
-(defn date-input-with-popup [date-field date showing? title]
+(defn date-input-with-popup [date-field date-value showing? title]
   "Displays a popup for the given date field"
   [popover-anchor-wrapper
    :showing? showing?
@@ -247,7 +242,7 @@
    :popover [popover-content-wrapper
              :showing? showing?
              :title title
-             :position :above-center
+             :position :above-right
              :backdrop-opacity 0.5
              :width "250px"
              :no-clip? true
@@ -256,7 +251,7 @@
              :close-button? true
              :on-cancel #(reset! showing? false)
              :body [datepicker
-                    :model (reagent/atom (str->date date))
+                    :model (reagent/atom (str->date date-value))
                     :show-today? true
                     :on-change #(dispatch [:input-change-dates date-field %])]]])
 
@@ -419,8 +414,7 @@
                          :label "Save"]
                  ]
                 ]]
-              ]
-   ])
+              ]])
 
 
 (defn employee-core-details []
