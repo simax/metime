@@ -19,7 +19,6 @@
             [cljs-time.format :refer [formatter parse unparse]]
             [cljs-time.coerce :as tc]
             [goog.date]
-            [devtools.core :as dt]
             [re-frame.core :refer [register-handler
                                    path
                                    debug
@@ -158,7 +157,7 @@
     [box :size "auto" :child [single-dropdown
                               :model (:departments_id employee)
                               :choices (department-list-choices departments)
-                              :on-change #(dispatch-sync [:department-change %])
+                              :on-change #(dispatch [:department-change %])
                               ]]]
    ])
 
@@ -175,7 +174,7 @@
                               :status-icon? (seq (get-in employee [:validation-errors :firstname]))
                               :status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
                               :placeholder "Employee first name"
-                              :on-change #(dispatch-sync [:input-change :firstname %])
+                              :on-change #(dispatch [:input-change :firstname %])
                               :change-on-blur? false]]
     ]]
   )
@@ -194,7 +193,7 @@
                               :status-icon? (seq (get-in employee [:validation-errors :lastname]))
                               :status-tooltip (apply str (get-in employee [:validation-errors :lastname]))
                               :placeholder "Employee last name"
-                              :on-change #(dispatch-sync [:input-change :lastname %])
+                              :on-change #(dispatch [:input-change :lastname %])
                               :change-on-blur? false]]
     ]]
   )
@@ -212,7 +211,7 @@
                               :status-icon? (seq (get-in employee [:validation-errors :email]))
                               :status-tooltip (apply str (get-in employee [:validation-errors :email]))
                               :placeholder "Employee email address"
-                              :on-change #(dispatch-sync [:input-change :email %])
+                              :on-change #(dispatch [:input-change :email %])
                               :change-on-blur? false]]
     ]]
   )
@@ -265,13 +264,13 @@
                          :border-style  "solid"
                          :border-width  "1px"})
 
-(def valide-date-style {:border-radius "4px 4px 4px 4px"
-                        :border-color  "white"
-                        :border-style  "solid"
-                        :border-width  "1px"})
+(def valid-date-style {:border-radius "4px 4px 4px 4px"
+                       :border-color  "white"
+                       :border-style  "solid"
+                       :border-width  "1px"})
 
 
-(defn show-dob-error [error-message showing-error-icon? showing-tooltip?]
+(defn show-date-error [error-message showing-error-icon? showing-tooltip?]
   (when @showing-error-icon? [popover-tooltip
                               :label @error-message
                               :position :right-center
@@ -291,20 +290,18 @@
   (let [error-message (subscribe [:employee-dob-error-message])
         showing-error-icon? (subscribe [:employee-dob-show-error])
         showing-date-popup? (reagent/atom false)
-        showing-tooltip? (reagent/atom false)
-        ]
+        showing-tooltip? (reagent/atom false)]
     [h-box
      :justify :start
      :children
      [
       [box :width "150px" :child [label :label "Date of birth"]]
       [h-box
-       :style (if @showing-error-icon? inavlid-date-style
-                                       valide-date-style)
+       :style (if @showing-error-icon? inavlid-date-style valid-date-style)
        :children
        [
         [box :child [input-text
-                     :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$" ;#"^(-{0,1})(\d{0,2})$"
+                     :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
                      :style {:border-radius "4px 0 0 4px"}
                      :placeholder "Date of Birth"
                      :model (formatted-date (:dob employee))
@@ -312,43 +309,59 @@
                      :on-change #(dispatch [:input-change-dates :dob %])]]
         (date-input-with-popup :dob (:dob employee) showing-date-popup? "Date of birth")
         ]]
-      (show-dob-error error-message showing-error-icon? showing-tooltip?)]]))
+      (show-date-error error-message showing-error-icon? showing-tooltip?)]]))
 
 
 (defn employee-start-date [employee]
-  (let [showing? (reagent/atom false)]
+  (let [error-message (subscribe [:employee-startdate-error-message])
+        showing-error-icon? (subscribe [:employee-startdate-show-error])
+        showing-date-popup? (reagent/atom false)
+        showing-tooltip? (reagent/atom false)]
     [h-box
      :justify :start
      :children
      [
-      [box :width "150px" :child [label :label "Start date"]]
-      [box :child [input-text
-                   :placeholder "Start date"
-                   :model (formatted-date (:startdate employee))
-                   :width "120px"
-                   :status (when (seq (get-in employee [:validation-errors :startdate])) :error)
-                   :status-icon? (seq (get-in employee [:validation-errors :startdate]))
-                   :status-tooltip (apply str (get-in employee [:validation-errors :startdate]))
-                   :on-change #(dispatch [:input-change-dates :startdate %])]]
-      (date-input-with-popup :startdate (:startdate employee) showing? "Start date")]]))
+      [box :width "150px" :child [label :label "Start Date"]]
+      [h-box
+       :style (if @showing-error-icon? inavlid-date-style valid-date-style)
+       :children
+       [
+        [box :child [input-text
+                     :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
+                     :style {:border-radius "4px 0 0 4px"}
+                     :placeholder "Start date"
+                     :model (formatted-date (:startdate employee))
+                     :width "120px"
+                     :on-change #(dispatch [:input-change-dates :startdate %])]]
+        (date-input-with-popup :startdate (:startdate employee) showing-date-popup? "Start date")
+        ]]
+      (show-date-error error-message showing-error-icon? showing-tooltip?)]]))
+
 
 (defn employee-end-date [employee]
-  (let [showing? (reagent/atom false)]
+  (let [error-message (subscribe [:employee-enddate-error-message])
+        showing-error-icon? (subscribe [:employee-enddate-show-error])
+        showing-date-popup? (reagent/atom false)
+        showing-tooltip? (reagent/atom false)]
     [h-box
      :justify :start
      :children
      [
-      [box :width "150px" :child [label :label "End date"]]
-      [box :child [input-text
-                   :placeholder "End date"
-                   :model (formatted-date (:enddate employee))
-                   :width "120px"
-                   :status (when (seq (get-in employee [:validation-errors :enddate])) :error)
-                   :status-icon? (seq (get-in employee [:validation-errors :enddate]))
-                   :status-tooltip (apply str (get-in employee [:validation-errors :enddate]))
-                   :on-change #(dispatch [:input-change-dates :enddate %])]]
-
-      (date-input-with-popup :enddate (:enddate employee) showing? "End date")]]))
+      [box :width "150px" :child [label :label "End Date"]]
+      [h-box
+       :style (if @showing-error-icon? inavlid-date-style valid-date-style)
+       :children
+       [
+        [box :child [input-text
+                     :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
+                     :style {:border-radius "4px 0 0 4px"}
+                     :placeholder "End date"
+                     :model (formatted-date (:enddate employee))
+                     :width "120px"
+                     :on-change #(dispatch [:input-change-dates :enddate %])]]
+        (date-input-with-popup :enddate (:enddate employee) showing-date-popup? "End date")
+        ]]
+      (show-date-error error-message showing-error-icon? showing-tooltip?)]]))
 
 (defn employee-this-year-opening [employee]
   [h-box
@@ -362,7 +375,7 @@
                  :status (when (seq (get-in employee [:validation-errors :this_year_opening])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_opening]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :this_year_opening]))
-                 :on-change #(dispatch-sync [:input-change-balances :this_year_opening %])
+                 :on-change #(dispatch [:input-change-balances :this_year_opening %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? true]]
     ]]
@@ -380,7 +393,7 @@
                  :status (when (seq (get-in employee [:validation-errors :this_year_remaining])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :this_year_remaining]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :this_year_remaining]))
-                 :on-change #(dispatch-sync [:input-change-balances :this_year_remaining %])
+                 :on-change #(dispatch [:input-change-balances :this_year_remaining %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
@@ -398,7 +411,7 @@
                  :status (when (seq (get-in employee [:validation-errors :next_year_opening])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_opening]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :next_year_opening]))
-                 :on-change #(dispatch-sync [:input-change-balances :next_year_opening %])
+                 :on-change #(dispatch [:input-change-balances :next_year_opening %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
@@ -416,7 +429,7 @@
                  :status (when (seq (get-in employee [:validation-errors :next_year_remaining])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_remaining]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :next_year_remaining]))
-                 :on-change #(dispatch-sync [:input-change-balances :next_year_remaining %])
+                 :on-change #(dispatch [:input-change-balances :next_year_remaining %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]

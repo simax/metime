@@ -23,9 +23,32 @@
     (reaction (not (empty? (seq (get-in @db [:employee :validation-errors :dob])))))))
 
 (register-sub
+  :employee-startdate-show-error
+  (fn [db _]
+    (reaction (not (empty? (seq (get-in @db [:employee :validation-errors :startdate])))))))
+
+(register-sub
+  :employee-enddate-show-error
+  (fn [db _]
+    (reaction (not (empty? (seq (get-in @db [:employee :validation-errors :enddate])))))))
+
+(register-sub
   :employee-dob-error-message
   (fn [db _]
     (reaction (if-let [errors (seq (get-in @db [:employee :validation-errors :dob]))]
+                (first errors)
+                ""))))
+(register-sub
+  :employee-startdate-error-message
+  (fn [db _]
+    (reaction (if-let [errors (seq (get-in @db [:employee :validation-errors :startdate]))]
+                (first errors)
+                ""))))
+
+(register-sub
+  :employee-enddate-error-message
+  (fn [db _]
+    (reaction (if-let [errors (seq (get-in @db [:employee :validation-errors :enddate]))]
                 (first errors)
                 ""))))
 

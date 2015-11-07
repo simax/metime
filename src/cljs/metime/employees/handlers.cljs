@@ -41,7 +41,6 @@
     (when (seq result) (.log js/console db))
     (assoc-in db [:employee :validation-errors] errors)))
 
-
 (defn handle-input-change [db [_ property-name new-value]]
   (assoc-in db [:employee property-name] new-value))
 
