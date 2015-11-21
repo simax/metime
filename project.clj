@@ -49,7 +49,7 @@
 
 
   :plugins [
-            ;[lein-figwheel "0.3.9"]
+            [clj-sql-up "0.3.7"]
             [lein-cljsbuild "1.1.0"]
             [lein-environ "1.0.0"]
             [lein-ring "0.9.6"]
