@@ -1,7 +1,7 @@
 ;; migrations/20140510123021491-create-employees.clj
 
 (defn up []
-  ["CREATE TABLE employees (id serial PRIMARY KEY,
+  ["CREATE TABLE employees (id integer PRIMARY KEY NOT NULL,
                             firstname varchar(255) null,
                             lastname varchar(255) null,
                             email varchar(255) null,

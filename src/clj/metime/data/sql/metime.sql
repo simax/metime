@@ -214,3 +214,24 @@ insert into holidays (start_date,
                 )
 
 
+-- name: db-get-all-confirmed-holidays-for-employee
+-- Get all holidays
+select
+id,
+[start_date],
+[start_type],
+[end_date],
+[employee_id],
+[employee_name],
+[leave_type_id],
+[leave_type],
+[duration],
+[deduction],
+[actioned_by_id],
+[reason],
+[declined_reason],
+[status],
+[unit]
+
+from holidays where status = 'Confirmed' and id = :id
+
