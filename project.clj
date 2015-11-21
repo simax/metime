@@ -9,9 +9,7 @@
                            [org.clojure/clojurescript "1.7.122"]
 
                            [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                           ;[figwheel "0.3.9"]
                            [figwheel-sidecar "0.4.0"]
-
 
                            [cljs-hash "0.0.2"]
                            [bouncer "0.3.3"]
@@ -21,12 +19,11 @@
                            [com.andrewmcveigh/cljs-time "0.3.13"]
                            [digest "1.4.4"]
 
-
                            ;; Server
                            [ring "1.4.0-RC2"]
                            [compojure "1.3.4"]
                            [cljs-http "0.1.35"]
-                           [yesql "0.5.0-rc3"]
+                           [yesql "0.5.1"]
                            [org.xerial/sqlite-jdbc "3.7.2"]
                            [liberator "0.13"]
                            [cheshire "5.5.0"]
@@ -49,6 +46,7 @@
 
 
   :plugins [
+            [lein-autoexpect "1.7.0"]
             [clj-sql-up "0.3.7"]
             [lein-cljsbuild "1.1.0"]
             [lein-environ "1.0.0"]

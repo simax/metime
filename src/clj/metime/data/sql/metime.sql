@@ -11,6 +11,7 @@ order by d.department
 
 -- name: db-get-all-departments-with-employees
 -- Get all department with employees
+
 select
 -- Department info
 d.id, d.id as 'departmentid', d.id as 'departmentid', d.department, d.managerid,
@@ -181,4 +182,35 @@ delete from employees where id = :id
 -- name: db-delete-all-employees!
 -- Delete all the employees
 delete from employees
+
+-- ============================= Holidays ===========================
+-- name: db-insert-holiday-request<!
+-- Insert a new holiday request
+insert into holidays (start_date,
+                      start_type,
+                      end_date,
+                      employee_id,
+                      employee_name,
+                      leave_type_id,
+                      leave_type,
+                      duration,
+                      deduction,
+                      reason,
+                      status,
+                      unit)
+                values (
+                      :start_date,
+                      :start_type,
+                      :end_date,
+                      :employee_id,
+                      :employee_name,
+                      :leave_type_id,
+                      :leave_type,
+                      :duration,
+                      :deduction,
+                      :reason,
+                      :status,
+                      :unit
+                )
+
 

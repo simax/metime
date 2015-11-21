@@ -18,6 +18,7 @@
 (defn get-department-by-id-with-employees [id]
   (db-get-department-by-id-with-employees {:id id} {:connection db/db-spec}))
 
+
 (defn get-department-by-name [department]
   (db-get-department-by-name {:department department} {:connection db/db-spec}))
 

@@ -10,7 +10,6 @@
   [work]
   (with-redefs [db/db-spec {:classname "org.sqlite.JDBC"
                               :subprotocol "sqlite"
-                              ;;:subname "/users/simonlomax/documents/development/clojure projects/metime/data/metime.test"}
                               :subname "data/metime.test"}
                 ]
 
