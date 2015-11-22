@@ -3,13 +3,16 @@
             [liberator.representation :refer [as-response]]
             [metime.data.departments :as deps]
             [metime.data.employees :as emps]
+            [metime.data.holidays :as hols]
             [clojure.java.io :as io]
             [clojure.walk :as walk]
             [clojure.data.json :as json]
-            [metis.core :refer [defvalidator] :as v]
+            [metis.core :refer [defvalidator]]
             [clj-time.core :as t]
             [clj-time.format :as f]
-            [clojure.set :refer :all]))
+            [clojure.set :refer :all]
+            [bouncer.core :as b]
+            [bouncer.validators :as v]))
 
 ;; convert the body to a reader. Useful for testing in the repl
 ;; where setting the body to a string is much simpler.
@@ -53,6 +56,12 @@
 (defn get-form-params [ctx]
   (get-in ctx [:request :form-params]))
 
+(defn parse-number
+  "Reads a number from a string. Returns nil if not a number."
+  [s]
+  (if (re-find #"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$" (.trim s))
+    (read-string s)))
+
 
 ;;---------------------
 ;; Validators
@@ -83,6 +92,33 @@
                                       :message "alpha numeric, at least one number"}
                           :confirmation {:confirm :password-confirm}]]
               [:dob :date])
+
+;(defvalidator holiday-request-validator
+;              [:employee_id :numericality {:only-integer true :greater-than 0}]
+;              [:start_date :date])
+
+(def date-format (f/formatter "yyyy-MM-dd"))
+
+(def holiday-request-types #{"Morning" "Afternoon" "All day"})
+(def holiday-request-units #{"Days" "Hours"})
+
+(def holiday-request-validation-rules
+  [:start_date [[v/required] [v/datetime date-format :message "Must be a valid date"]]
+   :start_type [[v/member holiday-request-types :message (apply (partial str "Must be one of ") (interpose ", " holiday-request-types))]]
+   :end_date [[v/required] [v/datetime date-format :message "Must be a valid date"]]
+   :employee_id [[v/required] [v/integer] [v/positive]]
+   :employee_name [[v/required :message "Employee name is required"]]
+   :leave_type_id [[v/required] [v/integer] [v/positive]]
+   :leave_type [[v/required :message "Leave type is required"]]
+   :duration [[v/required] [v/number] [v/positive]]
+   :deduction [[v/required] [v/number] [v/positive]]
+   :unit [[v/member holiday-request-units :message (apply (partial str "Must be either ") (interpose " or " holiday-request-units))]]])
+
+
+(defn validate-holiday-request [holiday-request]
+  (let [result (apply b/validate holiday-request holiday-request-validation-rules)
+        errors (first result)]
+    errors))
 
 ;;---------------------
 
@@ -286,3 +322,49 @@
              :multiple-representations? false
              :handle-ok ::employee
              :handle-not-found "Employee not found")
+
+(defn format-holiday-request [form-data]
+  (assoc form-data
+    :employee_id (parse-number (:employee_id form-data))
+    :leave_type_id (parse-number (:leave_type_id form-data))
+    :duration (parse-number (:duration form-data))
+    :deduction (parse-number (:deduction form-data))))
+
+(defresource holidays []
+             :available-media-types ["application/edn" "application/json"]
+             :allowed-methods [:get :post]
+             :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
+             :exists? (fn [ctx]
+                        (if (requested-method ctx :get)
+                          [true {::holidays (hols/get-holidays)}]
+                          ))
+
+             :malformed? (fn [ctx]
+                           (if (requested-method ctx :post)
+                             (let [form-data (-> ctx (get-form-params) (make-keyword-map) (format-holiday-request))
+                                   validation-result (validate-holiday-request form-data)]
+                               (if (not (empty? validation-result))
+                                 [true {::failure-message (str validation-result)}]
+                                 false))
+                             false))
+
+             :handle-malformed ::failure-message
+
+             :post! (fn [ctx]
+                      "We allow the DB to enforce its constraints here, rather than relying on the processable? descision point.
+                      That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
+                      (if (requested-method ctx :post)
+                        (try
+                          (when-let [new-id (hols/insert-holiday-request! (make-keyword-map (get-form-params ctx)))]
+                            {::location (str "http://localhost:3030/api/departments/" new-id)})
+                          (catch Exception e {::failure-message "Invaliday holiday request"}))))
+
+             :post-redirect? false
+             :handle-created (fn [ctx]
+                               (if (::failure-message ctx)
+                                 {:status 403 :body (::failure-message ctx)}
+                                 {:location (::location ctx)}))
+
+             :handle-ok ::holidays)
+
+

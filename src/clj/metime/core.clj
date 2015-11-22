@@ -6,7 +6,7 @@
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
-            [compojure.core :refer [defroutes context GET ANY]]
+            [compojure.core :refer [defroutes context GET POST ANY]]
             [metime.resources :refer :all]
             [selmer.parser :refer [render-file]]
             [environ.core :refer [env]]
@@ -18,11 +18,12 @@
            (GET "/" [] (render-file "index.html" {:dev (env :dev?)}))
            (context "/api" []
              (ANY "/departments" [] (departments))
+             (ANY "/departments/:id" [id] (department id))
              (ANY "/department/:id" [id] (department id))
              (ANY "/employees" [] (employees))
-             ;; Is this route needed?
-             (ANY "/employees/add" [] (employees))
              (ANY "/employee/:id" [id] (employee id))
+             (ANY "/holidays" [] (holidays))
+             ;(ANY "/holidays/:id" [id] (holiday id))
              (route/resources "/")
              (route/not-found "Not Found")))
 

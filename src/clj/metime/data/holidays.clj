@@ -13,5 +13,5 @@
   (let [result (db-insert-holiday-request<! data {:connection db/db-spec})]
     (first (vals result))))
 
-(defn get-all-confirmed-holidays-for-employee [id]
-  (db-get-all-confirmed-holidays-for-employee {:id id} {:connection db/db-spec}))
+(defn get-holidays []
+  (db-get-holidays {} {:connection db/db-spec}))

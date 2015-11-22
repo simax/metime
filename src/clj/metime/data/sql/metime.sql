@@ -214,7 +214,7 @@ insert into holidays (start_date,
                 )
 
 
--- name: db-get-all-confirmed-holidays-for-employee
+-- name: db-get-holidays
 -- Get all holidays
 select
 id,
@@ -233,5 +233,6 @@ id,
 [status],
 [unit]
 
-from holidays where status = 'Confirmed' and id = :id
+from holidays
+order by [start_date] desc
 
