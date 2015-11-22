@@ -93,10 +93,6 @@
                           :confirmation {:confirm :password-confirm}]]
               [:dob :date])
 
-;(defvalidator holiday-request-validator
-;              [:employee_id :numericality {:only-integer true :greater-than 0}]
-;              [:start_date :date])
-
 (def date-format (f/formatter "yyyy-MM-dd"))
 
 (def holiday-request-types #{"Morning" "Afternoon" "All day"})
