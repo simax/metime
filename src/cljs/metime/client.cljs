@@ -36,7 +36,7 @@
   ;; Main app component
   (reagent/render [nv/top-panel] (js/document.getElementById "app-container")))
 
-(defn ^:export init []
+(defn ^:export main []
   (let [current-location (utils/get-current-location)]
     (dispatch [:initialise-db])
     (when (or (= current-location "") (= current-location "#/")) (utils/set-hash! "#/employees"))
