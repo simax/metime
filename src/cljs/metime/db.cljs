@@ -1,6 +1,5 @@
 (ns metime.db
-  (:require [metime.routes :as r]
-            [secretary.core :as secretary]))
+  (:require [secretary.core :as secretary]))
 
 (secretary/set-config! :prefix "#")
 

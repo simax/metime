@@ -1,6 +1,5 @@
 (ns metime.routes
-  (:require [metime.utils :as utils]
-            [secretary.core :refer-macros [defroute]]
+  (:require [secretary.core :refer-macros [defroute]]
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch

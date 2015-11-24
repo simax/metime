@@ -26,8 +26,7 @@
         f (fn [he] ;; goog.History.Event
             (let [token (.-token he)]
               (when (seq token)
-                (secretary/dispatch! token)
-                )))]
+                (secretary/dispatch! token))))]
 
     (events/listen h EventType/NAVIGATE f)
     (doto h (.setEnabled true))))
