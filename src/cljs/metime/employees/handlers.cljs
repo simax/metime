@@ -29,10 +29,9 @@
    :dob [[v/datetime british-date-format :pre (comp seq :dob) :message "Must be a valid date"]]
    :startdate [[v/datetime british-date-format :pre (comp seq :startdate) :message "Must be a valid date"]]
    :enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
-   :this_year_opening [[v/integer :message "Must be an integer"]]
-   :this_year_remaining [[v/integer :message "Must be an integer"]]
-   :next_year_opening [[v/integer :message "Must be an integer"]]
-   :next_year_remaining [[v/integer :message "Must be an integer"]]])
+   :prev_year_allowance   [[v/integer :message "Must be an integer"]]
+   :current_year_allowance [[v/integer :message "Must be an integer"]]
+   :next_year_allowance [[v/integer :message "Must be an integer"]]])
 
 (defn validate-employee [db _]
   (let [employee (:employee db)
@@ -70,7 +69,7 @@
              :this_year_remaining 25
              :next_year_opening   25
              :next_year_remaining 25
-             :departments_id      departmentid
+             :department_id      departmentid
              :managerid           managerid
              :manager-firstname   (:manager-firstname dep)
              :manager-lastname    (:manager-lastname dep)
@@ -103,7 +102,7 @@
   (let [deps (:deps db)
         dep (first (filter #(= (:departmentid %) (js/parseInt id)) deps))
         updated-emp (assoc (:employee db)
-                      :departments_id id
+                      :department_id id
                       :department (:department dep)
                       :managerid (:managerid dep)
                       :manager-email (:manager-email dep)

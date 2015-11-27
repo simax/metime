@@ -77,7 +77,7 @@
                                     :startdate nil
                                     :enddate nil
                                     :dob nil
-                                    :departments_id 1
+                                    :department_id 1
                                     :managerid 0
                                     :password "abcd1234"
                                     :password-confirm "abcd1234"
@@ -135,7 +135,7 @@
                                     :startdate nil
                                     :enddate nil
                                     :dob nil
-                                    :departments_id 1
+                                    :department_id 1
                                     :managerid 0
                                     :password "abcd1234"
                                     :password-confirm "abcd1234"
@@ -157,7 +157,7 @@
                    :startdate nil
                    :enddate nil
                    :dob nil
-                   :departments_id 1
+                   :department_id 1
                    :managerid 0
                    :password "abcd1234"
                    :password-confirm "abcd1234"
@@ -184,7 +184,7 @@
                    :startdate nil
                    :enddate nil
                    :dob nil
-                   :departments_id 1
+                   :department_id 1
                    :managerid 0
                    :password "abcd1234"
                    :password-confirm "abcd1234"
@@ -207,7 +207,7 @@
                    :startdate nil
                    :enddate nil
                    :dob nil
-                   :departments_id 1
+                   :department_id 1
                    :managerid 0
                    :password "abcd1234"
                    :password-confirm "abcd1234"
@@ -224,7 +224,7 @@
                    :startdate nil
                    :enddate nil
                    :dob nil
-                   :departments_id 1
+                   :department_id 1
                    :managerid 0
                    :password "abcd1234"
                    :password-confirm "abcd1234"
@@ -248,7 +248,7 @@
                    :startdate nil
                    :enddate nil
                    :dob nil
-                   :departments_id 1
+                   :department_id 1
                    :managerid 0
                    :password "abcd1234"
                    :password-confirm "abcd1234"
@@ -274,7 +274,7 @@
                    :startdate nil
                    :enddate nil
                    :dob nil
-                   :departments_id 1
+                   :department_id 1
                    :managerid 0
                    :password "abcd1234"
                    :password-confirm "abcd1234"
@@ -302,7 +302,7 @@
                    :startdate nil
                    :enddate nil
                    :dob nil
-                   :departments_id 1
+                   :department_id 1
                    :managerid 0
                    :password "abcd1234"
                    :password-confirm "abcd1234"

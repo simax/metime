@@ -85,7 +85,7 @@
               [:firstname :length {:greater-than 0 :less-than 31}]
               [:lastname :length {:greater-than 0 :less-than 31}]
               [:email :email {:greater-than 0 :less-than 31}]
-              [:departments_id :numericality {:only-integer true :greater-than 0}]
+              [:department_id :numericality {:only-integer true :greater-than 0}]
               [:managerid :numericality {:only-integer true :greater-than 0}]
               [:password [:length {:greater-than-or-equal-to 8}
                           :formatted {:pattern #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}"
@@ -121,11 +121,11 @@
 
 (defn employees-by-department []
   (let [data-emps (emps/get-all-employees)
-        grouped-emps (group-by :departments_id data-emps)
+        grouped-emps (group-by :department_id data-emps)
 
         data-deps (deps/get-all-departments)
-        set-of-deps (rename (into #{} data-deps) {:id :departments_id})
-        set-of-emps (into #{} (map #(hash-map :departments_id %1 :employees %2)
+        set-of-deps (rename (into #{} data-deps) {:id :department_id})
+        set-of-emps (into #{} (map #(hash-map :department_id %1 :employees %2)
                                    (keys grouped-emps)
                                    (sort-by :lastname (vals grouped-emps))))]
     (sort-by :department (join set-of-deps set-of-emps))))

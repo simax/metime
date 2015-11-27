@@ -144,7 +144,7 @@
 (defn department-list-choices [departments]
   (into []
         (for [m @departments]
-          {:id (:departments_id m) :label (:department m)})))
+          {:id (:department_id m) :label (:department m)})))
 
 (defn department-drop-down-list [employee departments]
   [h-box
@@ -153,7 +153,7 @@
    [
     [box :width "150px" :child [label :class "control-label" :label "Department"]]
     [box :size "auto" :child [single-dropdown
-                              :model (:departments_id employee)
+                              :model (:department_id employee)
                               :choices (department-list-choices departments)
                               :on-change #(dispatch [:department-change %])
                               ]]]
@@ -325,77 +325,60 @@
         showing-error-icon? (subscribe [:employee-enddate-show-error])]
     (date-component employee :enddate "End date" "End date" error-message showing-error-icon?)))
 
-(defn employee-this-year-opening [employee]
+(defn employee-prev-year-allowance [employee]
   [h-box
    :justify :between
    :children
    [
-    [box :child [label :label "This year opening"]]
+    [box :child [label :label "Previous year allowance"]]
     [box :child [input-text
                  :width "100px"
-                 :model (str (:this_year_opening employee))
-                 :status (when (seq (get-in employee [:validation-errors :this_year_opening])) :error)
-                 :status-icon? (seq (get-in employee [:validation-errors :this_year_opening]))
-                 :status-tooltip (apply str (get-in employee [:validation-errors :this_year_opening]))
-                 :on-change #(dispatch [:input-change-balances :this_year_opening %])
+                 :model (str (:prev_year_allowance employee))
+                 :status (when (seq (get-in employee [:validation-errors :prev_year_allowance])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :prev_year_allowance]))
+                 :status-tooltip (apply str (get-in employee [:validation-errors :prev_year_allowance]))
+                 :on-change #(dispatch [:input-change-balances :prev_year_allowance %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? true]]
     ]]
   )
 
-(defn employee-this-year-remaining [employee]
+(defn employee-current-year-allowance [employee]
   [h-box
    :justify :between
    :children
    [
-    [box :child [label :label "This year remaining"]]
+    [box :child [label :label "Current year allowance"]]
     [box :child [input-text
                  :width "100px"
-                 :model (str (:this_year_remaining employee))
-                 :status (when (seq (get-in employee [:validation-errors :this_year_remaining])) :error)
-                 :status-icon? (seq (get-in employee [:validation-errors :this_year_remaining]))
-                 :status-tooltip (apply str (get-in employee [:validation-errors :this_year_remaining]))
-                 :on-change #(dispatch [:input-change-balances :this_year_remaining %])
+                 :model (str (:current_year_allowance employee))
+                 :status (when (seq (get-in employee [:validation-errors :current_year_allowance])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :current_year_allowance]))
+                 :status-tooltip (apply str (get-in employee [:validation-errors :current_year_allowance]))
+                 :on-change #(dispatch [:input-change-balances :current_year_allowance %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
   )
 
-(defn employee-next-year-opening [employee]
+(defn employee-next-year-allowance [employee]
   [h-box
    :justify :between
    :children
    [
-    [box :child [label :label "Next year opening"]]
+    [box :child [label :label "Next year allowance"]]
     [box :child [input-text
                  :width "100px"
                  :model (str (:next_year_opening employee))
-                 :status (when (seq (get-in employee [:validation-errors :next_year_opening])) :error)
-                 :status-icon? (seq (get-in employee [:validation-errors :next_year_opening]))
-                 :status-tooltip (apply str (get-in employee [:validation-errors :next_year_opening]))
-                 :on-change #(dispatch [:input-change-balances :next_year_opening %])
+                 :status (when (seq (get-in employee [:validation-errors :next_year_allowance])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :next_year_allowance]))
+                 :status-tooltip (apply str (get-in employee [:validation-errors :next_year_allowance]))
+                 :on-change #(dispatch [:input-change-balances :next_year_allowance %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
   )
 
-(defn employee-next-year-remaining [employee]
-  [h-box
-   :justify :between
-   :children
-   [
-    [box :child [label :label "Next year remaining"]]
-    [box :child [input-text
-                 :width "100px"
-                 :model (str (:next_year_remaining employee))
-                 :status (when (seq (get-in employee [:validation-errors :next_year_remaining])) :error)
-                 :status-icon? (seq (get-in employee [:validation-errors :next_year_remaining]))
-                 :status-tooltip (apply str (get-in employee [:validation-errors :next_year_remaining]))
-                 :on-change #(dispatch [:input-change-balances :next_year_remaining %])
-                 :validation-regex #"^(-{0,1})(\d{0,2})$"
-                 :change-on-blur? false]]
-    ]]
-  )
 
 (defn save-button []
   [v-box
@@ -461,10 +444,9 @@
        :gap "10px"
        :children
        [
-        [employee-this-year-opening employee]
-        [employee-this-year-remaining employee]
-        [employee-next-year-opening employee]
-        [employee-next-year-remaining employee]
+        [employee-prev-year-allowance employee]
+        [employee-current-year-allowance employee]
+        [employee-next-year-allowance employee]
         ]]]]
     ]]
 

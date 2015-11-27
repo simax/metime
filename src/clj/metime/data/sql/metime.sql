@@ -2,10 +2,10 @@
 -- Get all departments
 select
 -- Department info
-d.id, d.id as 'departmentid', d.department, d.managerid,
+d.id, d.id as 'departmentid', d.department, d.manager_id,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email'
-from departments d left join employees e on d.managerid = e.id
+from departments d left join employees e on d.manager_id = e.id
 order by d.department
 
 
@@ -14,12 +14,12 @@ order by d.department
 
 select
 -- Department info
-d.id, d.id as 'departmentid', d.id as 'departmentid', d.department, d.managerid,
+d.id, d.id as 'departmentid', d.id as 'departmentid', d.department, d.manager_id,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email',
 -- Employee info
 emps.*
-from departments d left join employees e on d.managerid = e.id left join employees emps on emps.departments_id = d.id
+from departments d left join employees e on d.manager_id = e.id left join employees emps on emps.department_id = d.id
 order by d.department, emps.lastname
 
 
@@ -32,10 +32,10 @@ select * from departments where department = :department
 -- Get the department with the given id
 select
 -- Department info
-d.id, d.department, d.managerid,
+d.id, d.department, d.manager_id,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email'
-from departments d left join employees e on d.managerid = e.id
+from departments d left join employees e on d.manager_id = e.id
 where d.id = :id
 order by department
 
@@ -44,24 +44,24 @@ order by department
 
 select
 -- Department info
-d.id, d.department, d.managerid,
+d.id, d.department, d.manager_id,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email',
 -- Employee info
 emps.*
-from departments d left join employees e on d.managerid = e.id left join employees emps on emps.departments_id = d.id
+from departments d left join employees e on d.manager_id = e.id left join employees emps on emps.department_id = d.id
 where d.id = :id
 order by d.department, emps.lastname
 
 
 -- name: db-insert-department<!
 -- Insert a new department
-insert into departments (department, managerid) values (:department, :managerid)
+insert into departments (department, manager_id) values (:department, :manager_id)
 
 -- name: db-update-department!
 -- Update department details
 update departments
-set department = :department, managerid = :managerid
+set department = :department, manager_id = :managerid
 where id = :id
 
 -- name: db-delete-department!
@@ -80,17 +80,16 @@ id,
 firstname,
 lastname,
 email,
-departments_id,
-managerid,
+department_id,
+manager_id,
 strftime('%d-%m-%Y', dob) as 'dob',
 strftime('%d-%m-%Y', startdate) as 'startdate',
 strftime('%d-%m-%Y', enddate) as 'enddate',
+prev_year_allowance,
+current_year_allowance,
+next_year_allowance,
 salt,
-password,
-this_year_opening,
-this_year_remaining,
-next_year_opening,
-next_year_remaining
+password
 from employees order by lastname
 
 
@@ -102,24 +101,23 @@ e.id,
 e.firstname,
 e.lastname,
 e.email,
-e.departments_id,
-e.managerid,
+e.department_id,
+e.manager_id,
 strftime('%d-%m-%Y', e.dob) as dob,
 strftime('%d-%m-%Y', e.startdate) as startdate,
 strftime('%d-%m-%Y', e.enddate) as enddate,
 e.salt,
 e.password,
-e.this_year_opening,
-e.this_year_remaining,
-e.next_year_opening,
-e.next_year_remaining,
+e.prev_year_allowance,
+e.current_year_allowance,
+e.next_year_allowance,
 d.department as 'department',
 -- Manager info
 m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
 
 from employees e
-  left join employees m on e.managerid = m.id
-  left join departments d on e.departments_id = d.id
+  left join employees m on e.manager_id = m.id
+  left join departments d on e.department_id = d.id
 where e.id = :id
 
 -- name: db-get-employee-by-email
@@ -130,30 +128,29 @@ e.id,
 e.firstname,
 e.lastname,
 e.email,
-e.departments_id,
-e.managerid,
+e.department_id,
+e.manager_id,
 e.strftime('%d-%m-%Y', dob) as e.dob,
 e.strftime('%d-%m-%Y', startdate) as e.startdate,
 e.strftime('%d-%m-%Y', enddate) as e.enddate,
 e.salt,
 e.password,
-e.this_year_opening,
-e.this_year_remaining,
-e.next_year_opening,
-e.next_year_remaining
+e.prev_year_allowance,
+e.current_year_allowance,
+e.next_year_allowance,
 d.department as 'department',
 -- Manager info
 m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
 
 from employees e
-  left join employees m on e.managerid = m.id
-  left join departments d on e.departments_id = d.id
+  left join employees m on e.manager_id = m.id
+  left join departments d on e.department_id = d.id
 where e.email = :email
 
 -- name: db-insert-employee<!
 -- Insert a new employee
-insert into employees (firstname,lastname,email,startdate,enddate,departments_id,managerid,dob,salt,password,this_year_opening,this_year_remaining,next_year_opening,next_year_remaining)
-values (:firstname,:lastname,:email,:startdate,:enddate,:departments_id,:managerid,:dob,:salt,:password,:this_year_opening,:this_year_remaining,:next_year_opening,:next_year_remaining)
+insert into employees (firstname,lastname,email,startdate,enddate,department_id,manager_id,dob,salt,password,prev_year_allowance,current_year_allowance,next_year_allowance)
+values (:firstname,:lastname,:email,:startdate,:enddate,:department_id,:managerid,:dob,:salt,:password,:prev_year_allowance,:current_year_allowance,:next_year_allowance)
 
 -- name: db-update-employee!
 -- Update department details
@@ -164,13 +161,12 @@ set
   email = :email,
   startdate = :startdate,
   enddate = :enddate,
-  departments_id = :departments_id,
-  managerid = :managerid,
+  department_id = :department_id,
+  manager_id = :manager_id,
   dob = :dob,
-  this_year_opening = :this_year_opening,
-  this_year_remaining = :this_year_remaining,
-  next_year_opening = :next_year_opening,
-  next_year_remaining = :next_year_remaining
+  prev_year_allowance = :prev_year_allowance,
+  current_year_allowance = :current_year_allowance,
+  next_year_allowance = :next_year_allowance
 
 where id = :id
 
