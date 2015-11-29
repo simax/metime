@@ -7,12 +7,12 @@
             [clojure.java.io :as io]
             [clojure.walk :as walk]
             [clojure.data.json :as json]
-            [metis.core :refer [defvalidator]]
             [clj-time.core :as t]
             [clj-time.format :as f]
+            [clj-time.coerce :as c]
             [clojure.set :refer :all]
             [bouncer.core :as b]
-            [bouncer.validators :as v]))
+            [bouncer.validators :as v :refer [defvalidator]]))
 
 ;; convert the body to a reader. Useful for testing in the repl
 ;; where setting the body to a string is much simpler.
@@ -21,6 +21,9 @@
     (condp instance? body
       java.lang.String body
       (slurp (io/reader body)))))
+
+
+
 
 ;; For PUT and POST parse the body as json and store in the context
 ;; under the given key.
@@ -66,34 +69,47 @@
 ;;---------------------
 ;; Validators
 
-;; Metis custom formatter
-
-(defn date [m k _]
-  (if (seq (k m))
-    (try
-      (f/parse (f/formatters :date) (k m))
-      nil
-      (catch Exception e
-        "Invalid date"))
-    ))
-
-(defvalidator department-validator
-              [:department :length {:greater-than 0 :less-than 31}]
-              [:managerid :numericality {:only-integer true :greater-than 0}])
-
-(defvalidator employee-validator
-              [:firstname :length {:greater-than 0 :less-than 31}]
-              [:lastname :length {:greater-than 0 :less-than 31}]
-              [:email :email {:greater-than 0 :less-than 31}]
-              [:department_id :numericality {:only-integer true :greater-than 0}]
-              [:managerid :numericality {:only-integer true :greater-than 0}]
-              [:password [:length {:greater-than-or-equal-to 8}
-                          :formatted {:pattern #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}"
-                                      :message "alpha numeric, at least one number"}
-                          :confirmation {:confirm :password-confirm}]]
-              [:dob :date])
 
 (def date-format (f/formatter "yyyy-MM-dd"))
+
+(defvalidator department-has-manager
+              {:default-message-format "Password and confirmation must match" :optional false}
+              [confirmation-value password-key subject]
+              (= confirmation-value (get subject (keyword password-key) "invalid confirmation")))
+
+
+
+(defvalidator date-before-today
+              {:default-message-format "%s can't be in the future"}
+              [date-to-validate]
+              (<= (c/to-long (f/parse-local-date date-format date-to-validate)) (c/to-long (t/today))))
+
+(defn validate-department [dept]
+  (let [department-validation-rules [:department [[v/required] [v/max-count 30]]
+                                     :manager-id [[v/required] [v/number] [v/positive]]]
+        result (apply b/validate dept department-validation-rules)
+        errors (first result)]
+    errors))
+
+(defvalidator password-confirmation
+              {:default-message-format "Password and confirmation must match" :optional false}
+              [confirmation-value password-key subject]
+              (= confirmation-value (get subject (keyword password-key) "invalid confirmation")))
+
+(defn validate-employee [emp]
+  (let [employee-validation-rules [:firstname [[v/string] [v/required] [v/min-count 1] [v/max-count 30]]
+                                   :lastname [[v/string] [v/required] [v/min-count 1] [v/max-count 30]]
+                                   :email [[v/email] [v/required] [v/max-count 30]]
+                                   :department_id [[v/required] [v/number] [v/positive]]
+                                   :manager_id [[v/required] [v/number] [v/positive]]
+                                   :password [[v/required] [v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password nust be alpha numeric with at least one number"]]
+                                   :dob [[v/required] [v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
+                                   ]
+        result (and (apply b/validate emp employee-validation-rules)
+                    (b/validate emp :confirmation [[password-confirmation "password" emp]]))
+        errors (first result)]
+    errors))
+
 
 (def holiday-request-types #{"Morning" "Afternoon" "All day"})
 (def holiday-request-units #{"Days" "Hours"})
@@ -143,7 +159,7 @@
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
                              (let [form-data (make-keyword-map (get-form-params ctx))
-                                   validation-result (department-validator form-data)]
+                                   validation-result (validate-department form-data)]
                                (if (not (empty? validation-result))
                                  [true {::failure-message (str validation-result)}]
                                  false))
@@ -195,7 +211,7 @@
              :malformed? (fn [ctx]
                            (if (requested-method ctx :put)
                              (let [form-data (make-keyword-map (get-form-params ctx))
-                                   validation-result (department-validator form-data :updating)]
+                                   validation-result (validate-department form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message (str validation-result)}]
                                  false))
@@ -238,7 +254,7 @@
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
                              (let [form-data (make-keyword-map (get-form-params ctx))
-                                   validation-result (employee-validator form-data)]
+                                   validation-result (validate-employee form-data)]
                                (if (not (empty? validation-result))
                                  [true {::failure-message (str validation-result)}]
                                  false))
@@ -288,7 +304,7 @@
              :malformed? (fn [ctx]
                            (if (requested-method ctx :put)
                              (let [form-data (make-keyword-map (get-form-params ctx))
-                                   validation-result (employee-validator form-data :updating)]
+                                   validation-result (validate-employee form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message (str validation-result)}]
                                  false))
