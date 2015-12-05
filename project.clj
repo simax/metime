@@ -46,6 +46,7 @@
 
 
   :plugins [
+            [lein-figwheel "0.3.9"]
             [lein-autoexpect "1.7.0"]
             [clj-sql-up "0.3.7"]
             [lein-cljsbuild "1.1.0"]

@@ -96,18 +96,57 @@
               [confirmation-value password-key subject]
               (= confirmation-value (get subject (keyword password-key) "invalid confirmation")))
 
+(defvalidator department-exists
+              {:default-message-format "Department doesn't exist"}
+              [dept-id db-dept-id subject]
+              (= 1 0))
+
+(defvalidator manager-exists
+              {:default-message-format "Manager doesn't exist"}
+              [mgr-id db-manager-id subject]
+              (= 1 0))
+
+;TODO: map over all rules in employee-validation-rules
+; to add [[#v'required]]
+
+;1. employee-validation-rules as #' (vars not funcs)
+
+;2. (def employee-validation-rules [:id [[#'v/number]]
+;                                :firstname [[#'v/string] [#'v/min-count 1] [#'v/max-count 30]]
+;                                :lastname [[#'v/string] [#'v/min-count 1] [#'v/max-count 30]]
+;                                :email [[#'v/email] [#'v/max-count 30]]
+;                                :department_id [[#'v/number] [#'v/positive]]
+;                                :manager_id [[#'v/number] [#'v/positive]]
+;                                :password [[#'v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password nust be alpha numeric with at least one number"]]
+;                                :dob [[#'v/datetime #'date-format :message "Must be a valid date"] [#'date-before-today :message "Date of birth can't be in the future"]]
+;                                :startdate [[#'v/datetime #'date-format :message "Must be a valid date"] [#'date-before-today :message "Start date can't be in the future"]]
+;                                ])
+
+; 3. Iterate over employee-validation-rules and pluck out the vector of
+; rules, for each keyword
+;(keep-indexed #(if (odd? %1) %2) employee-validation-rules)
+
+; 4. Add [#'v/required] to vector of rules
+;(def xx (reduce conj [[#'v/number]] [[#'v/required]]))
+
+
+
 (defn validate-employee [emp]
-  (let [employee-validation-rules [:firstname [[v/string] [v/required] [v/min-count 1] [v/max-count 30]]
+  (let [employee-validation-rules [:id [[v/number]]
+                                   :firstname [[v/string] [v/required] [v/min-count 1] [v/max-count 30]]
                                    :lastname [[v/string] [v/required] [v/min-count 1] [v/max-count 30]]
                                    :email [[v/email] [v/required] [v/max-count 30]]
                                    :department_id [[v/required] [v/number] [v/positive]]
                                    :manager_id [[v/required] [v/number] [v/positive]]
                                    :password [[v/required] [v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password nust be alpha numeric with at least one number"]]
                                    :dob [[v/required] [v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
+                                   :startdate [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Start date can't be in the future"]]
                                    ]
-        result (and (apply b/validate emp employee-validation-rules)
-                    (b/validate emp :confirmation [[password-confirmation "password" emp]]))
-        errors (first result)]
+        result [(first (apply b/validate emp employee-validation-rules))
+                (first (b/validate emp :department-id [[department-exists "department_id" emp]]))
+                (first (b/validate emp :manager-id [[manager-exists "manager_id" emp]]))
+                (first (b/validate emp :confirmation [[password-confirmation "password" emp]]))]
+        errors (remove nil? result)]
     errors))
 
 
