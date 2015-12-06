@@ -92,18 +92,20 @@
     errors))
 
 (defvalidator password-confirmation
-              {:default-message-format "Password and confirmation must match" :optional false}
+              {:default-message-format "Password and confirmation must match"}
               [confirmation-value password-key subject]
               (= confirmation-value (get subject (keyword password-key) "invalid confirmation")))
 
 (defvalidator department-exists
               {:default-message-format "Department doesn't exist"}
               [dept-id db-dept-id subject]
+              ; TODO: fix this, need to check DB
               (= 1 0))
 
 (defvalidator manager-exists
               {:default-message-format "Manager doesn't exist"}
               [mgr-id db-manager-id subject]
+              ; TODO: fix this, need to check DB
               (= 1 0))
 
 (def employee-validation-set
@@ -111,10 +113,10 @@
    :firstname [[v/string] [v/min-count 1] [v/max-count 30]]
    :lastname [[v/string] [v/min-count 1] [v/max-count 30]]
    :email [[v/email] [v/max-count 30]]
-   :department_id [[v/number] [v/positive] [department-exists]]
-   :manager_id [[v/number] [v/positive] [manager-exists]]
    :password [[v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password must be alpha numeric with at least one number"]]
-   :confirmation [[v/required] [password-confirmation :message "Password and confirmation must match"]]
+   ;:department_id [[v/number] [v/positive] [department-exists]]
+   ;:manager_id [[v/number] [v/positive] [manager-exists]]
+   ;:confirmation [[password-confirmation :message "Password and confirmation must match"]]
    :dob [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
    :startdate [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Start date can't be in the future"]]
    ])
@@ -140,10 +142,20 @@
 (defn is-new-employee? [emp] (zero? (:id emp)))
 
 (defn validate-employee [emp]
-  (let [validation-set (if (is-new-employee? emp) (build-required-validation-set employee-validation-set) employee-validation-set)
-        result [(first (apply b/validate emp validation-set))]
-        errors (remove nil? result)]
-    errors))
+  "Return a list of validation errors"
+  (if (is-new-employee? emp)
+    (let [validation-set (build-required-validation-set employee-validation-set)
+          result [(first (apply b/validate emp validation-set))
+                  (first (b/validate emp :department-id [[v/required] [department-exists "department_id" emp]]))
+                  (first (b/validate emp :manager-id [[v/required] [manager-exists "manager_id" emp]]))
+                  (first (b/validate emp :confirmation [[v/required] [password-confirmation "password" emp]]))]
+          errors (remove nil? result)]
+      errors)
+    ; TODO: Need to check for presence of department-id, confirmation etc and validate if present
+    (let [validation-set (build-required-validation-set employee-validation-set)
+          result [(first (apply b/validate emp validation-set))]
+          errors (remove nil? result)]
+      errors)))
 
 
 (def holiday-request-types #{"Morning" "Afternoon" "All day"})
