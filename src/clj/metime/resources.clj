@@ -117,32 +117,42 @@
 (defn extract-keywords-from-validation-set [validation-set]
   (keep-indexed #(if (even? %1) %2) validation-set))
 
-(defn build-required-validation-set [validation-set]
-  "Take the validation set of rules, which are optional by default and make them all required.
+(defn get-required-fields-and-values [required-fields data]
+  (let [field-indexes (keep-indexed #(when (required-fields %2) %1) data)
+        field-keys (map #(nth data %) field-indexes)
+        field-values (map #(nth data (inc %)) field-indexes)]
+    (into [] (interleave field-keys field-values))))
+
+(defn build-required-validation-set [required-fields validation-set]
+  "Take a set of required fields and the validation set of all rules and return
+   a set of required validation rules.
    Useful because when creating a new record, fields are required. When updating an existing one, they are often optional"
   ;; TDOD: Would be nice to pass in a set here of the required fields
   ;;       and mork those included in the set as required.
-  (interleave (extract-keywords-from-validation-set validation-set) (make-rules-required validation-set)))
+  (let [val-set (get-required-fields-and-values required-fields validation-set)]
+    (interleave (extract-keywords-from-validation-set val-set) (make-rules-required val-set))))
 
 (defn is-new-employee? [emp]
+  "The employee is deemed new if the :id is not supplied or it's supplied and zero"
   (if-let [emp-id (:id emp)]
     (zero? emp-id)
     true))
 
-(defn validate-employee [emp]
+(defn validate-employee [validation-rule-set required-rules emp]
   "Return a list of validation errors"
   (if (is-new-employee? emp)
-    (let [validation-set (build-required-validation-set employee-validation-set)
+    (let [validation-set (build-required-validation-set required-rules validation-rule-set)
           result [(first (apply b/validate emp validation-set))
                   (first (b/validate emp :confirmation [[v/required] [password-confirmation "password" emp]]))]
           errors (remove nil? result)]
       errors)
-    ; TODO: Need to check for presence of department_id, confirmation etc and validate if present
-    (let [validation-set employee-validation-set
+    (let [validation-set validation-rule-set
           result [(first (apply b/validate emp validation-set))]
           errors (remove nil? result)]
       errors)))
 
+(def new-employee-required-fields #{:firstname :lastname :email :password :confirmation})
+(def employee-validator (partial validate-employee employee-validation-set new-employee-required-fields))
 
 (def holiday-request-types #{"Morning" "Afternoon" "All day"})
 (def holiday-request-units #{"Days" "Hours"})
@@ -287,7 +297,7 @@
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
                              (let [form-data (make-keyword-map (get-form-params ctx))
-                                   validation-result (validate-employee form-data)]
+                                   validation-result (employee-validator form-data)]
                                (if (not (empty? validation-result))
                                  [true {::failure-message (str validation-result)}]
                                  false))
@@ -337,7 +347,7 @@
              :malformed? (fn [ctx]
                            (if (requested-method ctx :put)
                              (let [form-data (make-keyword-map (get-form-params ctx))
-                                   validation-result (validate-employee form-data)]
+                                   validation-result (employee-validator form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message (str validation-result)}]
                                  false))
