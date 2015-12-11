@@ -23,8 +23,6 @@
       (slurp (io/reader body)))))
 
 
-
-
 ;; For PUT and POST parse the body as json and store in the context
 ;; under the given key.
 (defn parse-json [context key]
@@ -72,13 +70,6 @@
 
 (def date-format (f/formatter "yyyy-MM-dd"))
 
-(defvalidator department-has-manager
-              {:default-message-format "Password and confirmation must match" :optional false}
-              [confirmation-value password-key subject]
-              (= confirmation-value (get subject (keyword password-key) "invalid confirmation")))
-
-
-
 (defvalidator date-before-today
               {:default-message-format "%s can't be in the future"}
               [date-to-validate]
@@ -98,15 +89,9 @@
 
 (defvalidator department-exists
               {:default-message-format "Department doesn't exist"}
-              [dept-id db-dept-id subject]
-              ; TODO: fix this, need to check DB
-              (= 1 0))
+              [dept-id]
+              (some? (deps/get-department-by-id dept-id)))
 
-(defvalidator manager-exists
-              {:default-message-format "Manager doesn't exist"}
-              [mgr-id db-manager-id subject]
-              ; TODO: fix this, need to check DB
-              (= 1 0))
 
 (def employee-validation-set
   [:id [[v/number]]
@@ -114,8 +99,7 @@
    :lastname [[v/string] [v/min-count 1] [v/max-count 30]]
    :email [[v/email] [v/max-count 30]]
    :password [[v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password must be alpha numeric with at least one number"]]
-   ;:department_id [[v/number] [v/positive] [department-exists]]
-   ;:manager_id [[v/number] [v/positive] [manager-exists]]
+   :department_id [[v/number] [v/positive] [department-exists]]
    ;:confirmation [[password-confirmation :message "Password and confirmation must match"]]
    :dob [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
    :startdate [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Start date can't be in the future"]]
@@ -136,6 +120,8 @@
 (defn build-required-validation-set [validation-set]
   "Take the validation set of rules, which are optional by default and make them all required.
    Useful because when creating a new record, fields are required. When updating an existing one, they are often optional"
+  ;; TDOD: Would be nice to pass in a set here of the required fields
+  ;;       and mork those included in the set as required.
   (interleave (extract-keywords-from-validation-set validation-set) (make-rules-required validation-set)))
 
 
@@ -146,8 +132,6 @@
   (if (is-new-employee? emp)
     (let [validation-set (build-required-validation-set employee-validation-set)
           result [(first (apply b/validate emp validation-set))
-                  (first (b/validate emp :department-id [[v/required] [department-exists "department_id" emp]]))
-                  (first (b/validate emp :manager-id [[v/required] [manager-exists "manager_id" emp]]))
                   (first (b/validate emp :confirmation [[v/required] [password-confirmation "password" emp]]))]
           errors (remove nil? result)]
       errors)
