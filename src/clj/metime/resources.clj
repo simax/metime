@@ -124,8 +124,10 @@
   ;;       and mork those included in the set as required.
   (interleave (extract-keywords-from-validation-set validation-set) (make-rules-required validation-set)))
 
-
-(defn is-new-employee? [emp] (zero? (:id emp)))
+(defn is-new-employee? [emp]
+  (if-let [emp-id (:id emp)]
+    (zero? emp-id)
+    true))
 
 (defn validate-employee [emp]
   "Return a list of validation errors"
@@ -135,8 +137,8 @@
                   (first (b/validate emp :confirmation [[v/required] [password-confirmation "password" emp]]))]
           errors (remove nil? result)]
       errors)
-    ; TODO: Need to check for presence of department-id, confirmation etc and validate if present
-    (let [validation-set (build-required-validation-set employee-validation-set)
+    ; TODO: Need to check for presence of department_id, confirmation etc and validate if present
+    (let [validation-set employee-validation-set
           result [(first (apply b/validate emp validation-set))]
           errors (remove nil? result)]
       errors)))
