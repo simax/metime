@@ -5,6 +5,7 @@
             [metime.data.employees :as emps]
             [metime.data.holidays :as hols]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.walk :as walk]
             [clojure.data.json :as json]
             [clj-time.core :as t]
@@ -19,7 +20,7 @@
 (defn body-as-string [ctx]
   (if-let [body (get-in ctx [:request :body])]
     (condp instance? body
-      java.lang.String body
+      String body
       (slurp (io/reader body)))))
 
 
@@ -68,6 +69,8 @@
 ;; Validators
 
 
+;; TODO: Write tests for validations ...
+
 (def date-format (f/formatter "yyyy-MM-dd"))
 
 (defvalidator date-before-today
@@ -92,17 +95,39 @@
               [dept-id]
               (some? (deps/get-department-by-id dept-id)))
 
+(defvalidator email-unique-if-not-blank
+              {:default-message-format "Email already exists"}
+              [email]
+              (if (str/blank? email)
+                true
+                (not (some? (emps/get-employee-by-email email)))))
 
+(defn is-zero? [num]
+  "If num is a Long, decide if it's zero or not.
+   If num is a string, parse it first, then decide if it's zero or not.
+   Otherwise return false."
+  (cond
+    (instance? Long num) (zero? num)
+    (instance? String num) (zero? (parse-number num))
+    :else false))
+
+(defn is-new-employee? [emp]
+  "The employee is deemed new if the :id is not supplied or it's supplied and zero"
+  (if-let [emp-id (:id emp)]
+    (is-zero? emp-id)
+    true))
+
+;; TODO: Deal with Password salt?
 (def employee-validation-set
   [:id [[v/number]]
    :firstname [[v/string] [v/min-count 1] [v/max-count 30]]
    :lastname [[v/string] [v/min-count 1] [v/max-count 30]]
-   :email [[v/email] [v/max-count 30]]
+   :email [[v/email] [v/max-count 30] [email-unique-if-not-blank]]
    :password [[v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password must be alpha numeric with at least one number"]]
    :department_id [[v/number] [v/positive] [department-exists]]
-   ;:confirmation [[password-confirmation :message "Password and confirmation must match"]]
    :dob [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
    :startdate [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Start date can't be in the future"]]
+   :is_approver [[v/boolean]]
    ])
 
 (defn extract-rules-from-validation-set [validation-set]
@@ -126,17 +151,10 @@
 (defn build-required-validation-set [required-fields validation-set]
   "Take a set of required fields and the validation set of all rules and return
    a set of required validation rules.
-   Useful because when creating a new record, fields are required. When updating an existing one, they are often optional"
-  ;; TDOD: Would be nice to pass in a set here of the required fields
-  ;;       and mork those included in the set as required.
+   Useful because when creating a new record, some fields are required.
+   When updating an existing one, they are often optional."
   (let [val-set (get-required-fields-and-values required-fields validation-set)]
     (interleave (extract-keywords-from-validation-set val-set) (make-rules-required val-set))))
-
-(defn is-new-employee? [emp]
-  "The employee is deemed new if the :id is not supplied or it's supplied and zero"
-  (if-let [emp-id (:id emp)]
-    (zero? emp-id)
-    true))
 
 (defn validate-employee [validation-rule-set required-rules emp]
   "Return a list of validation errors"
@@ -151,7 +169,7 @@
           errors (remove nil? result)]
       errors)))
 
-(def new-employee-required-fields #{:firstname :lastname :email :password :confirmation})
+(def new-employee-required-fields #{:firstname :lastname :email :password :confirmation :is_approver})
 (def employee-validator (partial validate-employee employee-validation-set new-employee-required-fields))
 
 (def holiday-request-types #{"Morning" "Afternoon" "All day"})
@@ -203,8 +221,8 @@
                            (if (requested-method ctx :post)
                              (let [form-data (make-keyword-map (get-form-params ctx))
                                    validation-result (validate-department form-data)]
-                               (if (not (empty? validation-result))
-                                 [true {::failure-message (str validation-result)}]
+                               (if (seq validation-result)
+                                 [true {::failure-message validation-result}]
                                  false))
                              false))
 
@@ -256,7 +274,7 @@
                              (let [form-data (make-keyword-map (get-form-params ctx))
                                    validation-result (validate-department form-data)]
                                (if (seq validation-result)
-                                 [true {::failure-message (str validation-result)}]
+                                 [true {::failure-message validation-result}]
                                  false))
                              false))
 
@@ -286,6 +304,11 @@
              :handle-not-found "Department not found")
 
 
+(def truthy? (complement #{"false"}))
+
+(defn parse-employee [emp]
+  (assoc emp :is_approver (truthy? (:is_approver emp))))
+
 (defresource employees []
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
@@ -296,23 +319,21 @@
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
-                             (let [form-data (make-keyword-map (get-form-params ctx))
+                             (let [form-data (parse-employee (make-keyword-map (get-form-params ctx)))
                                    validation-result (employee-validator form-data)]
-                               (if (not (empty? validation-result))
-                                 [true {::failure-message (str validation-result)}]
+                               (if (seq validation-result)
+                                 [true {::failure-message validation-result}]
                                  false))
                              false))
 
              :handle-malformed ::failure-message
 
              :post! (fn [ctx]
-                      "We allow the DB to enforce its constraints here, rather than relying on the processable? descision point.
-                      That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (emps/insert-employee! (make-keyword-map (get-form-params ctx)))]
+                          (when-let [new-id (emps/insert-employee! (parse-employee (make-keyword-map (get-form-params ctx))))]
                             {::location (str "http://localhost:3030/api/employees/" new-id)})
-                          (catch Exception e {::failure-message "Employee already registered with this email address"}))))
+                          (catch Exception e {::failure-message (.getMessage e)}))))
 
              :post-redirect? false
              :handle-created (fn [ctx]
@@ -346,10 +367,10 @@
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :put)
-                             (let [form-data (make-keyword-map (get-form-params ctx))
+                             (let [form-data (parse-employee (make-keyword-map (get-form-params ctx)))
                                    validation-result (employee-validator form-data)]
                                (if (seq validation-result)
-                                 [true {::failure-message (str validation-result)}]
+                                 [true {::failure-message validation-result}]
                                  false))
                              false))
 
@@ -366,7 +387,7 @@
                         (emps/delete-employee! id))
 
              :put! (fn [ctx]
-                     (let [new-data (make-keyword-map (get-form-params ctx))
+                     (let [new-data (parse-employee (make-keyword-map (get-form-params ctx)))
                            existing-data (::employee ctx)
                            updated-data (merge existing-data new-data)]
                        (emps/update-employee! updated-data)
@@ -398,7 +419,7 @@
                            (if (requested-method ctx :post)
                              (let [form-data (-> ctx (get-form-params) (make-keyword-map) (format-holiday-request))
                                    validation-result (validate-holiday-request form-data)]
-                               (if (not (empty? validation-result))
+                               (if (seq validation-result)
                                  [true {::failure-message (str validation-result)}]
                                  false))
                              false))
