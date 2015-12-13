@@ -124,7 +124,6 @@
 
 (def employee-validation-set
   [
-   ;:id [[v/number]]
    :firstname [[v/string] [v/min-count 1] [v/max-count 30]]
    :lastname [[v/string] [v/min-count 1] [v/max-count 30]]
    :email [[v/email] [email-unique-if-not-blank]]
