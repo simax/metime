@@ -93,7 +93,10 @@
 (defvalidator department-exists
               {:default-message-format "Department doesn't exist"}
               [dept-id]
-              (some? (deps/get-department-by-id dept-id)))
+              (let [id (if (instance? String num)
+                         (parse-number dept-id)
+                         dept-id)]
+                (some? (deps/get-department-by-id id))))
 
 (defvalidator email-unique-if-not-blank
               {:default-message-format "Email already exists"}
@@ -102,9 +105,11 @@
                 true
                 (not (some? (emps/get-employee-by-email email)))))
 
+;; TODO There is a parse-num defined in this ns and another in a CLJS ns.
+;;      There should only be one in a CLJC.
 (defn is-zero? [num]
   "If num is a Long, decide if it's zero or not.
-   If num is a string, parse it first, then decide if it's zero or not.
+   If num is a String, parse it first, then decide if it's zero or not.
    Otherwise return false."
   (cond
     (instance? Long num) (zero? num)
@@ -117,44 +122,45 @@
     (is-zero? emp-id)
     true))
 
-;; TODO: Deal with Password salt?
 (def employee-validation-set
-  [:id [[v/number]]
+  [
+   ;:id [[v/number]]
    :firstname [[v/string] [v/min-count 1] [v/max-count 30]]
    :lastname [[v/string] [v/min-count 1] [v/max-count 30]]
-   :email [[v/email] [v/max-count 30] [email-unique-if-not-blank]]
+   :email [[v/email] [email-unique-if-not-blank]]
    :password [[v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password must be alpha numeric with at least one number"]]
-   :department_id [[v/number] [v/positive] [department-exists]]
+   :department_id [[department-exists]]
    :dob [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
    :startdate [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Start date can't be in the future"]]
    :is_approver [[v/boolean]]
    ])
 
-(defn extract-rules-from-validation-set [validation-set]
-  (into [] (keep-indexed #(if (odd? %1) %2) validation-set)))
+(defn make-rule-required [validation-rule]
+  (reduce conj validation-rule [[v/required]]))
 
-(defn make-rule-required [validation-rules]
-  (reduce conj validation-rules [[v/required]]))
-
-(defn make-rules-required [validation-rules]
-  (into [] (mapv #(make-rule-required %) (extract-rules-from-validation-set validation-rules))))
+(defn append-required-to-rules [req-rules partitioned-validation-set]
+  (into [] (map (fn [rule-set]
+                  (let [rule-keyword (first rule-set)
+                        rule (second rule-set)]
+                    (if (contains? req-rules rule-keyword)
+                      (make-rule-required rule)
+                      rule)
+                    )) partitioned-validation-set)))
 
 (defn extract-keywords-from-validation-set [validation-set]
   (keep-indexed #(if (even? %1) %2) validation-set))
 
-(defn get-required-fields-and-values [required-fields data]
-  (let [field-indexes (keep-indexed #(when (required-fields %2) %1) data)
-        field-keys (map #(nth data %) field-indexes)
-        field-values (map #(nth data (inc %)) field-indexes)]
-    (into [] (interleave field-keys field-values))))
 
 (defn build-required-validation-set [required-fields validation-set]
-  "Take a set of required fields and the validation set of all rules and return
-   a set of required validation rules.
+  "Take a set of required fields and the validation set of all rules and
+   add the v/required rule to rules sets where the field keyword is included in the required-fields set.
    Useful because when creating a new record, some fields are required.
    When updating an existing one, they are often optional."
-  (let [val-set (get-required-fields-and-values required-fields validation-set)]
-    (interleave (extract-keywords-from-validation-set val-set) (make-rules-required val-set))))
+  (let [val-keywords (extract-keywords-from-validation-set validation-set)
+        partitioned-validation-set (partition 2 validation-set)]
+    (interleave val-keywords
+                (append-required-to-rules required-fields partitioned-validation-set)
+                )))
 
 (defn validate-employee [validation-rule-set required-rules emp]
   "Return a list of validation errors"
@@ -169,7 +175,7 @@
           errors (remove nil? result)]
       errors)))
 
-(def new-employee-required-fields #{:firstname :lastname :email :password :confirmation :is_approver})
+(def new-employee-required-fields #{:firstname :lastname :password :confirmation :is_approver})
 (def employee-validator (partial validate-employee employee-validation-set new-employee-required-fields))
 
 (def holiday-request-types #{"Morning" "Afternoon" "All day"})
@@ -207,6 +213,8 @@
                                    (sort-by :lastname (vals grouped-emps))))]
     (sort-by :department (join set-of-deps set-of-emps))))
 
+
+;;TODO: Need a password reset resource.
 
 (defresource departments []
              :available-media-types ["application/edn" "application/json"]
