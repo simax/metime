@@ -45,6 +45,15 @@
 
   (db-delete-all-employees! {} {:connection db/db-spec}))
 
+;; Using an auth token means we don't have to keep
+;; Checking the DB on verey request. Just create an auth token
+;; on Login. Make it expire after a day or so? (or make that configurable?)
+;; Once the auth token expires, force the user to login.
+;; In a SPA and rests service set-up (like this is) and all done over SSL
+;; its unlikely that the auth token will ever be compromised.
+;; Timetastic uses cookies. (30 day?)
+
+
 ;; Move following funcs to a security namespace?
 (defn auth-user [credentials]
   (let [user (get-employee-by-email (:email credentials))
