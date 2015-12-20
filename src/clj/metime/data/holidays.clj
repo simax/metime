@@ -1,6 +1,5 @@
 (ns metime.data.holidays
-  (:require [digest :as hashgen]
-            [yesql.core :refer [defqueries defquery]]
+  (:require [yesql.core :refer [defqueries defquery]]
             [metime.data.database :as db]))
 
 

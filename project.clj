@@ -17,13 +17,14 @@
                            [ring-cors "0.1.7"]
                            [clj-time "0.9.0"]
                            [com.andrewmcveigh/cljs-time "0.3.13"]
-                           [digest "1.4.4"]
 
                            ;; Server
                            [ring "1.4.0-RC2"]
                            [compojure "1.3.4"]
                            [cljs-http "0.1.35"]
                            [yesql "0.5.1"]
+                           [buddy/buddy-sign "0.8.1"]
+                           [buddy/buddy-hashers "0.9.1"]
                            [org.xerial/sqlite-jdbc "3.7.2"]
                            [liberator "0.13"]
                            [cheshire "5.5.0"]

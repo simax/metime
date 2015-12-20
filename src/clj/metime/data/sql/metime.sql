@@ -88,7 +88,6 @@ strftime('%d-%m-%Y', enddate) as 'enddate',
 prev_year_allowance,
 current_year_allowance,
 next_year_allowance,
-salt,
 password
 from employees order by lastname
 
@@ -106,7 +105,6 @@ e.manager_id,
 strftime('%d-%m-%Y', e.dob) as 'dob',
 strftime('%d-%m-%Y', e.startdate) as 'startdate',
 strftime('%d-%m-%Y', e.enddate) as 'enddate',
-e.salt,
 e.password,
 e.prev_year_allowance,
 e.current_year_allowance,
@@ -133,7 +131,6 @@ e.manager_id,
 strftime('%d-%m-%Y', e.dob) as 'dob',
 strftime('%d-%m-%Y', e.startdate) as 'startdate',
 strftime('%d-%m-%Y', e.enddate) as 'enddate',
-e.salt,
 e.password,
 e.prev_year_allowance,
 e.current_year_allowance,
@@ -149,8 +146,8 @@ where e.email = :email
 
 -- name: db-insert-employee<!
 -- Insert a new employee
-insert into employees (firstname,lastname,email,startdate,enddate,department_id,manager_id,dob,salt,password,prev_year_allowance,current_year_allowance,next_year_allowance,is_approver)
-values (:firstname,:lastname,:email,:startdate,:enddate,:department_id,:managerid,:dob,:salt,:password,:prev_year_allowance,:current_year_allowance,:next_year_allowance,:is_approver)
+insert into employees (firstname,lastname,email,startdate,enddate,department_id,manager_id,dob,password,prev_year_allowance,current_year_allowance,next_year_allowance,is_approver)
+values (:firstname,:lastname,:email,:startdate,:enddate,:department_id,:managerid,:dob,:password,:prev_year_allowance,:current_year_allowance,:next_year_allowance,:is_approver)
 
 -- name: db-update-employee!
 -- Update department details
@@ -166,7 +163,8 @@ set
   dob = :dob,
   prev_year_allowance = :prev_year_allowance,
   current_year_allowance = :current_year_allowance,
-  next_year_allowance = :next_year_allowance
+  next_year_allowance = :next_year_allowance,
+  password = :password
 
 where id = :id
 
