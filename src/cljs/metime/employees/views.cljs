@@ -211,6 +211,7 @@
                               :change-on-blur? false]]
     ]])
 
+
 (defn formatted-date [date-str]
   "If passed a valid date, returns a correctly formatted date string like 01-01-2015.
    Otherwise returns date-str."
@@ -428,6 +429,7 @@
         ]]
       )))
 
+
 (defn employee-balances [employee]
   [v-box
    :size "auto"
@@ -467,6 +469,53 @@
                 ]]
               ]
    ])
+
+(defn login-email [employee]
+  [h-box
+   :justify :between
+   :children
+   [
+    [box :width "150px" :child [label :label "Email"]]
+    [box :size "auto" :child [input-text
+                              :width "315px"
+                              :model (:email employee)
+                              :status (when (seq (get-in employee [:validation-errors :email])) :error)
+                              :status-icon? (seq (get-in employee [:validation-errors :email]))
+                              :status-tooltip (apply str (get-in employee [:validation-errors :email]))
+                              :placeholder "Email"
+                              :on-change #(dispatch [:input-change :email %])
+                              :change-on-blur? false]]
+    ]])
+
+(defn login-password [employee]
+  [h-box
+   :justify :between
+   :children
+   [
+    [box :width "150px" :child [label :label "Password"]]
+    [box :size "auto" :child [input-text
+                              :width "315px"
+                              :model (:password employee)
+                              :status (when (seq (get-in employee [:validation-errors :password])) :error)
+                              :status-icon? (seq (get-in employee [:validation-errors :password]))
+                              :status-tooltip (apply str (get-in employee [:validation-errors :password]))
+                              :placeholder "Password"
+                              :on-change #(dispatch [:input-change :email %])
+                              :change-on-blur? false]]
+    ]])
+
+(defn login-form []
+  (let [employee {:email "" :password ""}]
+    [v-box
+     :justify :center
+     :children
+     [[box :class "panel panel-body" :child [login-email employee]]
+      [box :class "panel panel-body" :child [login-password employee]]
+      [box :class "panel panel-body" :child [save-button]]
+      ]
+     ]
+    ))
+
 
 
 

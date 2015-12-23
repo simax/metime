@@ -6,6 +6,6 @@
 (defonce default-db
   {:api-root-url             "http://localhost:3030/api"
    :employee                 {:is-ready? false :validation-errors nil}
-   :view                     :employees
+   :view                     :login
    :nav-bar                  :employees
    :department-draw-open-id  0})

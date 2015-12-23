@@ -10,7 +10,7 @@
 (secretary/set-config! :prefix "#")
 
 (defroute root-route "/" []
-          (dispatch [:set-active-view :employees :employees]))
+          (dispatch [:set-active-view :login :employees]))
 
 (defroute employees-route "/employees" []
           (dispatch [:set-active-view :employees :employees]))

@@ -29,6 +29,9 @@
    :justify :center
    :child [:div (throbber :size :large :color "lime")]])
 
+(defn login-component []
+  (ev/login-form))
+
 (defn calendar-component []
   [:div {:style {:height "500px"}} [:h1 "Calendar page"]])
 

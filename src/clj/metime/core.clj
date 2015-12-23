@@ -42,7 +42,6 @@
              (route/resources "/")
              (route/not-found "Not Found")))
 
-
 (def auth-backend (jws-backend {:secret "secret" :options {:alg :hs512}}))
 
 (def app

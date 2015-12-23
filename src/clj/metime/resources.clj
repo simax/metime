@@ -251,12 +251,15 @@
 
 ;;TODO: Need a password reset resource.
 
+(defn get-credentials [ctx]
+  {:email (get-in ctx [:request :params :email]) :password (get-in ctx [:request :params :password])})
+
 (defresource build-auth-token []
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :malformed? (fn [ctx]
-                           (let [credentials {:email (get-in ctx [:request :params :email]) :password (get-in ctx [:request :params :password])}
+                           (let [credentials (get-credentials ctx)
                                  validation-result (validate-user-format credentials)]
                              (when (seq validation-result)
                                {::invalid-user-format validation-result})))
@@ -264,7 +267,7 @@
              :handle-malformed ::invalid-user-format
 
              :handle-ok (fn [ctx]
-                          {:token (sec/create-auth-token {:email (get-in ctx [:request :params :email]) :password (get-in ctx [:request :params :password])})}))
+                          {:token (sec/create-auth-token (get-credentials ctx))}))
 
 
 
