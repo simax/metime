@@ -20,9 +20,12 @@
 
                            ;; Server
                            [ring "1.4.0-RC2"]
-                           [compojure "1.3.4"]
+                           [ring/ring-json "0.4.0"]
+                           [compojure "1.4.0"]
                            [cljs-http "0.1.35"]
                            [yesql "0.5.1"]
+                           [buddy/buddy-core "0.8.2"]
+                           [buddy/buddy-auth "0.8.1"]
                            [buddy/buddy-sign "0.8.1"]
                            [buddy/buddy-hashers "0.9.1"]
                            [org.xerial/sqlite-jdbc "3.7.2"]

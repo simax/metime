@@ -12,6 +12,10 @@
             [clj-time.format :as f]
             [clj-time.coerce :as c]
             [clojure.set :refer :all]
+            [buddy.sign.jws :as jws]
+            [clj-time.core :as time]
+            [buddy.auth :refer [authenticated? throw-unauthorized]]
+            [buddy.hashers :as hashers]
             [bouncer.core :as b]
             [bouncer.validators :as v :refer [defvalidator]]))
 
@@ -63,6 +67,51 @@
   [s]
   (if (re-find #"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$" (.trim s))
     (read-string s)))
+
+
+;;---------------------
+;; Security
+
+;; Using an auth token means we don't have to keep
+;; Checking the DB on every request. Just create an auth token
+;; on Login. Make it expire after a day or so? (or make that configurable?)
+;; Once the auth token expires, force the user to login.
+;; In a SPA and REST service set-up (like this is) and all done over SSL
+;; its unlikely that the auth token will ever be compromised.
+;; Timetastic uses cookies. (30 day?)
+
+
+;; Move following funcs to a security namespace?
+(defn auth-user [credentials]
+  (let [user (emps/get-employee-by-email (:email credentials))
+        unauthed [false {:message "Invalid email or password"}]]
+    (if user
+      (if (hashers/check (:password credentials) (:password user))
+        [true (dissoc user :password)]
+        unauthed)
+      unauthed)))
+
+(defn create-auth-token-service [auth-conf credentials]
+  "If we wanted to use public/private key we could pass auth-conf and use it
+   See buddy documentation for that."
+  (let [[ok? res] (auth-user credentials)
+        mins-to-expiry 5
+        exp (-> (time/plus (time/now) (time/seconds (* 60 mins-to-expiry))))
+        claims {:user res :exp exp}]
+    (if ok?
+      ;; Should probably use a UUID here instead of "secret" (like timetastic?)
+      [true {:token (jws/sign claims "secret" {:alg :hs512})}]
+      [false res])))
+
+(defn secured-resource []
+  {:authorized?    #(authenticated? (:request %))
+   :allowed?       (fn [ctx]
+                     true)})
+
+
+;; Example of token usage
+;(def token (let [[ok? token] (create-auth-token {} {:email "simonlomax@ekmsystems.co.uk" :password "p@ssw0rd"})]
+;             (when ok? (:token token))))
 
 
 ;;---------------------
@@ -216,6 +265,7 @@
 ;;TODO: Need a password reset resource.
 
 (defresource departments []
+             (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
