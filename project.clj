@@ -19,7 +19,7 @@
                            [com.andrewmcveigh/cljs-time "0.3.13"]
 
                            ;; Server
-                           [ring "1.4.0-RC2"]
+                           [ring "1.4.0"]
                            [ring/ring-json "0.4.0"]
                            [compojure "1.4.0"]
                            [cljs-http "0.1.35"]

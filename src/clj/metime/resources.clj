@@ -4,6 +4,7 @@
             [metime.data.departments :as deps]
             [metime.data.employees :as emps]
             [metime.data.holidays :as hols]
+            [metime.security :as sec]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.walk :as walk]
@@ -81,32 +82,12 @@
 ;; Timetastic uses cookies. (30 day?)
 
 
-;; Move following funcs to a security namespace?
-(defn auth-user [credentials]
-  (let [user (emps/get-employee-by-email (:email credentials))
-        unauthed [false {:message "Invalid email or password"}]]
-    (if user
-      (if (hashers/check (:password credentials) (:password user))
-        [true (dissoc user :password)]
-        unauthed)
-      unauthed)))
-
-(defn create-auth-token-service [auth-conf credentials]
-  "If we wanted to use public/private key we could pass auth-conf and use it
-   See buddy documentation for that."
-  (let [[ok? res] (auth-user credentials)
-        mins-to-expiry 5
-        exp (-> (time/plus (time/now) (time/seconds (* 60 mins-to-expiry))))
-        claims {:user res :exp exp}]
-    (if ok?
-      ;; Should probably use a UUID here instead of "secret" (like timetastic?)
-      [true {:token (jws/sign claims "secret" {:alg :hs512})}]
-      [false res])))
 
 (defn secured-resource []
-  {:authorized?    #(authenticated? (:request %))
-   :allowed?       (fn [ctx]
-                     true)})
+  {:authorized? #(authenticated? (:request %))
+   :allowed?    (fn [_]
+                  ;; Not currently doing any further role based authorization
+                  true)})
 
 
 ;; Example of token usage
@@ -131,6 +112,13 @@
   (let [department-validation-rules [:department [[v/required] [v/max-count 30]]
                                      :manager-id [[v/required] [v/number] [v/positive]]]
         result (apply b/validate dept department-validation-rules)
+        errors (first result)]
+    errors))
+
+(defn validate-user-format [user]
+  (let [user-validation-rules [:email [[v/required] [v/email]]
+                               :password [[v/required]]]
+        result (apply b/validate user user-validation-rules)
         errors (first result)]
     errors))
 
@@ -198,7 +186,6 @@
 (defn extract-keywords-from-validation-set [validation-set]
   (keep-indexed #(if (even? %1) %2) validation-set))
 
-
 (defn build-required-validation-set [required-fields validation-set]
   "Take a set of required fields and the validation set of all rules and
    add the v/required rule to rules sets where the field keyword is included in the required-fields set.
@@ -263,6 +250,23 @@
 
 
 ;;TODO: Need a password reset resource.
+
+(defresource build-auth-token []
+             :available-media-types ["application/edn" "application/json"]
+             :allowed-methods [:get]
+             :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
+             :malformed? (fn [ctx]
+                           (let [credentials {:email (get-in ctx [:request :params :email]) :password (get-in ctx [:request :params :password])}
+                                 validation-result (validate-user-format credentials)]
+                             (when (seq validation-result)
+                               {::invalid-user-format validation-result})))
+
+             :handle-malformed ::invalid-user-format
+
+             :handle-ok (fn [ctx]
+                          {:token (sec/create-auth-token {:email (get-in ctx [:request :params :email]) :password (get-in ctx [:request :params :password])})}))
+
+
 
 (defresource departments []
              (secured-resource)

@@ -21,14 +21,6 @@
             [prone.middleware :as prone]
             [liberator.dev]))
 
-
-(defn create-auth-token [req]
-  (let [[ok? res] (create-auth-token-service (:auth-conf req)
-                                             (:params req))]
-    (if ok?
-      {:status 201 :headers {"Content-Type" "application/json"} :body (str "{ token" ":" (:token res) "}")}
-      {:status 401 :headers {"Content-Type" "application/json"} :body (str "{ message" ":" (:message res) "}")})))
-
 (defn my-sample-handler
   [request]
   (if (authenticated? request)
@@ -38,7 +30,7 @@
 (defroutes app-routes
            (GET "/" [] (render-file "index.html" {:dev (env :dev?)}))
            (context "/api" []
-             (POST "/create-auth-token" [] create-auth-token)
+             (GET "/auth-token" [] (build-auth-token))
              (GET "/sample" [] my-sample-handler)
              (ANY "/departments" [] (departments))
              (ANY "/departments/:id" [id] (department id))
@@ -50,26 +42,6 @@
              (route/resources "/")
              (route/not-found "Not Found")))
 
-;(defn my-authfn
-;  [request authdata]
-;  (let [username (:username authdata)
-;        password (:password authdata)]
-;    username))
-
-;(def tokens {:2f904e245c1f5 "Admin"
-;             :45c1f5e3f05d0 "foouser"})
-
-;(defn my-authfn
-;  [request token]
-;  (let [token (keyword token)]
-;    (get tokens token nil)))
-
-;(def auth-backend (token-backend {:authfn my-authfn}))
-;(def auth-backend (http-basic-backend {:realm "MyApi" :authfn my-authfn}))
-
-;(defn my-authentication-wrapper [handler]
-;  (fn [request]
-;    (handler (assoc request :identity true))))
 
 (def auth-backend (jws-backend {:secret "secret" :options {:alg :hs512}}))
 
@@ -77,7 +49,6 @@
   (->
     (routes app-routes)
     (wrap-authentication auth-backend)
-    ;(my-authentication-wrapper)
     (wrap-keyword-params)
     (wrap-json-params)
     (prone/wrap-exceptions)
