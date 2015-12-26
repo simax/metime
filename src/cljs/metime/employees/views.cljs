@@ -476,8 +476,8 @@
    :children
    [
     [box :width "150px" :child [label :label "Email"]]
-    [box :size "auto" :child [input-text
-                              :width "315px"
+    [box :size "auto"  :child [input-text
+                              :width "300px"
                               :model (:email credentials)
                               :status (when (seq (get-in credentials [:validation-errors :email])) :error)
                               :status-icon? (seq (get-in credentials [:validation-errors :email]))
@@ -494,7 +494,7 @@
    [
     [box :width "150px" :child [label :label "Password"]]
     [box :size "auto" :child [input-text
-                              :width "315px"
+                              :width "300px"
                               :model (:password credentials)
                               :status (when (seq (get-in credentials [:validation-errors :password])) :error)
                               :status-icon? (seq (get-in credentials [:validation-errors :password]))
@@ -528,6 +528,7 @@
   (let [credentials {:email "" :password ""}]
     [v-box
      :justify :center
+     :min-width "550px"
      :children
      [[box :class "panel panel-body" :child [login-email credentials]]
       [box :class "panel panel-body" :child [login-password credentials]]

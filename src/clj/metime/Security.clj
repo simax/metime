@@ -17,7 +17,7 @@
   "If we wanted to use public/private key we could pass auth-conf and use it
    See buddy documentation for that."
   (let [[ok? res] (auth-user credentials)
-        mins-to-expiry 5
+        mins-to-expiry 30
         exp (-> (time/plus (time/now) (time/seconds (* 60 mins-to-expiry))))
         claims {:user res :exp exp}]
     (if ok?
