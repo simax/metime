@@ -6,11 +6,12 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.json :refer [wrap-json-params]]
+            [ring.middleware.cookies :refer [wrap-cookies]]
+            [ring.util.response :refer [response redirect content-type]]
             [buddy.auth.backends.token :refer [jws-backend token-backend]]
             [buddy.auth.backends.httpbasic :refer [http-basic-backend]]
             [buddy.auth.middleware :refer [wrap-authentication]]
             [buddy.auth :refer [authenticated? throw-unauthorized]]
-            [ring.util.response :refer [response redirect content-type]]
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
@@ -19,13 +20,22 @@
             [selmer.parser :refer [render-file]]
             [environ.core :refer [env]]
             [prone.middleware :as prone]
-            [liberator.dev]))
+            [liberator.dev]
+            [metime.security :as sec]))
 
 (defn my-sample-handler
   [request]
-  (if (authenticated? request)
-    (response (format "Hello %s\n" (:identity request)))
-    (response "NO ACCESS - UNAUTHORIZED\n")))
+  ;(if (authenticated? request)
+  ;  (response (format "Hello %s\n" (:identity request)))
+  ;  (response "NO ACCESS - UNAUTHORIZED\n"))
+  (let [email (get-in request [:params :email] )
+        password (get-in request [:params :password] )
+        token (sec/create-auth-token {:email email :password password})
+        ]
+    {:status 200
+     :headers {}
+     :cookies { "simon" {:value token :domain "127.0.0.1"}}
+     :body "Setting a cookie."}))
 
 (defroutes app-routes
            (GET "/" [] (render-file "index.html" {:dev (env :dev?)}))
@@ -50,6 +60,7 @@
     (wrap-authentication auth-backend)
     (wrap-keyword-params)
     (wrap-json-params)
+    (wrap-cookies)
     (prone/wrap-exceptions)
     (handler/site)
     (wrap-cors

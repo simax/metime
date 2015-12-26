@@ -470,7 +470,7 @@
               ]
    ])
 
-(defn login-email [employee]
+(defn login-email [credentials]
   [h-box
    :justify :between
    :children
@@ -478,16 +478,16 @@
     [box :width "150px" :child [label :label "Email"]]
     [box :size "auto" :child [input-text
                               :width "315px"
-                              :model (:email employee)
-                              :status (when (seq (get-in employee [:validation-errors :email])) :error)
-                              :status-icon? (seq (get-in employee [:validation-errors :email]))
-                              :status-tooltip (apply str (get-in employee [:validation-errors :email]))
+                              :model (:email credentials)
+                              :status (when (seq (get-in credentials [:validation-errors :email])) :error)
+                              :status-icon? (seq (get-in credentials [:validation-errors :email]))
+                              :status-tooltip (apply str (get-in credentials [:validation-errors :email]))
                               :placeholder "Email"
                               :on-change #(dispatch [:input-change :email %])
                               :change-on-blur? false]]
     ]])
 
-(defn login-password [employee]
+(defn login-password [credentials]
   [h-box
    :justify :between
    :children
@@ -495,23 +495,43 @@
     [box :width "150px" :child [label :label "Password"]]
     [box :size "auto" :child [input-text
                               :width "315px"
-                              :model (:password employee)
-                              :status (when (seq (get-in employee [:validation-errors :password])) :error)
-                              :status-icon? (seq (get-in employee [:validation-errors :password]))
-                              :status-tooltip (apply str (get-in employee [:validation-errors :password]))
+                              :model (:password credentials)
+                              :status (when (seq (get-in credentials [:validation-errors :password])) :error)
+                              :status-icon? (seq (get-in credentials [:validation-errors :password]))
+                              :status-tooltip (apply str (get-in credentials [:validation-errors :password]))
                               :placeholder "Password"
-                              :on-change #(dispatch [:input-change :email %])
-                              :change-on-blur? false]]
+                              :on-change #(dispatch [:input-change :password %])
+                              :change-on-blur? false
+                              :attr {:type "password"}]]
     ]])
 
+(defn login-button []
+  [v-box
+   :children [
+              [h-box
+               :style {:flex-flow "row wrap"}
+               :class "panel"
+               :justify :between
+               :children
+               [
+                [box
+                 :class "panel panel-body"
+                 :child [button
+                         :class "btn btn-primary"
+                         :on-click #(dispatch [:log-in])
+                         :label "Login"]
+                 ]
+                ]]
+              ]])
+
 (defn login-form []
-  (let [employee {:email "" :password ""}]
+  (let [credentials {:email "" :password ""}]
     [v-box
      :justify :center
      :children
-     [[box :class "panel panel-body" :child [login-email employee]]
-      [box :class "panel panel-body" :child [login-password employee]]
-      [box :class "panel panel-body" :child [save-button]]
+     [[box :class "panel panel-body" :child [login-email credentials]]
+      [box :class "panel panel-body" :child [login-password credentials]]
+      [box :class "panel panel-body" :child [login-button credentials]]
       ]
      ]
     ))

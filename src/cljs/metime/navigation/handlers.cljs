@@ -13,10 +13,27 @@
             [cljs-http.client :as http]
             [metime.utils :as utils]
             [metime.employees.views]
-            [metime.db :as dbase]))
+            [metime.db :as dbase]
+            [metime.utils :as utils]))
+
+(defn get-auth-cookie []
+  (utils/get-cookie "auth"))
+
+(register-handler
+  :fetch-auth-code
+  (fn [db [_]]
+    (assoc db :authentication-token (get-auth-cookie))))
+
+(register-handler
+  :initialise-db
+  (fn [db [_]]
+    (dispatch [:fetch-auth-code])
+    (merge db dbase/default-db)))
 
 (defn update-active-view [db nav-bar view-component]
-  (assoc db :nav-bar nav-bar :view view-component))
+  (if (empty? (:authentication-token @db))
+    (assoc db :nav-bar nil :view :log-in)
+    (assoc db :nav-bar nav-bar :view view-component)))
 
 (defn fetch-employee
   [db url]
@@ -33,7 +50,7 @@
 (defn employee-edit-handler
   [db [_ id]]
   (dispatch [:fetch-employee id])
-  (merge db (assoc db :nav-bar :employees :view :employee)))
+  (assoc db :nav-bar :employees :view :employee))
 
 (register-handler
   :employee-edit
@@ -43,11 +60,6 @@
   :set-active-view
   (fn [db [_ nav-bar view-component-id]]
     (update-active-view db nav-bar view-component-id)))
-
-(register-handler
-  :initialise-db
-  (fn [db [_]]
-    (merge db dbase/default-db)))
 
 (register-handler
   :process-departments-response
@@ -66,13 +78,11 @@
 (register-handler
   :fetch-department-employees
   (fn [db [_ endpoint]]
-    (let [_ (fetch-departments (utils/api db endpoint))]
-      (assoc db :deps nil))))
+    (fetch-departments (utils/api db endpoint))
+    (assoc db :deps nil)))
 
 (register-handler
   :fetch-employee
   (fn [db [_ id]]
     (when (> id 0)
       (fetch-employee db (str (utils/api db "/employee/") id)))))
-
-

@@ -32,5 +32,10 @@
 (register-sub
   :initialised?
   (fn [db _]
-    (reaction (not (empty? @db)))))
+    (reaction (not-empty @db))))
+
+(register-sub
+  :logged-in
+  (fn [db _]
+    (reaction (:authentication-token @db))))
 

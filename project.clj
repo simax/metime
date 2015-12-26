@@ -36,8 +36,8 @@
 
                            ;; UI
                            [reagent "0.5.0"]
-                           [re-frame "0.5.0"]
-                           [re-com "0.6.1"]
+                           [re-frame "0.6.0"]
+                           [re-com "0.8.0"]
                            [secretary "1.2.3"]
 
                            ;; Dev
@@ -86,6 +86,7 @@
                                        :asset-path           "js/compiled/out"
                                        :output-to            "resources/public/js/compiled/app.js"
                                        :output-dir           "resources/public/js/compiled/out"
+                                       :source-map           true
                                        :source-map-timestamp true}}
                        {:id           "min"
                         :source-paths ["src/cljs"]

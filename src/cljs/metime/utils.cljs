@@ -4,7 +4,9 @@
                                    path
                                    register-sub
                                    dispatch
-                                   subscribe]])
+                                   subscribe]]
+            [goog.net.cookies]
+            [cljs.reader :as reader])
   (:import goog.History
            goog.History.EventType))
 
@@ -41,16 +43,17 @@
 
 (defn input-value [component] (-> component .-target .-value))
 
-;(defn input-element [{:keys [id name type placeholder on-blur on-change default-value value]}]
-;  "An input element which updates its value on change"
-;  ^{:key id} [:input
-;              {:id            id
-;               :name          name
-;               :placeholder   placeholder
-;               :class         "form-control"
-;               :type          type
-;               :default-value default-value
-;               :on-blur       on-blur
-;               :on-change     on-change
-;               }])
+(defn get-cookie [k]
+  "Returns the cookie after parsing it with cljs.reader/read-string."
+  (reader/read-string (or (.get goog.net.cookies (name k)) "nil")))
 
+(defn set-cookie! [k content & [{:keys [max-age path domain secure?]} :as opts]]
+  "Stores the cookie value using pr-str."
+  (let [k (name k)
+        content (pr-str content)]
+    (if-not opts
+      (.set goog.net.cookies k content)
+      (.set goog.net.cookies k content (or max-age -1) path domain (boolean secure?)))))
+
+(defn remove-cookie! [k]
+  (.remove goog.net.cookies (name k)))

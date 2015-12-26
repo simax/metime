@@ -29,7 +29,7 @@
    :dob [[v/datetime british-date-format :pre (comp seq :dob) :message "Must be a valid date"]]
    :startdate [[v/datetime british-date-format :pre (comp seq :startdate) :message "Must be a valid date"]]
    :enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
-   :prev_year_allowance   [[v/integer :message "Must be an integer"]]
+   :prev_year_allowance [[v/integer :message "Must be an integer"]]
    :current_year_allowance [[v/integer :message "Must be an integer"]]
    :next_year_allowance [[v/integer :message "Must be an integer"]]])
 
@@ -69,7 +69,7 @@
              :this_year_remaining 25
              :next_year_opening   25
              :next_year_remaining 25
-             :department_id      departmentid
+             :department_id       departmentid
              :managerid           managerid
              :manager-firstname   (:manager-firstname dep)
              :manager-lastname    (:manager-lastname dep)
@@ -147,3 +147,19 @@
   :show-failed-save-attempt
   (fn [db [_ errors]]
     (assoc-in db [:employee :validation-errors] errors)))
+
+(defn set-auth-cookie! [token]
+  (let [expiry (* 60 60 24 30)]                             ; 30 days (secs mins hours days)
+    (utils/set-cookie! "auth" token {:max-age expiry})))
+
+(defn authenticate-user [db [_]]
+  (go
+    (let [url (str (:api-root-url db) "/auth-token?" "email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password]))
+          token ((js->clj ((<! (http/get url)) :body)) :token)]
+      (set-auth-cookie! token)
+      (assoc db :authentication-token token :nav-bar :employees :view :employees)))
+  db)
+
+(register-handler
+  :log-in
+  authenticate-user)

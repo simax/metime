@@ -12,8 +12,8 @@
                                    dispatch
                                    dispatch-sync
                                    subscribe]]
-            [metime.utils :as utils]
-            [devtools.core :as dt])
+            [devtools.core :as dt]
+            [metime.utils :as utils])
   (:import goog.History))
 
 
@@ -33,7 +33,7 @@
 
 (defn mount-root []
   ;; Main app component
-  (reagent/render [nv/login-component] (js/document.getElementById "app-container")))
+  (reagent/render [nv/top-panel] (js/document.getElementById "app-container")))
 
 (defn ^:export main []
   (let [current-location (utils/get-current-location)]

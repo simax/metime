@@ -106,9 +106,16 @@
        [(switch-view @view-component-id)]
        ])))
 
+(defn log-in []
+  (let [logged-in (subscribe [:logged-in])]
+    (fn []
+      (if (empty? @logged-in)
+        [login-component]
+        [main-panel]))))
+
 (defn top-panel []
   (let [ready? (subscribe [:initialised?])]
     (fn []
       (if-not @ready?
         [loader-component]
-        [main-panel]))))
+        [log-in]))))
