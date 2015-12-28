@@ -28,14 +28,14 @@
   ;(if (authenticated? request)
   ;  (response (format "Hello %s\n" (:identity request)))
   ;  (response "NO ACCESS - UNAUTHORIZED\n"))
-  (let [email (get-in request [:params :email] )
-        password (get-in request [:params :password] )
-        token (sec/create-auth-token {:email email :password password})
-        ]
+  ;(let [email (get-in request [:params :email] )
+  ;      password (get-in request [:params :password] )
+  ;      token (sec/create-auth-token {:email email :password password})
+  ;      ]
     {:status 200
      :headers {}
-     :cookies { "simon" {:value token :domain "127.0.0.1"}}
-     :body "Setting a cookie."}))
+     ;:cookies { "simon" {:value token :domain "127.0.0.1"}}
+     :body "A sample response."})
 
 (defroutes app-routes
            (GET "/" [] (render-file "index.html" {:dev (env :dev?)}))

@@ -30,6 +30,9 @@
 (defroute login-route "/login" []
           (dispatch [:set-active-view :login :login]))
 
+(defroute log-out-route "/logout" []
+          (dispatch [:set-active-view :log-out :login]))
+
 (defroute employee-add-route "/employees/add" []
           (dispatch [:employee-add]))
 

@@ -19,33 +19,36 @@
 (defn get-auth-cookie []
   (utils/get-cookie "auth"))
 
+
 (register-handler
   :fetch-auth-code
   (fn [db [_]]
-    (assoc db :authentication-token (get-auth-cookie))))
+    (let [token (get-auth-cookie)]
+      (if token
+        (dispatch [:authenticated token])
+        (dispatch [:log-out])))
+    db))
+
 
 (register-handler
   :initialise-db
   (fn [db [_]]
-    (dispatch [:fetch-auth-code])
-    (merge db dbase/default-db)))
+    (let [token (get-auth-cookie)]
+      (-> (merge db dbase/default-db)
+          (assoc :authentication-token token
+                 :nav-bar :employees
+                 :view :employees)))))
 
 (defn update-active-view [db nav-bar view-component]
   (if (empty? (:authentication-token @db))
     (assoc db :nav-bar nil :view :log-in)
     (assoc db :nav-bar nav-bar :view view-component)))
 
-(defn fetch-employee
-  [db url]
-  ;; The following go block will "park" until the http request returns data
-  (go (dispatch [:process-employee-response ((<! (http/get url)) :body)]))
-  (assoc db :employee {:is-ready? false}))
+(defn add-authorization-header [token]
+  {:headers {"authorization" (str "Token " token)}})
 
-(defn fetch-departments
-  [url]
-  (go
-    ;; The following go block will "park" until the http request returns data
-    (dispatch [:process-departments-response (((<! (http/get url)) :body) :departments)])))
+(defn secure-url [url token]
+  (http/get url (add-authorization-header token)))
 
 (defn employee-edit-handler
   [db [_ id]]
@@ -75,14 +78,34 @@
         (assoc db :employee (assoc emp :is-ready? true :not-found false)))
       )))
 
+(defn api-call [url token dispatch-handler response-keys]
+  ;; Make a secure url call with authorization header.
+  ;; Dispatch redirect to login if unauthorized.
+  (go
+    ;; The following go block will "park" until the http request returns data
+    (let [response (<! (secure-url url token))
+          status (:status response)]
+      (if (= status 401)
+        (dispatch [:log-out])
+        (dispatch [dispatch-handler (get-in response response-keys)])))))
+
+
 (register-handler
   :fetch-department-employees
   (fn [db [_ endpoint]]
-    (fetch-departments (utils/api db endpoint))
-    (assoc db :deps nil)))
+    (let [url (utils/api db endpoint)
+          token (:authentication-token db)
+          dispatch-handler :process-departments-response
+          response-keys [:body :departments]]
+      (api-call url token dispatch-handler response-keys))
+    db))
 
 (register-handler
   :fetch-employee
   (fn [db [_ id]]
-    (when (> id 0)
-      (fetch-employee db (str (utils/api db "/employee/") id)))))
+    (let [url (str (utils/api db "/employee/") id)
+          token (:authentication-token db)
+          dispatch-handler :process-employee-response
+          response-keys [:body]]
+      (api-call url token dispatch-handler response-keys))
+    db))

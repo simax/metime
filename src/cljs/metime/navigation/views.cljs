@@ -18,7 +18,8 @@
                {:id :file-manager :text "File Manager" :path (r/file-manager-route)}
                {:id :calendar :text "Calendar" :path (r/calendar-route)}
                {:id :tables :text "Tables" :path (r/tables-route)}
-               {:id :user :text "User" :path (r/user-route)}])
+               {:id :user :text "User" :path (r/user-route)}
+               {:id :log-out :text "Log out" :path (r/log-out-route)}])
 
 
 (defn loader-component []
@@ -87,6 +88,7 @@
 
 (defn switch-view [view-component]
   (case view-component
+    :login login-component
     :tables tables-component
     :calendar calendar-component
     :file-manager file-manager-component
@@ -101,21 +103,21 @@
     (fn []
       [:div
        ;; Top nav bar
-       [nav-bar @current-nav-bar]
+       (when-not (= @view-component-id :login) [nav-bar @current-nav-bar])
        ;; Switch view
        [(switch-view @view-component-id)]
        ])))
 
-(defn log-in []
-  (let [logged-in (subscribe [:logged-in])]
-    (fn []
-      (if (empty? @logged-in)
-        [login-component]
-        [main-panel]))))
+;(defn log-in []
+;  (let [logged-in (subscribe [:logged-in])]
+;    (fn []
+;      (if (empty? @logged-in)
+;        [login-component]
+;        [main-panel]))))
 
-(defn top-panel []
+(defn initial-panel []
   (let [ready? (subscribe [:initialised?])]
     (fn []
       (if-not @ready?
         [loader-component]
-        [log-in]))))
+        [main-panel]))))

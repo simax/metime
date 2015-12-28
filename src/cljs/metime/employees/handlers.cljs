@@ -37,7 +37,7 @@
   (let [employee (:employee db)
         result (apply b/validate employee employee-validation-rules)
         errors (first result)]
-    (when (seq result) (.log js/console db))
+    ;(when (seq result) (.log js/console db))
     (assoc-in db [:employee :validation-errors] errors)))
 
 (defn handle-input-change [db [_ property-name new-value]]
@@ -152,14 +152,28 @@
   (let [expiry (* 60 60 24 30)]                             ; 30 days (secs mins hours days)
     (utils/set-cookie! "auth" token {:max-age expiry})))
 
+(register-handler
+  :authenticated
+  (fn [db [_ token]]
+    (assoc db :authentication-token token :nav-bar :employees :view :employees)))
+
 (defn authenticate-user [db [_]]
   (go
     (let [url (str (:api-root-url db) "/auth-token?" "email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password]))
           token ((js->clj ((<! (http/get url)) :body)) :token)]
       (set-auth-cookie! token)
-      (assoc db :authentication-token token :nav-bar :employees :view :employees)))
+      (dispatch [:authenticated token])))
   db)
 
 (register-handler
   :log-in
   authenticate-user)
+
+(register-handler
+  :log-out
+  (fn [db [_]]
+    (assoc db
+      :view                    :login
+      :authentication-token    ""
+      :nav-bar                 nil
+      )))
