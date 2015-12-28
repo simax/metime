@@ -262,7 +262,7 @@
                            (let [credentials (get-credentials ctx)
                                  validation-result (validate-user-format credentials)]
                              (when (seq validation-result)
-                               {::invalid-user-format validation-result})))
+                               {::invalid-user-format "Invalid email/password"})))
 
              :handle-malformed ::invalid-user-format
 
@@ -311,6 +311,7 @@
 
 
 (defresource department [id]
+             (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :delete :put]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
@@ -374,6 +375,7 @@
   (assoc emp :is_approver (truthy? (:is_approver emp))))
 
 (defresource employees []
+             (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
@@ -472,6 +474,7 @@
     :deduction (parse-number (:deduction form-data))))
 
 (defresource holidays []
+             (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])

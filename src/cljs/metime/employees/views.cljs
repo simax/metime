@@ -476,7 +476,7 @@
    :children
    [
     [box :width "150px" :child [label :label "Email"]]
-    [box :size "auto"  :child [input-text
+    [box :size "auto" :child [input-text
                               :width "300px"
                               :model (:email credentials)
                               :status (when (seq (get-in credentials [:validation-errors :email])) :error)
@@ -505,34 +505,34 @@
                               :attr {:type "password"}]]
     ]])
 
-(defn login-button []
-  [v-box
-   :children [
-              [h-box
-               :style {:flex-flow "row wrap"}
-               :class "panel"
-               :justify :between
-               :children
-               [
-                [box
-                 :class "panel panel-body"
-                 :child [button
-                         :class "btn btn-primary"
-                         :on-click #(dispatch [:log-in])
-                         :label "Login"]
-                 ]
-                ]]
-              ]])
+(defn login-button [msg]
+  [h-box
+   :class "panel"
+   :justify :between
+   :align-self :stretch
+   :children
+   [
+    [box :width "150px" :child [label :style {:color "red" :font-weight :bold} :label msg]]
+    [box
+     :child [button
+             :class "btn btn-primary"
+             :on-click #(dispatch [:log-in])
+             :label "Login"]
+     ]
+    ]])
 
-(defn login-form []
+(defn login-form [msg]
   (let [credentials {:email "" :password ""}]
     [v-box
-     :justify :center
-     :min-width "550px"
+     :width "480px"
+     :class "panel panel-body"
+     ;:justify :center
+     :gap "20px"
      :children
-     [[box :class "panel panel-body" :child [login-email credentials]]
-      [box :class "panel panel-body" :child [login-password credentials]]
-      [box :class "panel panel-body" :child [login-button credentials]]
+     [
+      [login-email credentials]
+      [login-password credentials]
+      [login-button msg]
       ]
      ]
     ))

@@ -17,7 +17,8 @@
   "If we wanted to use public/private key we could pass auth-conf and use it
    See buddy documentation for that."
   (let [[ok? res] (auth-user credentials)
-        mins-to-expiry 30
+        mins-to-expiry 2
+        ; [expiry (* 60 60 24 30)] ; 30 days (secs mins hours days)
         exp (-> (time/plus (time/now) (time/seconds (* 60 mins-to-expiry))))
         claims {:user res :exp exp}]
     (if ok?
@@ -25,7 +26,7 @@
       [true {:token (jws/sign claims "secret" {:alg :hs512})}]
       [false res])))
 
-(defn create-auth-token [credentias]
-  (let [[ok? res] (create-auth-token-service credentias)]
+(defn create-auth-token [credentials]
+  (let [[ok? res] (create-auth-token-service credentials)]
     (if ok? (:token res) "")))
 

@@ -68,3 +68,8 @@
     (reaction (if (= (:department-draw-open-id @db) department-id)
                 "panel-body panel-collapse collapse in"
                 "panel-body panel-collapse collapse"))))
+
+(register-sub
+  :authentication-failed
+  (fn [db _]
+    (reaction (:authentication-failed-msg @db))))

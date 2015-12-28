@@ -12,8 +12,7 @@
                                    dispatch
                                    dispatch-sync
                                    subscribe]]
-            [devtools.core :as dt]
-            [metime.utils :as utils])
+            [devtools.core :as dt])
   (:import goog.History))
 
 
@@ -37,9 +36,7 @@
   (reagent/render [nv/initial-panel] (js/document.getElementById "app-container")))
 
 (defn ^:export main []
-  (let [current-location (utils/get-current-location)]
-    (dispatch [:initialise-db])
-    ;(when (or (= current-location "") (= current-location "#/")) (utils/set-hash! "#/employees"))
-    (hook-browser-navigation!)
-    (mount-root)))
+  (dispatch [:initialise-db])
+  (hook-browser-navigation!)
+  (mount-root))
 

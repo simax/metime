@@ -155,14 +155,30 @@
 (register-handler
   :authenticated
   (fn [db [_ token]]
-    (assoc db :authentication-token token :nav-bar :employees :view :employees)))
+    (assoc db :authentication-token token :authentication-failed-msg "" :nav-bar :employees :view :employees)))
+
+(register-handler
+  :authentication-failed
+  (fn [db [_]]
+    (assoc db :authentication-token ""
+              :authentication-failed-msg "Invalid email/password"
+              :nav-bar nil
+              :view :login)))
+
+(defn response-ok? [response]
+  (= 200 (:status response)))
 
 (defn authenticate-user [db [_]]
   (go
     (let [url (str (:api-root-url db) "/auth-token?" "email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password]))
-          token ((js->clj ((<! (http/get url)) :body)) :token)]
+          response (<! (http/get url))
+          token (if (response-ok? response)
+                  ((js->clj (response :body)) :token)
+                  "")]
       (set-auth-cookie! token)
-      (dispatch [:authenticated token])))
+      (if (empty? token)
+        (dispatch [:authentication-failed])
+        (dispatch [:authenticated token]))))
   db)
 
 (register-handler
@@ -173,7 +189,7 @@
   :log-out
   (fn [db [_]]
     (assoc db
-      :view                    :login
-      :authentication-token    ""
-      :nav-bar                 nil
+      :view                       :login
+      :authentication-failed-msg  ""
+      :nav-bar                    nil
       )))
