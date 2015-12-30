@@ -9,7 +9,6 @@
                                    dispatch
                                    subscribe]]
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
-            [cljs-http.client :as http]
             [metime.utils :as utils]
             [metime.employees.views]
             [metime.db :as dbase]
@@ -43,11 +42,6 @@
     (assoc db :nav-bar nil :view :login)
     (assoc db :nav-bar nav-bar :view view-component)))
 
-(defn add-authorization-header [token]
-  {:headers {"authorization" (str "Token " token)}})
-
-(defn secure-url [url token]
-  (http/get url (add-authorization-header token)))
 
 (defn employee-edit-handler
   [db [_ id]]
@@ -77,26 +71,16 @@
         (assoc db :employee (assoc emp :is-ready? true :not-found false)))
       )))
 
-(defn api-call [url token dispatch-handler response-keys]
-  ;; Make a secure url call with authorization header.
-  ;; Dispatch redirect to login if unauthorized.
-  (go
-    ;; The following go block will "park" until the http request returns data
-    (let [response (<! (secure-url url token))
-          status (:status response)]
-      (if (= status 401)
-        (dispatch [:log-out])
-        (dispatch [dispatch-handler (get-in response response-keys)])))))
-
 
 (register-handler
   :fetch-department-employees
   (fn [db [_ endpoint]]
     (let [url (utils/api db endpoint)
           token (:authentication-token db)
-          dispatch-handler :process-departments-response
+          valid-token-handler :process-departments-response
+          invalid-token-handler :log-out
           response-keys [:body :departments]]
-      (api-call url token dispatch-handler response-keys))
+      (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
     db))
 
 (register-handler
@@ -104,7 +88,8 @@
   (fn [db [_ id]]
     (let [url (str (utils/api db "/employee/") id)
           token (:authentication-token db)
-          dispatch-handler :process-employee-response
+          valid-token-handler :process-employee-response
+          invalid-token-handler :log-out
           response-keys [:body]]
-      (api-call url token dispatch-handler response-keys))
+      (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
     db))

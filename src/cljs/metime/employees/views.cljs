@@ -532,7 +532,6 @@
     [v-box
      :width "480px"
      :class "panel panel-body"
-     ;:justify :center
      :gap "20px"
      :children
      [

@@ -14,6 +14,7 @@
                                    register-sub
                                    dispatch
                                    subscribe]]
+            [metime.utils :as utils]
             [bouncer.core :as b]
             [bouncer.validators :as v]))
 
@@ -81,13 +82,27 @@
     {:url (utils/api db (str "/employee/" employee-id)) :verb http/put}
     {:url (utils/api db "/employees") :verb http/post}))
 
+;
+;(fn [db [_ id]]
+;  (let [url (str (utils/api db "/employee/") id)
+;        token (:authentication-token db)
+;        valid-token-handler :process-employee-response
+;        invalid-token-handler :log-out
+;        response-keys [:body]]
+;    (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
+;  db)
+;
 
 (defn handle-employee-save [db _]
   (if (apply b/valid? (:employee db) employee-validation-rules)
     (let [employee-id (get-in db [:employee :id])
           endpoint (get-employee-save-endpoint db employee-id)
           data (assoc (:employee db) :password "password1" :password-confirm "password1")
-          response (go (<! (apply (:verb endpoint) [(:url endpoint) {:form-params data}])))]
+          token (:authentication-token db)
+          auth-header (utils/get-authorization-header token)
+          ;TODO: Fix issue here!!
+          response (go (<! (apply (:verb endpoint) [(:url endpoint) auth-header {:form-params data}])))
+          ]
 
       (if (= (:status response) 409)                        ;; Conflict
         (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
@@ -155,7 +170,7 @@
 (register-handler
   :authenticated
   (fn [db [_ token]]
-    (assoc db :authentication-token token :authentication-failed-msg "" :nav-bar :employees :view :employees)))
+    (assoc db :authentication-token token :authentication-failed-msg "" :nav-bar nil :view :home)))
 
 (register-handler
   :authentication-failed

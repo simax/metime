@@ -1,4 +1,5 @@
 (ns metime.utils
+  (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [cljs-hash.md5 :as hashgen]
             [re-frame.core :refer [register-handler
                                    path
@@ -6,7 +7,9 @@
                                    dispatch
                                    subscribe]]
             [goog.net.cookies]
-            [cljs.reader :as reader])
+            [cljs.reader :as reader]
+            [cljs.core.async :refer [put! take! <! >! chan timeout]]
+            [cljs-http.client :as http])
   (:import goog.History
            goog.History.EventType))
 
@@ -57,3 +60,21 @@
 
 (defn remove-cookie! [k]
   (.remove goog.net.cookies (name k)))
+
+(defn get-authorization-header [token]
+  {:headers {"authorization" (str "Token " token)}})
+
+(defn secure-url [url token]
+  (http/get url (get-authorization-header token)))
+
+(defn api-call [url token valid-token-handler invalid-token-handler response-keys]
+  ;; Make a secure url call with authorization header.
+  ;; Dispatch redirect to login if unauthorized.
+  (go
+    ;; The following go block will "park" until the http request returns data
+    (let [response (<! (secure-url url token))
+          status (:status response)]
+      (if (= status 401)
+        (dispatch [invalid-token-handler])
+        (dispatch [valid-token-handler (get-in response response-keys)])))))
+

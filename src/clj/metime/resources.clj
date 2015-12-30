@@ -89,12 +89,6 @@
                   ;; Not currently doing any further role based authorization
                   true)})
 
-
-;; Example of token usage
-;(def token (let [[ok? token] (create-auth-token {} {:email "simonlomax@ekmsystems.co.uk" :password "p@ssw0rd"})]
-;             (when ok? (:token token))))
-
-
 ;;---------------------
 ;; Validators
 

@@ -33,3 +33,13 @@
   (pushy/start! (pushy/pushy dispatch-route parse-url)))
 
 (def url-for (partial bidi/path-for routes))
+
+;(def state (atom {}))
+;
+;(defn set-page! [match]
+;  (swap! state assoc :page match))
+;
+;(def history
+;  (pushy/pushy set-page! (partial bidi/match-route app-routes)))
+;
+;(pushy/start! history)

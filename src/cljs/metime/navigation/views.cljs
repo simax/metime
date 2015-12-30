@@ -14,7 +14,6 @@
            goog.History.EventType))
 
 (def nav-bars [
-               ;{:id :home :text "Home" :path (r/url-for :home)}
                {:id :employees :text "Employees" :path (r/url-for :employees)}
                {:id :file-manager :text "File Manager" :path (r/url-for :file-manager)}
                {:id :calendar :text "Calendar" :path (r/url-for :calendar)}
@@ -121,14 +120,6 @@
                ;; Switch view
                [(switch-view @view-component-id)]
                ]])))
-
-
-;(defn log-in []
-;  (let [logged-in (subscribe [:logged-in])]
-;    (fn []
-;      (if (empty? @logged-in)
-;        [login-component]
-;        [main-panel]))))
 
 (defn initial-panel []
   (let [ready? (subscribe [:initialised?])]

@@ -20,6 +20,7 @@
 
                            ;; Server
                            [ring "1.4.0"]
+                           [ring/ring-defaults "0.1.5"]
                            [ring/ring-json "0.4.0"]
                            [compojure "1.4.0"]
                            [cljs-http "0.1.35"]
@@ -70,7 +71,7 @@
                :deps [[org.xerial/sqlite-jdbc "3.7.2"]]}
 
 
-  :ring {:handler metime.core/app :auto-reload? true}
+  :ring {:handler metime.core/app :auto-reload? true }
 
   :min-lein-version "2.5.0"
 
