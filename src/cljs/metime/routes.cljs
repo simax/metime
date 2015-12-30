@@ -1,43 +1,35 @@
 (ns metime.routes
-  (:require [secretary.core :refer-macros [defroute]]
-            [re-frame.core :refer [register-handler
+  (:require
+    [bidi.bidi :as bidi]
+    [pushy.core :as pushy]
+    [re-frame.core :refer [register-handler
                                    path
                                    dispatch
-                                   dispatch-sync
-                                   subscribe]]
-            [secretary.core :as secretary]))
+                                   subscribe]]))
 
-(secretary/set-config! :prefix "#")
 
-(defroute root-route "/" []
-          (dispatch [:set-active-view :login :employees]))
+(def routes ["/" {
+                  ""              :home
+                  "employees/"    { "" :employees
+                                   [:id "/"] :edit-employee}
+                  "tables"        :tables
+                  "calendar"      :calendar
+                  "file-manager"  :file-manager
+                  "user"          :user
+                  "login"         :login
+                  "logout"        :logout
+                  }])
 
-(defroute employees-route "/employees" []
-          (dispatch [:set-active-view :employees :employees]))
+(defn- parse-url [url]
+  (bidi/match-route routes url))
 
-(defroute tables-route "/tables" []
-          (dispatch [:set-active-view :tables :tables]))
+(defn- dispatch-route [matched-route]
+  (let [panel-name (:handler matched-route)]
+    (if (= panel-name :home)
+      (dispatch [:set-active-view nil panel-name])
+      (dispatch [:set-active-view panel-name panel-name]))))
 
-(defroute calendar-route "/calendar" []
-          (dispatch [:set-active-view :calendar :calendar]))
+(defn app-routes []
+  (pushy/start! (pushy/pushy dispatch-route parse-url)))
 
-(defroute file-manager-route "/file-manager" []
-          (dispatch [:set-active-view :file-manager :file-manager]))
-
-(defroute user-route "/user" []
-          (dispatch [:set-active-view :user :user]))
-
-(defroute login-route "/login" []
-          (dispatch [:set-active-view :login :login]))
-
-(defroute log-out-route "/logout" []
-          (dispatch [:set-active-view :log-out :login]))
-
-(defroute employee-add-route "/employees/add" []
-          (dispatch [:employee-add]))
-
-(defroute employee-route "/employee/:id" [id]
-          (dispatch [:employee-edit id]))
-
-(defroute "*" []
-          (dispatch [:set-active-view nil :not-found]))
+(def url-for (partial bidi/path-for routes))

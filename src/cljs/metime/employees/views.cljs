@@ -42,7 +42,9 @@
   [:div {:class "col-md-3 col-lg-3"}
    [:div {:class "dash-unit"}
     [:div {:class "thumbnail" :style {:margin-top "20px"}}
-     [:a {:href (r/employee-route {:id id})}
+     [:a {:href (r/url-for :edit-employee :id id) :on-click (fn [e]
+                                                              (dispatch [:employee-edit id])
+                                                              (.preventDefault e))}
       [:h1 (employee-name firstname lastname)]
       [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
       ]
@@ -63,7 +65,7 @@
         rows-of-employees (partition 4 4 nil department-list-item)
         department-name (clojure.string/replace department #"[\s]" "-")
         draw-open-class (subscribe [:department-draw-open-class departmentid])]
-    [:div#accordian.panel.panel-default.row
+    [:div#accordian.panel.panel-default.row {:style {:width "1100px"}}
      [:div.panel-heading.clearfix.panel-heading
       [:div.col-md-2.col-xs-2
        [:div.col-md-4.col-xs-4 [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]]
@@ -97,7 +99,11 @@
     ]])
 
 (defn departments-container [deps]
-  [department-list deps])
+  [box
+   :justify :center
+   :align :center
+   :child
+   [department-list deps]])
 
 (defn employee-not-found []
   [box :child [:div.well [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."]]])

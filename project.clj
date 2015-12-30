@@ -38,8 +38,8 @@
                            [reagent "0.5.0"]
                            [re-frame "0.6.0"]
                            [re-com "0.8.0"]
-                           [secretary "1.2.3"]
                            [bidi "1.24.0"]
+                           [kibu/pushy "0.3.6"]
 
                            ;; Dev
                            [org.clojure/tools.trace "0.7.8"]

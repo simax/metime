@@ -53,7 +53,7 @@
 
 (defn handle-employee-add [db [_ departmentid managerid]]
   (let [dep (first (filter #(= (:departmentid %) departmentid) (:deps db)))]
-    (utils/set-hash! (r/employee-add-route))
+    ;(utils/set-hash! (r/url-for :employee-add))
     (merge db
            (assoc db :nav-bar :employees :view :employee)
            {:employee
@@ -92,7 +92,7 @@
       (if (= (:status response) 409)                        ;; Conflict
         (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
         (do
-          (utils/set-hash! (r/employees-route))
+          ;(utils/set-hash! (r/url-for :employees))
           (dispatch [:set-active-view :employees :employees])
           db)))
     (validate-employee db _)))

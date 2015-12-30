@@ -1,7 +1,4 @@
-(ns metime.db
-  (:require [secretary.core :as secretary]))
-
-(secretary/set-config! :prefix "#")
+(ns metime.db)
 
 (defonce default-db
          {:api-root-url               "http://localhost:3030/api"

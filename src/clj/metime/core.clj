@@ -7,7 +7,7 @@
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.json :refer [wrap-json-params]]
             [ring.middleware.cookies :refer [wrap-cookies]]
-            [ring.util.response :refer [response redirect content-type]]
+            [ring.util.response :refer [response file-response redirect content-type]]
             [buddy.auth.backends.token :refer [jws-backend token-backend]]
             [buddy.auth.backends.httpbasic :refer [http-basic-backend]]
             [buddy.auth.middleware :refer [wrap-authentication]]
@@ -25,23 +25,13 @@
 
 (defn my-sample-handler
   [request]
-  ;(if (authenticated? request)
-  ;  (response (format "Hello %s\n" (:identity request)))
-  ;  (response "NO ACCESS - UNAUTHORIZED\n"))
-  ;(let [email (get-in request [:params :email] )
-  ;      password (get-in request [:params :password] )
-  ;      token (sec/create-auth-token {:email email :password password})
-  ;      ]
-    {:status 200
-     :headers {}
-     ;:cookies { "simon" {:value token :domain "127.0.0.1"}}
-     :body "A sample response."})
+  (redirect "/index.html"))
 
 (defroutes app-routes
-           (GET "/" [] (render-file "index.html" {:dev (env :dev?)}))
+           ;(GET "/" [] (render-file "index.html" {:dev (env :dev?)}))
+           (GET "/" [] (file-response "index.html" {:root "public"}))
            (context "/api" []
              (GET "/auth-token" [] (build-auth-token))
-             (GET "/sample" [] my-sample-handler)
              (ANY "/departments" [] (departments))
              (ANY "/departments/:id" [id] (department id))
              (ANY "/department/:id" [id] (department id))
@@ -50,6 +40,7 @@
              (ANY "/holidays" [] (holidays))
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/resources "/")
+             (ANY "*" [] (file-response "index.html" {:root "public"}))
              (route/not-found "Not Found")))
 
 (def auth-backend (jws-backend {:secret "secret" :options {:alg :hs512}}))
@@ -58,16 +49,12 @@
   (->
     (routes app-routes)
     (wrap-authentication auth-backend)
-    (wrap-keyword-params)
-    (wrap-json-params)
-    (wrap-cookies)
     (prone/wrap-exceptions)
-    (handler/site)
+    (handler/site) ; Multiple standard middleware wrap_params, wrap_cookies etc
     (wrap-cors
       :access-control-allow-credentials "true"
       :access-control-allow-origin [#".*"]
       :access-control-allow-methods [:get :put :post :delete])
-    (wrap-base-url)
     #_(liberator.dev/wrap-trace :header :ui)
     ))
 

@@ -4,7 +4,6 @@
             [metime.navigation.subs]
             [metime.employees.views :as ev]
             [metime.routes :as r]
-            [secretary.core :refer-macros [defroute]]
             [re-com.core :refer [box throbber]]
             [re-frame.core :refer [register-handler
                                    path
@@ -14,12 +13,14 @@
   (:import goog.History
            goog.History.EventType))
 
-(def nav-bars [{:id :employees :text "Employees" :path (r/employees-route)}
-               {:id :file-manager :text "File Manager" :path (r/file-manager-route)}
-               {:id :calendar :text "Calendar" :path (r/calendar-route)}
-               {:id :tables :text "Tables" :path (r/tables-route)}
-               {:id :user :text "User" :path (r/user-route)}
-               {:id :log-out :text "Log out" :path (r/log-out-route)}])
+(def nav-bars [
+               ;{:id :home :text "Home" :path (r/url-for :home)}
+               {:id :employees :text "Employees" :path (r/url-for :employees)}
+               {:id :file-manager :text "File Manager" :path (r/url-for :file-manager)}
+               {:id :calendar :text "Calendar" :path (r/url-for :calendar)}
+               {:id :tables :text "Tables" :path (r/url-for :tables)}
+               {:id :user :text "User" :path (r/url-for :user)}
+               {:id :logout :text "Log out" :path (r/url-for :login)}])
 
 
 (defn loader-component []
@@ -32,7 +33,13 @@
 
 (defn login-component []
   (let [msg (subscribe [:authentication-failed])]
-        (ev/login-form @msg)))
+    (ev/login-form @msg)))
+
+(defn home-component []
+  [:div {:style {:height "500px"}}
+   [:h1 "Home page"]
+   [:div
+    [:p "Welcome to time off 4 me!!!"]]])
 
 (defn calendar-component []
   [:div {:style {:height "500px"}} [:h1 "Calendar page"]])
@@ -55,7 +62,7 @@
     (fn []
       (if-not (seq @deps)
         [loader-component]
-        [:div [ev/departments-container @deps]]))))
+        [ev/departments-container @deps]))))
 
 (defn employee-component []
   (let [emp (subscribe [:employee])]
@@ -80,15 +87,17 @@
       [:span.icon-bar]
       [:span.icon-bar]
       ]
-     [:a.navbar-brand {:href= (r/employees-route)} [:img {:src "assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
+     [:a.navbar-brand {:href (r/url-for :home)} [:img {:src "/assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
     [:div#nav-bar.navbar-collapse.collapse
      [:ul.nav.navbar-nav
       (for [nav-bar-item nav-bars]
         ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item current-nav-bar-id])]
      ]]])
 
+;; Use multimethods instead?
 (defn switch-view [view-component]
   (case view-component
+    :home home-component
     :login login-component
     :tables tables-component
     :calendar calendar-component
@@ -102,12 +111,17 @@
   (let [view-component-id (subscribe [:view-component])
         current-nav-bar (subscribe [:current-nav-bar])]
     (fn []
-      [:div
-       ;; Top nav bar
-       (when-not (= @view-component-id :login) [nav-bar @current-nav-bar])
-       ;; Switch view
-       [(switch-view @view-component-id)]
-       ])))
+      [box
+       :align :center
+       :justify :center
+       :size "auto"
+       :child [:div
+               ;; Top nav bar
+               (when-not (= @view-component-id :login) [nav-bar @current-nav-bar])
+               ;; Switch view
+               [(switch-view @view-component-id)]
+               ]])))
+
 
 ;(defn log-in []
 ;  (let [logged-in (subscribe [:logged-in])]

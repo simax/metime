@@ -8,7 +8,6 @@
                                    register-sub
                                    dispatch
                                    subscribe]]
-            [secretary.core :refer-macros [defroute]]
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [cljs-http.client :as http]
             [metime.utils :as utils]
@@ -40,8 +39,8 @@
                  :view :employees)))))
 
 (defn update-active-view [db nav-bar view-component]
-  (if (empty? (:authentication-token @db))
-    (assoc db :nav-bar nil :view :log-in)
+  (if (empty? (:authentication-token db))
+    (assoc db :nav-bar nil :view :login)
     (assoc db :nav-bar nav-bar :view view-component)))
 
 (defn add-authorization-header [token]
