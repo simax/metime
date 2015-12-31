@@ -23,17 +23,17 @@
             [environ.core :refer [env]]
             [prone.middleware :as prone]
             [liberator.dev]
-            [metime.security :as sec]))
+            [clojure.java.io :as io]))
 
-;(defn my-sample-handler
-;  [request]
-;  (redirect "/orig-plain-index.html"))
+
+(defn root-handler [_]
+  {:status 200
+   :headers {"Content-Type" "text/html; charset=utf-8"}
+   :body (slurp (-> "public/index.html" io/resource))})
 
 (defroutes app-routes
-           ;(route/resources "/")
-           ;(GET "/" [] (render-file "orig-plain-index.html" {:dev (env :dev?)}))
-           (GET "/" [] (resp/redirect "/index.html"))
-           (GET "/simon" [] (str "<h1>Hello Simon" "</h1>"))
+           (GET "/" [] root-handler)
+           (GET "/fake" [] (str "<h1>" "Meaningless URL just to test we get a response"  "</h1>"))
 
            (context "/api" []
              (GET "/auth-token" [] (build-auth-token))
@@ -45,19 +45,19 @@
              (ANY "/holidays" [] (holidays))
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))
-           (ANY "*" [] (resp/redirect "/index.html"))
-           )
+           ;; All other roots failed. Just serve the app again
+           ;; and let the client take over.
+           (ANY "*" [] root-handler))
 
 (def auth-backend (jws-backend {:secret "secret" :options {:alg :hs512}}))
 
 (def app
   (->
     app-routes
-    ;(routes app-routes)
-    ;(wrap-reload 'metime.core.app)
+    (wrap-reload)
     (wrap-authentication auth-backend)
     (prone/wrap-exceptions)
-    ;(handler/site) ; Multiple standard middleware wrap_params, wrap_cookies etc
+    ; wrap-defaults adds lots of standard middleware such as wrap_params, wrap_cookies etc
     (wrap-defaults site-defaults)
     (wrap-cors
       :access-control-allow-credentials "true"

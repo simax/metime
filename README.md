@@ -3,10 +3,10 @@
 
 ## Development
 
-To start the api. At the terminal (or command line on Windows), type `lein ring server-headless 3030`.
+To start the api. At the terminal (or command line on Windows), type `lein ring server-headless 3000`.
 
 At the terminal, type: lein figwheel
-in the browser navigate to 'http://localhost:3449'. This will connect to the REPL.
+in the browser navigate to 'http://localhost:3000'. This will connect to the REPL.
 
 Note: Global app state is held in the re-frame.db/app-db atom. @re-frame.db/app-db  
 

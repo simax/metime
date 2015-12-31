@@ -103,8 +103,8 @@
     :file-manager file-manager-component
     :user user-component
     :employees employees-component
-    :employee employee-component
-    not-found))
+    :edit-employee employee-component
+    :not-found not-found))
 
 (defn main-panel []
   (let [view-component-id (subscribe [:view-component])

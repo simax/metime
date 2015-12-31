@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [run!])
   (:require
     [reagent.core :as reagent]
+    [metime.navigation.handlers]
     [metime.navigation.views :as nv]
     [reagent.core :as reagent :refer [atom]]
     [re-frame.core :refer [register-handler
@@ -9,8 +10,7 @@
                            dispatch
                            subscribe]]
     [metime.routes :as r]
-    [devtools.core :as dt]
-    ))
+    [devtools.core :as dt]))
 
 
 (dt/install!)

@@ -1,7 +1,7 @@
 (ns metime.db)
 
 (defonce default-db
-         {:api-root-url               "http://localhost:3030/api"
+         {:api-root-url               "http://localhost:3000/api"
           :authentication-failed-msg  ""
           :employee                   {:is-ready? false :validation-errors nil}
           :view                       :login

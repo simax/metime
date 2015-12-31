@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-lein ring server-headless 3030
+lein ring server-headless 3000

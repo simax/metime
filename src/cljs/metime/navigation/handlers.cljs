@@ -31,11 +31,13 @@
 (register-handler
   :initialise-db
   (fn [db [_]]
-    (let [token (get-auth-cookie)]
-      (-> (merge db dbase/default-db)
-          (assoc :authentication-token token
-                 :nav-bar :employees
-                 :view :employees)))))
+    (if (empty? db)
+      (let [token (get-auth-cookie)]
+        (-> dbase/default-db
+            (assoc :authentication-token token
+                   :nav-bar :employees
+                   :view :employees)))
+      db)))
 
 (defn update-active-view [db nav-bar view-component]
   (if (empty? (:authentication-token db))
@@ -46,7 +48,7 @@
 (defn employee-edit-handler
   [db [_ id]]
   (dispatch [:fetch-employee id])
-  (assoc db :nav-bar :employees :view :employee))
+  (assoc db :nav-bar :employees :view :edit-employee))
 
 (register-handler
   :employee-edit

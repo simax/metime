@@ -2,23 +2,25 @@
   (:require
     [bidi.bidi :as bidi]
     [pushy.core :as pushy]
+    [metime.navigation.handlers]
     [re-frame.core :refer [register-handler
-                                   path
-                                   dispatch
-                                   subscribe]]))
+                           path
+                           dispatch
+                           subscribe]]))
 
 
-(def routes ["/" {
-                  ""              :home
-                  "employees/"    { "" :employees
-                                   [:id "/"] :edit-employee}
-                  "tables"        :tables
-                  "calendar"      :calendar
-                  "file-manager"  :file-manager
-                  "user"          :user
-                  "login"         :login
-                  "logout"        :logout
-                  }])
+(def routes ["/" [
+                  [""              :home]
+                  ["employees"     { "" :employees
+                                   [ "/" [#"\d*" :id] ] :edit-employee}]
+                  ["tables"        :tables]
+                  ["calendar"      :calendar]
+                  ["file-manager"  :file-manager]
+                  ["user"          :user]
+                  ["login"         :login]
+                  [true            :not-found]
+                  ]
+             ])
 
 (defn- parse-url [url]
   (bidi/match-route routes url))
@@ -29,17 +31,11 @@
       (dispatch [:set-active-view nil panel-name])
       (dispatch [:set-active-view panel-name panel-name]))))
 
-(defn app-routes []
-  (pushy/start! (pushy/pushy dispatch-route parse-url)))
-
 (def url-for (partial bidi/path-for routes))
 
-;(def state (atom {}))
-;
-;(defn set-page! [match]
-;  (swap! state assoc :page match))
-;
-;(def history
-;  (pushy/pushy set-page! (partial bidi/match-route app-routes)))
-;
-;(pushy/start! history)
+(def history
+  (pushy/pushy dispatch-route parse-url))
+
+(defn app-routes []
+  (pushy/start! history))
+
