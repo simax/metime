@@ -8,10 +8,7 @@
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch
-                                   subscribe]])
-
-  (:import goog.History
-           goog.History.EventType))
+                                   subscribe]]))
 
 (def nav-bars [
                {:id :employees :text "Employees" :path (r/url-for :employees)}

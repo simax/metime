@@ -9,9 +9,7 @@
             [goog.net.cookies]
             [cljs.reader :as reader]
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
-            [cljs-http.client :as http])
-  (:import goog.History
-           goog.History.EventType))
+            [cljs-http.client :as http]))
 
 (defn gravatar [data]
   (let [email-address (or (:gravatar-email data) "")

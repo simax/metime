@@ -45,7 +45,7 @@
              (ANY "/holidays" [] (holidays))
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))
-           ;; All other roots failed. Just serve the app again
+           ;; All other routes failed. Just serve the app again
            ;; and let the client take over.
            (ANY "*" [] root-handler))
 

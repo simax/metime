@@ -1,5 +1,4 @@
 (ns metime.employees.subs
-  (:refer-clojure :exclude [run!])
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
                    [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :refer [register-sub]]))

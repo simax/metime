@@ -1,13 +1,12 @@
 (ns metime.employees.views
-  (:refer-clojure :exclude [run!])
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
-                   [reagent.ratom :refer [reaction]])
+                   ;[reagent.ratom :refer [reaction]]
+                   )
   (:require [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [metime.employees.subs]
             [metime.employees.handlers]
             [metime.routes :as r]
             [metime.utils :as utils]
-            [reagent.core :refer [atom]]
             [re-com.core :refer [h-box v-box box gap
                                  title single-dropdown label
                                  input-text datepicker datepicker-dropdown button
@@ -28,9 +27,7 @@
                                    dispatch
                                    dispatch-sync
                                    subscribe]]
-            [reagent.core :as reagent])
-  (:import goog.History
-           goog.History.EventType))
+            [reagent.core :as reagent]))
 
 
 (defn employee-name [firstname lastname]

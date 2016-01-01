@@ -8,7 +8,7 @@
                            [org.clojure/clojure "1.7.0"]
                            [org.clojure/clojurescript "1.7.122"]
 
-                           [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                           [org.clojure/core.async "0.2.374"]
                            [figwheel-sidecar "0.4.0"]
 
                            [cljs-hash "0.0.2"]
@@ -36,7 +36,7 @@
                            [org.clojure/data.json "0.2.5"]
 
                            ;; UI
-                           [reagent "0.5.0"]
+                           [reagent "0.5.1"]
                            [re-frame "0.6.0"]
                            [re-com "0.8.0"]
                            [bidi "1.24.0"]
@@ -88,7 +88,8 @@
                                        :asset-path           "js/compiled/out"
                                        :output-to            "resources/public/js/compiled/app.js"
                                        :output-dir           "resources/public/js/compiled/out"
-                                       :source-map           true
+                                       :source-map           "resources/public/js/compiled/app.js.map"
+                                       ;:recompile-dependents false
                                        :source-map-timestamp true}}
                        {:id           "min"
                         :source-paths ["src/cljs"]

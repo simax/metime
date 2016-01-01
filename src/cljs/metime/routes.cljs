@@ -2,7 +2,6 @@
   (:require
     [bidi.bidi :as bidi]
     [pushy.core :as pushy]
-    [metime.navigation.handlers]
     [re-frame.core :refer [register-handler
                            path
                            dispatch
@@ -22,10 +21,10 @@
                   ]
              ])
 
-(defn- parse-url [url]
+(defn parse-url [url]
   (bidi/match-route routes url))
 
-(defn- dispatch-route [matched-route]
+(defn dispatch-route [matched-route]
   (let [panel-name (:handler matched-route)]
     (if (= panel-name :home)
       (dispatch [:set-active-view nil panel-name])
