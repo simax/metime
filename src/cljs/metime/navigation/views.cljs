@@ -16,7 +16,9 @@
                {:id :calendar :text "Calendar" :path (r/url-for :calendar)}
                {:id :tables :text "Tables" :path (r/url-for :tables)}
                {:id :user :text "User" :path (r/url-for :user)}
-               {:id :logout :text "Log out" :path (r/url-for :login)}])
+               {:id :logout :text "Log out" :path (r/url-for :login)}
+               {:id :test :text "Test" :path (r/url-for :test)}
+               ])
 
 
 (defn loader-component []
@@ -48,6 +50,12 @@
 
 (defn user-component []
   [:div {:style {:height "500px"}} [:h1 "User page"]])
+
+(defn test-component []
+  [:div {:style {:height "500px"}} [:h1 "Test page"]])
+
+(defn test-level-2-component []
+  [:div {:style {:height "500px"}} [:h1 "Test page - LEVEL 2"]])
 
 (defn not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
@@ -101,6 +109,8 @@
     :user user-component
     :employees employees-component
     :edit-employee employee-component
+    :test test-component
+    :test-level-2 test-level-2-component
     :not-found not-found))
 
 (defn main-panel []

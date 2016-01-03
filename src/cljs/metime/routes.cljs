@@ -10,13 +10,15 @@
 
 (def routes ["/" [
                   [""              :home]
-                  ["employees"     { "" :employees
-                                   [ "/" [#"\d*" :id] ] :edit-employee}]
                   ["tables"        :tables]
                   ["calendar"      :calendar]
                   ["file-manager"  :file-manager]
                   ["user"          :user]
                   ["login"         :login]
+                  ["test"          { "" :test
+                                    [ "/level-2"  ] :test-level-2-component}]
+                  ["employees"     { "" :employees
+                                    [ "/" [#"\d*" :id] ] :edit-employee}]
                   [true            :not-found]
                   ]
              ])

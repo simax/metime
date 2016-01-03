@@ -189,7 +189,8 @@
           response (<! (http/get url))
           token (if (response-ok? response)
                   ((js->clj (response :body)) :token)
-                  "")]
+                  "")
+          ]
       (set-auth-cookie! token)
       (if (empty? token)
         (dispatch [:authentication-failed])

@@ -459,7 +459,8 @@
 
 (defn employee-maintenance-form [employee]
   [v-box
-   :children [[employee-core-heading employee]
+   :children [
+              [employee-core-heading employee]
               [h-box
                :style {:flex-flow "row wrap"}
                :class "panel"

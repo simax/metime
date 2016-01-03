@@ -26,10 +26,16 @@
             [clojure.java.io :as io]))
 
 
-(defn root-handler [_]
-  {:status 200
-   :headers {"Content-Type" "text/html; charset=utf-8"}
-   :body (slurp (-> "public/index.html" io/resource))})
+;{:status 200
+; :headers {"Content-Type" "text/html; charset=utf-8"}
+; :body (slurp (-> "public/index.html" io/resource))}
+
+(def auth-backend (jws-backend {:secret "secret" :options {:alg :hs512}}))
+
+
+(defn root-handler [req]
+  (println (:content-type req))
+  (resp/content-type (resp/resource-response "/index.html" {:root "public"}) "text/html"))
 
 (defroutes app-routes
            (GET "/" [] root-handler)
@@ -47,9 +53,8 @@
              (route/not-found "Not Found"))
            ;; All other routes failed. Just serve the app again
            ;; and let the client take over.
-           (ANY "*" [] root-handler))
-
-(def auth-backend (jws-backend {:secret "secret" :options {:alg :hs512}}))
+           (ANY "*" [] root-handler)
+           )
 
 (def app
   (->
@@ -59,6 +64,8 @@
     (prone/wrap-exceptions)
     ; wrap-defaults adds lots of standard middleware such as wrap_params, wrap_cookies etc
     (wrap-defaults site-defaults)
+    ;(wrap-keyword-params)
+    ;(wrap-json-params)
     (wrap-cors
       :access-control-allow-credentials "true"
       :access-control-allow-origin [#".*"]
