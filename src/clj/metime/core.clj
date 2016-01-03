@@ -33,8 +33,7 @@
 (def auth-backend (jws-backend {:secret "secret" :options {:alg :hs512}}))
 
 
-(defn root-handler [req]
-  (println (:content-type req))
+(defn root-handler [_]
   (resp/content-type (resp/resource-response "/index.html" {:root "public"}) "text/html"))
 
 (defroutes app-routes
