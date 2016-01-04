@@ -85,7 +85,7 @@
                         :figwheel     {:on-jsload "metime.client/mount-root"}
 
                         :compiler     {:main                 metime.client
-                                       :asset-path           "js/compiled/out"
+                                       :asset-path           "/js/compiled/out"
                                        :output-to            "resources/public/js/compiled/app.js"
                                        :output-dir           "resources/public/js/compiled/out"
                                        :source-map           "resources/public/js/compiled/app.js.map"
