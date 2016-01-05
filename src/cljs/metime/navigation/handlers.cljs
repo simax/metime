@@ -38,10 +38,6 @@
                    :view :employees)))
       db)))
 
-(defn update-active-view [db nav-bar view-component]
-  (if (empty? (:authentication-token db))
-    (assoc db :nav-bar nil :view :login)
-    (assoc db :nav-bar nav-bar :view view-component)))
 
 
 (defn employee-edit-handler
@@ -55,8 +51,13 @@
 
 (register-handler
   :set-active-view
-  (fn [db [_ nav-bar view-component-id]]
-    (update-active-view db nav-bar view-component-id)))
+  (fn [db [_ view-component-id]]
+    (assoc db :view view-component-id)))
+
+(register-handler
+  :set-active-navbar
+  (fn [db [_ nav-bar-id]]
+    (assoc db :nav-bar nav-bar-id)))
 
 (register-handler
   :process-departments-response

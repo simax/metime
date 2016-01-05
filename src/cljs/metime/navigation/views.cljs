@@ -34,33 +34,41 @@
     (ev/login-form @msg)))
 
 (defn home-component []
+  (dispatch [:set-active-navbar :home])
   [:div {:style {:height "500px"}}
    [:h1 "Home page"]
    [:div
     [:p "Welcome to time off 4 me!!!"]]])
 
 (defn calendar-component []
+  (dispatch [:set-active-navbar :calendar])
   [:div {:style {:height "500px"}} [:h1 "Calendar page"]])
 
 (defn tables-component []
+  (dispatch [:set-active-navbar :tables])
   [:div {:style {:height "500px"}} [:h1 "Tables page"]])
 
 (defn file-manager-component []
+  (dispatch [:set-active-navbar :file-manager])
   [:div {:style {:height "500px"}} [:h1 "File manager page"]])
 
 (defn user-component []
+  (dispatch [:set-active-navbar :user])
   [:div {:style {:height "500px"}} [:h1 "User page"]])
 
 (defn test-component []
+  (dispatch [:set-active-navbar :test])
   [:div {:style {:height "500px"}} [:h1 "Test page"]])
 
 (defn test-level-2-component []
+  (dispatch [:set-active-navbar :test])
   [:div {:style {:height "500px"}} [:h1 "Test page - LEVEL 2"]])
 
 (defn not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
 (defn employees-component []
+  (dispatch [:set-active-navbar :employees])
   (dispatch [:fetch-department-employees "/departments"])
   (let [deps (subscribe [:departments])]
     (fn []
@@ -99,19 +107,32 @@
      ]]])
 
 ;; Use multimethods instead?
-(defn switch-view [view-component]
-  (case view-component
-    :home home-component
-    :login login-component
-    :tables tables-component
-    :calendar calendar-component
-    :file-manager file-manager-component
-    :user user-component
-    :employees employees-component
-    :edit-employee employee-component
-    :test test-component
-    :test-level-2 test-level-2-component
-    :not-found not-found))
+;(defn switch-view [view-component]
+;  (case view-component
+;    :home home-component
+;    :login login-component
+;    :tables tables-component
+;    :calendar calendar-component
+;    :file-manager file-manager-component
+;    :user user-component
+;    :employees employees-component
+;    :edit-employee employee-component
+;    :test test-component
+;    :test-level-2 test-level-2-component
+;    :not-found not-found))
+
+(defmulti set-active-view identity)
+(defmethod set-active-view :home [] home-component)
+(defmethod set-active-view :login [] login-component)
+(defmethod set-active-view :tables [] tables-component)
+(defmethod set-active-view :calendar [] calendar-component)
+(defmethod set-active-view :file-manager [] file-manager-component)
+(defmethod set-active-view :user [] user-component)
+(defmethod set-active-view :employees [] employees-component)
+(defmethod set-active-view :edit-employee [] employee-component)
+(defmethod set-active-view :test [] test-component)
+(defmethod set-active-view :test-level-2 [] test-level-2-component)
+(defmethod set-active-view :not-found [] not-found)
 
 (defn main-panel []
   (let [view-component-id (subscribe [:view-component])
@@ -125,7 +146,7 @@
                ;; Top nav bar
                (when-not (= @view-component-id :login) [nav-bar @current-nav-bar])
                ;; Switch view
-               [(switch-view @view-component-id)]
+               [(set-active-view @view-component-id)]
                ]])))
 
 (defn initial-panel []

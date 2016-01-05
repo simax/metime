@@ -108,7 +108,7 @@
         (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
         (do
           ;(utils/set-hash! (r/url-for :employees))
-          (dispatch [:set-active-view :employees :employees])
+          (dispatch [:set-active-view :employees])
           db)))
     (validate-employee db _)))
 
