@@ -34,8 +34,8 @@
       (let [token (get-auth-cookie)]
         (-> dbase/default-db
             (assoc :authentication-token token
-                   :nav-bar :employees
-                   :view :employees)))
+                   :nav-bar :home
+                   :view :home)))
       db)))
 
 
@@ -43,10 +43,10 @@
 (defn employee-edit-handler
   [db [_ id]]
   (dispatch [:fetch-employee id])
-  (assoc db :nav-bar :employees :view :edit-employee))
+  (assoc db :nav-bar :employees :view :employee-editor))
 
 (register-handler
-  :employee-edit
+  :employee-to-edit
   employee-edit-handler)
 
 (register-handler

@@ -106,21 +106,6 @@
         ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item current-nav-bar-id])]
      ]]])
 
-;; Use multimethods instead?
-;(defn switch-view [view-component]
-;  (case view-component
-;    :home home-component
-;    :login login-component
-;    :tables tables-component
-;    :calendar calendar-component
-;    :file-manager file-manager-component
-;    :user user-component
-;    :employees employees-component
-;    :edit-employee employee-component
-;    :test test-component
-;    :test-level-2 test-level-2-component
-;    :not-found not-found))
-
 (defmulti set-active-view identity)
 (defmethod set-active-view :home [] home-component)
 (defmethod set-active-view :login [] login-component)
@@ -129,7 +114,7 @@
 (defmethod set-active-view :file-manager [] file-manager-component)
 (defmethod set-active-view :user [] user-component)
 (defmethod set-active-view :employees [] employees-component)
-(defmethod set-active-view :edit-employee [] employee-component)
+(defmethod set-active-view :employee-editor [] employee-component)
 (defmethod set-active-view :test [] test-component)
 (defmethod set-active-view :test-level-2 [] test-level-2-component)
 (defmethod set-active-view :not-found [] not-found)
