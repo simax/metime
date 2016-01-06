@@ -8,7 +8,8 @@
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch
-                                   subscribe]]))
+                                   subscribe]]
+            [pushy.core :as pushy]))
 
 (def nav-bars [
                {:id :employees :text "Employees" :path (r/url-for :employees)}
@@ -106,18 +107,18 @@
         ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item current-nav-bar-id])]
      ]]])
 
-(defmulti set-active-view identity)
-(defmethod set-active-view :home [] home-component)
-(defmethod set-active-view :login [] login-component)
-(defmethod set-active-view :tables [] tables-component)
-(defmethod set-active-view :calendar [] calendar-component)
-(defmethod set-active-view :file-manager [] file-manager-component)
-(defmethod set-active-view :user [] user-component)
-(defmethod set-active-view :employees [] employees-component)
-(defmethod set-active-view :employee-editor [] employee-component)
-(defmethod set-active-view :test [] test-component)
-(defmethod set-active-view :test-level-2 [] test-level-2-component)
-(defmethod set-active-view :not-found [] not-found)
+(defmulti  route-switcher (fn [route-info] (:handler route-info)))
+(defmethod route-switcher :home [_] home-component)
+(defmethod route-switcher :login [_] login-component)
+(defmethod route-switcher :tables [_] tables-component)
+(defmethod route-switcher :calendar [_] calendar-component)
+(defmethod route-switcher :file-manager [_] file-manager-component)
+(defmethod route-switcher :user [_] user-component)
+(defmethod route-switcher :employees [_] employees-component)
+(defmethod route-switcher :employee-editor [route-info] (dispatch [:employee-to-edit (get-in route-info [:route-params :id])]))
+(defmethod route-switcher :test [_] test-component)
+(defmethod route-switcher :test-level-2 [_] test-level-2-component)
+(defmethod route-switcher :not-found [_] not-found)
 
 (defn main-panel []
   (let [view-component-id (subscribe [:view-component])
@@ -130,8 +131,8 @@
        :child [:div
                ;; Top nav bar
                (when-not (= @view-component-id :login) [nav-bar @current-nav-bar])
-               ;; Switch view
-               [(set-active-view @view-component-id)]
+               ;; Go to the right place in the app
+               [(route-switcher (r/parse-url (pushy/get-token r/history)))]
                ]])))
 
 (defn initial-panel []
