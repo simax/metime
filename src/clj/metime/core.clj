@@ -41,7 +41,9 @@
            (GET "/fake" [] (str "<h1>" "Meaningless URL just to test we get a response"  "</h1>"))
 
            (context "/api" []
-             (GET "/auth-token" [] (build-auth-token))
+
+             (GET "/simon" [] (fn [_] {:status 200 :body "Some text from Simon"}))
+             (GET "/authtoken" [] (build-auth-token))       ; (fn [_] {:status 200 :body "Some text from Simon"})
              (ANY "/departments" [] (departments))
              (ANY "/departments/:id" [id] (department id))
              (ANY "/department/:id" [id] (department id))

@@ -30,14 +30,13 @@
 (register-handler
   :initialise-db
   (fn [db [_]]
-    (if (empty? db)
-      (let [token (get-auth-cookie)]
-        (-> dbase/default-db
-            (assoc :authentication-token token
-                   :nav-bar :home
-                   :view :home)))
-      db)))
-
+    ;(if (empty? db)
+    ;  db)
+    (let [token (get-auth-cookie)]
+      (-> dbase/default-db
+          (assoc :authentication-token token
+                 :nav-bar :home
+                 :view :home)))))
 
 
 (defn employee-edit-handler

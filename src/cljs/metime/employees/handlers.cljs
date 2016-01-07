@@ -1,6 +1,6 @@
 (ns metime.employees.handlers
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [cljs.core.async :refer [put! take! <! >! chan timeout]]
+  (:require [cljs.core.async :refer [<!]]
             [metime.utils :as utils]
             [metime.routes :as r]
             [cljs-http.client :as http]
@@ -183,9 +183,12 @@
 (defn response-ok? [response]
   (= 200 (:status response)))
 
+(defn build-url [db]
+  (str (:api-root-url db) "/authtoken?" "email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password])))
+
 (defn authenticate-user [db [_]]
   (go
-    (let [url (str (:api-root-url db) "/auth-token?" "email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password]))
+    (let [url (str (:api-root-url db) "/authtoken?" "email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password]))
           response (<! (http/get url))
           token (if (response-ok? response)
                   ((js->clj (response :body)) :token)
@@ -197,6 +200,23 @@
         (dispatch [:authenticated token]))))
   db)
 
+; "http://localhost:3000/api/simon"
+
+;(when (response-ok? response)
+;  (let [token ((response :body) :token)]
+;    (if (empty? token)
+;      (dispatch [:authentication-failed])
+;      (do
+;        (set-auth-cookie! token)
+;        (dispatch [:authenticated token])))))
+
+
+;(let [response (<! (secure-url url token))
+;      status (:status response)]
+;  (if (= status 401)
+;    (dispatch [invalid-token-handler])
+;    (dispatch [valid-token-handler (get-in response response-keys)])))
+
 (register-handler
   :log-in
   authenticate-user)
@@ -205,7 +225,7 @@
   :log-out
   (fn [db [_]]
     (assoc db
-      :view                       :login
-      :authentication-failed-msg  ""
-      :nav-bar                    nil
+      :view :login
+      :authentication-failed-msg ""
+      :nav-bar nil
       )))
