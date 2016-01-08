@@ -29,13 +29,10 @@
 
 (register-handler
   :initialise-db
-  (fn [db [_]]
-    ;(if (empty? db)
-    ;  db)
+  (fn [_ [_]]
     (let [token (get-auth-cookie)]
       (-> dbase/default-db
           (assoc :authentication-token token
-                 :nav-bar :home
                  :view :home)))))
 
 

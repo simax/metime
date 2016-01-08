@@ -14,15 +14,25 @@
 
 (dt/install!)
 
+(defmulti  route-switcher (fn [route-info] (:handler route-info)))
+(defmethod route-switcher :home [_] (dispatch [:set-active-view :home]))
+(defmethod route-switcher :login [_] (dispatch [:set-active-view :login]))
+(defmethod route-switcher :tables [_] (dispatch [:set-active-view :tables]))
+(defmethod route-switcher :calendar [_] (dispatch [:set-active-view :calendar]))
+(defmethod route-switcher :file-manager [_] (dispatch [:set-active-view :file-manager]))
+(defmethod route-switcher :user [_] (dispatch [:set-active-view :user]))
+(defmethod route-switcher :employees [_] (dispatch [:set-active-view :employees]))
+(defmethod route-switcher :employee-editor [route-info] (dispatch [:employee-to-edit (get-in route-info [:route-params :id])]))
+(defmethod route-switcher :test [_] (dispatch [:set-active-view :test]))
+(defmethod route-switcher :test-level-2 [_] (dispatch [:set-active-view :test]))
+(defmethod route-switcher :not-found [_] (dispatch [:set-active-view :not-found]))
+
 (defn mount-root []
   (reagent/render [nv/initial-panel] (.getElementById js/document "app-container")))
 
 (defn ^:export main []
   (r/app-routes)
   (dispatch [:initialise-db])
-
-  (println (str "current url: " (pushy/get-token r/history)))
-  (println (r/parse-url (pushy/get-token r/history)))
-
+  (route-switcher (r/parse-url (pushy/get-token r/history)))
   (mount-root))
 

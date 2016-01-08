@@ -177,7 +177,6 @@
   (fn [db [_]]
     (assoc db :authentication-token ""
               :authentication-failed-msg "Invalid email/password"
-              :nav-bar nil
               :view :login)))
 
 (defn response-ok? [response]
@@ -188,7 +187,7 @@
 
 (defn authenticate-user [db [_]]
   (go
-    (let [url (str (:api-root-url db) "/authtoken?" "email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password]))
+    (let [url (build-url db)
           response (<! (http/get url))
           token (if (response-ok? response)
                   ((js->clj (response :body)) :token)
@@ -226,6 +225,4 @@
   (fn [db [_]]
     (assoc db
       :view :login
-      :authentication-failed-msg ""
-      :nav-bar nil
-      )))
+      :authentication-failed-msg "")))
