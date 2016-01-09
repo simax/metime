@@ -8,8 +8,7 @@
             [re-frame.core :refer [register-handler
                                    path
                                    dispatch
-                                   subscribe]]
-            [pushy.core :as pushy]))
+                                   subscribe]]))
 
 (def nav-bars [
                {:id :employees :text "Employees" :path (r/url-for :employees)}
@@ -30,57 +29,61 @@
    :justify :center
    :child [:div (throbber :size :large :color "lime")]])
 
-(defn login-component []
+(defn view-login []
   (let [msg (subscribe [:authentication-failed])]
     (ev/login-form @msg)))
 
-(defn home-component []
+(defn view-home []
   (dispatch [:set-active-navbar :home])
+  ;(dispatch [:set-active-route [:home]])
   [:div {:style {:height "500px"}}
    [:h1 "Home page"]
    [:div
     [:p "Welcome to time off 4 me!!!"]]])
 
-(defn calendar-component []
+(defn view-calendar []
   (dispatch [:set-active-navbar :calendar])
+  ;(dispatch [:set-active-route [:calendar]])
   [:div {:style {:height "500px"}} [:h1 "Calendar page"]])
 
-(defn tables-component []
+(defn view-tables []
   (dispatch [:set-active-navbar :tables])
   [:div {:style {:height "500px"}} [:h1 "Tables page"]])
 
-(defn file-manager-component []
+(defn view-file-manager []
   (dispatch [:set-active-navbar :file-manager])
   [:div {:style {:height "500px"}} [:h1 "File manager page"]])
 
-(defn user-component []
+(defn view-user []
   (dispatch [:set-active-navbar :user])
   [:div {:style {:height "500px"}} [:h1 "User page"]])
 
-(defn test-component []
+(defn view-test []
   (dispatch [:set-active-navbar :test])
   [:div {:style {:height "500px"}} [:h1 "Test page"]])
 
-(defn test-level-2-component []
+(defn view-test-level-2 []
   (dispatch [:set-active-navbar :test])
   [:div {:style {:height "500px"}} [:h1 "Test page - LEVEL 2"]])
 
-(defn not-found []
+(defn view-not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
 
-(defn employees-component []
+(defn view-employees []
   (dispatch [:set-active-navbar :employees])
-  (dispatch [:fetch-department-employees "/departments"])
-  (let [deps (subscribe [:departments])]
+  (dispatch [:fetch-departments-and-employees "/departments"])
+  (let [departments-and-employees (subscribe [:departments-and-employees])]
     (fn []
-      (if-not (seq @deps)
+      (if-not (seq @departments-and-employees)
         [loader-component]
-        [ev/departments-container @deps]))))
+        [ev/departments-container @departments-and-employees]))))
 
-(defn employee-component []
-  (let [emp (subscribe [:employee])]
+(defn view-employee []
+  (let [emp (subscribe [:employee])
+        departments (subscribe [:departments])]
     (fn []
-      (if (not (:is-ready? @emp))
+      (when (not (some? @departments)) (dispatch [:fetch-departments-only "/departments-only"]))
+      (if (not (or (:is-ready? @emp) (some? @departments))) ; (not (:is-ready? @emp))
         [loader-component]
         (if (:not-found @emp)
           [ev/employee-not-found]
@@ -109,20 +112,23 @@
 
 
 (defmulti set-active-view identity)
-(defmethod set-active-view :home [] home-component)
-(defmethod set-active-view :login [] login-component)
-(defmethod set-active-view :tables [] tables-component)
-(defmethod set-active-view :calendar [] calendar-component)
-(defmethod set-active-view :file-manager [] file-manager-component)
-(defmethod set-active-view :user [] user-component)
-(defmethod set-active-view :employees [] employees-component)
-(defmethod set-active-view :employee-editor [] employee-component)
-(defmethod set-active-view :test [] test-component)
-(defmethod set-active-view :test-level-2 [] test-level-2-component)
-(defmethod set-active-view :not-found [] not-found)
+(defmethod set-active-view :home [] view-home)
+(defmethod set-active-view :login [] view-login)
+(defmethod set-active-view :tables [] view-tables)
+(defmethod set-active-view :calendar [] view-calendar)
+(defmethod set-active-view :file-manager [] view-file-manager)
+(defmethod set-active-view :user [] view-user)
+(defmethod set-active-view :employees [] view-employees)
+(defmethod set-active-view :employee-editor [] view-employee)
+(defmethod set-active-view :test [] view-test)
+(defmethod set-active-view :test-level-2 [] view-test-level-2)
+(defmethod set-active-view :not-found [] view-not-found)
+
+(defn set-active-navbar [current-nav-bar]
+  [nav-bar current-nav-bar])
 
 (defn main-panel []
-  (let [view-component-id (subscribe [:view-component])
+  (let [current-view (subscribe [:current-view])
         current-nav-bar (subscribe [:current-nav-bar])]
     (fn []
       [box
@@ -130,10 +136,10 @@
        :justify :center
        :size "auto"
        :child [:div
-               ;; Top nav bar
-               (when-not (= @view-component-id :login) [nav-bar @current-nav-bar])
-               ;; Switch view
-               [(set-active-view @view-component-id)]
+               ;; Display active navbar
+               (set-active-navbar @current-nav-bar)
+               ;; Display active view
+               [(set-active-view @current-view)]
                ]])))
 
 (defn initial-panel []

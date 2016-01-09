@@ -24,14 +24,14 @@
 (defmethod route-switcher :employees [_] (dispatch [:set-active-view :employees]))
 (defmethod route-switcher :employee-editor [route-info] (dispatch [:employee-to-edit (get-in route-info [:route-params :id])]))
 (defmethod route-switcher :test [_] (dispatch [:set-active-view :test]))
-(defmethod route-switcher :test-level-2 [_] (dispatch [:set-active-view :test]))
+(defmethod route-switcher :test-level-2 [_] (dispatch [:set-active-view :test-level-2]))
 (defmethod route-switcher :not-found [_] (dispatch [:set-active-view :not-found]))
 
 (defn mount-root []
   (reagent/render [nv/initial-panel] (.getElementById js/document "app-container")))
 
 (defn ^:export main []
-  (r/app-routes)
+  (r/start-routing)
   (dispatch [:initialise-db])
   (route-switcher (r/parse-url (pushy/get-token r/history)))
   (mount-root))

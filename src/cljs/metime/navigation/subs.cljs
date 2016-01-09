@@ -4,9 +4,9 @@
   (:require [re-frame.core :refer [register-sub]]))
 
 (register-sub
-  :departments
+  :departments-and-employees
   (fn [db _]
-    (reaction (:deps @db))))
+    (reaction (:departments-and-employees @db))))
 
 (register-sub
   :employee
@@ -14,7 +14,7 @@
     (reaction (:employee @db))))
 
 (register-sub
-  :view-component
+  :current-view
   (fn [db _]
     (reaction (:view @db))))
 
@@ -22,6 +22,11 @@
   :current-nav-bar
   (fn [db _]
     (reaction (:nav-bar @db))))
+
+(register-sub
+  :current-route
+  (fn [db _]
+    (reaction (:route-params @db))))
 
 (register-sub
   :nav-bars

@@ -1,7 +1,5 @@
 (ns metime.employees.views
-  (:require-macros [cljs.core.async.macros :refer [go alt!]]
-                   ;[reagent.ratom :refer [reaction]]
-                   )
+  (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [metime.employees.subs]
             [metime.employees.handlers]
@@ -88,19 +86,19 @@
               ^{:key (:id employee-item)} [employee-list-item employee-item])
             )]])]]))
 
-(defn department-list [departments]
+(defn department-list [departments-and-employees]
   [:div.clearfix.accordian
    [:ul
-    (for [dep departments]
-      ^{:key (:department dep)} [:li [department-list-item dep]])
+    (for [department departments-and-employees]
+      ^{:key (:department department)} [:li [department-list-item department]])
     ]])
 
-(defn departments-container [deps]
+(defn departments-container [departments-and-employees]
   [box
    :justify :center
    :align :center
    :child
-   [department-list deps]])
+   [department-list departments-and-employees]])
 
 (defn employee-not-found []
   [box :child [:div.well [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."]]])
@@ -147,7 +145,7 @@
 (defn department-list-choices [departments]
   (into []
         (for [m @departments]
-          {:id (:department_id m) :label (:department m)})))
+          {:id (:departmentid m) :label (:department m)})))
 
 (defn department-drop-down-list [employee departments]
   [h-box
@@ -405,7 +403,7 @@
 
 
 (defn employee-core-details []
-  (let [departments (subscribe [:deps])]
+  (let [departments (subscribe [:departments])]
     (fn [employee]
       [v-box
        :width "500px"

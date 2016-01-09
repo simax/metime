@@ -9,17 +9,17 @@
 
 
 (def routes ["/" [
-                  [""              :home]
-                  ["tables"        :tables]
-                  ["calendar"      :calendar]
-                  ["file-manager"  :file-manager]
-                  ["user"          :user]
-                  ["login"         :login]
-                  ["test"          { "" :test
-                                    [ "/level-2"  ] :test-level-2}]
-                  ["employees"     {""                 :employees
-                                    ["/" [#"\d*" :id]] :employee-editor}]
-                  [true            :not-found]
+                  ["" :home]
+                  ["tables" :tables]
+                  ["calendar" :calendar]
+                  ["file-manager" :file-manager]
+                  ["user" :user]
+                  ["login" :login]
+                  ["test" {""           :test
+                           ["/level-2"] :test-level-2}]
+                  ["employees" {""                 :employees
+                                ["/" [#"\d*" :id]] :employee-editor}]
+                  [true :not-found]
                   ]
              ])
 
@@ -35,6 +35,11 @@
 (def history
   (pushy/pushy dispatch-route parse-url))
 
-(defn app-routes []
+(defn set-route-token!
+  "Set the url from the given route params"
+  [params]
+  (pushy/set-token! history (apply url-for params)))
+
+(defn start-routing []
   (pushy/start! history))
 

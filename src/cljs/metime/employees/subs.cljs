@@ -3,13 +3,11 @@
                    [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :refer [register-sub]]))
 
-(defn departments-query
-  [db _]
-  (reaction (get-in @db [:deps])))
 
 (register-sub
-  :deps
-  departments-query)
+  :departments
+  (fn [db _]
+    (reaction (:departments @db ))))
 
 (register-sub
   :department-id

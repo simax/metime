@@ -53,8 +53,7 @@
     (assoc-in db [:employee property-name] date-value)))
 
 (defn handle-employee-add [db [_ departmentid managerid]]
-  (let [dep (first (filter #(= (:departmentid %) departmentid) (:deps db)))]
-    ;(utils/set-hash! (r/url-for :employee-add))
+  (let [dep (first (filter #(= (:departmentid %) departmentid) (:departments-and-employees db)))]
     (merge db
            (assoc db :nav-bar :employees :view :employee)
            {:employee
@@ -113,17 +112,22 @@
     (validate-employee db _)))
 
 
-(defn handle-department-change [db [_ id]]
-  (let [deps (:deps db)
-        dep (first (filter #(= (:departmentid %) (js/parseInt id)) deps))
-        updated-emp (assoc (:employee db)
-                      :department_id id
-                      :department (:department dep)
-                      :managerid (:managerid dep)
-                      :manager-email (:manager-email dep)
-                      :manager-firstname (:manager-firstname dep)
-                      :manager-lastname (:manager-lastname dep))]
-    (assoc db :employee updated-emp)))
+
+
+(register-handler
+  :department-change
+  (fn [db [_ id]]
+    (let [deps (:departments db)
+          dep (first (filter #(= (:departmentid %) (js/parseInt id)) deps))
+          updated-emp (assoc (:employee db)
+                        :department_id id
+                        :department (:department dep)
+                        :managerid (:managerid dep)
+                        :manager-email (:manager-email dep)
+                        :manager-firstname (:manager-firstname dep)
+                        :manager-lastname (:manager-lastname dep))]
+      (assoc db :employee updated-emp))))
+
 
 (register-handler
   :input-change
@@ -148,10 +152,6 @@
   handle-employee-save)
 
 (register-handler
-  :department-change
-  handle-department-change)
-
-(register-handler
   :ui-department-drawer-status-toggle
   (fn [db [_ department]]
     (if (= (:department-draw-open-id db) department)
@@ -165,11 +165,12 @@
 
 (defn set-auth-cookie! [token]
   (let [expiry (* 60 60 24 30)]                             ; 30 days (secs mins hours days)
-    (utils/set-cookie! "auth" token {:max-age expiry})))
+    (utils/set-cookie! "auth" token {:max-age expiry :path "/"})))
 
 (register-handler
   :authenticated
   (fn [db [_ token]]
+    (r/set-route-token! [:home])
     (assoc db :authentication-token token :authentication-failed-msg "" :nav-bar nil :view :home)))
 
 (register-handler
@@ -185,40 +186,22 @@
 (defn build-url [db]
   (str (:api-root-url db) "/authtoken?" "email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password])))
 
-(defn authenticate-user [db [_]]
-  (go
-    (let [url (build-url db)
-          response (<! (http/get url))
-          token (if (response-ok? response)
-                  ((js->clj (response :body)) :token)
-                  "")
-          ]
-      (set-auth-cookie! token)
-      (if (empty? token)
-        (dispatch [:authentication-failed])
-        (dispatch [:authenticated token]))))
-  db)
-
-; "http://localhost:3000/api/simon"
-
-;(when (response-ok? response)
-;  (let [token ((response :body) :token)]
-;    (if (empty? token)
-;      (dispatch [:authentication-failed])
-;      (do
-;        (set-auth-cookie! token)
-;        (dispatch [:authenticated token])))))
-
-
-;(let [response (<! (secure-url url token))
-;      status (:status response)]
-;  (if (= status 401)
-;    (dispatch [invalid-token-handler])
-;    (dispatch [valid-token-handler (get-in response response-keys)])))
 
 (register-handler
   :log-in
-  authenticate-user)
+  (fn [db [_]]
+    (go
+      (let [url (build-url db)
+            response (<! (http/get url))
+            token (if (response-ok? response)
+                    ((js->clj (response :body)) :token)
+                    "")
+            ]
+        (set-auth-cookie! token)
+        (if (empty? token)
+          (dispatch [:authentication-failed])
+          (dispatch [:authenticated token]))))
+    db))
 
 (register-handler
   :log-out

@@ -36,14 +36,12 @@
                  :view :home)))))
 
 
-(defn employee-edit-handler
-  [db [_ id]]
-  (dispatch [:fetch-employee id])
-  (assoc db :nav-bar :employees :view :employee-editor))
-
 (register-handler
   :employee-to-edit
-  employee-edit-handler)
+  (fn employee-edit-handler
+    [db [_ id]]
+    (dispatch [:fetch-employee id])
+    (assoc db :nav-bar :employees :view :employee-editor)))
 
 (register-handler
   :set-active-view
@@ -58,7 +56,14 @@
 (register-handler
   :process-departments-response
   (fn [db [_ department-employees]]
-    (assoc db :deps (js->clj department-employees))))
+    (let [value (js->clj department-employees)]
+      (assoc db :departments-and-employees value))))
+
+(register-handler
+  :process-departments-only-response
+  (fn [db [_ departments]]
+    (let [value (js->clj departments)]
+      (assoc db :departments value))))
 
 (register-handler
   :process-employee-response
@@ -71,7 +76,18 @@
 
 
 (register-handler
-  :fetch-department-employees
+  :fetch-departments-only
+  (fn [db [_ endpoint]]
+    (let [url (utils/api db endpoint)
+          token (:authentication-token db)
+          valid-token-handler :process-departments-only-response
+          invalid-token-handler :log-out
+          response-keys [:body :departments]]
+      (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
+    db))
+
+(register-handler
+  :fetch-departments-and-employees
   (fn [db [_ endpoint]]
     (let [url (utils/api db endpoint)
           token (:authentication-token db)

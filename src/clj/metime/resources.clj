@@ -242,6 +242,8 @@
                                    (sort-by :lastname (vals grouped-emps))))]
     (sort-by :department (join set-of-deps set-of-emps))))
 
+(defn fetch-departments []
+  (deps/get-all-departments))
 
 ;;TODO: Need a password reset resource.
 
@@ -302,6 +304,16 @@
                                  {:status 403 :body (::failure-message ctx)}
                                  {:location (::location ctx)}))
 
+             :handle-ok ::departments)
+
+(defresource departments-only []
+             (secured-resource)
+             :available-media-types ["application/edn" "application/json"]
+             :allowed-methods [:get]
+             :exists? (fn [ctx]
+                        (if (requested-method ctx :get)
+                          [true {::departments {:departments (fetch-departments)}}]
+                          ))
              :handle-ok ::departments)
 
 
