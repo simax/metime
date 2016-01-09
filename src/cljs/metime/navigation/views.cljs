@@ -124,8 +124,8 @@
 (defmethod set-active-view :test-level-2 [] view-test-level-2)
 (defmethod set-active-view :not-found [] view-not-found)
 
-(defn set-active-navbar [current-nav-bar]
-  [nav-bar current-nav-bar])
+(defn set-active-navbar [current-nav-bar current-view]
+  (when-not (= current-view :login) [nav-bar current-nav-bar]))
 
 (defn main-panel []
   (let [current-view (subscribe [:current-view])
@@ -137,7 +137,7 @@
        :size "auto"
        :child [:div
                ;; Display active navbar
-               (set-active-navbar @current-nav-bar)
+               (set-active-navbar @current-nav-bar @current-view)
                ;; Display active view
                [(set-active-view @current-view)]
                ]])))

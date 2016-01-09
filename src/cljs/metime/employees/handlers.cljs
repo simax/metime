@@ -206,6 +206,7 @@
 (register-handler
   :log-out
   (fn [db [_]]
+    (utils/remove-cookie! "auth")
     (assoc db
       :view :login
       :authentication-failed-msg "")))
