@@ -71,7 +71,7 @@
 
 (defn view-employees []
   (dispatch [:set-active-navbar :employees])
-  (dispatch [:fetch-departments-and-employees "/departments"])
+  (dispatch [:fetch-departments-and-employees "/departments-and-employees"])
   (let [departments-and-employees (subscribe [:departments-and-employees])]
     (fn []
       (if-not (seq @departments-and-employees)
@@ -79,10 +79,10 @@
         [ev/departments-container @departments-and-employees]))))
 
 (defn view-employee []
+  (dispatch [:fetch-departments-only "/departments-only"])
   (let [emp (subscribe [:employee])
         departments (subscribe [:departments])]
     (fn []
-      (when (not (some? @departments)) (dispatch [:fetch-departments-only "/departments-only"]))
       (if (not (or (:is-ready? @emp) (some? @departments))) ; (not (:is-ready? @emp))
         [loader-component]
         (if (:not-found @emp)

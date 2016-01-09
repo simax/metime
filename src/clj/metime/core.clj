@@ -44,7 +44,7 @@
 
              (GET "/simon" [] (fn [_] {:status 200 :body "Some text from Simon"}))
              (GET "/authtoken" [] (build-auth-token))       ; (fn [_] {:status 200 :body "Some text from Simon"})
-             (ANY "/departments" [] (departments))
+             (ANY "/departments-and-employees" [] (departments))
              (ANY "/departments-only" [] (departments-only))
              (ANY "/departments/:id" [id] (department id))
              (ANY "/department/:id" [id] (department id))
