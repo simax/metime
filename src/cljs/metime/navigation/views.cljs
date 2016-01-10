@@ -119,6 +119,7 @@
 (defmethod set-active-view :file-manager [] view-file-manager)
 (defmethod set-active-view :user [] view-user)
 (defmethod set-active-view :employees [] view-employees)
+(defmethod set-active-view :employee-add [] view-employee)
 (defmethod set-active-view :employee-editor [] view-employee)
 (defmethod set-active-view :test [] view-test)
 (defmethod set-active-view :test-level-2 [] view-test-level-2)

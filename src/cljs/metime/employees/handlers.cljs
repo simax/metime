@@ -41,41 +41,6 @@
     ;(when (seq result) (.log js/console db))
     (assoc-in db [:employee :validation-errors] errors)))
 
-(defn handle-input-change [db [_ property-name new-value]]
-  (assoc-in db [:employee property-name] new-value))
-
-(defn handle-input-change-balances [db [_ property-name new-value]]
-  (assoc-in db [:employee property-name] (utils/parse-int new-value)))
-
-(defn handle-input-change-dates [db [_ property-name new-value]]
-  (let [date-value (try (unparse british-date-format new-value)
-                        (catch :default e new-value))]
-    (assoc-in db [:employee property-name] date-value)))
-
-(defn handle-employee-add [db [_ departmentid managerid]]
-  (let [dep (first (filter #(= (:departmentid %) departmentid) (:departments-and-employees db)))]
-    (merge db
-           (assoc db :nav-bar :employees :view :employee)
-           {:employee
-            {:is-ready?           true
-             :id                  0
-             :firstname           ""
-             :lastname            ""
-             :email               ""
-             :dob                 nil
-             :startdate           nil
-             :enddate             nil
-             :this_year_opening   25
-             :this_year_remaining 25
-             :next_year_opening   25
-             :next_year_remaining 25
-             :department_id       departmentid
-             :managerid           managerid
-             :manager-firstname   (:manager-firstname dep)
-             :manager-lastname    (:manager-lastname dep)
-             :manager-email       (:manager-email dep)
-             }})))
-
 (defn get-employee-save-endpoint [db employee-id]
   (if (not (is-new-employee? employee-id))
     {:url (utils/api db (str "/employee/" employee-id)) :verb http/put}
@@ -92,28 +57,6 @@
 ;  db)
 ;
 
-(defn handle-employee-save [db _]
-  (if (apply b/valid? (:employee db) employee-validation-rules)
-    (let [employee-id (get-in db [:employee :id])
-          endpoint (get-employee-save-endpoint db employee-id)
-          data (assoc (:employee db) :password "password1" :password-confirm "password1")
-          token (:authentication-token db)
-          auth-header (utils/get-authorization-header token)
-          ;TODO: Fix issue here!!
-          response (go (<! (apply (:verb endpoint) [(:url endpoint) auth-header {:form-params data}])))
-          ]
-
-      (if (= (:status response) 409)                        ;; Conflict
-        (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
-        (do
-          ;(utils/set-hash! (r/url-for :employees))
-          (dispatch [:set-active-view :employees])
-          db)))
-    (validate-employee db _)))
-
-
-
-
 (register-handler
   :department-change
   (fn [db [_ id]]
@@ -128,28 +71,87 @@
                         :manager-lastname (:manager-lastname dep))]
       (assoc db :employee updated-emp))))
 
-
 (register-handler
   :input-change
   (enrich validate-employee)
-  handle-input-change)
+  (fn [db [_ property-name new-value]]
+    (assoc-in db [:employee property-name] new-value)))
 
 (register-handler
   :input-change-dates
   (enrich validate-employee)
-  handle-input-change-dates)
+  (fn [db [_ property-name new-value]]
+    (let [date-value (try (unparse british-date-format new-value)
+                          (catch :default e new-value))]
+      (assoc-in db [:employee property-name] date-value))))
 
 (register-handler
   :input-change-balances
-  handle-input-change-balances)
+  (fn [db [_ property-name new-value]]
+    (assoc-in db [:employee property-name] (utils/parse-int new-value))))
 
 (register-handler
   :employee-add
-  handle-employee-add)
+  (fn [db [_ departmentid managerid]]
+    (let [dep (first (filter #(= (:departmentid %) departmentid) (:departments-and-employees db)))]
+      (-> db
+          (merge
+            {:nav-bar :employees :view :employee-add
+             :employee
+                      {:is-ready?           true
+                       :id                  0
+                       :firstname           "John"
+                       :lastname            "Doe"
+                       :email               "johndow@somewhere.com"
+                       :dob                 "01-01-1980"
+                       :startdate           "01-01-2000"
+                       :enddate             nil
+                       :this_year_opening   25
+                       :this_year_remaining 25
+                       :next_year_opening   25
+                       :next_year_remaining 25
+                       :department_id       departmentid
+                       :managerid           managerid
+                       :manager-firstname   (:manager-firstname dep)
+                       :manager-lastname    (:manager-lastname dep)
+                       :manager-email       (:manager-email dep)
+                       :password            "password1"
+                       :password-confirm    "password1"
+                       }})))))
+
+
+(register-handler
+  :fetch-departments-only
+  (fn [db [_ endpoint]]
+    (utils/call-api (utils/api db endpoint) (:authentication-token db)
+                    {:valid-token-handler   :process-departments-only-response
+                     :invalid-token-handler :log-out
+                     :response-keys         [:body :departments]})
+    db))
+
+
+(defn show-conflict-error [response]
+  (if (= (:status response) 409)                            ;; Conflict
+    (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
+    (do
+      ;(utils/set-hash! (r/url-for :employees))
+      (dispatch [:set-active-view :employees]))))
 
 (register-handler
   :employee-save
-  handle-employee-save)
+  (fn [db [_ endpoint]]
+    (let [employee (:employee db)]
+      (if (apply b/valid? employee employee-validation-rules)
+        (let [;employee-id (get-in db [:employee :id])
+              ;endpoint (get-employee-save-endpoint db employee-id)
+              token (:authentication-token db)
+              auth-header (utils/build-authorization-header token)
+              ;TODO: Fix issue here!!
+              response (go (<! (apply (:verb endpoint) [(:url endpoint) auth-header {:form-params employee}])))
+              ]
+
+          (show-conflict-error response))
+        (validate-employee db _)))))
 
 (register-handler
   :ui-department-drawer-status-toggle
@@ -195,8 +197,7 @@
             response (<! (http/get url))
             token (if (response-ok? response)
                     ((js->clj (response :body)) :token)
-                    "")
-            ]
+                    "")]
         (set-auth-cookie! token)
         (if (empty? token)
           (dispatch [:authentication-failed])

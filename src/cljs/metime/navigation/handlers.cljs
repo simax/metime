@@ -78,32 +78,26 @@
 (register-handler
   :fetch-departments-only
   (fn [db [_ endpoint]]
-    (let [url (utils/api db endpoint)
-          token (:authentication-token db)
-          valid-token-handler :process-departments-only-response
-          invalid-token-handler :log-out
-          response-keys [:body :departments]]
-      (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
+    (utils/call-api :GET (utils/api db endpoint) (:authentication-token db)
+                    {:valid-token-handler   :process-departments-only-response
+                     :invalid-token-handler :log-out
+                     :response-keys         [:body :departments]})
     db))
 
 (register-handler
   :fetch-departments-and-employees
   (fn [db [_ endpoint]]
-    (let [url (utils/api db endpoint)
-          token (:authentication-token db)
-          valid-token-handler :process-departments-response
-          invalid-token-handler :log-out
-          response-keys [:body :departments]]
-      (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
+    (utils/call-api :GET (utils/api db endpoint) (:authentication-token db)
+                    {:valid-token-handler   :process-departments-response
+                     :invalid-token-handler :log-out
+                     :response-keys         [:body :departments]})
     db))
 
 (register-handler
   :fetch-employee
   (fn [db [_ id]]
-    (let [url (str (utils/api db "/employee/") id)
-          token (:authentication-token db)
-          valid-token-handler :process-employee-response
-          invalid-token-handler :log-out
-          response-keys [:body]]
-      (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
+    (utils/call-api :GET (str (utils/api db "/employee/") id) (:authentication-token db)
+                    {:valid-token-handler   :process-employee-response
+                     :invalid-token-handler :log-out
+                     :response-keys         [:body]})
     db))

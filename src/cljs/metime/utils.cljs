@@ -30,7 +30,7 @@
 
 (defn isNaN [node]
   (and (= (.call js/toString node) (str "[object Number]"))
-       (js/eval (str node " != +" node ))))
+       (js/eval (str node " != +" node))))
 
 (defn parse-int [s]
   "Parse the string for an integer"
@@ -59,20 +59,61 @@
 (defn remove-cookie! [k]
   (.remove goog.net.cookies (name k)))
 
-(defn get-authorization-header [token]
+
+
+(defn build-authorization-header [token]
   {:headers {"authorization" (str "Token " token)}})
 
-(defn secure-url [url token]
-  (http/get url (get-authorization-header token)))
+(defn call-secure-url [verb url token]
+  (case verb
+    :GET (http/get url (build-authorization-header token))
+    :DELETE (http/delete url (build-authorization-header token))))
 
-(defn api-call [url token valid-token-handler invalid-token-handler response-keys]
+(defn post-to-secure-url [url token data]
+  (http/post url (build-authorization-header token) data))
+
+;  (let [url (str (utils/api db "/employee/") id)
+;        token (:authentication-token db)
+;        valid-token-handler :process-employee-response
+;        invalid-token-handler :log-out
+;        response-keys [:body]]
+;    (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
+;  db)
+
+;; TODO: Need to deal with :POST :PUT etc and form data
+
+(defn call-secure-api [verb url token {:keys [valid-token-handler invalid-token-handler response-keys]}]
   ;; Make a secure url call with authorization header.
   ;; Dispatch redirect to login if unauthorized.
   (go
     ;; The following go block will "park" until the http request returns data
-    (let [response (<! (secure-url url token))
+    (let [response (<! (call-secure-url verb url token))
+          status (:status response)]
+      (if (not= status 200)
+        (dispatch [invalid-token-handler])
+        (dispatch [valid-token-handler (get-in response response-keys)])))))
+
+(defn post-data-to-secure-api [url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
+  ;; Make a secure url call with authorization header.
+  ;; Dispatch redirect to login if unauthorized.
+  (go
+    ;; The following go block will "park" until the http request returns data
+    (let [response (<! (post-to-secure-url url token data))
           status (:status response)]
       (if (= status 401)
         (dispatch [invalid-token-handler])
         (dispatch [valid-token-handler (get-in response response-keys)])))))
+
+(defmulti call-api identity)
+(defmethod call-api :GET [verb url token response-map]
+  (call-secure-api verb url token response-map))
+
+(defmethod call-api :DELETE [verb url token response-map]
+  (call-secure-api verb url token response-map))
+
+;(defmulti send-data-to-api (fn [verb url token data response-map] verb))
+;(defmethod send-data-to-api :POST [url token data response-map] (post-data-to-secure-api url token data response-map))
+;(defmethod send-data-to-api :PUT [url token data response-map] (put-data-to-secure-api url token data response-map))
+
+
 
