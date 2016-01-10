@@ -8,7 +8,7 @@
             [ring.middleware.json :refer [wrap-json-params]]
             [ring.middleware.cookies :refer [wrap-cookies]]
             [ring.middleware.reload :refer [wrap-reload]]
-            [ring.util.response :as resp] ;;  file-response redirect content-type
+            [ring.util.response :as resp]                   ;;  file-response redirect content-type
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [buddy.auth.backends.token :refer [jws-backend token-backend]]
             [buddy.auth.backends.httpbasic :refer [http-basic-backend]]
@@ -38,7 +38,7 @@
 
 (defroutes app-routes
            (GET "/" [] root-handler)
-           (GET "/fake" [] (str "<h1>" "Meaningless URL just to test we get a response"  "</h1>"))
+           (GET "/fake" [] (str "<h1>" "Meaningless URL just to test we get a response" "</h1>"))
 
            (context "/api" []
 
@@ -61,12 +61,20 @@
 (def app
   (->
     app-routes
-    (wrap-reload)
+    (wrap-reload)                                           ; This still doesn't seem to work as expected
     (wrap-authentication auth-backend)
     (prone/wrap-exceptions)
-    ; wrap-defaults adds lots of standard middleware such as wrap_params, wrap_cookies etc
-    ;(wrap-defaults site-defaults)
-    ;(wrap-keyword-params)
+    ; wrap-defaults adds lots of standard middleware
+    ; such as wrap_params, wrap_cookies etc
+    ; It also adds wrap-anti-forgery which will cause
+    ; issues if the api endpoints are NOT called from the
+    ; browser. Because the anti-forgery token will not exist.
+    ; Although it could be passed in the header?
+    ; Need to understand this better.
+    ; Need to read https://github.com/ring-clojure/ring-anti-forgery.
+
+    ; NOT having wrap-defaults seems to break the front end.
+    (wrap-defaults site-defaults)
     (wrap-params)
     (wrap-json-params)
     (wrap-cors
