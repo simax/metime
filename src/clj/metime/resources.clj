@@ -60,8 +60,11 @@
 (defn make-keyword-map [string-map]
   (walk/keywordize-keys string-map))
 
-(defn get-form-params [ctx]
-  (get-in ctx [:request :form-params]))
+(defn get-posted-data [ctx]
+  "Retreive posted data from request. The presence of
+  wrap-params and wrap-json-params middleware plcses data under the :request :params key
+  if data is posted as json or form-url-encoded."
+  (get-in ctx [:request :params]))
 
 (defn parse-number
   "Reads a number from a string. Returns nil if not a number."
@@ -268,7 +271,7 @@
 
 
 (defresource departments []
-             (secured-resource)
+             ;(secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
@@ -279,7 +282,7 @@
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
-                             (let [form-data (make-keyword-map (get-form-params ctx))
+                             (let [form-data (make-keyword-map (get-posted-data ctx))
                                    validation-result (validate-department form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message validation-result}]
@@ -293,7 +296,7 @@
                       That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (deps/insert-department! (make-keyword-map (get-form-params ctx)))]
+                          (when-let [new-id (deps/insert-department! (make-keyword-map (get-posted-data ctx)))]
                             ; TODO: Stop hardcoding URL below!!
                             {::location (str "http://localhost:3000/api/departments/" new-id)})
                           (catch Exception e {::failure-message "Department already exists"}))))
@@ -343,7 +346,7 @@
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :put)
-                             (let [form-data (make-keyword-map (get-form-params ctx))
+                             (let [form-data (make-keyword-map (get-posted-data ctx))
                                    validation-result (validate-department form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message validation-result}]
@@ -353,7 +356,7 @@
              :handle-malformed ::failure-message
 
              :conflict? (fn [ctx]
-                          (let [new-department-name (:department (make-keyword-map (get-form-params ctx)))
+                          (let [new-department-name (:department (make-keyword-map (get-posted-data ctx)))
                                 existing-department (first (deps/get-department-by-name new-department-name))]
                             (and (not (nil? existing-department)) (not= (str id) (str (:id existing-department))))))
 
@@ -363,7 +366,7 @@
                         (deps/delete-department! id))
 
              :put! (fn [ctx]
-                     (let [new-data (make-keyword-map (get-form-params ctx))
+                     (let [new-data (make-keyword-map (get-posted-data ctx))
                            existing-data (::department ctx)
                            updated-data (merge existing-data new-data)]
                        (deps/update-department! updated-data)
@@ -382,7 +385,7 @@
   (assoc emp :is_approver (truthy? (:is_approver emp))))
 
 (defresource employees []
-             (secured-resource)
+             ;(secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
@@ -392,7 +395,7 @@
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
-                             (let [form-data (parse-employee (make-keyword-map (get-form-params ctx)))
+                             (let [form-data (parse-employee (make-keyword-map (get-posted-data ctx)))
                                    validation-result (employee-validator form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message validation-result}]
@@ -404,7 +407,7 @@
              :post! (fn [ctx]
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (emps/insert-employee! (parse-employee (make-keyword-map (get-form-params ctx))))]
+                          (when-let [new-id (emps/insert-employee! (parse-employee (make-keyword-map (get-posted-data ctx))))]
                             {::location (str "http://localhost:3000/api/employees/" new-id)})
                           (catch Exception e {::failure-message (.getMessage e)}))))
 
@@ -441,7 +444,7 @@
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :put)
-                             (let [form-data (parse-employee (make-keyword-map (get-form-params ctx)))
+                             (let [form-data (parse-employee (make-keyword-map (get-posted-data ctx)))
                                    validation-result (employee-validator form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message validation-result}]
@@ -451,7 +454,7 @@
              :handle-malformed ::failure-message
 
              :conflict? (fn [ctx]
-                          (let [new-employee (make-keyword-map (get-form-params ctx))
+                          (let [new-employee (make-keyword-map (get-posted-data ctx))
                                 existing-employee (emps/get-employee-by-email (:email new-employee))]
                             (and (not (nil? existing-employee)) (not= (:id new-employee) (str (:id existing-employee))))))
 
@@ -461,7 +464,7 @@
                         (emps/delete-employee! id))
 
              :put! (fn [ctx]
-                     (let [new-data (parse-employee (make-keyword-map (get-form-params ctx)))
+                     (let [new-data (parse-employee (make-keyword-map (get-posted-data ctx)))
                            existing-data (::employee ctx)
                            updated-data (merge existing-data new-data)]
                        (emps/update-employee! updated-data)
@@ -492,7 +495,7 @@
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
-                             (let [form-data (-> ctx (get-form-params) (make-keyword-map) (format-holiday-request))
+                             (let [form-data (-> ctx (get-posted-data) (make-keyword-map) (format-holiday-request))
                                    validation-result (validate-holiday-request form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message (str validation-result)}]
@@ -506,7 +509,7 @@
                       That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (hols/insert-holiday-request! (make-keyword-map (get-form-params ctx)))]
+                          (when-let [new-id (hols/insert-holiday-request! (make-keyword-map (get-posted-data ctx)))]
                             {::location (str "http://localhost:3000/api/departments/" new-id)})
                           (catch Exception e {::failure-message "Invaliday holiday request"}))))
 

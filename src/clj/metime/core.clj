@@ -65,9 +65,10 @@
     (wrap-authentication auth-backend)
     (prone/wrap-exceptions)
     ; wrap-defaults adds lots of standard middleware such as wrap_params, wrap_cookies etc
-    (wrap-defaults site-defaults)
+    ;(wrap-defaults site-defaults)
     ;(wrap-keyword-params)
-    ;(wrap-json-params)
+    (wrap-params)
+    (wrap-json-params)
     (wrap-cors
       :access-control-allow-credentials "true"
       :access-control-allow-origin [#".*"]

@@ -395,7 +395,7 @@
                  :class "panel panel-body"
                  :child [button
                          :class "btn btn-primary"
-                         :on-click #(dispatch [:employee-save])
+                         :on-click #(dispatch [:employee-save "/employees"])
                          :label "Save"]
                  ]
                 ]]

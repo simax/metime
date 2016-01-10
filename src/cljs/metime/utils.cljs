@@ -59,8 +59,6 @@
 (defn remove-cookie! [k]
   (.remove goog.net.cookies (name k)))
 
-
-
 (defn build-authorization-header [token]
   {:headers {"authorization" (str "Token " token)}})
 
@@ -69,22 +67,11 @@
     :GET (http/get url (build-authorization-header token))
     :DELETE (http/delete url (build-authorization-header token))))
 
-(defn post-to-secure-url [url token data]
-  (http/post url (build-authorization-header token) data))
-
-;  (let [url (str (utils/api db "/employee/") id)
-;        token (:authentication-token db)
-;        valid-token-handler :process-employee-response
-;        invalid-token-handler :log-out
-;        response-keys [:body]]
-;    (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
-;  db)
-
 ;; TODO: Need to deal with :POST :PUT etc and form data
 
 (defn call-secure-api [verb url token {:keys [valid-token-handler invalid-token-handler response-keys]}]
-  ;; Make a secure url call with authorization header.
-  ;; Dispatch redirect to login if unauthorized.
+  "Make a secure url call (GET or DELETE) with authorization header.
+  Dispatch redirect to login if unauthorized."
   (go
     ;; The following go block will "park" until the http request returns data
     (let [response (<! (call-secure-url verb url token))
@@ -93,27 +80,34 @@
         (dispatch [invalid-token-handler])
         (dispatch [valid-token-handler (get-in response response-keys)])))))
 
-(defn post-data-to-secure-api [url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
-  ;; Make a secure url call with authorization header.
-  ;; Dispatch redirect to login if unauthorized.
+(defn send-data-to-secure-url [verb url token data]
+  (case verb
+    :POST (http/post url (build-authorization-header token) data)
+    :PUT (http/put url (build-authorization-header token) data)))
+
+(defn send-data-to-secure-api [verb url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
+  "Make a secure url call with authorization header.
+   Dispatch redirect to login if unauthorized."
   (go
     ;; The following go block will "park" until the http request returns data
-    (let [response (<! (post-to-secure-url url token data))
+    (let [response (<! (send-data-to-secure-url verb url token data))
           status (:status response)]
-      (if (= status 401)
+      (if (not= status 201)
         (dispatch [invalid-token-handler])
-        (dispatch [valid-token-handler (get-in response response-keys)])))))
+        (dispatch [valid-token-handler])))))  ; (get-in response response-keys)
 
-(defmulti call-api identity)
-(defmethod call-api :GET [verb url token response-map]
-  (call-secure-api verb url token response-map))
+; Dispatch on the 1st parameter, namely, verb
+(defmulti call-api
+          "GET or DELETE to secure URL with token and
+           response map {:valid-dispatch and :invalid-dispatch handlers
+           and :response keys of fetched data to display}"
+          identity)
+(defmethod call-api :GET [verb url token response-map] (call-secure-api verb url token response-map))
+(defmethod call-api :DELETE [verb url token response-map] (call-secure-api verb url token response-map))
 
-(defmethod call-api :DELETE [verb url token response-map]
-  (call-secure-api verb url token response-map))
-
-;(defmulti send-data-to-api (fn [verb url token data response-map] verb))
-;(defmethod send-data-to-api :POST [url token data response-map] (post-data-to-secure-api url token data response-map))
-;(defmethod send-data-to-api :PUT [url token data response-map] (put-data-to-secure-api url token data response-map))
-
-
-
+; Dispatch on the 1st parameter, namely, verb
+(defmulti send-data-to-api
+          "POST or PUT to secure URL with token,
+           data and response map {:valid-dispatch and :invalid-dispatch handlers}" identity)
+(defmethod send-data-to-api :POST [verb url token data response-map] (send-data-to-secure-api verb url token data response-map))
+(defmethod send-data-to-api :PUT [verb url token data response-map] (send-data-to-secure-api verb url token data response-map))

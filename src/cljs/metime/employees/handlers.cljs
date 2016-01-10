@@ -120,16 +120,6 @@
                        }})))))
 
 
-(register-handler
-  :fetch-departments-only
-  (fn [db [_ endpoint]]
-    (utils/call-api (utils/api db endpoint) (:authentication-token db)
-                    {:valid-token-handler   :process-departments-only-response
-                     :invalid-token-handler :log-out
-                     :response-keys         [:body :departments]})
-    db))
-
-
 (defn show-conflict-error [response]
   (if (= (:status response) 409)                            ;; Conflict
     (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
@@ -137,20 +127,30 @@
       ;(utils/set-hash! (r/url-for :employees))
       (dispatch [:set-active-view :employees]))))
 
+
+(register-handler
+  :save-success
+  (fn [db [_]]
+    (js/alert "Employee saved!!!")
+    db))
+
+(register-handler
+  :save-failure
+  (fn [db [_]]
+    (js/alert "Oooops, failed saving employee :(")
+    db))
+
+
 (register-handler
   :employee-save
   (fn [db [_ endpoint]]
     (let [employee (:employee db)]
       (if (apply b/valid? employee employee-validation-rules)
-        (let [;employee-id (get-in db [:employee :id])
-              ;endpoint (get-employee-save-endpoint db employee-id)
-              token (:authentication-token db)
-              auth-header (utils/build-authorization-header token)
-              ;TODO: Fix issue here!!
-              response (go (<! (apply (:verb endpoint) [(:url endpoint) auth-header {:form-params employee}])))
-              ]
-
-          (show-conflict-error response))
+        (utils/send-data-to-api :POST
+                                (str (utils/api db endpoint)) (:authentication-token db) employee
+                                {:valid-token-handler   :process-departments-only-response
+                                 :invalid-token-handler :log-out
+                                 :response-keys         [:body :departments]})
         (validate-employee db _)))))
 
 (register-handler
