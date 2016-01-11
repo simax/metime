@@ -74,7 +74,7 @@
     ; Need to read https://github.com/ring-clojure/ring-anti-forgery.
 
     ; NOT having wrap-defaults seems to break the front end.
-    (wrap-defaults site-defaults) ; (assoc-in site-defaults [:security :anti-forgery] false)
+    (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false))
     (wrap-params)
     (wrap-json-params)
     (wrap-cors

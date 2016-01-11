@@ -271,7 +271,7 @@
 
 
 (defresource departments []
-             ;(secured-resource)
+             (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
