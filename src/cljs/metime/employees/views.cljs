@@ -371,7 +371,7 @@
     [box :child [label :label "Next year allowance"]]
     [box :child [input-text
                  :width "100px"
-                 :model (str (:next_year_opening employee))
+                 :model (str (:next_year_allowance employee))
                  :status (when (seq (get-in employee [:validation-errors :next_year_allowance])) :error)
                  :status-icon? (seq (get-in employee [:validation-errors :next_year_allowance]))
                  :status-tooltip (apply str (get-in employee [:validation-errors :next_year_allowance]))

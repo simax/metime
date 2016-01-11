@@ -82,7 +82,7 @@
 
 (defn send-data-to-secure-url [verb url token data]
   (case verb
-    :POST (http/post url (build-authorization-header token) data)
+    :POST (http/post url {:form-params data})               ; (build-authorization-header token)
     :PUT (http/put url (build-authorization-header token) data)))
 
 (defn send-data-to-secure-api [verb url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]

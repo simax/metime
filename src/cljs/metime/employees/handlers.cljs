@@ -98,25 +98,25 @@
           (merge
             {:nav-bar :employees :view :employee-add
              :employee
-                      {:is-ready?           true
-                       :id                  0
-                       :firstname           "John"
-                       :lastname            "Doe"
-                       :email               "johndow@somewhere.com"
-                       :dob                 "01-01-1980"
-                       :startdate           "01-01-2000"
-                       :enddate             nil
-                       :this_year_opening   25
-                       :this_year_remaining 25
-                       :next_year_opening   25
-                       :next_year_remaining 25
-                       :department_id       departmentid
-                       :managerid           managerid
-                       :manager-firstname   (:manager-firstname dep)
-                       :manager-lastname    (:manager-lastname dep)
-                       :manager-email       (:manager-email dep)
-                       :password            "password1"
-                       :password-confirm    "password1"
+                      {:is-ready?               true
+                       :id                      0
+                       :firstname               "John"
+                       :lastname                "Doe"
+                       :email                   "johndow@somewhere.com"
+                       :prev_year_allowance     25
+                       :current_year_allowance  25
+                       :next_year_allowance     25
+                       :dob                     "01-01-1980"
+                       :startdate               "01-01-2000"
+                       :enddate                 nil
+                       :department_id           departmentid
+                       :managerid               managerid
+                       :manager-firstname       (:manager-firstname dep)
+                       :manager-lastname        (:manager-lastname dep)
+                       :manager-email           (:manager-email dep)
+                       :password                "password1"
+                       :confirmation            "password1"
+                       :is_approver             false
                        }})))))
 
 
