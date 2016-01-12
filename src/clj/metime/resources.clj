@@ -200,11 +200,11 @@
     (let [validation-set (build-required-validation-set required-rules validation-rule-set)
           result [(first (apply b/validate emp validation-set))
                   (first (b/validate emp :confirmation [[v/required] [password-confirmation "password" emp]]))]
-          errors (remove nil? result)]
+          errors (doall (remove nil? result))]
       errors)
     (let [validation-set validation-rule-set
           result [(first (apply b/validate emp validation-set))]
-          errors (remove nil? result)]
+          errors (doall (remove nil? result))]
       errors)))
 
 (def new-employee-required-fields #{:firstname :lastname :password :confirmation :is_approver})
