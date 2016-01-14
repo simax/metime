@@ -88,13 +88,13 @@
 (defn send-data-to-secure-api [verb url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
   "Make a secure url call with authorization header.
    Dispatch redirect to login if unauthorized."
-  (go
-    ;; The following go block will "park" until the http request returns data
-    (let [response (<! (send-data-to-secure-url verb url token data))
-          status (:status response)]
-      (if (not= status 201)
-        (dispatch [invalid-token-handler])
-        (dispatch [valid-token-handler])))))  ; (get-in response response-keys)
+  ;; The following go block will "park" until the http request returns data
+  (let [response (go (<! (send-data-to-secure-url verb url token data)))
+        status (:status response)]
+    (if (not= status 201)
+      (dispatch [invalid-token-handler])
+      (dispatch [valid-token-handler]))))           ; (get-in response response-keys)
+
 
 ; Dispatch on the 1st parameter, namely, verb
 (defmulti call-api

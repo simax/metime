@@ -98,7 +98,7 @@
 
 ;; TODO: Write tests for validations ...
 
-(def date-format (f/formatter "yyyy-MM-dd"))
+(def date-format (f/formatter "dd-MM-yyyy"))
 
 (defvalidator date-before-today
               {:default-message-format "%s can't be in the future"}

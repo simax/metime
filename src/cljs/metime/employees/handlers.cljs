@@ -102,12 +102,12 @@
                        :id                      0
                        :firstname               "John"
                        :lastname                "Doe"
-                       :email                   "johndow@somewhere.com"
+                       :email                   "johndoe@somewhere.com"
                        :prev_year_allowance     25
                        :current_year_allowance  25
                        :next_year_allowance     25
-                       :dob                     "01-01-1980"
-                       :startdate               "01-01-2000"
+                       :dob                     (parse (formatter "yyyyMMdd") "19800101")
+                       :startdate               (parse (formatter "yyyyMMdd") "20000101")
                        :enddate                 nil
                        :department_id           departmentid
                        :managerid               managerid
