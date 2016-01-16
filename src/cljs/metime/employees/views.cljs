@@ -213,20 +213,25 @@
     ]])
 
 
-(defn formatted-date [date-str]
+(defn is-date? [input]
+  (println (type input))
+  (instance? js/Date input))
+
+(defn date->str [date]
   "If passed a valid date, returns a correctly formatted date string like 01-01-2015.
    Otherwise returns date-str."
-  (if (empty? date-str)
-    ""
-    (let [formatted-date-str (try (unparse (formatter "yyyy-MM-dd") (iso8601->date (clojure.string/replace date-str "-" "")))
-                                  (catch :default e date-str))]
-      formatted-date-str)
-    ))
+  (if (is-date? date)
+    (if (nil? date)
+      ""
+      (let [formatted-date-str (try (unparse (formatter "dd-MM-yyyy") date)
+                                    (catch :default e date))]
+        formatted-date-str))
+    (if (nil? date) "" date)))
 
 (defn str->date [date-str]
-  "Returns a date object from date-str. Returns todays date if date-str is empty"
+  "Returns a date object from date-str. Returns nil if date-str is empty"
   (if (empty? date-str)
-    (now)
+    nil
     (try (iso8601->date (clojure.string/replace date-str "-" ""))
          (catch :default e (now)))))
 
@@ -255,7 +260,9 @@
              :body [datepicker
                     :model (reagent/atom (str->date date-value))
                     :show-today? true
-                    :on-change #(dispatch [:input-change-dates date-field %])]]])
+                    :on-change #(dispatch [:input-change-dates date-field %])]
+             ]]
+  )
 
 (def inavlid-date-style {:border-radius "4px 4px 4px 4px"
                          :border-color  "red"
@@ -302,7 +309,7 @@
                      :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
                      :style {:border-radius "4px 0 0 4px"}
                      :placeholder place-holder
-                     :model (formatted-date (field db-model))
+                     :model (date->str (field db-model))
                      :width "120px"
                      :on-change #(dispatch [:input-change-dates field %])]]
         (date-input-with-popup field (field db-model) showing-date-popup? place-holder)
@@ -424,8 +431,8 @@
             [employee-last-name employee]
             [employee-email employee]
             [employee-dob employee]
-            [employee-start-date employee]
-            [employee-end-date employee]
+            ;[employee-start-date employee]
+            ;[employee-end-date employee]
             ]]]]
         ]]
       )))
@@ -456,6 +463,7 @@
   )
 
 (defn employee-maintenance-form [employee]
+  (println (str "Firstname: " (:firstname employee)))
   [v-box
    :children [
               [employee-core-heading employee]

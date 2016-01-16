@@ -38,7 +38,6 @@
   (let [employee (:employee db)
         result (apply b/validate employee employee-validation-rules)
         errors (first result)]
-    ;(when (seq result) (.log js/console db))
     (assoc-in db [:employee :validation-errors] errors)))
 
 (defn get-employee-save-endpoint [db employee-id]
@@ -106,8 +105,8 @@
                        :prev_year_allowance     25
                        :current_year_allowance  25
                        :next_year_allowance     25
-                       :dob                     (parse (formatter "yyyyMMdd") "19800101")
-                       :startdate               (parse (formatter "yyyyMMdd") "20000101")
+                       :dob                     "01-01-1980"  ;(unparse (formatter "yyyyMMdd") "19800101")
+                       :startdate               "01-01-1999"  ;(unparse (formatter "yyyyMMdd") "19990101")
                        :enddate                 nil
                        :department_id           departmentid
                        :managerid               managerid

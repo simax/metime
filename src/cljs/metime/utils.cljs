@@ -89,11 +89,12 @@
   "Make a secure url call with authorization header.
    Dispatch redirect to login if unauthorized."
   ;; The following go block will "park" until the http request returns data
-  (let [response (go (<! (send-data-to-secure-url verb url token data)))
-        status (:status response)]
-    (if (not= status 201)
-      (dispatch [invalid-token-handler])
-      (dispatch [valid-token-handler]))))           ; (get-in response response-keys)
+  (go
+    (let [response (<! (send-data-to-secure-url verb url token data))
+          status (:status response)]
+      (if (= status 201)
+        (dispatch [valid-token-handler])
+        (dispatch [invalid-token-handler])))))
 
 
 ; Dispatch on the 1st parameter, namely, verb
