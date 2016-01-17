@@ -67,8 +67,6 @@
     :GET (http/get url (build-authorization-header token))
     :DELETE (http/delete url (build-authorization-header token))))
 
-;; TODO: Need to deal with :POST :PUT etc and form data
-
 (defn call-secure-api [verb url token {:keys [valid-token-handler invalid-token-handler response-keys]}]
   "Make a secure url call (GET or DELETE) with authorization header.
   Dispatch redirect to login if unauthorized."
@@ -81,9 +79,10 @@
         (dispatch [valid-token-handler (get-in response response-keys)])))))
 
 (defn send-data-to-secure-url [verb url token data]
+  (println (str "verb: " verb))
   (case verb
     :POST (http/post url {:form-params data})               ; (build-authorization-header token)
-    :PUT (http/put url (build-authorization-header token) data)))
+    :PUT (http/put url (build-authorization-header token) {:form-params data})))
 
 (defn send-data-to-secure-api [verb url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
   "Make a secure url call with authorization header.
@@ -110,5 +109,8 @@
 (defmulti send-data-to-api
           "POST or PUT to secure URL with token,
            data and response map {:valid-dispatch and :invalid-dispatch handlers}" identity)
-(defmethod send-data-to-api :POST [verb url token data response-map] (send-data-to-secure-api verb url token data response-map))
-(defmethod send-data-to-api :PUT [verb url token data response-map] (send-data-to-secure-api verb url token data response-map))
+(defmethod send-data-to-api :POST [verb url token data response-map]
+  (send-data-to-secure-api verb url token data response-map))
+
+(defmethod send-data-to-api :PUT [verb url token data response-map]
+  (send-data-to-secure-api verb url token data response-map))

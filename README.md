@@ -22,6 +22,14 @@ You can now interact with the app and the browser.
 Try typing (js/alert "Hello World!!!") and you should see the alert popup in the browser.
 
 
+## Date handling
+
+Dates are stored in the database as Date types (yyyy-MM-dd)
+They are returned as strings from queries (dd-MM-yyyy)
+They are stored as strings in app-db (dd-MM-yyyy)  
+They are edited as strings in input-text (dd-MM-yyyy) 
+They are edited as dates in date popups.
+
 ## Database migration
 
 Using clj-sql-up to handle DB migrations

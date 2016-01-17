@@ -141,16 +141,23 @@
 
 
 (register-handler
+  :switch-view-to-employees
+  (fn [db [_ _]]
+    (dispatch [:set-active-view :employees])
+    db))
+
+(register-handler
   :employee-save
   (fn [db [_ endpoint]]
     (let [employee (:employee db)]
       (if (apply b/valid? employee employee-validation-rules)
         (utils/send-data-to-api :POST
                                 (str (utils/api db endpoint)) (:authentication-token db) employee
-                                {:valid-token-handler   :process-departments-only-response
+                                {:valid-token-handler   :switch-view-to-employees
                                  :invalid-token-handler :log-out
                                  :response-keys         [:body :departments]})
-        (validate-employee db _)))))
+        (validate-employee db _))
+      db)))
 
 (register-handler
   :ui-department-drawer-status-toggle

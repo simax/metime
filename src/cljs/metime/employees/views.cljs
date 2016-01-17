@@ -141,7 +141,6 @@
               [box :child [manager-gravatar employee]]
               ]])
 
-
 (defn department-list-choices [departments]
   (into []
         (for [m @departments]
@@ -213,20 +212,14 @@
     ]])
 
 
-(defn is-date? [input]
-  (println (type input))
-  (instance? js/Date input))
-
 (defn date->str [date]
   "If passed a valid date, returns a correctly formatted date string like 01-01-2015.
    Otherwise returns date-str."
-  (if (is-date? date)
-    (if (nil? date)
-      ""
-      (let [formatted-date-str (try (unparse (formatter "dd-MM-yyyy") date)
-                                    (catch :default e date))]
-        formatted-date-str))
-    (if (nil? date) "" date)))
+  (if (nil? date)
+    ""
+    (let [formatted-date-str (try (unparse (formatter "dd-MM-yyyy") date)
+                                  (catch :default e date))]
+      formatted-date-str)))
 
 (defn str->date [date-str]
   "Returns a date object from date-str. Returns nil if date-str is empty"
@@ -463,7 +456,6 @@
   )
 
 (defn employee-maintenance-form [employee]
-  (println (str "Firstname: " (:firstname employee)))
   [v-box
    :children [
               [employee-core-heading employee]
