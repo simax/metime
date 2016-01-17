@@ -79,7 +79,6 @@
         (dispatch [valid-token-handler (get-in response response-keys)])))))
 
 (defn send-data-to-secure-url [verb url token data]
-  (println (str "verb: " verb))
   (case verb
     :POST (http/post url {:form-params data})               ; (build-authorization-header token)
     :PUT (http/put url (build-authorization-header token) {:form-params data})))

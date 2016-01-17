@@ -154,7 +154,7 @@
         (utils/send-data-to-api :POST
                                 (str (utils/api db endpoint)) (:authentication-token db) employee
                                 {:valid-token-handler   :switch-view-to-employees
-                                 :invalid-token-handler :log-out
+                                 :invalid-token-handler :save-failure
                                  :response-keys         [:body :departments]})
         (validate-employee db _))
       db)))
