@@ -27,34 +27,18 @@
   [:firstname [[v/required :message "First name is required"]]
    :lastname [[v/required :message "Last name is required"]]
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
-   :dob [[v/datetime british-date-format :pre (comp seq :dob) :message "Must be a valid date"]]
+   :dob [[v/required :message "A date of birth is required"] [v/datetime british-date-format :pre (comp seq :dob) :message "Must be a valid date"]]
    :startdate [[v/datetime british-date-format :pre (comp seq :startdate) :message "Must be a valid date"]]
    :enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
    :prev_year_allowance [[v/integer :message "Must be an integer"]]
    :current_year_allowance [[v/integer :message "Must be an integer"]]
    :next_year_allowance [[v/integer :message "Must be an integer"]]])
 
-(defn validate-employee [db _]
+(defn validate-employee [db]
   (let [employee (:employee db)
         result (apply b/validate employee employee-validation-rules)
         errors (first result)]
     (assoc-in db [:employee :validation-errors] errors)))
-
-(defn get-employee-save-endpoint [db employee-id]
-  (if (not (is-new-employee? employee-id))
-    {:url (utils/api db (str "/employee/" employee-id)) :verb http/put}
-    {:url (utils/api db "/employees") :verb http/post}))
-
-;
-;(fn [db [_ id]]
-;  (let [url (str (utils/api db "/employee/") id)
-;        token (:authentication-token db)
-;        valid-token-handler :process-employee-response
-;        invalid-token-handler :log-out
-;        response-keys [:body]]
-;    (utils/api-call url token valid-token-handler invalid-token-handler response-keys))
-;  db)
-;
 
 (register-handler
   :department-change
@@ -147,33 +131,37 @@
     (dispatch [:set-active-view :employees])
     db))
 
-(defn add-new-employee [db endpoint employee]
+(defn build-employee-add-endpoint [db]
+  (str (utils/api db "/employees")))
+
+(defn build-employee-update-endpoint [db employee]
+  (str (utils/api db (str  "/employee/" (:id employee)))))
+
+
+(defn add-new-employee [db employee]
   (utils/send-data-to-api :POST
-                          (str (utils/api db endpoint)) (:authentication-token db) employee
+                          (build-employee-add-endpoint db) (:authentication-token db) employee
                           {:valid-token-handler   :switch-view-to-employees
                            :invalid-token-handler :save-failure
                            :response-keys         [:body :departments]}))
 
-(defn build-employee-update-endpoint [db endpoint employee]
-  (str (utils/api db (str  "/employee/" (:id employee)))))
-
-(defn update-employee [db endpoint employee]
+(defn update-employee [db employee]
   (utils/send-data-to-api :PUT
-                          (build-employee-update-endpoint db endpoint employee) (:authentication-token db) employee
-                          {:valid-token-handler   :switch-view-to-employees
+                          (build-employee-update-endpoint db employee) (:authentication-token db) employee
+                          {:valid-token-handler   :switch-view-to-employees ; Needs to be seq so we can send paramaters too
                            :invalid-token-handler :save-failure
                            :response-keys         [:body :departments]}))
 
 
 (register-handler
   :employee-save
-  (fn [db [_ endpoint]]
+  (fn [db [_]]
     (let [employee (:employee db)]
       (when (apply b/valid? employee employee-validation-rules)
         (if (is-new-employee? (:id employee))
-          (add-new-employee db endpoint employee)
-          (update-employee db endpoint employee)))
-      db)))
+          (add-new-employee db employee)
+          (update-employee db employee)))
+      (validate-employee db))))
 
 (register-handler
   :ui-department-drawer-status-toggle
