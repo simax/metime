@@ -132,12 +132,16 @@
                          dept-id)]
                 (some? (deps/get-department-by-id id))))
 
-(defvalidator email-unique-if-not-blank
-              {:default-message-format "Email already exists"}
-              [email]
-              (if (str/blank? email)
-                true
-                (not (some? (emps/get-employee-by-email email)))))
+;TODO: Need to imporive duplicate email checking. Duplicate if current id
+;      and email don't match an existing id and email
+;
+;(defvalidator email-unique-if-not-blank
+;              {:default-message-format "Email already exists"}
+;              [email]
+;              (if (str/blank? email)
+;                true
+;                (if-let [emp (emps/get-employee-by-email email)]
+;                  (if (:id)))))
 
 ;; TODO There is a parse-num defined in this ns and another in a CLJS ns.
 ;;      There should only be one in a CLJC.
@@ -160,7 +164,7 @@
   [
    :firstname [[v/string] [v/min-count 1] [v/max-count 30]]
    :lastname [[v/string] [v/min-count 1] [v/max-count 30]]
-   :email [[v/email] [email-unique-if-not-blank]]
+   :email [[v/email]]
    :password [[v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password must be alpha numeric with at least one number"]]
    :department_id [[department-exists]]
    :dob [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
@@ -385,7 +389,7 @@
   (assoc emp :is_approver (truthy? (:is_approver emp))))
 
 (defresource employees []
-             ;(secured-resource)
+             (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
@@ -422,7 +426,7 @@
 
 
 (defresource employee [id]
-             ;(secured-resource)
+             (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :delete :put]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])

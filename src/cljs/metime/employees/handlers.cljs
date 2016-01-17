@@ -64,7 +64,7 @@
           updated-emp (assoc (:employee db)
                         :department_id id
                         :department (:department dep)
-                        :managerid (:managerid dep)
+                        :managerid (:manager_id dep)
                         :manager-email (:manager-email dep)
                         :manager-firstname (:manager-firstname dep)
                         :manager-lastname (:manager-lastname dep))]
@@ -91,11 +91,12 @@
 
 (register-handler
   :employee-add
-  (fn [db [_ departmentid managerid]]
+  (fn [db [_ departmentid]]
     (let [dep (first (filter #(= (:departmentid %) departmentid) (:departments-and-employees db)))]
       (-> db
           (merge
-            {:nav-bar :employees :view :employee-add
+            {:nav-bar :employees
+             :view :employee-add
              :employee
                       {:is-ready?               true
                        :id                      0
@@ -109,7 +110,7 @@
                        :startdate               "01-01-1999"  ;(unparse (formatter "yyyyMMdd") "19990101")
                        :enddate                 nil
                        :department_id           departmentid
-                       :managerid               managerid
+                       :managerid               (:manager_id dep)
                        :manager-firstname       (:manager-firstname dep)
                        :manager-lastname        (:manager-lastname dep)
                        :manager-email           (:manager-email dep)
@@ -146,17 +147,32 @@
     (dispatch [:set-active-view :employees])
     db))
 
+(defn add-new-employee [db endpoint employee]
+  (utils/send-data-to-api :POST
+                          (str (utils/api db endpoint)) (:authentication-token db) employee
+                          {:valid-token-handler   :switch-view-to-employees
+                           :invalid-token-handler :save-failure
+                           :response-keys         [:body :departments]}))
+
+(defn build-employee-update-endpoint [db endpoint employee]
+  (str (utils/api db (str  "/employee/" (:id employee)))))
+
+(defn update-employee [db endpoint employee]
+  (utils/send-data-to-api :PUT
+                          (build-employee-update-endpoint db endpoint employee) (:authentication-token db) employee
+                          {:valid-token-handler   :switch-view-to-employees
+                           :invalid-token-handler :save-failure
+                           :response-keys         [:body :departments]}))
+
+
 (register-handler
   :employee-save
   (fn [db [_ endpoint]]
     (let [employee (:employee db)]
-      (if (apply b/valid? employee employee-validation-rules)
-        (utils/send-data-to-api :POST
-                                (str (utils/api db endpoint)) (:authentication-token db) employee
-                                {:valid-token-handler   :switch-view-to-employees
-                                 :invalid-token-handler :save-failure
-                                 :response-keys         [:body :departments]})
-        (validate-employee db _))
+      (when (apply b/valid? employee employee-validation-rules)
+        (if (is-new-employee? (:id employee))
+          (add-new-employee db endpoint employee)
+          (update-employee db endpoint employee)))
       db)))
 
 (register-handler

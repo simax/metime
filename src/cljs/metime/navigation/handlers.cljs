@@ -69,8 +69,6 @@
   :process-employee-response
   (fn [db [_ employee]]
     (let [emp (js->clj employee)]
-      ; TODO Make dob a string not a date
-      (println (str "DOB: " (:dob emp)))
       (if (nil? (:id emp))
         (assoc db :employee (assoc {} :is-ready? true :not-found true))
         (assoc db :employee (assoc emp :is-ready? true :not-found false)))

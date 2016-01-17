@@ -80,10 +80,10 @@
 
 (defn send-data-to-secure-url [verb url token data]
   (case verb
-    :POST (http/post url {:form-params data})               ; (build-authorization-header token)
-    :PUT (http/put url (build-authorization-header token) {:form-params data})))
+    :POST (http/post url (merge (build-authorization-header token) {:form-params data}))
+    :PUT (http/put url (merge (build-authorization-header token) {:form-params data}))))
 
-(defn send-data-to-secure-api [verb url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
+(defn post-data-to-secure-api [verb url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
   "Make a secure url call with authorization header.
    Dispatch redirect to login if unauthorized."
   ;; The following go block will "park" until the http request returns data
@@ -91,6 +91,19 @@
     (let [response (<! (send-data-to-secure-url verb url token data))
           status (:status response)]
       (if (= status 201)
+        (dispatch [valid-token-handler])
+        (dispatch [invalid-token-handler])))))
+
+
+(defn put-data-to-secure-api [verb url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
+  "Make a secure url call with authorization header.
+   Dispatch redirect to login if unauthorized."
+  ;; The following go block will "park" until the http request returns data
+  (println (str "Attempting to put to: " url))
+  (go
+    (let [response (<! (send-data-to-secure-url verb url token data))
+          status (:status response)]
+      (if (= status 200)
         (dispatch [valid-token-handler])
         (dispatch [invalid-token-handler])))))
 
@@ -109,7 +122,7 @@
           "POST or PUT to secure URL with token,
            data and response map {:valid-dispatch and :invalid-dispatch handlers}" identity)
 (defmethod send-data-to-api :POST [verb url token data response-map]
-  (send-data-to-secure-api verb url token data response-map))
+  (post-data-to-secure-api verb url token data response-map))
 
 (defmethod send-data-to-api :PUT [verb url token data response-map]
-  (send-data-to-secure-api verb url token data response-map))
+  (put-data-to-secure-api verb url token data response-map))

@@ -1,15 +1,31 @@
 (ns metime.data.employees
-  (:require [buddy.hashers :as hashers]
+  (:require [clojure.string :as string]
+            [buddy.hashers :as hashers]
             [yesql.core :refer [defqueries defquery]]
             [metime.data.database :as db]))
 
 (defqueries "metime/data/sql/metime.sql" {:connection db/db-spec})
+
+(defn format-date [date]
+  "Change date format from 31-12-1999 to 1999-12-31"
+  (if (empty? date)
+    ""
+    (do
+      (let [date-str (string/split date, #"-")]
+        (str (nth date-str 2) "-" (nth date-str 1) "-" (nth date-str 0))))))
+
+(defn format-dates [employee]
+  (let [emp (assoc employee :dob (format-date (:dob employee))
+                            :startdate (format-date (:startdate employee))
+                            :enddate (format-date (:enddate employee)))]
+    emp))
 
 (defn prepare-for-insert [data]
   "Prepare the incoming data ready for inserting into the DB."
   "Generate a salted password and remove extraneous keys from the map"
   (let [hashed-password (hashers/encrypt (:password data) {:alg :pbkdf2+sha256})]
     (-> data
+        (format-dates)
         (dissoc :password-confirm)
         (assoc :password hashed-password))))
 
@@ -30,7 +46,9 @@
     (first (vals result))))
 
 (defn update-employee! [data]
-  (db-update-employee! data {:connection db/db-spec}))
+  (-> data
+    (format-dates)
+    (db-update-employee! {:connection db/db-spec})))
 
 (defn delete-employee! [id]
   "Delete the employee with the given id"

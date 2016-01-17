@@ -146,8 +146,8 @@ where e.email = :email
 
 -- name: db-insert-employee<!
 -- Insert a new employee
-insert into employees (firstname,lastname,email,startdate,enddate,department_id,manager_id,dob,password,prev_year_allowance,current_year_allowance,next_year_allowance,is_approver)
-values (:firstname,:lastname,:email,:startdate,:enddate,:department_id,:managerid,:dob,:password,:prev_year_allowance,:current_year_allowance,:next_year_allowance,:is_approver)
+insert into employees ( firstname,  lastname,  email, startdate,   enddate,  department_id,  manager_id,  dob,  password,  prev_year_allowance,  current_year_allowance,  next_year_allowance,  is_approver)
+values                (:firstname,:lastname,:email,   :startdate, :enddate, :department_id, :managerid,  :dob, :password, :prev_year_allowance, :current_year_allowance, :next_year_allowance, :is_approver)
 
 -- name: db-update-employee!
 -- Update department details
