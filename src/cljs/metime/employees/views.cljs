@@ -1,6 +1,7 @@
 (ns metime.employees.views
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
-  (:require [cljs.core.async :refer [put! take! <! >! chan timeout]]
+  (:require [clojure.string :as string]
+            [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [metime.employees.subs]
             [metime.employees.handlers]
             [metime.routes :as r]
@@ -221,12 +222,22 @@
                                   (catch :default e date))]
       formatted-date-str)))
 
+;TODO: Should be in CLJC also appears in metime.resources
+(defn format-date [date]
+  "Change date format from 31-12-1999 to 1999-12-31"
+  (if (empty? date)
+    ""
+    (do
+      (let [date-str (string/split date, #"-")]
+        (str (nth date-str 2) "-" (nth date-str 1) "-" (nth date-str 0))))))
+
 (defn str->date [date-str]
   "Returns a date object from date-str. Returns nil if date-str is empty"
   (if (empty? date-str)
     nil
-    (try (iso8601->date (clojure.string/replace date-str "-" ""))
-         (catch :default e (now)))))
+    (let [d (format-date date-str)]
+      (try (iso8601->date (clojure.string/replace d "-" ""))
+           (catch :default e (now))))))
 
 
 (defn date-input-with-popup [date-field date-value showing? title]
@@ -246,16 +257,14 @@
              :backdrop-opacity 0.5
              :width "250px"
              :no-clip? true
-             :arrow-length 0
-             :arrow-width 0
+             :arrow-length 20
+             :arrow-width 20
              :close-button? true
              :on-cancel #(reset! showing? false)
              :body [datepicker
                     :model (reagent/atom (str->date date-value))
                     :show-today? true
-                    :on-change #(dispatch [:input-change-dates date-field %])]
-             ]]
-  )
+                    :on-change #(dispatch [:input-change-dates date-field %])]]])
 
 (def inavlid-date-style {:border-radius "4px 4px 4px 4px"
                          :border-color  "red"
