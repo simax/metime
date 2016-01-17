@@ -100,14 +100,14 @@
              :employee
                       {:is-ready?               true
                        :id                      0
-                       :firstname               "John"
-                       :lastname                "Doe"
-                       :email                   "johndoe@somewhere.com"
+                       :firstname               ""
+                       :lastname                ""
+                       :email                   ""
                        :prev_year_allowance     25
                        :current_year_allowance  25
                        :next_year_allowance     25
-                       :dob                     "01-01-1980"  ;(unparse (formatter "yyyyMMdd") "19800101")
-                       :startdate               "01-01-1999"  ;(unparse (formatter "yyyyMMdd") "19990101")
+                       :dob                     nil
+                       :startdate               nil
                        :enddate                 nil
                        :department_id           departmentid
                        :managerid               (:manager_id dep)
