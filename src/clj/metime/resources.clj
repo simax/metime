@@ -143,6 +143,15 @@
 ;                (if-let [emp (emps/get-employee-by-email email)]
 ;                  (if (:id)))))
 
+(defvalidator unique-email
+              {:default-message-format "Email already exists"}
+              [email-value id-key subject] ; subject is the employee map
+              (let [id (get subject (keyword id-key))]
+                (when-let [emp (emps/get-employee-by-email email-value)]
+                  (= id (:id emp)))
+                ))
+
+
 ;; TODO There is a parse-num defined in this ns and another in a CLJS ns.
 ;;      There should only be one in a CLJC.
 (defn is-zero? [num]
@@ -164,7 +173,6 @@
   [
    :firstname [[v/string] [v/min-count 1] [v/max-count 30]]
    :lastname [[v/string] [v/min-count 1] [v/max-count 30]]
-   :email [[v/email]]
    :password [[v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password must be alpha numeric with at least one number"]]
    :department_id [[department-exists]]
    :dob [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
@@ -195,15 +203,17 @@
   (let [val-keywords (extract-keywords-from-validation-set validation-set)
         partitioned-validation-set (partition 2 validation-set)]
     (interleave val-keywords
-                (append-required-to-rules required-fields partitioned-validation-set)
-                )))
+                (append-required-to-rules required-fields partitioned-validation-set))))
 
+;TODO Validation working but not showing in UI correctly for
+; missing startdate and non unique email address
 (defn validate-employee [validation-rule-set required-rules emp]
   "Return a list of validation errors"
   (if (is-new-employee? emp)
     (let [validation-set (build-required-validation-set required-rules validation-rule-set)
           result [(first (apply b/validate emp validation-set))
-                  (first (b/validate emp :confirmation [[v/required] [password-confirmation "password" emp]]))]
+                  (first (b/validate emp :confirmation [[v/required] [password-confirmation "password" emp]]))
+                  (first (b/validate emp :email [[v/required] [unique-email "id" emp]]))]
           errors (doall (remove nil? result))]
       errors)
     (let [validation-set validation-rule-set
@@ -241,7 +251,6 @@
 (defn employees-by-department []
   (let [data-emps (emps/get-all-employees)
         grouped-emps (group-by :department_id data-emps)
-
         data-deps (deps/get-all-departments)
         set-of-deps (rename (into #{} data-deps) {:id :department_id})
         set-of-emps (into #{} (map #(hash-map :department_id %1 :employees %2)
