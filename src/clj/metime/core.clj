@@ -36,6 +36,9 @@
 (defn root-handler [_]
   (resp/content-type (resp/resource-response "/index.html" {:root "public"}) "text/html"))
 
+(defn test-handler [id email]
+  (resp/content-type (resp/resource-response "/index.html" {:root "public"}) "text/html"))
+
 (defroutes app-routes
            (GET "/" [] root-handler)
            (GET "/fake" [] (str "<h1>" "Meaningless URL just to test we get a response" "</h1>"))
@@ -49,7 +52,8 @@
              (ANY "/departments/:id" [id] (department id))
              (ANY "/department/:id" [id] (department id))
              (ANY "/employees" [] (employees))
-             (ANY "/employee/:id" [id] (employee id))
+             (ANY "/employee/:id{[0-9]+}" [id] (employee id))
+             (ANY "/test" [id email] (test-handler id email))
              (ANY "/holidays" [] (holidays))
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))

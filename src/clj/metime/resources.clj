@@ -135,13 +135,6 @@
 ;TODO: Need to imporive duplicate email checking. Duplicate if current id
 ;      and email don't match an existing id and email
 ;
-;(defvalidator email-unique-if-not-blank
-;              {:default-message-format "Email already exists"}
-;              [email]
-;              (if (str/blank? email)
-;                true
-;                (if-let [emp (emps/get-employee-by-email email)]
-;                  (if (:id)))))
 
 (defvalidator unique-email
               {:default-message-format "Email already exists"}
@@ -176,7 +169,7 @@
    :password [[v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password must be alpha numeric with at least one number"]]
    :department_id [[department-exists]]
    :dob [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
-   :startdate [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Start date can't be in the future"]]
+   ;:startdate [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Start date can't be in the future"]]
    :is_approver [[v/boolean]]
    ])
 
@@ -206,7 +199,6 @@
                 (append-required-to-rules required-fields partitioned-validation-set))))
 
 ;TODO Validation working but not showing in UI correctly for
-; missing startdate and non unique email address
 (defn validate-employee [validation-rule-set required-rules emp]
   "Return a list of validation errors"
   (if (is-new-employee? emp)

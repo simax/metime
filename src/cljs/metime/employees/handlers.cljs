@@ -1,5 +1,7 @@
 (ns metime.employees.handlers
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros
+    [cljs.core.async.macros :refer [go]]
+    [bouncer.validators :refer [defvalidator]])
   (:require [cljs.core.async :refer [<!]]
             [metime.utils :as utils]
             [metime.routes :as r]
@@ -23,6 +25,20 @@
 
 (def british-date-format (f/formatter "dd-MM-yyyy"))
 
+;utils/call-api :GET (utils/api db endpoint) (:authentication-token db)
+;{:valid-token-handler   :process-departments-only-response
+; :invalid-token-handler :log-out
+; :response-keys         [:body :departments]}
+
+
+
+;(defvalidator unique-email
+;              {:default-message-format "Email already exists"}
+;              [email-value id-key subject] ; subject is the employee map
+;              (let [id (get subject (keyword id-key))]
+;                (when-let [emp (emps/get-employee-by-email email-value)]
+;                  (= id (:id emp)))))
+
 (def employee-validation-rules
   [:firstname [[v/required :message "First name is required"]]
    :lastname [[v/required :message "Last name is required"]]
@@ -36,7 +52,9 @@
 
 (defn validate-employee [db]
   (let [employee (:employee db)
-        result (apply b/validate employee employee-validation-rules)
+        result [(first (apply b/validate employee employee-validation-rules))
+                ;(first (b/validate employee :email [[v/required] [unique-email "id" employee]]))
+                ]
         errors (first result)]
     (assoc-in db [:employee :validation-errors] errors)))
 
