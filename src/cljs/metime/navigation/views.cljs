@@ -11,13 +11,13 @@
                                    subscribe]]))
 
 (def nav-bars [
-               {:id :employees :text "Employees" :path (r/url-for :employees)}
-               {:id :file-manager :text "File Manager" :path (r/url-for :file-manager)}
-               {:id :calendar :text "Calendar" :path (r/url-for :calendar)}
-               {:id :tables :text "Tables" :path (r/url-for :tables)}
-               {:id :user :text "User" :path (r/url-for :user)}
-               {:id :logout :text "Log out" :path (r/url-for :login)}
-               {:id :test :text "Test" :path (r/url-for :test)}
+               {:id :employees :text "Employees" :path (r/site-url-for :employees)}
+               {:id :file-manager :text "File Manager" :path (r/site-url-for :file-manager)}
+               {:id :calendar :text "Calendar" :path (r/site-url-for :calendar)}
+               {:id :tables :text "Tables" :path (r/site-url-for :tables)}
+               {:id :user :text "User" :path (r/site-url-for :user)}
+               {:id :logout :text "Log out" :path (r/site-url-for :login)}
+               {:id :test :text "Test" :path (r/site-url-for :test)}
                ])
 
 
@@ -71,7 +71,7 @@
 
 (defn view-employees []
   (dispatch [:set-active-navbar :employees])
-  (dispatch [:fetch-departments-and-employees "/departments-and-employees"])
+  (dispatch [:fetch-departments-and-employees])
   (let [departments-and-employees (subscribe [:departments-and-employees])]
     (fn []
       (if-not (seq @departments-and-employees)
@@ -79,7 +79,7 @@
         [ev/departments-container @departments-and-employees]))))
 
 (defn view-employee []
-  (dispatch [:fetch-departments-only "/departments-only"])
+  (dispatch [:fetch-departments-only])
   (let [emp (subscribe [:employee])
         departments (subscribe [:departments])]
     (fn []
@@ -103,7 +103,7 @@
       [:span.icon-bar]
       [:span.icon-bar]
       ]
-     [:a.navbar-brand {:href (r/url-for :home)} [:img {:src "/assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
+     [:a.navbar-brand {:href (r/site-url-for :home)} [:img {:src "/assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
     [:div#nav-bar.navbar-collapse.collapse
      [:ul.nav.navbar-nav
       (for [nav-bar-item nav-bars]

@@ -25,9 +25,6 @@
 ;  "Get the url in the address bar, including the hash portion."
 ;  (subs (.-hash js/window.location) 0))
 
-(defn api [db endpoint]
-  (str (:api-root-url db) endpoint))
-
 (defn isNaN [node]
   (and (= (.call js/toString node) (str "[object Number]"))
        (js/eval (str node " != +" node))))

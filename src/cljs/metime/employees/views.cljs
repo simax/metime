@@ -38,9 +38,9 @@
   [:div {:class "col-md-3 col-lg-3"}
    [:div {:class "dash-unit"}
     [:div {:class "thumbnail" :style {:margin-top "20px"}}
-     [:a {:href (r/url-for :employee-editor :id id) :on-click (fn [e]
-                                                                (dispatch [:employee-to-edit id])
-                                                                (.preventDefault e))}
+     [:a {:href (r/site-url-for :employee-editor :id id) :on-click (fn [e]
+                                                                     (dispatch [:employee-to-edit id])
+                                                                     (.preventDefault e))}
       [:h1 (employee-name firstname lastname)]
       [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
       ]

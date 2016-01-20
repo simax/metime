@@ -4,7 +4,7 @@
     [bouncer.validators :refer [defvalidator]])
   (:require [cljs.core.async :refer [<!]]
             [metime.utils :as utils]
-            [metime.routes :as r]
+            [metime.routes :as routes]
             [cljs-http.client :as http]
             [cljs-time.core :refer [date-time now days minus day-of-week]]
             [cljs-time.format :as f :refer [formatter parse unparse]]
@@ -149,23 +149,20 @@
     (dispatch [:set-active-view :employees])
     db))
 
-(defn build-employee-add-endpoint [db]
-  (str (utils/api db "/employees")))
-
-(defn build-employee-update-endpoint [db employee]
-  (str (utils/api db (str  "/employee/" (:id employee)))))
+(defn build-employee-update-endpoint [ employee]
+  (routes/api-endpoint-for :employee-by-id :id (:id employee)))
 
 
 (defn add-new-employee [db employee]
   (utils/send-data-to-api :POST
-                          (build-employee-add-endpoint db) (:authentication-token db) employee
+                          (routes/api-endpoint-for :employees) (:authentication-token db) employee
                           {:valid-token-handler   :switch-view-to-employees
                            :invalid-token-handler :save-failure
                            :response-keys         [:body :departments]}))
 
 (defn update-employee [db employee]
   (utils/send-data-to-api :PUT
-                          (build-employee-update-endpoint db employee) (:authentication-token db) employee
+                          (build-employee-update-endpoint employee) (:authentication-token db) employee
                           {:valid-token-handler   :switch-view-to-employees ; Needs to be seq so we can send paramaters too
                            :invalid-token-handler :save-failure
                            :response-keys         [:body :departments]}))
@@ -200,7 +197,7 @@
 (register-handler
   :authenticated
   (fn [db [_ token]]
-    (r/set-route-token! [:home])
+    (routes/set-route-token! [:home])
     (assoc db :authentication-token token :authentication-failed-msg "" :nav-bar nil :view :home)))
 
 (register-handler
@@ -214,7 +211,7 @@
   (= 200 (:status response)))
 
 (defn build-url [db]
-  (str (:api-root-url db) "/authtoken?" "email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password])))
+  (str (routes/api-endpoint-for :authtoken) "?email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password])))
 
 
 (register-handler

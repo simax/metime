@@ -8,7 +8,7 @@
                                    dispatch
                                    subscribe]]
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
-            [metime.utils :as utils]
+            [metime.routes :as routes]
             [metime.employees.views]
             [metime.db :as dbase]
             [metime.utils :as utils]))
@@ -77,8 +77,8 @@
 
 (register-handler
   :fetch-departments-only
-  (fn [db [_ endpoint]]
-    (utils/call-api :GET (utils/api db endpoint) (:authentication-token db)
+  (fn [db [_]]
+    (utils/call-api :GET (routes/api-endpoint-for :departments-only) (:authentication-token db)
                     {:valid-token-handler   :process-departments-only-response
                      :invalid-token-handler :log-out
                      :response-keys         [:body :departments]})
@@ -86,8 +86,8 @@
 
 (register-handler
   :fetch-departments-and-employees
-  (fn [db [_ endpoint]]
-    (utils/call-api :GET (utils/api db endpoint) (:authentication-token db)
+  (fn [db [_]]
+    (utils/call-api :GET (routes/api-endpoint-for :departments-and-employees) (:authentication-token db)
                     {:valid-token-handler   :process-departments-response
                      :invalid-token-handler :log-out
                      :response-keys         [:body :departments]})
@@ -96,7 +96,7 @@
 (register-handler
   :fetch-employee
   (fn [db [_ id]]
-    (utils/call-api :GET (str (utils/api db "/employee/") id) (:authentication-token db)
+    (utils/call-api :GET (routes/api-endpoint-for :employee-by-id :id id) (:authentication-token db)
                     {:valid-token-handler   :process-employee-response
                      :invalid-token-handler :log-out
                      :response-keys         [:body]})

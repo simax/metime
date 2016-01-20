@@ -412,6 +412,8 @@
              :post! (fn [ctx]
                       (if (requested-method ctx :post)
                         (try
+                          ;TODO: move metime.routes to cljc so we can use routes in cljs and clj
+                          ;and not harcode like below
                           (when-let [new-id (emps/insert-employee! (parse-employee (make-keyword-map (get-posted-data ctx))))]
                             {::location (str "http://localhost:3000/api/employees/" new-id)})
                           (catch Exception e {::failure-message (.getMessage e)}))))

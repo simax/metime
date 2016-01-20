@@ -7,30 +7,45 @@
                            dispatch
                            subscribe]]))
 
+;TODO: Add routes here for api endpoints so we can use url-for and can avoid them
+; being hardcoded throughout the codebase
 
-(def routes ["/" [
-                  ["" :home]
-                  ["tables" :tables]
-                  ["calendar" :calendar]
-                  ["file-manager" :file-manager]
-                  ["user" :user]
-                  ["login" :login]
-                  ["test" {""           :test
-                           ["/level-2"] :test-level-2}]
-                  ["employees" {""                 :employees
-                                ["/" [#"\d*" :id]] :employee-editor}]
-                  [true :not-found]
-                  ]
-             ])
+(def site-routes ["/"
+                  [
+                   ["" :home]
+                   ["tables" :tables]
+                   ["calendar" :calendar]
+                   ["file-manager" :file-manager]
+                   ["user" :user]
+                   ["login" :login]
+                   ["test" {""           :test
+                            ["/level-2"] :test-level-2}]
+                   ["employees" {""                 :employees
+                                 ["/" [#"\d*" :id]] :employee-editor}]
+                   [true :not-found]
+                   ]
+                  ])
+
+(def api-routes ["http://localhost:3000/api"
+                 [
+                  ["/authtoken" :authtoken]
+                  ["/departments" {""             :departments-only
+                                   ["/employees"] :departments-and-employees}]
+                  ["/employees" {""                 :employees
+                                 ["/" [#"\d*" :id]] :employee-by-id}]]
+                 ])
+
 
 (defn parse-url [url]
-  (bidi/match-route routes url))
+  (bidi/match-route site-routes url))
 
 (defn dispatch-route [matched-route]
   (let [handler (:handler matched-route)]
     (dispatch [:set-active-view handler])))
 
-(def url-for (partial bidi/path-for routes))
+(def site-url-for (partial bidi/path-for site-routes))
+
+(def api-endpoint-for (partial bidi/path-for api-routes))
 
 (def history
   (pushy/pushy dispatch-route parse-url))
@@ -38,7 +53,7 @@
 (defn set-route-token!
   "Set the url from the given route params"
   [params]
-  (pushy/set-token! history (apply url-for params)))
+  (pushy/set-token! history (apply site-url-for params)))
 
 (defn start-routing []
   (pushy/start! history))
