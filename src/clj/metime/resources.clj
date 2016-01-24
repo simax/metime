@@ -275,7 +275,7 @@
 
 
 
-(defresource departments []
+(defresource departments-and-employees []
              (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
@@ -314,7 +314,7 @@
 
              :handle-ok ::departments)
 
-(defresource departments-only []
+(defresource departments []
              (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get]
@@ -428,56 +428,97 @@
 
 
 
-(defresource employee [id]
+(defn find-employee-by [employee-finder-fn criteria]
+  (fn [ctx]
+    (if (or (requested-method ctx :get) (requested-method ctx :put))
+      (let [employee (employee-finder-fn criteria)]
+        (if (empty? employee)
+          false
+          [(not (empty? employee)) {::employee employee}]))
+      true)))
+
+(defn is-employee-processable? [employee-finder-fn criteria]
+  (fn [ctx]
+    (if (or (requested-method ctx :delete) (requested-method ctx :put))
+      (if-let [employee (employee-finder-fn criteria)]
+        [true {::employee employee}]
+        false)
+      true)))
+
+(defn is-employee-malformed? []
+  (fn [ctx]
+    (if (requested-method ctx :put)
+      (let [form-data (parse-employee (make-keyword-map (get-posted-data ctx)))
+            validation-result (employee-validator form-data)]
+        (if (seq validation-result)
+          [true {::failure-message validation-result}]
+          false))
+      false)))
+
+(defn does-employee-conflict? []
+  (fn [ctx]
+    (let [new-employee (make-keyword-map (get-posted-data ctx))
+          existing-employee (emps/get-employee-by-email (:email new-employee))]
+      (and (not (nil? existing-employee)) (not= (:id new-employee) (str (:id existing-employee)))))))
+
+(defn update-existing-employee []
+  (fn [ctx]
+    (let [new-data (parse-employee (make-keyword-map (get-posted-data ctx)))
+          existing-data (::employee ctx)
+          updated-data (merge existing-data new-data)]
+      (emps/update-employee! updated-data)
+      {::employee updated-data})))
+
+(defresource employee-by-id [id]
              (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :delete :put]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :can-put-to-missing? false
-             :exists? (fn [ctx]
-                        (if (or (requested-method ctx :get) (requested-method ctx :put))
-                          (let [employee (emps/get-employee-by-id id)]
-                            (if (empty? employee)
-                              false
-                              [(not (empty? employee)) {::employee employee}]))
-                          true))
+             :exists? (find-employee-by emps/get-employee-by-id id)
 
-             :processable? (fn [ctx]
-                             (if (or (requested-method ctx :delete) (requested-method ctx :put))
-                               (if-let [employee (emps/get-employee-by-id id)]
-                                 [true {::employee employee}]
-                                 false)
-                               true))
+             :processable? (is-employee-processable? emps/get-employee-by-id id)
 
-             :malformed? (fn [ctx]
-                           (if (requested-method ctx :put)
-                             (let [form-data (parse-employee (make-keyword-map (get-posted-data ctx)))
-                                   validation-result (employee-validator form-data)]
-                               (if (seq validation-result)
-                                 [true {::failure-message validation-result}]
-                                 false))
-                             false))
+             :malformed? (is-employee-malformed?)
 
              :handle-malformed ::failure-message
 
-             :conflict? (fn [ctx]
-                          (let [new-employee (make-keyword-map (get-posted-data ctx))
-                                existing-employee (emps/get-employee-by-email (:email new-employee))]
-                            (and (not (nil? existing-employee)) (not= (:id new-employee) (str (:id existing-employee))))))
+             :conflict? (does-employee-conflict?)
 
              :handle-conflict {:employee ["Employee already registered with this email address"]}
 
-             :delete! (fn [ctx]
+             :delete! (fn [_]
                         (emps/delete-employee! id))
 
-             :put! (fn [ctx]
-                     (let [new-data (parse-employee (make-keyword-map (get-posted-data ctx)))
-                           existing-data (::employee ctx)
-                           updated-data (merge existing-data new-data)]
-                       (emps/update-employee! updated-data)
-                       {::employee updated-data}))
+             :put! (update-existing-employee)
 
-             :new? (fn [ctx] (nil? ::employee))
+             :new? (fn [_] (nil? ::employee))
+             :respond-with-entity? (fn [ctx] (not (empty? (::employee ctx))))
+             :multiple-representations? false
+             :handle-ok ::employee
+             :handle-not-found "Employee not found")
+
+(defresource employee-by-email [email]
+             (secured-resource)
+             :available-media-types ["application/edn" "application/json"]
+             :allowed-methods [:get :put]
+             :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
+             :can-put-to-missing? false
+             :exists? (find-employee-by emps/get-employee-by-email email)
+
+             :processable? (is-employee-processable? emps/get-employee-by-email email)
+
+             :malformed? (is-employee-malformed?)
+
+             :handle-malformed ::failure-message
+
+             :conflict? (does-employee-conflict?)
+
+             :handle-conflict {:employee ["Employee already registered with this email address"]}
+
+             :put! (update-existing-employee)
+
+             :new? (fn [_] (nil? ::employee))
              :respond-with-entity? (fn [ctx] (not (empty? (::employee ctx))))
              :multiple-representations? false
              :handle-ok ::employee

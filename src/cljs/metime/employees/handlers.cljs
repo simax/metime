@@ -2,7 +2,7 @@
   (:require-macros
     [cljs.core.async.macros :refer [go]]
     [bouncer.validators :refer [defvalidator]])
-  (:require [cljs.core.async :refer [<!]]
+  (:require [cljs.core.async :refer [<! >! chan]]
             [metime.utils :as utils]
             [metime.routes :as routes]
             [cljs-http.client :as http]
@@ -30,14 +30,24 @@
 ; :invalid-token-handler :log-out
 ; :response-keys         [:body :departments]}
 
+(defn get-employee-by-email [token email]
+  (let [ch (chan)]
+    (go
+      (let [url (routes/api-endpoint-for :employee-by-email :email email)
+            response (<! (utils/call-secure-url :GET token url))]
+        (>! ch (:body response))))
+    ch))
 
-
-;(defvalidator unique-email
-;              {:default-message-format "Email already exists"}
-;              [email-value id-key subject] ; subject is the employee map
-;              (let [id (get subject (keyword id-key))]
-;                (when-let [emp (emps/get-employee-by-email email-value)]
-;                  (= id (:id emp)))))
+(defn unique-email [email id token]
+  (let [ch (chan)]
+    (go
+      (let [emp (<! (get-employee-by-email token email))]
+        (println (str "current id: " id " id of record with given email address: " (:id emp)))
+        (>! ch (cond
+                 (not (some? (:id emp))) ""
+                 (and (some? (:id emp)) (not= id (:id emp))) "Email already exists"
+                 :else ""))))
+    ch))
 
 (def employee-validation-rules
   [:firstname [[v/required :message "First name is required"]]
@@ -50,13 +60,54 @@
    :current_year_allowance [[v/integer :message "Must be an integer"]]
    :next_year_allowance [[v/integer :message "Must be an integer"]]])
 
+
+;(register-handler
+;  :email-change
+;  (fn [db [_ _ email]]
+;    (dispatch [:input-change :email email])
+;    (go
+;      (let [error (<! (unique-email email (get-in db [:employee :id]) (:authentication-token db)))]
+;        (println error)
+;        (assoc-in db [:employee :validation-errors :email] error)))
+;    db))
+
+(register-handler
+  :email-uniqness-violation
+  (fn [db [_ unique-email-error]]
+    (if (some? unique-email-error)
+      (assoc-in db [:employee :validation-errors :email] (list unique-email-error))
+      (update-in db [:employee :validation-errors] (dissoc :email)))
+    ))
+
+(register-handler
+  :validate-email-uniqness
+  (fn [db [_]]
+    (go
+      (let [unique-email-error (<! (unique-email (get-in db [:employee :email]) (get-in db [:employee :id]) (:authentication-token db)))]
+        (println unique-email-error)
+        (dispatch [:email-uniqness-violation unique-email-error])))
+    db))
+
+;(defn validate-employee [db]
+;  (go
+;    (let [employee (:employee db)
+;        result [(first (apply b/validate employee employee-validation-rules))]
+;        ; errors (assoc-in (first result) [:email] (list unique-email-error))
+;        errors (first result)
+;        ]
+;    (println (str "Errors: " errors))
+;    (assoc-in db [:employee :validation-errors] errors)))
+;  )
+
+
 (defn validate-employee [db]
   (let [employee (:employee db)
-        result [(first (apply b/validate employee employee-validation-rules))
-                ;(first (b/validate employee :email [[v/required] [unique-email "id" employee]]))
-                ]
+        result [(first (apply b/validate employee employee-validation-rules))]
         errors (first result)]
-    (assoc-in db [:employee :validation-errors] errors)))
+    (println errors)
+    (assoc-in db [:employee :validation-errors] errors))
+  )
+
 
 (register-handler
   :department-change
@@ -76,6 +127,7 @@
   :input-change
   (enrich validate-employee)
   (fn [db [_ property-name new-value]]
+    (dispatch [:validate-email-uniqness])
     (assoc-in db [:employee property-name] new-value)))
 
 (register-handler
@@ -98,27 +150,27 @@
       (-> db
           (merge
             {:nav-bar :employees
-             :view :employee-add
+             :view    :employee-add
              :employee
-                      {:is-ready?               true
-                       :id                      0
-                       :firstname               ""
-                       :lastname                ""
-                       :email                   ""
-                       :prev_year_allowance     25
-                       :current_year_allowance  25
-                       :next_year_allowance     25
-                       :dob                     nil
-                       :startdate               nil
-                       :enddate                 nil
-                       :department_id           departmentid
-                       :managerid               (:manager_id dep)
-                       :manager-firstname       (:manager-firstname dep)
-                       :manager-lastname        (:manager-lastname dep)
-                       :manager-email           (:manager-email dep)
-                       :password                "password1"
-                       :confirmation            "password1"
-                       :is_approver             false
+                      {:is-ready?              true
+                       :id                     0
+                       :firstname              ""
+                       :lastname               ""
+                       :email                  ""
+                       :prev_year_allowance    25
+                       :current_year_allowance 25
+                       :next_year_allowance    25
+                       :dob                    nil
+                       :startdate              nil
+                       :enddate                nil
+                       :department_id          departmentid
+                       :managerid              (:manager_id dep)
+                       :manager-firstname      (:manager-firstname dep)
+                       :manager-lastname       (:manager-lastname dep)
+                       :manager-email          (:manager-email dep)
+                       :password               "password1"
+                       :confirmation           "password1"
+                       :is_approver            false
                        }})))))
 
 
@@ -149,7 +201,7 @@
     (dispatch [:set-active-view :employees])
     db))
 
-(defn build-employee-update-endpoint [ employee]
+(defn build-employee-update-endpoint [employee]
   (routes/api-endpoint-for :employee-by-id :id (:id employee)))
 
 

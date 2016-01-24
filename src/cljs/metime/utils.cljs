@@ -59,7 +59,7 @@
 (defn build-authorization-header [token]
   {:headers {"authorization" (str "Token " token)}})
 
-(defn call-secure-url [verb url token]
+(defn call-secure-url [verb token url]
   (case verb
     :GET (http/get url (build-authorization-header token))
     :DELETE (http/delete url (build-authorization-header token))))
@@ -68,8 +68,7 @@
   "Make a secure url call (GET or DELETE) with authorization header.
   Dispatch redirect to login if unauthorized."
   (go
-    ;; The following go block will "park" until the http request returns data
-    (let [response (<! (call-secure-url verb url token))
+    (let [response (<! (call-secure-url verb token url))
           status (:status response)]
       (if (not= status 200)
         (dispatch [invalid-token-handler])

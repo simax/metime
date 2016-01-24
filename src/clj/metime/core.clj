@@ -18,7 +18,7 @@
             [compojure.handler :as handler]
             [compojure.route :as route]
             [compojure.core :refer [defroutes context GET POST ANY]]
-            [metime.resources :refer :all]
+            [metime.resources :as res]
             [selmer.parser :refer [render-file]]
             [environ.core :refer [env]]
             [prone.middleware :as prone]
@@ -36,31 +36,25 @@
 (defn root-handler [_]
   (resp/content-type (resp/resource-response "/index.html" {:root "public"}) "text/html"))
 
-(defn test-handler [id email]
-  (resp/content-type (resp/resource-response "/index.html" {:root "public"}) "text/html"))
+(defn employee-by-id-or-email-handler [id email]
+  (if (some? id) (res/employee-by-id id) (res/employee-by-email email)))
 
 (defroutes app-routes
            (GET "/" [] root-handler)
-           (GET "/fake" [] (str "<h1>" "Meaningless URL just to test we get a response" "</h1>"))
-
            (context "/api" []
 
-             (GET "/simon" [] (fn [_] {:status 200 :body "Some text from Simon"}))
-             (GET "/authtoken" [] (build-auth-token))       ; (fn [_] {:status 200 :body "Some text from Simon"})
-             (ANY "/departments/employees" [] (departments))
-             (ANY "/departments" [] (departments-only))
-             (ANY "/departments/:id" [id] (department id))
-             ;(ANY "/department/:id" [id] (department id))
-             (ANY "/employees" [] (employees))
-             (ANY "/employees/:id{[0-9]+}" [id] (employee id))
-             (ANY "/test" [id email] (test-handler id email))
-             (ANY "/holidays" [] (holidays))
+             (GET "/authtoken" [] (res/build-auth-token))       ; (fn [_] {:status 200 :body "Some text from Simon"})
+             (ANY "/departments/employees" [] (res/departments-and-employees))
+             (ANY "/departments" [] (res/departments))
+             (ANY "/departments/:id" [id] (res/department id))
+             (ANY "/employees" [] (res/employees))
+             (ANY "/employee" [id email] (employee-by-id-or-email-handler id email))
+             (ANY "/holidays" [] (res/holidays))
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))
            ;; All other routes failed. Just serve the app again
            ;; and let the client take over.
-           (ANY "*" [] root-handler)
-           )
+           (ANY "*" [] root-handler))
 
 (def app
   (->

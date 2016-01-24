@@ -31,8 +31,10 @@
                   ["/authtoken" :authtoken]
                   ["/departments" {""             :departments-only
                                    ["/employees"] :departments-and-employees}]
-                  ["/employees" {""                 :employees
-                                 ["/" [#"\d*" :id]] :employee-by-id}]]
+                  ["/employees" :employees]
+                  [["/employee?id=" [#"\d*" :id]] :employee-by-id]
+                  [["/employee?email=" :email] :employee-by-email]
+                  ]
                  ])
 
 
