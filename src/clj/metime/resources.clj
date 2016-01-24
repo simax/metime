@@ -142,7 +142,7 @@
               (let [id (get subject (keyword id-key))]
                 (when-let [emp (emps/get-employee-by-email email-value)]
                   (= id (:id emp)))
-                ))
+                true))
 
 
 ;; TODO There is a parse-num defined in this ns and another in a CLJS ns.

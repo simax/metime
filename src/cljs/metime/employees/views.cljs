@@ -202,6 +202,7 @@
    [
     [box :width "150px" :child [label :label "Email"]]
     [box :size "auto" :child [input-text
+                              ;:validation-regex #"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
                               :width "315px"
                               :model (:email employee)
                               :status (when (seq (get-in employee [:validation-errors :email])) :error)

@@ -38,7 +38,7 @@
         (>! ch (:body response))))
     ch))
 
-(defn is-email-found-for-a-different-employee? [emp id]
+(defn email-found-for-a-different-employee? [emp id]
   (and (some? (:id emp)) (not= id (:id emp))))
 
 (defn unique-email [email id token]
@@ -47,7 +47,7 @@
       (let [emp (<! (get-employee-by-email token email))]
         (println (str "current id: " id " id of record with given email address: " (:id emp)))
         (>! ch (cond
-                 (is-email-found-for-a-different-employee? emp id) "Email already exists"
+                 (email-found-for-a-different-employee? emp id) "Email already in use"
                  (not (some? (:id emp))) ""
                  :else ""))))
     ch))
@@ -67,14 +67,15 @@
 (register-handler
   :email-uniqness-violation
   (fn [db [_ unique-email-error]]
-    (when (not (empty? unique-email-error)) (assoc-in db [:employee :validation-errors :email] (list unique-email-error)))))
+    (if (not (empty? unique-email-error))
+      (assoc-in db [:employee :validation-errors :email] (list unique-email-error))
+      db)))
 
 (register-handler
   :validate-email-uniqness
   (fn [db [_]]
     (go
       (let [unique-email-error (<! (unique-email (get-in db [:employee :email]) (get-in db [:employee :id]) (:authentication-token db)))]
-        (println unique-email-error)
         (dispatch [:email-uniqness-violation unique-email-error])))
     db))
 
@@ -163,13 +164,13 @@
 (register-handler
   :save-success
   (fn [db [_]]
-    (js/alert "Employee saved!!!")
+    ;(js/alert "Employee saved!!!")
     db))
 
 (register-handler
   :save-failure
   (fn [db [_]]
-    (js/alert "Oooops, failed saving employee :(")
+    ;(js/alert "Oooops, failed saving employee :(")
     db))
 
 
@@ -202,7 +203,8 @@
   :employee-save
   (fn [db [_]]
     (let [employee (:employee db)]
-      (when (apply b/valid? employee employee-validation-rules)
+      (dispatch [:validate-email-uniqness])
+      (when (not (some? (get-in employee [:validation-errors])))                                   ;(apply b/valid? employee employee-validation-rules)
         (if (is-new-employee? (:id employee))
           (add-new-employee db employee)
           (update-employee db employee)))
