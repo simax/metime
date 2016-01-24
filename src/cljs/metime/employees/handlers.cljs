@@ -38,14 +38,17 @@
         (>! ch (:body response))))
     ch))
 
+(defn is-email-found-for-a-different-employee? [emp id]
+  (and (some? (:id emp)) (not= id (:id emp))))
+
 (defn unique-email [email id token]
   (let [ch (chan)]
     (go
       (let [emp (<! (get-employee-by-email token email))]
         (println (str "current id: " id " id of record with given email address: " (:id emp)))
         (>! ch (cond
+                 (is-email-found-for-a-different-employee? emp id) "Email already exists"
                  (not (some? (:id emp))) ""
-                 (and (some? (:id emp)) (not= id (:id emp))) "Email already exists"
                  :else ""))))
     ch))
 
@@ -61,23 +64,10 @@
    :next_year_allowance [[v/integer :message "Must be an integer"]]])
 
 
-;(register-handler
-;  :email-change
-;  (fn [db [_ _ email]]
-;    (dispatch [:input-change :email email])
-;    (go
-;      (let [error (<! (unique-email email (get-in db [:employee :id]) (:authentication-token db)))]
-;        (println error)
-;        (assoc-in db [:employee :validation-errors :email] error)))
-;    db))
-
 (register-handler
   :email-uniqness-violation
   (fn [db [_ unique-email-error]]
-    (if (some? unique-email-error)
-      (assoc-in db [:employee :validation-errors :email] (list unique-email-error))
-      (update-in db [:employee :validation-errors] (dissoc :email)))
-    ))
+    (when (not (empty? unique-email-error)) (assoc-in db [:employee :validation-errors :email] (list unique-email-error)))))
 
 (register-handler
   :validate-email-uniqness
@@ -88,25 +78,13 @@
         (dispatch [:email-uniqness-violation unique-email-error])))
     db))
 
-;(defn validate-employee [db]
-;  (go
-;    (let [employee (:employee db)
-;        result [(first (apply b/validate employee employee-validation-rules))]
-;        ; errors (assoc-in (first result) [:email] (list unique-email-error))
-;        errors (first result)
-;        ]
-;    (println (str "Errors: " errors))
-;    (assoc-in db [:employee :validation-errors] errors)))
-;  )
-
 
 (defn validate-employee [db]
   (let [employee (:employee db)
         result [(first (apply b/validate employee employee-validation-rules))]
         errors (first result)]
     (println errors)
-    (assoc-in db [:employee :validation-errors] errors))
-  )
+    (assoc-in db [:employee :validation-errors] errors)))
 
 
 (register-handler
