@@ -309,7 +309,7 @@
        :children
        [
         [box :child [input-text
-                     :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
+                     :validation-regex #"^(\d{1,2}\-{1}\d{1,2}-{1}\d{4})$" ;#"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
                      :style {:border-radius "4px 0 0 4px"}
                      :placeholder place-holder
                      :model (date->str (field db-model))

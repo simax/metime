@@ -55,7 +55,7 @@
   (= 1 (db-delete-employee! {:id id} {:connection db/db-spec})))
 
 (defn delete-all-employees! []
-  "Probably only useful while testing/debugging. Unaware of a use case
+  "Probably only useful while testing/debugging. Can't envisage a use case
   for this function in production"
 
   (db-delete-all-employees! {} {:connection db/db-spec}))

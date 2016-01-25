@@ -16,7 +16,6 @@
 (defn get-auth-cookie []
   (utils/get-cookie "auth"))
 
-
 (register-handler
   :fetch-auth-code
   (fn [db [_]]
@@ -26,7 +25,6 @@
         (dispatch [:log-out])))
     db))
 
-
 (register-handler
   :initialise-db
   (fn [_ [_]]
@@ -34,7 +32,6 @@
       (-> dbase/default-db
           (assoc :authentication-token token
                  :view :home)))))
-
 
 (register-handler
   :employee-to-edit
@@ -73,7 +70,6 @@
         (assoc db :employee (assoc {} :is-ready? true :not-found true))
         (assoc db :employee (assoc emp :is-ready? true :not-found false)))
       )))
-
 
 (register-handler
   :fetch-departments-only

@@ -132,7 +132,7 @@
                          dept-id)]
                 (some? (deps/get-department-by-id id))))
 
-;TODO: Need to imporive duplicate email checking. Duplicate if current id
+;TODO: Need to improve duplicate email checking. Duplicate if current id
 ;      and email don't match an existing id and email
 ;
 

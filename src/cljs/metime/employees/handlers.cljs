@@ -6,7 +6,7 @@
             [metime.utils :as utils]
             [metime.routes :as routes]
             [cljs-http.client :as http]
-            [cljs-time.core :refer [date-time now days minus day-of-week]]
+            [cljs-time.core :refer [date-time local-date now days minus day-of-week]]
             [cljs-time.format :as f :refer [formatter parse unparse]]
             [re-frame.core :refer [register-handler
                                    path
@@ -45,7 +45,6 @@
   (let [ch (chan)]
     (go
       (let [emp (<! (get-employee-by-email token email))]
-        (println (str "current id: " id " id of record with given email address: " (:id emp)))
         (>! ch (cond
                  (email-found-for-a-different-employee? emp id) "Email already in use"
                  (not (some? (:id emp))) ""
@@ -75,8 +74,8 @@
   :validate-email-uniqness
   (fn [db [_]]
     (when-not (get-in db [:employee :validation-errors :email]) (go
-      (let [unique-email-error (<! (unique-email (get-in db [:employee :email]) (get-in db [:employee :id]) (:authentication-token db)))]
-        (dispatch [:email-uniqness-violation unique-email-error]))))
+                                                                  (let [unique-email-error (<! (unique-email (get-in db [:employee :email]) (get-in db [:employee :id]) (:authentication-token db)))]
+                                                                    (dispatch [:email-uniqness-violation unique-email-error]))))
     db))
 
 
@@ -84,7 +83,6 @@
   (let [employee (:employee db)
         result [(first (apply b/validate employee employee-validation-rules))]
         errors (first result)]
-    (println errors)
     (assoc-in db [:employee :validation-errors] errors)))
 
 
@@ -109,12 +107,20 @@
     (dispatch [:validate-email-uniqness])
     (assoc-in db [:employee property-name] new-value)))
 
+
+(defn date->str [input-date]
+  (if (nil? input-date)
+    ""
+    (let [formatted-date-string (try (unparse british-date-format input-date)
+             (catch :default e input-date))]
+    formatted-date-string)))
+
 (register-handler
   :input-change-dates
   (enrich validate-employee)
   (fn [db [_ property-name new-value]]
-    (let [date-value (try (unparse british-date-format new-value)
-                          (catch :default e new-value))]
+    (let [date-value (date->str new-value)]
+      (println (str "date-value: " date-value))
       (assoc-in db [:employee property-name] date-value))))
 
 (register-handler
@@ -189,12 +195,13 @@
   :employee-save
   (fn [db [_]]
     (let [employee (:employee db)]
-      (dispatch [:validate-email-uniqness])
-      (when (not (some? (get-in employee [:validation-errors])))                                   ;(apply b/valid? employee employee-validation-rules)
-        (if (is-new-employee? (:id employee))
-          (add-new-employee db employee)
-          (update-employee db employee)))
-      (validate-employee db))))
+      (when (not (some? (get-in employee [:validation-errors]))) ;(apply b/valid? employee employee-validation-rules)
+        (do
+          (dispatch [:validate-email-uniqness])
+          (if (is-new-employee? (:id employee))
+            (add-new-employee db employee)
+            (update-employee db employee))))
+      db)))
 
 (register-handler
   :ui-department-drawer-status-toggle
