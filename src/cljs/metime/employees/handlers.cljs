@@ -74,9 +74,9 @@
 (register-handler
   :validate-email-uniqness
   (fn [db [_]]
-    (go
+    (when-not (get-in db [:employee :validation-errors :email]) (go
       (let [unique-email-error (<! (unique-email (get-in db [:employee :email]) (get-in db [:employee :id]) (:authentication-token db)))]
-        (dispatch [:email-uniqness-violation unique-email-error])))
+        (dispatch [:email-uniqness-violation unique-email-error]))))
     db))
 
 
@@ -153,24 +153,10 @@
                        }})))))
 
 
-(defn show-conflict-error [response]
-  (if (= (:status response) 409)                            ;; Conflict
-    (dispatch [:show-failed-save-attempt {:email (get-in response [:body :employee])}])
-    (do
-      ;(utils/set-hash! (r/url-for :employees))
-      (dispatch [:set-active-view :employees]))))
-
-
-(register-handler
-  :save-success
-  (fn [db [_]]
-    ;(js/alert "Employee saved!!!")
-    db))
-
 (register-handler
   :save-failure
   (fn [db [_]]
-    ;(js/alert "Oooops, failed saving employee :(")
+    ; Potentially show some kind of boostrap alert?
     db))
 
 

@@ -302,7 +302,7 @@
                       (if (requested-method ctx :post)
                         (try
                           (when-let [new-id (deps/insert-department! (make-keyword-map (get-posted-data ctx)))]
-                            ; TODO: Stop hardcoding URL below!!
+                            ; TODO: Stop hardcoding URL below!! Put bidi data in a CLJC and use them
                             {::location (str "http://localhost:3000/api/departments/" new-id)})
                           (catch Exception e {::failure-message "Department already exists"}))))
 
