@@ -6,17 +6,13 @@
             [metime.data.holidays :as hols]
             [metime.security :as sec]
             [clojure.java.io :as io]
-            [clojure.string :as str]
             [clojure.walk :as walk]
             [clojure.data.json :as json]
             [clj-time.core :as t]
             [clj-time.format :as f]
             [clj-time.coerce :as c]
             [clojure.set :refer :all]
-            [buddy.sign.jws :as jws]
-            [clj-time.core :as time]
             [buddy.auth :refer [authenticated? throw-unauthorized]]
-            [buddy.hashers :as hashers]
             [bouncer.core :as b]
             [bouncer.validators :as v :refer [defvalidator]]))
 

@@ -108,19 +108,19 @@
     (assoc-in db [:employee property-name] new-value)))
 
 
-(defn date->str [input-date]
+(defn chack-date-validity [input-date]
   (if (nil? input-date)
     ""
-    (let [formatted-date-string (try (unparse british-date-format input-date)
-             (catch :default e input-date))]
-    formatted-date-string)))
+    (if-let [_ (try (parse british-date-format input-date)
+                    (catch :default e nil))]
+      input-date
+      "")))
 
 (register-handler
   :input-change-dates
   (enrich validate-employee)
   (fn [db [_ property-name new-value]]
-    (let [date-value (date->str new-value)]
-      (println (str "date-value: " date-value))
+    (let [date-value (chack-date-validity new-value)]
       (assoc-in db [:employee property-name] date-value))))
 
 (register-handler

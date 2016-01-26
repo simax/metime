@@ -6,13 +6,16 @@
 
 (defqueries "metime/data/sql/metime.sql" {:connection db/db-spec})
 
+(defn pad-with-leading-zero [str]
+  (format "%02d" (read-string str)))
+
 (defn format-date [date]
   "Change date format from 31-12-1999 to 1999-12-31"
   (if (empty? date)
     ""
     (do
       (let [date-str (string/split date, #"-")]
-        (str (nth date-str 2) "-" (nth date-str 1) "-" (nth date-str 0))))))
+        (str (pad-with-leading-zero (nth date-str 2)) "-" (pad-with-leading-zero (nth date-str 1)) "-" (pad-with-leading-zero (nth date-str 0)))))))
 
 (defn format-dates [employee]
   (let [emp (assoc employee :dob (format-date (:dob employee))
