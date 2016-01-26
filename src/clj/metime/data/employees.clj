@@ -14,8 +14,13 @@
   (if (empty? date)
     ""
     (do
-      (let [date-str (string/split date, #"-")]
-        (str (pad-with-leading-zero (nth date-str 2)) "-" (pad-with-leading-zero (nth date-str 1)) "-" (pad-with-leading-zero (nth date-str 0)))))))
+      (->> (string/split date, #"-")
+           (map pad-with-leading-zero)
+           (reverse)
+           (interpose "-")
+           (apply str)))))
+
+; str (pad-with-leading-zero (nth date-str 2)) "-" (pad-with-leading-zero (nth date-str 1)) "-" (pad-with-leading-zero (nth date-str 0))
 
 (defn format-dates [employee]
   (let [emp (assoc employee :dob (format-date (:dob employee))
@@ -50,8 +55,8 @@
 
 (defn update-employee! [data]
   (-> data
-    (format-dates)
-    (db-update-employee! {:connection db/db-spec})))
+      (format-dates)
+      (db-update-employee! {:connection db/db-spec})))
 
 (defn delete-employee! [id]
   "Delete the employee with the given id"
