@@ -20,8 +20,6 @@
            (interpose "-")
            (apply str)))))
 
-; str (pad-with-leading-zero (nth date-str 2)) "-" (pad-with-leading-zero (nth date-str 1)) "-" (pad-with-leading-zero (nth date-str 0))
-
 (defn format-dates [employee]
   (let [emp (assoc employee :dob (format-date (:dob employee))
                             :startdate (format-date (:startdate employee))
