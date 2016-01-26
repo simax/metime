@@ -13,12 +13,11 @@
   "Change date format from 31-12-1999 to 1999-12-31"
   (if (empty? date)
     ""
-    (do
-      (->> (string/split date, #"-")
-           (map pad-with-leading-zero)
-           (reverse)
-           (interpose "-")
-           (apply str)))))
+    (->> (string/split date, #"-")
+         (map pad-with-leading-zero)
+         (reverse)
+         (interpose "-")
+         (apply str))))
 
 (defn format-dates [employee]
   (let [emp (assoc employee :dob (format-date (:dob employee))
