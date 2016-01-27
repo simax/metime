@@ -25,11 +25,6 @@
 
 (def british-date-format (f/formatter "dd-MM-yyyy"))
 
-;utils/call-api :GET (utils/api db endpoint) (:authentication-token db)
-;{:valid-token-handler   :process-departments-only-response
-; :invalid-token-handler :log-out
-; :response-keys         [:body :departments]}
-
 (defn get-employee-by-email [token email]
   (let [ch (chan)]
     (go

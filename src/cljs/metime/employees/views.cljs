@@ -1,6 +1,6 @@
 (ns metime.employees.views
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
-  (:require [clojure.string :as string]
+  (:require [metime.formatting :as fmt]
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [metime.employees.subs]
             [metime.employees.handlers]
@@ -223,20 +223,11 @@
                                   (catch :default e date))]
       formatted-date-str)))
 
-;TODO: Should be in CLJC also appears in metime.resources
-(defn format-date [date]
-  "Change date format from 31-12-1999 to 1999-12-31"
-  (if (empty? date)
-    ""
-    (do
-      (let [date-str (string/split date, #"-")]
-        (str (nth date-str 2) "-" (nth date-str 1) "-" (nth date-str 0))))))
-
 (defn str->date [date-str]
   "Returns a date object from date-str. Returns nil if date-str is empty"
   (if (empty? date-str)
     nil
-    (let [d (format-date date-str)]
+    (let [d (fmt/format-date date-str)]
       (try (iso8601->date (clojure.string/replace d "-" ""))
            (catch :default e (now))))))
 

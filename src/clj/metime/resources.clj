@@ -194,7 +194,7 @@
     (interleave val-keywords
                 (append-required-to-rules required-fields partitioned-validation-set))))
 
-;TODO Validation working but not showing in UI correctly for
+
 (defn validate-employee [validation-rule-set required-rules emp]
   "Return a list of validation errors"
   (if (is-new-employee? emp)

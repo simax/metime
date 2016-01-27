@@ -1,28 +1,15 @@
 (ns metime.data.employees
-  (:require [clojure.string :as string]
-            [buddy.hashers :as hashers]
+  (:require [buddy.hashers :as hashers]
             [yesql.core :refer [defqueries defquery]]
-            [metime.data.database :as db]))
+            [metime.data.database :as db]
+            [metime.formatting :as fmt]))
 
 (defqueries "metime/data/sql/metime.sql" {:connection db/db-spec})
 
-(defn pad-with-leading-zero [str]
-  (format "%02d" (read-string str)))
-
-(defn format-date [date]
-  "Change date format from 31-12-1999 to 1999-12-31"
-  (if (empty? date)
-    ""
-    (->> (string/split date, #"-")
-         (map pad-with-leading-zero)
-         (reverse)
-         (interpose "-")
-         (apply str))))
-
 (defn format-dates [employee]
-  (let [emp (assoc employee :dob (format-date (:dob employee))
-                            :startdate (format-date (:startdate employee))
-                            :enddate (format-date (:enddate employee)))]
+  (let [emp (assoc employee :dob (fmt/format-date (:dob employee))
+                            :startdate (fmt/format-date (:startdate employee))
+                            :enddate (fmt/format-date (:enddate employee)))]
     emp))
 
 (defn prepare-for-insert [data]
