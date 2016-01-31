@@ -269,7 +269,7 @@
                               :status-tooltip (apply str (get-in employee [:validation-errors :email]))
                               :placeholder "Employee email address"
                               :on-change #(dispatch [:input-change :email %])
-                              :change-on-blur? false]]
+                              :change-on-blur? true]]
     ]])
 
 
