@@ -13,7 +13,7 @@
                                  popover-tooltip md-circle-icon-button]
              :refer-macros [handler-fn]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
-            [cljs-time.core :refer [before? after? date-time now days minus day-of-week]]
+            [cljs-time.core :refer [within? before? after? date-time now days minus day-of-week]]
             [cljs-time.format :refer [formatter parse unparse]]
             [cljs-time.coerce]
             [goog.date]
@@ -261,7 +261,6 @@
    [
     [box :width "150px" :child [label :label "Email"]]
     [box :size "auto" :child [input-text
-                              ;:validation-regex #"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
                               :width "315px"
                               :model (:email employee)
                               :status (when (seq (get-in employee [:validation-errors :email])) :error)
@@ -378,6 +377,11 @@
 (defn date-in-the-past? [date]
   (before? date (now)))
 
+(defn date-between? [start end date]
+  ;(let [s ])
+  ;(within? (parse (formatter "dd-MM-yyyy") start) (parse (formatter "dd-MM-yyyy") end) date)
+  true)
+
 (defn employee-dob [employee]
   (let [error-message (subscribe [:employee-dob-error-message])
         showing-error-icon? (subscribe [:employee-dob-show-error])]
@@ -387,13 +391,17 @@
 (defn employee-start-date [employee]
   (let [error-message (subscribe [:employee-startdate-error-message])
         showing-error-icon? (subscribe [:employee-startdate-show-error])]
-    (date-component employee :startdate "Start date" "Start date" error-message showing-error-icon?)))
+    (letfn [(after-dob? [date]
+              (date-between? (:dob employee) (:enddate employee) date))]
+      (date-component employee :startdate "Start date" "Start date" error-message showing-error-icon? after-dob?))))
 
 
 (defn employee-end-date [employee]
   (let [error-message (subscribe [:employee-enddate-error-message])
         showing-error-icon? (subscribe [:employee-enddate-show-error])]
-    (date-component employee :enddate "End date" "End date" error-message showing-error-icon?)))
+    (letfn [(after-start-date? [date]
+              (after? date (:startdate employee)))]
+      (date-component employee :enddate "End date" "End date" error-message showing-error-icon?))))
 
 (defn employee-prev-year-allowance [employee]
   [h-box

@@ -134,6 +134,7 @@
 (register-handler
   :datepicker-change-dates
   (fn hdlr-datepicker-change-dates [db [_ property-name new-value]]
+    (println ":datepicker-change-dates")
     (let [date-value (date->str new-value)]
       (dispatch [:input-change-dates property-name date-value])
       (assoc-in db [:employee property-name] date-value))))
