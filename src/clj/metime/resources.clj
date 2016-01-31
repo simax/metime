@@ -178,8 +178,8 @@
                         rule (second rule-set)]
                     (if (contains? req-rules rule-keyword)
                       (make-rule-required rule)
-                      rule)
-                    )) partitioned-validation-set)))
+                      rule))
+                    )) partitioned-validation-set))
 
 (defn extract-keywords-from-validation-set [validation-set]
   (keep-indexed #(if (even? %1) %2) validation-set))

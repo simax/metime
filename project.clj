@@ -36,8 +36,8 @@
                            [org.clojure/data.json "0.2.5"]
 
                            ;; UI
-                           [reagent "0.5.1"]
-                           [re-frame "0.6.0"]
+                           [reagent "0.6.0-alpha"]
+                           [re-frame "0.7.0-alpha-2"]
                            [re-com "0.8.0"]
                            [bidi "1.24.0"]
                            [kibu/pushy "0.3.6"]
@@ -48,11 +48,13 @@
                            [selmer "0.8.0"]
                            [environ "1.0.0"]
                            [expectations "2.1.2"]
-                           [binaryage/devtools "0.4.1"]]
+                           [binaryage/devtools "0.4.1"]
+                           [org.clojars.stumitchell/clairvoyant "0.1.0-SNAPSHOT"]
+                           [day8/re-frame-tracer "0.1.0-SNAPSHOT"]]
 
 
   :plugins [
-            [lein-figwheel "0.3.9"]
+            [lein-figwheel "0.5.0-6"]
             [lein-autoexpect "1.7.0"]
             [clj-sql-up "0.3.7"]
             [lein-cljsbuild "1.1.0"]
@@ -95,6 +97,7 @@
                         :source-paths ["src/cljs"]
                         :compiler     {:output-to     "resources/public/js/compiled/app.js"
                                        :main          metime.client
+                                       :closure-defines {:goog.DEBUG false}
                                        :optimizations :advanced
                                        :pretty-print  false}}]}
   :figwheel {

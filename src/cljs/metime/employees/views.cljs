@@ -13,7 +13,7 @@
                                  popover-tooltip md-circle-icon-button]
              :refer-macros [handler-fn]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
-            [cljs-time.core :refer [date-time now days minus day-of-week]]
+            [cljs-time.core :refer [before? after? date-time now days minus day-of-week]]
             [cljs-time.format :refer [formatter parse unparse]]
             [cljs-time.coerce]
             [goog.date]
@@ -26,7 +26,66 @@
                                    dispatch
                                    dispatch-sync
                                    subscribe]]
-            [reagent.core :as reagent]))
+            [reagent.core :as reagent]
+            [clairvoyant.core :refer-macros [trace-forms]]
+            [re-frame-tracer.core :refer [tracer]]))
+
+
+;(trace-forms
+;  {:tracer (tracer :color "indigo")}
+
+(defn login-email [credentials]
+  [h-box
+   :justify :between
+   :children
+   [
+    [box :width "150px" :child [label :label "Email"]]
+    [box :size "auto" :child [input-text
+                              :width "300px"
+                              :model (:email credentials)
+                              :status (when (seq (get-in credentials [:validation-errors :email])) :error)
+                              :status-icon? (seq (get-in credentials [:validation-errors :email]))
+                              :status-tooltip (apply str (get-in credentials [:validation-errors :email]))
+                              :placeholder "Email"
+                              :on-change #(dispatch [:input-change :email %])
+                              :change-on-blur? false]]
+    ]])
+
+
+(defn login-password [credentials]
+  [h-box
+   :justify :between
+   :children
+   [
+    [box :width "150px" :child [label :label "Password"]]
+    [box :size "auto" :child [input-text
+                              :width "300px"
+                              :model (:password credentials)
+                              :status (when (seq (get-in credentials [:validation-errors :password])) :error)
+                              :status-icon? (seq (get-in credentials [:validation-errors :password]))
+                              :status-tooltip (apply str (get-in credentials [:validation-errors :password]))
+                              :placeholder "Password"
+                              :on-change #(dispatch [:input-change :password %])
+                              :change-on-blur? false
+                              :attr {:type "password"}]]
+    ]])
+
+(defn login-button [msg]
+  [h-box
+   :class "panel"
+   :justify :between
+   :align-self :stretch
+   :children
+   [
+    [box :width "150px" :child [label :style {:color "red" :font-weight :bold} :label msg]]
+    [box
+     :child [button
+             :class "btn btn-primary"
+             :on-click #(dispatch [:log-in])
+             :label "Login"]
+     ]
+    ]])
+
 
 
 (defn employee-name [firstname lastname]
@@ -227,12 +286,12 @@
   "Returns a date object from date-str. Returns nil if date-str is empty"
   (if (empty? date-str)
     nil
-    (let [d (fmt/format-date date-str)]
+    (let [d (fmt/format-date-reverse date-str)]
       (try (iso8601->date (clojure.string/replace d "-" ""))
            (catch :default e (now))))))
 
 
-(defn date-input-with-popup [date-field date-value showing? title]
+(defn date-input-with-popup [date-field date-value showing? title selectable-fn]
   "Displays a popup for the given date field"
   [popover-anchor-wrapper
    :showing? showing?
@@ -254,9 +313,10 @@
              :close-button? true
              :on-cancel #(reset! showing? false)
              :body [datepicker
+                    :selectable-fn selectable-fn
                     :model (reagent/atom (str->date date-value))
                     :show-today? true
-                    :on-change #(dispatch [:input-change-dates date-field %])]]])
+                    :on-change #(dispatch [:datepicker-change-dates date-field %])]]])
 
 (def inavlid-date-style {:border-radius "4px 4px 4px 4px"
                          :border-color  "red"
@@ -286,36 +346,42 @@
                              ))
 
 
-(defn date-component [db-model field field-label place-holder error-message showing-error-icon?]
+(defn date-component
   "A generic date input box with popup and validation features"
-  (let [showing-date-popup? (reagent/atom false)
-        showing-tooltip? (reagent/atom false)]
-    [h-box
-     :justify :start
-     :children
-     [
-      [box :width "150px" :child [label :label field-label]]
-      [h-box
-       :style (if @showing-error-icon? inavlid-date-style valid-date-style)
-       :children
-       [
-        [box :child [input-text
-                     :validation-regex #"^(\d{0,2}\-{0,1}\d{0,2}-{0,1}\d{0,4})$"
-                     :style {:border-radius "4px 0 0 4px"}
-                     :placeholder place-holder
-                     :model (date->str (field db-model))
-                     :width "120px"
-                     :change-on-blur? true
-                     :on-change #(dispatch [:input-change-dates field %])]]
-        (date-input-with-popup field (field db-model) showing-date-popup? place-holder)
-        ]]
-      (show-date-error error-message showing-error-icon? showing-tooltip?)]]))
+  ([db-model field field-label place-holder error-message showing-error-icon?]
+   (date-component db-model field field-label place-holder error-message showing-error-icon? (partial constantly true)))
 
+  ([db-model field field-label place-holder error-message showing-error-icon? selectable-fn]
+   (let [showing-date-popup? (reagent/atom false)
+         showing-tooltip? (reagent/atom false)]
+     [h-box
+      :justify :start
+      :children
+      [
+       [box :width "150px" :child [label :label field-label]]
+       [h-box
+        :style (if @showing-error-icon? inavlid-date-style valid-date-style)
+        :children
+        [
+         [box :child [input-text
+                      :style {:border-radius "4px 0 0 4px"}
+                      :placeholder place-holder
+                      :model (date->str (field db-model))
+                      :width "120px"
+                      :change-on-blur? true
+                      :on-change #(dispatch [:input-change-dates field %])]]
+         (date-input-with-popup field (field db-model) showing-date-popup? place-holder selectable-fn)
+         ]]
+       (show-date-error error-message showing-error-icon? showing-tooltip?)]])))
+
+
+(defn date-in-the-past? [date]
+  (before? date (now)))
 
 (defn employee-dob [employee]
   (let [error-message (subscribe [:employee-dob-error-message])
         showing-error-icon? (subscribe [:employee-dob-show-error])]
-    (date-component employee :dob "Date of birth" "Date of birth" error-message showing-error-icon?)))
+    (date-component employee :dob "Date of birth" "Date of birth" error-message showing-error-icon? date-in-the-past?)))
 
 
 (defn employee-start-date [employee]
@@ -403,7 +469,6 @@
                 ]]
               ]])
 
-
 (defn employee-core-details []
   (let [departments (subscribe [:departments])]
     (fn [employee]
@@ -474,56 +539,6 @@
               ]
    ])
 
-(defn login-email [credentials]
-  [h-box
-   :justify :between
-   :children
-   [
-    [box :width "150px" :child [label :label "Email"]]
-    [box :size "auto" :child [input-text
-                              :width "300px"
-                              :model (:email credentials)
-                              :status (when (seq (get-in credentials [:validation-errors :email])) :error)
-                              :status-icon? (seq (get-in credentials [:validation-errors :email]))
-                              :status-tooltip (apply str (get-in credentials [:validation-errors :email]))
-                              :placeholder "Email"
-                              :on-change #(dispatch [:input-change :email %])
-                              :change-on-blur? false]]
-    ]])
-
-(defn login-password [credentials]
-  [h-box
-   :justify :between
-   :children
-   [
-    [box :width "150px" :child [label :label "Password"]]
-    [box :size "auto" :child [input-text
-                              :width "300px"
-                              :model (:password credentials)
-                              :status (when (seq (get-in credentials [:validation-errors :password])) :error)
-                              :status-icon? (seq (get-in credentials [:validation-errors :password]))
-                              :status-tooltip (apply str (get-in credentials [:validation-errors :password]))
-                              :placeholder "Password"
-                              :on-change #(dispatch [:input-change :password %])
-                              :change-on-blur? false
-                              :attr {:type "password"}]]
-    ]])
-
-(defn login-button [msg]
-  [h-box
-   :class "panel"
-   :justify :between
-   :align-self :stretch
-   :children
-   [
-    [box :width "150px" :child [label :style {:color "red" :font-weight :bold} :label msg]]
-    [box
-     :child [button
-             :class "btn btn-primary"
-             :on-click #(dispatch [:log-in])
-             :label "Login"]
-     ]
-    ]])
 
 (defn login-form [msg]
   (let [credentials {:email "" :password ""}]
@@ -539,9 +554,4 @@
       ]
      ]
     ))
-
-
-
-
-
-
+; )

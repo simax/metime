@@ -1,17 +1,14 @@
 (ns metime.formatting
   (:require
-    #?(:cljs [cljs.reader :as rdr])
     [clojure.string :as string]))
 
 (defn pad-with-leading-zero [s]
-  (let [num
-        #?(:cljs (rdr/read-string s))
-        #?(:clj (read-string s))]
-    (if (= 1 (count (str num)))
-      (str "0" num)
-      (str num))))
+  (if (= 1 (count s))
+    (str "0" s)
+    s))
 
-(defn format-date [date]
+
+(defn format-date-reverse [date]
   "Change date format from 31-12-1999 to 1999-12-31"
   (if (empty? date)
     ""
@@ -20,3 +17,16 @@
          (reverse)
          (interpose "-")
          (apply str))))
+
+(defn format-date [date]
+  "Change date format from 31-12-1999 to 1999-12-31"
+  (if (empty? date)
+    ""
+    (->> (string/split date, #"-")
+         (map pad-with-leading-zero)
+         (interpose "-")
+         (apply str))))
+
+
+
+
