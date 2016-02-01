@@ -58,7 +58,7 @@
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
    ;:dob [[v/datetime british-date-format :pre (comp seq :dob) :message "Must be a valid date"]]
    :dob [[v/required :message "Date of birth is required"]]
-   :startdate [[v/datetime british-date-format :message "Must be a valid date"]]
+   :startdate [[v/required :message "Date of birth is required"] [v/datetime british-date-format :message "Must be a valid date"]]
    :enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
    :prev_year_allowance [[v/integer :message "Must be an integer"]]
    :current_year_allowance [[v/integer :message "Must be an integer"]]
