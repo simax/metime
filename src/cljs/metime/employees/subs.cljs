@@ -73,4 +73,11 @@
   :authentication-failed
   (fn [db _]
     (make-reaction (fn sub-authentication-failed [] (:authentication-failed-msg @db)))))
+
+(register-sub
+  :employee-errors
+  (fn [db _]
+    (make-reaction (fn sub-employee-errors [] (get-in @db [:employee :validation-errors])))))
+
+
 ;)

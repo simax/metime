@@ -8,7 +8,7 @@
             [metime.utils :as utils]
             [re-com.core :refer [h-box v-box box gap
                                  title single-dropdown label
-                                 input-text datepicker datepicker-dropdown button
+                                 input-text input-textarea datepicker datepicker-dropdown button
                                  popover-anchor-wrapper popover-content-wrapper
                                  popover-tooltip md-circle-icon-button]
              :refer-macros [handler-fn]]
@@ -17,22 +17,16 @@
             [cljs-time.format :refer [formatter parse unparse]]
             [cljs-time.coerce]
             [goog.date]
-            [re-frame.core :refer [register-handler
-                                   path
-                                   debug
-                                   after
-                                   enrich
-                                   register-sub
-                                   dispatch
-                                   dispatch-sync
-                                   subscribe]]
+            [re-frame.core :refer [dispatch subscribe]]
             [reagent.core :as reagent]
             [clairvoyant.core :refer-macros [trace-forms]]
-            [re-frame-tracer.core :refer [tracer]]))
+            [re-frame-tracer.core :refer [tracer]]
+            [cljs.pprint :refer [pprint]]))
 
 
 ;(trace-forms
 ;  {:tracer (tracer :color "indigo")}
+
 
 (defn login-email [credentials]
   [h-box
@@ -272,24 +266,6 @@
     ]])
 
 
-(defn date->str [date]
-  "If passed a valid date, returns a correctly formatted date string like 01-01-2015.
-   Otherwise returns date-str."
-  (if (nil? date)
-    ""
-    (let [formatted-date-str (try (unparse (formatter "dd-MM-yyyy") date)
-                                  (catch :default e date))]
-      formatted-date-str)))
-
-(defn str->date [date-str]
-  "Returns a date object from date-str. Returns nil if date-str is empty"
-  (if (empty? date-str)
-    nil
-    (let [d (fmt/format-date-reverse date-str)]
-      (try (iso8601->date (clojure.string/replace d "-" ""))
-           (catch :default e (now))))))
-
-
 (defn date-input-with-popup [date-field date-value showing? title selectable-fn]
   "Displays a popup for the given date field"
   [popover-anchor-wrapper
@@ -313,7 +289,7 @@
              :on-cancel #(reset! showing? false)
              :body [datepicker
                     :selectable-fn selectable-fn
-                    :model (reagent/atom (str->date date-value))
+                    :model (reagent/atom (fmt/str->date date-value))
                     :show-today? true
                     :on-change #(dispatch [:datepicker-change-dates date-field %])]]])
 
@@ -365,7 +341,7 @@
          [box :child [input-text
                       :style {:border-radius "4px 0 0 4px"}
                       :placeholder place-holder
-                      :model (date->str (field db-model))
+                      :model (fmt/date->str (field db-model))
                       :width "120px"
                       :change-on-blur? true
                       :on-change #(dispatch [:input-change-dates field %])]]
@@ -377,10 +353,12 @@
 (defn date-in-the-past? [date]
   (before? date (now)))
 
-(defn date-between? [start end date]
-  ;(let [s ])
-  ;(within? (parse (formatter "dd-MM-yyyy") start) (parse (formatter "dd-MM-yyyy") end) date)
-  true)
+(defn after-dob? [date]
+  (let [employee (:employee @re-frame.db/app-db)
+        dob (:dob employee)]
+    (when (not (nil? dob))
+      (after? date (parse (formatter "dd-MM-yyyy") dob)))))
+
 
 (defn employee-dob [employee]
   (let [error-message (subscribe [:employee-dob-error-message])
@@ -391,17 +369,16 @@
 (defn employee-start-date [employee]
   (let [error-message (subscribe [:employee-startdate-error-message])
         showing-error-icon? (subscribe [:employee-startdate-show-error])]
-    (letfn [(after-dob? [date]
-              (date-between? (:dob employee) (:enddate employee) date))]
-      (date-component employee :startdate "Start date" "Start date" error-message showing-error-icon? after-dob?))))
+    (date-component employee :startdate "Start date" "Start date" error-message showing-error-icon? after-dob?)))
 
 
 (defn employee-end-date [employee]
   (let [error-message (subscribe [:employee-enddate-error-message])
         showing-error-icon? (subscribe [:employee-enddate-show-error])]
-    (letfn [(after-start-date? [date]
-              (after? date (:startdate employee)))]
-      (date-component employee :enddate "End date" "End date" error-message showing-error-icon?))))
+    (letfn [(after-startdate? [date]
+              (when (not (nil? (:dob employee)))
+                (after? date (parse (formatter "dd-MM-yyyy") (:dob employee)))))]
+      (date-component employee :enddate "End date" "End date" error-message showing-error-icon? after-startdate?))))
 
 (defn employee-prev-year-allowance [employee]
   [h-box
@@ -530,6 +507,18 @@
 
   )
 
+(defn employee-errors []
+  (let [employee-errors (subscribe [:employee-errors])]
+    (fn []
+      [input-textarea
+       :style {:border-radius "4px 0 0 4px"}
+       :model (with-out-str (pprint @employee-errors))
+       :width "600px"
+       :rows 10
+       :disabled? true
+       :on-change (fn [] identity)
+       ])))
+
 (defn employee-maintenance-form [employee]
   [v-box
    :children [
@@ -542,6 +531,9 @@
                [
                 [box :class "panel panel-body" :child [employee-core-details employee]]
                 [box :class "panel panel-body" :child [employee-balances employee]]
+
+                [box :child [employee-errors]]
+
                 [box :class "panel panel-body" :child [save-button]]
                 ]]
               ]

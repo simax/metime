@@ -7,9 +7,9 @@
 (defqueries "metime/data/sql/metime.sql" {:connection db/db-spec})
 
 (defn format-dates [employee]
-  (let [emp (assoc employee :dob (fmt/format-date-reverse (:dob employee))
-                            :startdate (fmt/format-date-reverse (:startdate employee))
-                            :enddate (fmt/format-date-reverse (:enddate employee)))]
+  (let [emp (assoc employee :dob (fmt/format-date-yyyy-mm-dd (:dob employee))
+                            :startdate (fmt/format-date-yyyy-mm-dd (:startdate employee))
+                            :enddate (fmt/format-date-yyyy-mm-dd (:enddate employee)))]
     emp))
 
 (defn prepare-for-insert [data]

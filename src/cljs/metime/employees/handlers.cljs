@@ -58,7 +58,7 @@
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
    ;:dob [[v/datetime british-date-format :pre (comp seq :dob) :message "Must be a valid date"]]
    :dob [[v/required :message "Date of birth is required"]]
-   :startdate [[v/datetime british-date-format :pre (comp seq :startdate) :message "Must be a valid date"]]
+   :startdate [[v/datetime british-date-format :message "Must be a valid date"]]
    :enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
    :prev_year_allowance [[v/integer :message "Must be an integer"]]
    :current_year_allowance [[v/integer :message "Must be an integer"]]
@@ -114,28 +114,17 @@
 
 
 (defn check-date-validity [input-date]
-  (let [date-str (fmt/format-date
+  (let [date-str (fmt/format-date-dd-mm-yyyy
                    (first
                      (re-find #"^([0]?[1-9]|[1|2][0-9]|[3][0|1])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4})$" input-date)))]
     (if (try (parse (formatter "dd-MM-yyyy") date-str) (catch js/Error _ nil))
       date-str
       nil)))
 
-(defn date->str [date]
-  "If passed a valid date, returns a correctly formatted date string like 01-01-2015.
-   Otherwise returns date-str."
-  (if (nil? date)
-    ""
-    (let [formatted-date-str (try (unparse (formatter "dd-MM-yyyy") date)
-                                  (catch :default e date))]
-      formatted-date-str)))
-
-
 (register-handler
   :datepicker-change-dates
   (fn hdlr-datepicker-change-dates [db [_ property-name new-value]]
-    (println ":datepicker-change-dates")
-    (let [date-value (date->str new-value)]
+    (let [date-value (fmt/date->str new-value)]
       (dispatch [:input-change-dates property-name date-value])
       (assoc-in db [:employee property-name] date-value))))
 
