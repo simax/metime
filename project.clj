@@ -12,7 +12,7 @@
                            [figwheel-sidecar "0.4.0"]
 
                            [cljs-hash "0.0.2"]
-                           [bouncer "0.3.3"]
+                           [bouncer "1.0.0"]
                            [metis "0.3.3"]
                            [ring-cors "0.1.7"]
                            [clj-time "0.9.0"]
@@ -62,7 +62,7 @@
             [lein-ring "0.9.6"]
             [lein-asset-minifier "0.2.2"]]
 
-  :source-paths ["src/clj" "src/cljs"]
+  :source-paths ["src/clj" "src/cljc" "src/cljs"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
