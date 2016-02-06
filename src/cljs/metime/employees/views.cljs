@@ -533,6 +533,11 @@
                 [box :class "panel panel-body" :child [employee-balances employee]]
 
                 [box :child [employee-errors]]
+                ;[box :child [input-text
+                ;             :width "100px"
+                ;             :model (:startdate employee)
+                ;             :disabled? true
+                ;             :on-change #(dispatch [:none %])]]
 
                 [box :class "panel panel-body" :child [save-button]]
                 ]]

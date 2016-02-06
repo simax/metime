@@ -26,6 +26,13 @@
 ;(trace-forms
 ; {:tracer (tracer :color "green")}
 
+
+
+;(defvalidator blank-or-valid-date
+;              {:default-message-format "%s can't be in the future"}
+;              [date-to-validate]
+;              (<= (c/to-long (f/parse-local-date date-format date-to-validate)) (c/to-long (t/today))))
+
 (defn is-new-employee? [id]
   (zero? id))
 
@@ -52,13 +59,14 @@
                  :else ""))))
     ch))
 
+
 (def employee-validation-rules
   [:firstname [[v/required :message "First name is required"]]
    :lastname [[v/required :message "Last name is required"]]
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
    ;:dob [[v/datetime british-date-format :pre (comp seq :dob) :message "Must be a valid date"]]
    :dob [[v/required :message "Date of birth is required"] [v/datetime british-date-format :message "Must be a valid date"]]
-   :startdate [[v/datetime british-date-format :message "Must be a valid date"]]
+   :startdate [[v/datetime british-date-format :message "Must be a valid date" :pre (comp seq :startdate)]]
    :enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
    :prev_year_allowance [[v/integer :message "Must be an integer"]]
    :current_year_allowance [[v/integer :message "Must be an integer"]]
@@ -88,9 +96,7 @@
   (let [employee (:employee db)
         result [(first (apply b/validate employee employee-validation-rules))]
         errors (first result)]
-    (println (str "Startdate empty?: " (empty? (get-in db [:employee :startdate])) " Errors: " result))
     (assoc-in db [:employee :validation-errors] errors)))
-
 
 (register-handler
   :department-change
@@ -118,9 +124,9 @@
   (let [date-str (fmt/format-date-dd-mm-yyyy
                    (first
                      (re-find #"^([0]?[1-9]|[1|2][0-9]|[3][0|1])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4})$" input-date)))]
-    (if (try (parse (formatter "dd-MM-yyyy") date-str) (catch js/Error _ nil))
+    (if (try (parse (formatter "dd-MM-yyyy") date-str) (catch js/Error _ false))
       date-str
-      date-str)))
+      input-date)))
 
 (register-handler
   :datepicker-change-dates
