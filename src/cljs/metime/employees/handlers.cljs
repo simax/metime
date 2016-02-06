@@ -121,11 +121,11 @@
 
 
 (defn check-date-validity [input-date]
-  (let [date-str (fmt/format-date-dd-mm-yyyy
+  (let [formatted-date (fmt/format-date-dd-mm-yyyy
                    (first
                      (re-find #"^([0]?[1-9]|[1|2][0-9]|[3][0|1])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4})$" input-date)))]
-    (if (try (parse (formatter "dd-MM-yyyy") date-str) (catch js/Error _ false))
-      date-str
+    (if (try (parse (formatter "dd-MM-yyyy") formatted-date) (catch js/Error _ false))
+      formatted-date
       input-date)))
 
 (register-handler
@@ -150,6 +150,7 @@
 (register-handler
   :employee-add
   (fn hdlr-employee-add [db [_ departmentid]]
+    (println (str "departmentid: " departmentid))
     (let [dep (first (filter #(= (:departmentid %) departmentid) (:departments-and-employees db)))]
       (-> db
           (merge

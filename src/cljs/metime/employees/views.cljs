@@ -133,7 +133,7 @@
       (if (not-empty rows-of-employees)
         [:div
          [:button {:class    "btn btn-primary glyphicon glyphicon-plus-sign"
-                   :on-click #(dispatch [:employee-add departmentid])} " Add employee"]
+                   :on-click #(dispatch [:employee-add-new departmentid])} " Add employee"]
          [:ul {:style {:margin-top "20px"}}
           (for [employee-row rows-of-employees]
             (for [employee-item employee-row]

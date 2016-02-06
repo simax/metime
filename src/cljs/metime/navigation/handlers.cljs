@@ -40,8 +40,16 @@
                   :view :home)))))
 
  (register-handler
+   :employee-add-new
+   (fn hdlr-employee-add-new
+     [db [_ departmentid]]
+     (dispatch [:employee-add departmentid])
+     (routes/set-route-token! [:employee-add])
+     (assoc db :nav-bar :employees :view :employee-editor)))
+
+ (register-handler
    :employee-to-edit
-   (fn hdlr-employee-edit-handler
+   (fn hdlr-employee-to-edit
      [db [_ id]]
      (dispatch [:fetch-employee id])
      (assoc db :nav-bar :employees :view :employee-editor)))

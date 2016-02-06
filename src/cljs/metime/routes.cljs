@@ -20,6 +20,7 @@
                    ["login" :login]
                    ["test" {""           :test
                             ["/level-2"] :test-level-2}]
+                   ["employee" {"/add" :employee-add}]
                    ["employees" {""                 :employees
                                  ["/" [#"\d*" :id]] :employee-editor}]
                    [true :not-found]

@@ -22,6 +22,7 @@
 (defmethod route-switcher :file-manager [_] (dispatch [:set-active-view :file-manager]))
 (defmethod route-switcher :user [_] (dispatch [:set-active-view :user]))
 (defmethod route-switcher :employees [_] (dispatch [:set-active-view :employees]))
+(defmethod route-switcher :employee-add [] (dispatch [:set-active-view :employee-add]))
 (defmethod route-switcher :employee-editor [route-info] (dispatch [:employee-to-edit (get-in route-info [:route-params :id])]))
 (defmethod route-switcher :test [_] (dispatch [:set-active-view :test]))
 (defmethod route-switcher :test-level-2 [_] (dispatch [:set-active-view :test-level-2]))
