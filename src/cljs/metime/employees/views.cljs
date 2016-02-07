@@ -10,7 +10,7 @@
                                  title single-dropdown label
                                  input-text input-textarea datepicker datepicker-dropdown button
                                  popover-anchor-wrapper popover-content-wrapper
-                                 popover-tooltip md-circle-icon-button]
+                                 popover-tooltip md-icon-button md-circle-icon-button]
              :refer-macros [handler-fn]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
             [cljs-time.core :refer [within? before? after? date-time now days minus day-of-week]]
@@ -92,8 +92,8 @@
    [:div {:class "dash-unit"}
     [:div {:class "thumbnail" :style {:margin-top "20px"}}
      [:a {:href (routes/site-url-for :employee-editor :id id) :on-click (fn [e]
-                                                                     (dispatch [:employee-to-edit id])
-                                                                     (.preventDefault e))}
+                                                                          (dispatch [:employee-to-edit id])
+                                                                          (.preventDefault e))}
       [:h1 (employee-name firstname lastname)]
       [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
       ]
@@ -127,18 +127,45 @@
         [:h2 department]
         ]
        [:div.col-md-1.col-xs-1
-        [:button {:class    "btn btn-default glyphicon glyphicon-sort"
-                  :on-click #(dispatch [:ui-department-drawer-status-toggle departmentid])}]]]]
+        [v-box
+         :align :center
+         :height "50px"
+         :children
+         [
+          [box :child
+           [md-icon-button
+            :md-icon-name "zmdi-swap-vertical"              ;
+            :size :larger
+            :on-click #(dispatch [:ui-department-drawer-status-toggle departmentid])
+            ]]]]
+        ]]]
      [:div {:class @draw-open-class :id department-name :style {:height "auto"}}
-      (if (not-empty rows-of-employees)
-        [:div
-         [:button {:class    "btn btn-primary glyphicon glyphicon-plus-sign"
-                   :on-click #(dispatch [:employee-add-new departmentid])} " Add employee"]
-         [:ul {:style {:margin-top "20px"}}
-          (for [employee-row rows-of-employees]
-            (for [employee-item employee-row]
-              ^{:key (:id employee-item)} [employee-list-item employee-item])
-            )]])]]))
+      (let [add-employee-label "Add a new employee to the department"]
+        (when (not-empty rows-of-employees)
+          [v-box
+           :gap "20px"
+           :children
+           [
+            [h-box
+             :gap "10px"
+             ;:style {:padding-left "55px"}
+             :justify :center
+             :align :center
+             :children [
+                        [md-circle-icon-button
+                         :md-icon-name "zmdi-plus"
+                         :emphasise? true
+                         :on-click #(dispatch [:employee-add-new departmentid])
+                         :tooltip add-employee-label]
+                        [label :label add-employee-label]
+                        ]]
+            [box :child
+             [:ul {:style {:margin-top "20px"}}
+              (for [employee-row rows-of-employees]
+                (for [employee-item employee-row]
+                  ^{:key (:id employee-item)} [employee-list-item employee-item])
+                )]]
+            ]]))]]))
 
 (defn department-list [departments-and-employees]
   [:div.clearfix.accordian
@@ -148,11 +175,28 @@
     ]])
 
 (defn departments-container [departments-and-employees]
-  [box
-   :justify :center
-   :align :center
-   :child
-   [department-list departments-and-employees]])
+  [v-box
+   :gap "20px"
+   :children
+   [
+    [h-box
+     :align :center
+     :justify :center
+     :gap "10px"
+     :children
+     [
+      [md-circle-icon-button
+       :md-icon-name "zmdi-plus"
+       :emphasise? true
+       :on-click #(dispatch [:department-add-new])
+       :tooltip "Add a new department"]
+      [label :label "Add a new department"]]
+     ]
+    [box
+     :justify :center
+     :align :center
+     :child
+     [department-list departments-and-employees]]]])
 
 (defn employee-not-found []
   [box :child [:div.well [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."]]])

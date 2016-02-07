@@ -31,7 +31,7 @@
          (apply str))))
 #?(:cljs
      (defn date->str [date]
-       "Return an empty string is passed nil or an invalid date.
+       "Return an empty string if passed nil or an invalid date.
         Otherwise, returns a correctly formatted date string
         in the dd-MM-yyyy format e.g. 01-01-2015."
        (if (nil? date)
