@@ -227,6 +227,13 @@
       (assoc db :department-draw-open-id department))))
 
 (register-handler
+  :ui-new-department-drawer-status-toggle
+  (fn hdlr-ui-new-department-drawer-status-toggle [db [_]]
+    (if (:new-department-draw-open? db)
+      (assoc db :new-department-draw-open? false)
+      (assoc db :new-department-draw-open? true))))
+
+(register-handler
   :show-failed-save-attempt
   (fn hdlr-show-failed-save-attempt [db [_ errors]]
     (assoc-in db [:employee :validation-errors] errors)))

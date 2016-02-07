@@ -167,31 +167,62 @@
                 )]]
             ]]))]]))
 
+(defn new-department-container []
+  [h-box
+   :children
+   [
+    [box :child
+    [input-text
+     :width "315px"
+     :model "new department"
+     ;:status (when (seq (get-in employee [:validation-errors :firstname])) :error)
+     ;:status-icon? (seq (get-in employee [:validation-errors :firstname]))
+     ;:status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
+     :placeholder "Department name"
+     :on-change #(dispatch [:input-change :firstname %])
+     :change-on-blur? false]
+    ]]])
+
 (defn department-list [departments-and-employees]
-  [:div.clearfix.accordian
-   [:ul
-    (for [department departments-and-employees]
-      ^{:key (:department department)} [:li [department-list-item department]])
-    ]])
+  (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])]
+    [:div.clearfix.accordian
+     [h-box
+      :align :center
+      :justify :center
+      :children
+      [
+       [:ul
+        [:div.panel.panel-default.row {:style {:width "1100px"}}
+         [:div.panel-heading.clearfix.panel-heading
+          [h-box
+           :style {:padding-left "30px"}
+           :align :center
+           :gap "140px"
+           :children
+           [
+            [md-circle-icon-button
+             :md-icon-name "zmdi-plus"
+             :emphasise? true
+             :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
+             :tooltip "Add a new department"]
+            [box :child [:h2 "Add a new department"]]]]]]
+        [box
+         :child
+         [:div {:class @new-department-draw-open-class :id "new-department" :style {:height "auto"}}
+          [new-department-container]
+          ]]
+        ]]
+      ]
+     [:ul
+      (for [department departments-and-employees]
+        ^{:key (:department department)} [:li [department-list-item department]])
+      ]]))
 
 (defn departments-container [departments-and-employees]
   [v-box
    :gap "20px"
    :children
    [
-    [h-box
-     :align :center
-     :justify :center
-     :gap "10px"
-     :children
-     [
-      [md-circle-icon-button
-       :md-icon-name "zmdi-plus"
-       :emphasise? true
-       :on-click #(dispatch [:department-add-new])
-       :tooltip "Add a new department"]
-      [label :label "Add a new department"]]
-     ]
     [box
      :justify :center
      :align :center

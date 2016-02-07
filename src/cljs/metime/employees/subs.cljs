@@ -65,9 +65,20 @@
 (register-sub
   :department-draw-open-class
   (fn [db [_ department-id]]
-    (make-reaction (fn sub-department-draw-open-class [] (if (= (:department-draw-open-id @db) department-id)
-                                                           "panel-body panel-collapse collapse in"
-                                                           "panel-body panel-collapse collapse")))))
+    (make-reaction
+      (fn sub-department-draw-open-class []
+        (if (= (:department-draw-open-id @db) department-id)
+          "panel-body panel-collapse collapse in"
+          "panel-body panel-collapse collapse")))))
+(register-sub
+  :new-department-draw-open-class
+  (fn [db [_]]
+    (make-reaction
+      (fn sub-new-department-draw-open-class []
+        (if (:new-department-draw-open? @db)
+          "panel-body panel-collapse collapse in"
+          "panel-body panel-collapse collapse")))))
+
 
 (register-sub
   :authentication-failed
