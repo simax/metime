@@ -3,7 +3,7 @@
   (:require [metime.navigation.handlers]
             [metime.navigation.subs]
             [metime.employees.views :as ev]
-            [metime.routes :as r]
+            [metime.routes :as routes]
             [re-com.core :refer [box throbber]]
             [re-frame.core :refer [register-handler
                                    path
@@ -16,13 +16,13 @@
 ;  {:tracer (tracer :color "indigo")}
 
 (def nav-bars [
-               {:id :employees :text "Employees" :path (r/site-url-for :employees)}
-               {:id :file-manager :text "File Manager" :path (r/site-url-for :file-manager)}
-               {:id :calendar :text "Calendar" :path (r/site-url-for :calendar)}
-               {:id :tables :text "Tables" :path (r/site-url-for :tables)}
-               {:id :user :text "User" :path (r/site-url-for :user)}
-               {:id :logout :text "Log out" :path (r/site-url-for :login)}
-               {:id :test :text "Test" :path (r/site-url-for :test)}
+               {:id :employees :text "Employees" :path (routes/site-url-for :employees)}
+               {:id :file-manager :text "File Manager" :path (routes/site-url-for :file-manager)}
+               {:id :calendar :text "Calendar" :path (routes/site-url-for :calendar)}
+               {:id :tables :text "Tables" :path (routes/site-url-for :tables)}
+               {:id :user :text "User" :path (routes/site-url-for :user)}
+               {:id :logout :text "Log out" :path (routes/site-url-for :login)}
+               {:id :test :text "Test" :path (routes/site-url-for :test)}
                ])
 
 
@@ -127,7 +127,7 @@
       [:span.icon-bar]
       [:span.icon-bar]
       ]
-     [:a.navbar-brand {:href (r/site-url-for :home)} [:img {:src "/assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
+     [:a.navbar-brand {:href (routes/site-url-for :home)} [:img {:src "/assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
     [:div#nav-bar.navbar-collapse.collapse
      [:ul.nav.navbar-nav
       (for [nav-bar-item nav-bars]

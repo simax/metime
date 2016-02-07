@@ -7,7 +7,7 @@
                            path
                            dispatch
                            subscribe]]
-    [metime.routes :as r]
+    [metime.routes :as routes]
     [devtools.core :as dt]))
 
 (enable-console-print!)
@@ -32,8 +32,8 @@
   (reagent/render [nv/initial-panel] (.getElementById js/document "app-container")))
 
 (defn ^:export main []
-  (r/start-routing)
+  (routes/start-routing)
   (dispatch [:initialise-db])
-  (route-switcher (r/parse-url (pushy/get-token r/history)))
+  (route-switcher (routes/parse-url (pushy/get-token routes/history)))
   (mount-root))
 

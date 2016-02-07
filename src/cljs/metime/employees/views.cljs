@@ -4,7 +4,7 @@
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [metime.employees.subs]
             [metime.employees.handlers]
-            [metime.routes :as r]
+            [metime.routes :as routes]
             [metime.utils :as utils]
             [re-com.core :refer [h-box v-box box gap
                                  title single-dropdown label
@@ -91,7 +91,7 @@
   [:div {:class "col-md-3 col-lg-3"}
    [:div {:class "dash-unit"}
     [:div {:class "thumbnail" :style {:margin-top "20px"}}
-     [:a {:href (r/site-url-for :employee-editor :id id) :on-click (fn [e]
+     [:a {:href (routes/site-url-for :employee-editor :id id) :on-click (fn [e]
                                                                      (dispatch [:employee-to-edit id])
                                                                      (.preventDefault e))}
       [:h1 (employee-name firstname lastname)]

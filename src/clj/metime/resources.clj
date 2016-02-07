@@ -4,6 +4,7 @@
             [metime.data.departments :as deps]
             [metime.data.employees :as emps]
             [metime.data.holidays :as hols]
+            [metime.routes :as routes]
             [metime.security :as sec]
             [clojure.java.io :as io]
             [clojure.walk :as walk]
@@ -298,8 +299,7 @@
                       (if (requested-method ctx :post)
                         (try
                           (when-let [new-id (deps/insert-department! (make-keyword-map (get-posted-data ctx)))]
-                            ; TODO: Stop hardcoding URL below!! Put bidi data in a CLJC and use them
-                            {::location (str "http://localhost:3000/api/departments/" new-id)})
+                            {::location (routes/api-endpoint-for :department-by-id :id new-id)})
                           (catch Exception e {::failure-message "Department already exists"}))))
 
              :post-redirect? false
@@ -408,10 +408,8 @@
              :post! (fn [ctx]
                       (if (requested-method ctx :post)
                         (try
-                          ;TODO: move metime.routes to cljc so we can use routes in cljs and clj
-                          ;and not harcode like below
                           (when-let [new-id (emps/insert-employee! (parse-employee (make-keyword-map (get-posted-data ctx))))]
-                            {::location (str "http://localhost:3000/api/employees/" new-id)})
+                            {::location (routes/api-endpoint-for :employee-by-id :id new-id)})
                           (catch Exception e {::failure-message (.getMessage e)}))))
 
              :post-redirect? false
@@ -554,7 +552,7 @@
                       (if (requested-method ctx :post)
                         (try
                           (when-let [new-id (hols/insert-holiday-request! (make-keyword-map (get-posted-data ctx)))]
-                            {::location (str "http://localhost:3000/api/departments/" new-id)})
+                            {::location (routes/api-endpoint-for :holiday-by-id :id new-id)})
                           (catch Exception e {::failure-message "Invaliday holiday request"}))))
 
              :post-redirect? false
