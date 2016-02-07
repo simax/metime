@@ -41,7 +41,7 @@
                               :status-icon? (seq (get-in credentials [:validation-errors :email]))
                               :status-tooltip (apply str (get-in credentials [:validation-errors :email]))
                               :placeholder "Email"
-                              :on-change #(dispatch [:input-change :email %])
+                              :on-change #(dispatch [:input-change-no-validate :email %])
                               :change-on-blur? false]]
     ]])
 
@@ -59,7 +59,7 @@
                               :status-icon? (seq (get-in credentials [:validation-errors :password]))
                               :status-tooltip (apply str (get-in credentials [:validation-errors :password]))
                               :placeholder "Password"
-                              :on-change #(dispatch [:input-change :password %])
+                              :on-change #(dispatch [:input-change-no-validate :password %])
                               :change-on-blur? false
                               :attr {:type "password"}]]
     ]])

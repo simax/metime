@@ -26,13 +26,6 @@
 ;(trace-forms
 ; {:tracer (tracer :color "green")}
 
-
-
-;(defvalidator blank-or-valid-date
-;              {:default-message-format "%s can't be in the future"}
-;              [date-to-validate]
-;              (<= (c/to-long (f/parse-local-date date-format date-to-validate)) (c/to-long (t/today))))
-
 (defn is-new-employee? [id]
   (zero? id))
 
@@ -64,15 +57,12 @@
   [:firstname [[v/required :message "First name is required"]]
    :lastname [[v/required :message "Last name is required"]]
    :email [[v/required :message "An email address is required"] [v/email :message "Please supply a valid email address"]]
-   ;:dob [[v/datetime british-date-format :pre (comp seq :dob) :message "Must be a valid date"]]
    :dob [[v/required :message "Date of birth is required"] [v/datetime british-date-format :message "Must be a valid date"]]
    :startdate [[v/datetime british-date-format :message "Must be a valid date" :pre (comp seq :startdate)]]
    :enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
    :prev_year_allowance [[v/integer :message "Must be an integer"]]
    :current_year_allowance [[v/integer :message "Must be an integer"]]
    :next_year_allowance [[v/integer :message "Must be an integer"]]])
-
-; [v/required :message "A date of birth is required"]
 
 
 (register-handler
@@ -119,6 +109,11 @@
     (dispatch [:validate-email-uniqness])
     (assoc-in db [:employee property-name] new-value)))
 
+(register-handler
+  :input-change-no-validate
+  (fn hdlr-input-change-no-validate [db [_ property-name new-value]]
+    (assoc-in db [:employee property-name] new-value)))
+
 
 (defn check-date-validity [input-date]
   (let [formatted-date (fmt/format-date-dd-mm-yyyy
@@ -147,10 +142,16 @@
   (fn hdlr-input-change-balances [db [_ property-name new-value]]
     (assoc-in db [:employee property-name] (utils/parse-int new-value))))
 
+; TODO: Set department id. Not necessarily got departments at this stage.
+(defn set-department [department-id departments]
+  (if (nil? department-id)
+    (do (println (str "count departments: " (count departments)))
+        (first departments))
+    (first (filter #(= (:id %) department-id) departments))))
+
 (register-handler
   :employee-add
   (fn hdlr-employee-add [db [_ departmentid]]
-    (println (str "departmentid: " departmentid))
     (let [dep (first (filter #(= (:departmentid %) departmentid) (:departments-and-employees db)))]
       (-> db
           (merge

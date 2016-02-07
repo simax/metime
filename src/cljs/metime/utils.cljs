@@ -70,9 +70,11 @@
   (go
     (let [response (<! (call-secure-url verb token url))
           status (:status response)]
-      (if (not= status 200)
-        (dispatch [invalid-token-handler])
-        (dispatch [valid-token-handler (get-in response response-keys)])))))
+      (cond
+        (= status 200) (dispatch [valid-token-handler (get-in response response-keys)])
+        (= status 404) (dispatch [valid-token-handler {:not-found true}])
+        :else (dispatch [invalid-token-handler])
+        ))))
 
 (defn send-data-to-secure-url [verb url token data]
   (case verb

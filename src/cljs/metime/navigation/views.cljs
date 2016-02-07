@@ -48,7 +48,6 @@
 
 (defn view-calendar []
   (dispatch [:set-active-navbar :calendar])
-  ;(dispatch [:set-active-route [:calendar]])
   [:div {:style {:height "500px"}} [:h1 "Calendar page"]])
 
 (defn view-tables []
@@ -83,17 +82,25 @@
         [loader-component]
         [ev/departments-container @departments-and-employees]))))
 
+(defn set-employee-department [departments emp]
+  (if (nil? (:department_id emp))
+    (let [dep (first departments)]
+      (assoc emp :department_id (:id dep)
+                 :managerid (:manager_id dep)
+                 :manager-firstname (:manager-firstname dep)
+                 :manager-email (:manager-email dep)))
+    emp))
+
 (defn view-employee-add []
   (dispatch [:fetch-departments-only])
   (let [emp (subscribe [:employee])
         departments (subscribe [:departments])]
     (fn []
       (if (not (or (:is-ready? @emp) (some? @departments)))
-        (do (dispatch [:employee-add])
+        (do
+          (dispatch [:employee-add])
           [loader-component])
-        (if (:not-found @emp)
-          [ev/employee-not-found]
-          [ev/employee-maintenance-form @emp])))))
+        [ev/employee-maintenance-form (set-employee-department @departments @emp)]))))
 
 (defn view-employee []
   (dispatch [:fetch-departments-only])
