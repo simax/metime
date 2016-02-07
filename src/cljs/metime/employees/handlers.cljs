@@ -142,13 +142,6 @@
   (fn hdlr-input-change-balances [db [_ property-name new-value]]
     (assoc-in db [:employee property-name] (utils/parse-int new-value))))
 
-; TODO: Set department id. Not necessarily got departments at this stage.
-(defn set-department [department-id departments]
-  (if (nil? department-id)
-    (do (println (str "count departments: " (count departments)))
-        (first departments))
-    (first (filter #(= (:id %) department-id) departments))))
-
 (register-handler
   :employee-add
   (fn hdlr-employee-add [db [_ departmentid]]
