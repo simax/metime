@@ -2,6 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [metime.formatting :as fmt]
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
+            [metime.navigation.subs]
             [metime.employees.subs]
             [metime.employees.handlers]
             [metime.routes :as routes]
@@ -79,7 +80,6 @@
              :label "Login"]
      ]
     ]])
-
 
 
 (defn employee-name [firstname lastname]
@@ -168,20 +168,36 @@
             ]]))]]))
 
 (defn new-department-container []
-  [h-box
-   :children
-   [
-    [box :child
-    [input-text
-     :width "315px"
-     :model "new department"
-     ;:status (when (seq (get-in employee [:validation-errors :firstname])) :error)
-     ;:status-icon? (seq (get-in employee [:validation-errors :firstname]))
-     ;:status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
-     :placeholder "Department name"
-     :on-change #(dispatch [:input-change :firstname %])
-     :change-on-blur? false]
-    ]]])
+  (let [
+        dep (subscribe [:department])
+        id-fn #(:id %)
+        label-fn #(str (:firstname %) " " (:lastname %))
+        deps-emps (subscribe [:departments-and-employees])
+        employees (sort-by :lastname (mapcat :employees @deps-emps))
+        selected-employee-id (reagent/atom nil)
+        ]
+    [h-box
+     :children
+     [
+      [input-text
+       :width "315px"
+       :model (:department @dep)
+       ;:status (when (seq (get-in employee [:validation-errors :firstname])) :error)
+       ;:status-icon? (seq (get-in employee [:validation-errors :firstname]))
+       ;:status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
+       :placeholder "Department name"
+       :on-change #(dispatch [:input-change :department %])
+       :change-on-blur? false]
+      [single-dropdown
+       :width "315px"
+       :choices employees
+       :model selected-employee-id
+       :filter-box? true
+       :id-fn id-fn
+       :label-fn label-fn
+       :on-change #(dispatch [:set-department-manager-id selected-employee-id])
+      ]
+      ]]))
 
 (defn department-list [departments-and-employees]
   (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])]
@@ -247,8 +263,7 @@
       :children
       [[box :child [:h1 (str (:firstname employee) " " (:lastname employee))]]
        [:h2 {:style {:color "grey"}} (:department employee)]
-       ]]]]]
-  )
+       ]]]]])
 
 (defn manager-gravatar [employee]
   [v-box

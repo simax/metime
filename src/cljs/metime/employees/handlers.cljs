@@ -64,6 +64,10 @@
    :current_year_allowance [[v/integer :message "Must be an integer"]]
    :next_year_allowance [[v/integer :message "Must be an integer"]]])
 
+(register-handler
+  :set-department-manager-id
+  (fn hdlr-set-department-manager-id [db [_ employee-id]]
+    (assoc-in db [:department :manager-id] employee-id)))
 
 (register-handler
   :email-uniqness-violation
@@ -231,7 +235,15 @@
   (fn hdlr-ui-new-department-drawer-status-toggle [db [_]]
     (if (:new-department-draw-open? db)
       (assoc db :new-department-draw-open? false)
-      (assoc db :new-department-draw-open? true))))
+      (do
+        (dispatch [:new-department])
+        (assoc db :new-department-draw-open? true)))))
+
+
+(register-handler
+  :new-department
+  (fn ndlr-new-department [db [_]]
+    (assoc db :department {:id 0 :department "" :manager-id 0})))
 
 (register-handler
   :show-failed-save-attempt
