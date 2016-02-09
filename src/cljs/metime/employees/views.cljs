@@ -167,10 +167,18 @@
                 )]]
             ]]))]]))
 
+; Make a vector of employee maps that include the department name for each employee
+;(for [x xs
+;      :let [dep (:department x)
+;            emp (:employees x)]]
+;  [{:department dep :employee }])
+
+
 (defn new-department-container []
   (let [
         dep (subscribe [:department])
         id-fn #(:id %)
+        group-fn #(str (:department_id %))
         label-fn #(str (:firstname %) " " (:lastname %))
         deps-emps (subscribe [:departments-and-employees])
         employees (sort-by :lastname (mapcat :employees @deps-emps))
@@ -191,10 +199,11 @@
       [single-dropdown
        :width "315px"
        :choices employees
-       :model selected-employee-id
-       :filter-box? true
        :id-fn id-fn
        :label-fn label-fn
+       :group-fn group-fn
+       :model selected-employee-id
+       :filter-box? true
        :on-change #(dispatch [:set-department-manager-id selected-employee-id])
       ]
       ]]))
