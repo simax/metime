@@ -182,7 +182,7 @@
         group-fn #(str (:department %))
         label-fn #(str (:firstname %) " " (:lastname %))
         deps-emps (subscribe [:departments-and-employees])
-        employees (get-employees-with-department-name @deps-emps)
+        employees (sort-by (juxt :department :lastname) (get-employees-with-department-name @deps-emps))
         selected-employee-id (reagent/atom nil)]
     [h-box
      :children
