@@ -172,20 +172,18 @@
   (mapcat identity
           (for [x xs
                 :let [dep (:department x)
-                      employees (get-in x [:employees])]]
+                      employees (:employees x)]]
             (for [emp employees]
               {:department dep :id (:id emp) :firstname (:firstname emp) :lastname (:lastname emp)}))))
 
 (defn new-department-container []
-  (let [
-        dep (subscribe [:department])
+  (let [dep (subscribe [:department])
         id-fn #(:id %)
         group-fn #(str (:department %))
         label-fn #(str (:firstname %) " " (:lastname %))
         deps-emps (subscribe [:departments-and-employees])
         employees (get-employees-with-department-name @deps-emps)
-        selected-employee-id (reagent/atom nil)
-        ]
+        selected-employee-id (reagent/atom nil)]
     [h-box
      :children
      [
