@@ -11,7 +11,7 @@
                                  title single-dropdown label
                                  input-text input-textarea datepicker datepicker-dropdown button
                                  popover-anchor-wrapper popover-content-wrapper
-                                 popover-tooltip md-icon-button md-circle-icon-button]
+                                 popover-tooltip md-icon-button md-circle-icon-button row-button]
              :refer-macros [handler-fn]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
             [cljs-time.core :refer [within? before? after? date-time now days minus day-of-week]]
@@ -168,7 +168,7 @@
             ]]))]]))
 
 (defn get-employees-with-department-name [xs]
-  "Make a list of employees that include the department name for each employee"
+  "Return a list of employees that include the department name for each employee"
   (mapcat identity
           (for [x xs
                 :let [dep (:department x)
@@ -185,27 +185,47 @@
         employees (sort-by (juxt :department :lastname) (get-employees-with-department-name @deps-emps))
         selected-employee-id (reagent/atom nil)]
     [h-box
+     :gap "20px"
      :children
      [
-      [input-text
-       :width "315px"
-       :model (:department @dep)
-       ;:status (when (seq (get-in employee [:validation-errors :firstname])) :error)
-       ;:status-icon? (seq (get-in employee [:validation-errors :firstname]))
-       ;:status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
-       :placeholder "Department name"
-       :on-change #(dispatch [:input-change :department %])
-       :change-on-blur? false]
-      [single-dropdown
-       :width "315px"
-       :choices employees
-       :id-fn id-fn
-       :label-fn label-fn
-       :group-fn group-fn
-       :model selected-employee-id
-       :filter-box? true
-       :on-change #(dispatch [:set-department-manager-id selected-employee-id])
-       ]
+      [v-box
+       :gap "10px"
+       :children
+       [[label :class "control-label" :label "Department"]
+        [input-text
+         :width "315px"
+         :model (:department @dep)
+         ;:status (when (seq (get-in employee [:validation-errors :firstname])) :error)
+         ;:status-icon? (seq (get-in employee [:validation-errors :firstname]))
+         ;:status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
+         :placeholder "Department name"
+         :on-change #(dispatch [:input-change :department %])
+         :change-on-blur? false]]]
+      [v-box
+       :gap "10px"
+       :children
+       [[label :class "control-label" :label "Manager"]
+        [single-dropdown
+         :width "315px"
+         :placeholder "Manager"
+         :choices employees
+         :id-fn id-fn
+         :label-fn label-fn
+         :group-fn group-fn
+         :model selected-employee-id
+         :filter-box? true
+         :on-change #(dispatch [:set-department-manager-id selected-employee-id])
+         ]]]
+      [v-box
+       :justify :end
+       :children
+       [
+        [md-icon-button
+         :emphasise? true
+         :md-icon-name "zmdi-floppy"
+         :tooltip "Save department"
+         :on-click #(dispatch [:save-department])
+         ]]]
       ]]))
 
 (defn department-list [departments-and-employees]

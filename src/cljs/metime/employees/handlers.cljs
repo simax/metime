@@ -65,6 +65,11 @@
    :next_year_allowance [[v/integer :message "Must be an integer"]]])
 
 (register-handler
+  :save-department
+  (fn hdlr-save-department [db [_]]
+    db))
+
+(register-handler
   :set-department-manager-id
   (fn hdlr-set-department-manager-id [db [_ employee-id]]
     (assoc-in db [:department :manager-id] employee-id)))
