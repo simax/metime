@@ -651,7 +651,7 @@
                 [box :class "panel panel-body" :child [employee-core-details employee]]
                 [box :class "panel panel-body" :child [employee-balances employee]]
 
-                [box :child [employee-errors]]
+                ;[box :child [employee-errors]]
                 ;[box :child [input-text
                 ;             :width "100px"
                 ;             :model (:startdate employee)
