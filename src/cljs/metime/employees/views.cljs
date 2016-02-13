@@ -199,7 +199,7 @@
          ;:status-icon? (seq (get-in employee [:validation-errors :firstname]))
          ;:status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
          :placeholder "Department name"
-         :on-change #(dispatch [:input-change :department %])
+         :on-change #(dispatch [:input-change-department :department %])
          :change-on-blur? false]]]
       [v-box
        :gap "10px"
@@ -214,7 +214,7 @@
          :group-fn group-fn
          :model selected-employee-id
          :filter-box? true
-         :on-change #(dispatch [:set-department-manager-id selected-employee-id])
+         :on-change #(dispatch [:set-department-manager-id %])
          ]]]
       [v-box
        :justify :end
@@ -224,7 +224,7 @@
          :emphasise? true
          :md-icon-name "zmdi-floppy"
          :tooltip "Save department"
-         :on-click #(dispatch [:save-department])
+         :on-click #(dispatch [:department-save])
          ]]]
       ]]))
 

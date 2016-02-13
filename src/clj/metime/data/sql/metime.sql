@@ -144,6 +144,68 @@ from employees e
   left join departments d on e.department_id = d.id
 where e.email = :email
 
+
+-- name: db-all-departments-and-employees
+select
+-- Employee info
+e.id,
+e.firstname,
+e.lastname,
+e.email,
+e.department_id,
+e.manager_id,
+strftime('%d-%m-%Y', e.dob) as 'dob',
+strftime('%d-%m-%Y', e.startdate) as 'startdate',
+strftime('%d-%m-%Y', e.enddate) as 'enddate',
+e.password,
+e.prev_year_allowance,
+e.current_year_allowance,
+e.next_year_allowance,
+d.department as 'department',
+-- Manager info
+m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
+
+from departments d
+  left join employees m on e.manager_id = m.id
+  left join employees e on e.department_id = d.id
+
+
+-- name: db-departments-with-employees
+select
+-- Employee info
+e.id,
+e.firstname,
+e.lastname,
+e.email,
+e.department_id,
+e.manager_id,
+strftime('%d-%m-%Y', e.dob) as 'dob',
+strftime('%d-%m-%Y', e.startdate) as 'startdate',
+strftime('%d-%m-%Y', e.enddate) as 'enddate',
+e.password,
+e.prev_year_allowance,
+e.current_year_allowance,
+e.next_year_allowance,
+d.department as 'department',
+-- Manager info
+m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
+
+from departments d
+  inner join employees m on e.manager_id = m.id
+  inner join employees e on e.department_id = d.id
+
+
+-- name: db-departments-without-employees
+select
+d.department as 'department',
+-- Manager info
+m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
+from departments d
+  inner join employees m on d.manager_id = m.id
+where
+  d.id not in (select department_id from employees)
+
+
 -- name: db-insert-employee<!
 -- Insert a new employee
 insert into employees ( firstname,  lastname,  email, startdate,   enddate,  department_id,  manager_id,  dob,  password,  prev_year_allowance,  current_year_allowance,  next_year_allowance,  is_approver)

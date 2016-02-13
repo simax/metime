@@ -104,7 +104,7 @@
 
 (defn validate-department [dept]
   (let [department-validation-rules [:department [[v/required] [v/max-count 30]]
-                                     :manager-id [[v/required] [v/number] [v/positive]]]
+                                     :manager-id [[v/required]]]
         result (apply b/validate dept department-validation-rules)
         errors (first result)]
     errors))
@@ -245,7 +245,10 @@
         set-of-emps (into #{} (map #(hash-map :department_id %1 :employees %2)
                                    (keys grouped-emps)
                                    (sort-by :lastname (vals grouped-emps))))]
-    (sort-by :department (join set-of-deps set-of-emps))))
+    (sort-by :department (join set-of-deps set-of-emps)))
+  ;(emps/get-all-employees-by-department)
+  ;(emps/get-departments-with-employees)
+  )
 
 (defn fetch-departments []
   (deps/get-all-departments))
@@ -282,6 +285,22 @@
                           [true {::departments {:departments (employees-by-department)}}]
                           ))
 
+             :handle-created (fn [ctx]
+                               (if (::failure-message ctx)
+                                 {:status 403 :body (::failure-message ctx)}
+                                 {:location (::location ctx)}))
+
+             :handle-ok ::departments)
+
+(defresource departments []
+             (secured-resource)
+             :available-media-types ["application/edn" "application/json"]
+             :allowed-methods [:get :post]
+             :exists? (fn [ctx]
+                        (if (requested-method ctx :get)
+                          [true {::departments {:departments (fetch-departments)}}]
+                          ))
+
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
                              (let [form-data (make-keyword-map (get-posted-data ctx))
@@ -303,21 +322,7 @@
                           (catch Exception e {::failure-message "Department already exists"}))))
 
              :post-redirect? false
-             :handle-created (fn [ctx]
-                               (if (::failure-message ctx)
-                                 {:status 403 :body (::failure-message ctx)}
-                                 {:location (::location ctx)}))
 
-             :handle-ok ::departments)
-
-(defresource departments []
-             (secured-resource)
-             :available-media-types ["application/edn" "application/json"]
-             :allowed-methods [:get]
-             :exists? (fn [ctx]
-                        (if (requested-method ctx :get)
-                          [true {::departments {:departments (fetch-departments)}}]
-                          ))
              :handle-ok ::departments)
 
 

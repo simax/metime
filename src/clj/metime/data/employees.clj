@@ -49,10 +49,21 @@
 (defn delete-all-employees! []
   "Probably only useful while testing/debugging. Can't envisage a use case
   for this function in production"
-
   (db-delete-all-employees! {} {:connection db/db-spec}))
 
 
+(defn get-departments-with-employees []
+  "Inner join of departments and employees"
+  (db-departments-with-employees))
+
+(defn get-departments-without-employees []
+  "Departments with no associated employees"
+  (db-departments-without-employees))
+
+(defn get-all-employees-by-department []
+  "Get all employees by department. Effectively a left join of departments and their emmployees.
+   i.e. Fetch all departments and their employees whether the department has employees or not"
+  (db-all-departments-and-employees {} {:connection db/db-spec}))
 
 
 

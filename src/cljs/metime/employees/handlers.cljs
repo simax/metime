@@ -29,6 +29,9 @@
 (defn is-new-employee? [id]
   (zero? id))
 
+(defn is-new-department? [id]
+  (zero? id))
+
 (def british-date-format (f/formatter "dd-MM-yyyy"))
 
 (defn get-employee-by-email [token email]
@@ -42,6 +45,7 @@
 (defn email-found-for-a-different-employee? [emp id]
   (and (some? (:id emp)) (not= id (:id emp))))
 
+
 (defn unique-email [email id token]
   (let [ch (chan)]
     (go
@@ -52,6 +56,9 @@
                  :else ""))))
     ch))
 
+(def department-validation-rules
+  [:department [[v/required :message "Department name is required"]]
+   :manager-id [[v/required :message "A manager is required"]]])
 
 (def employee-validation-rules
   [:firstname [[v/required :message "First name is required"]]
@@ -90,12 +97,17 @@
           (dispatch [:email-uniqness-violation unique-email-error]))))
     db))
 
-
 (defn validate-employee [db]
   (let [employee (:employee db)
         result [(first (apply b/validate employee employee-validation-rules))]
         errors (first result)]
     (assoc-in db [:employee :validation-errors] errors)))
+
+(defn validate-department [db]
+  (let [department (:department db)
+        result [(first (apply b/validate department department-validation-rules))]
+        errors (first result)]
+    (assoc-in db [:department :validation-errors] errors)))
 
 (register-handler
   :department-change
@@ -117,6 +129,12 @@
   (fn hdlr-input-change [db [_ property-name new-value]]
     (dispatch [:validate-email-uniqness])
     (assoc-in db [:employee property-name] new-value)))
+
+(register-handler
+  :input-change-department
+  (enrich validate-department)
+  (fn hdlr-input-change [db [_ property-name new-value]]
+    (assoc-in db [:department property-name] new-value)))
 
 (register-handler
   :input-change-no-validate
@@ -183,9 +201,16 @@
 
 
 (register-handler
-  :save-failure
+  :employee-save-failure
   (fn hdlr-save-failure [db [_]]
     ; Potentially show some kind of boostrap alert?
+    db))
+
+(register-handler
+  :department-save-failure
+  (fn hdlr-save-failure [db [_]]
+    ; Potentially show some kind of boostrap alert?
+    (println "Problem saving department")
     db))
 
 
@@ -195,24 +220,61 @@
     (dispatch [:set-active-view :employees])
     db))
 
+(defn build-department-update-endpoint [department]
+  (routes/api-endpoint-for :department-by-id :id (:id department)))
+
 (defn build-employee-update-endpoint [employee]
   (routes/api-endpoint-for :employee-by-id :id (:id employee)))
 
 
+(defn add-new-department [db department]
+  "Add a new department via the API"
+  (utils/send-data-to-api :POST
+                          (routes/api-endpoint-for :departments-only) (:authentication-token db) department
+                          {:valid-token-handler   :switch-view-to-employees
+                           :invalid-token-handler :department-save-failure
+                           :response-keys         [:body :departments]}))
+
+(defn update-department [db department]
+  "Update an existing department"
+  (utils/send-data-to-api :PUT
+                          (build-department-update-endpoint department) (:authentication-token db) department
+                          {:valid-token-handler   :switch-view-to-employees ; Needs to be seq so we can send paramaters too
+                           :invalid-token-handler :department-save-failure
+                           :response-keys         [:body :departments]}))
+
+
 (defn add-new-employee [db employee]
+  "Add a new employee via the API"
   (utils/send-data-to-api :POST
                           (routes/api-endpoint-for :employees) (:authentication-token db) employee
                           {:valid-token-handler   :switch-view-to-employees
-                           :invalid-token-handler :save-failure
+                           :invalid-token-handler :employee-save-failure
                            :response-keys         [:body :departments]}))
 
 (defn update-employee [db employee]
+  "Update an existing employee"
   (utils/send-data-to-api :PUT
                           (build-employee-update-endpoint employee) (:authentication-token db) employee
                           {:valid-token-handler   :switch-view-to-employees ; Needs to be seq so we can send paramaters too
-                           :invalid-token-handler :save-failure
+                           :invalid-token-handler :employee-save-failure
                            :response-keys         [:body :departments]}))
 
+
+
+
+(register-handler
+  :department-save
+  (enrich validate-department)
+  (fn hdlr-department-save [db [_]]
+    (let [department (:department db)]
+      (when (and
+              (apply b/valid? department department-validation-rules)
+              (not (some? (get-in department [:validation-errors]))))
+        (if (is-new-department? (:id department))
+          (add-new-department db department)
+          (update-department db department)))
+      db)))
 
 (register-handler
   :employee-save

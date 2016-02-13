@@ -1,8 +1,8 @@
 (ns metime.data.departments
-  (:require [cheshire.core :as json]
-            [yesql.core :refer [defqueries defquery]]
+  (:require [yesql.core :refer [defqueries defquery]]
             [metime.data.database :as db]
-            [clojure.string :as str]))
+            [camel-snake-kebab.core :refer :all]
+            [camel-snake-kebab.extras :refer [transform-keys]]))
 
 (defqueries "metime/data/sql/metime.sql" {:connection db/db-spec})
 
@@ -26,7 +26,8 @@
   ;; Needed to use this syntax here rather than :keyword lookup
   ;; Because sqlite returns a key of last_insert_rowid().
   ;; The parens at the end of the keyword cause problems trying to use the keyword as a function.
-  (let [result (db-insert-department<! data {:connection db/db-spec})]
+  (let [d (transform-keys ->snake_case data)
+        result (db-insert-department<! d {:connection db/db-spec})]
     (first (vals result))))
 
 (defn update-department! [data]

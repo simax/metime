@@ -34,6 +34,7 @@
                            [cheshire "5.5.0"]
                            [prone "0.8.2"]
                            [org.clojure/data.json "0.2.5"]
+                           [camel-snake-kebab "0.3.2"]
 
                            ;; UI
                            [reagent "0.6.0-alpha"]
