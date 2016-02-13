@@ -195,11 +195,14 @@ from departments d
   inner join employees e on e.department_id = d.id
 
 
+-- :department "Design", :manager-firstname "David", :departmentid 2, :manager-email "davidsharpe@ekmsystems.co.uk", :manager-lastname "Sharpe", :manager_id 10,
+
 -- name: db-departments-without-employees
 select
 d.department as 'department',
 -- Manager info
-m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
+m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email',
+d.id as 'departmentid'
 from departments d
   inner join employees m on d.manager_id = m.id
 where

@@ -238,16 +238,19 @@
 
 
 (defn employees-by-department []
-  (let [data-emps (emps/get-all-employees)
-        grouped-emps (group-by :department_id data-emps)
-        data-deps (deps/get-all-departments)
-        set-of-deps (rename (into #{} data-deps) {:id :department_id})
+  (let [emps (emps/get-all-employees)
+        grouped-emps (group-by :department_id emps)
+        deps (deps/get-all-departments)
+        set-of-deps (rename (into #{} deps) {:id :department_id})
         set-of-emps (into #{} (map #(hash-map :department_id %1 :employees %2)
                                    (keys grouped-emps)
-                                   (sort-by :lastname (vals grouped-emps))))]
-    (sort-by :department (join set-of-deps set-of-emps)))
+                                   (sort-by :lastname (vals grouped-emps))))
+        deps-with-emps (join set-of-deps set-of-emps)
+        deps-without-emps (emps/get-departments-without-employees)]
+    (sort-by :department (concat deps-with-emps deps-without-emps)))
   ;(emps/get-all-employees-by-department)
   ;(emps/get-departments-with-employees)
+  ;(emps/get-departments-without-employees)
   )
 
 (defn fetch-departments []
