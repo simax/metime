@@ -27,8 +27,8 @@
 (def api-routes ["http://localhost:3000/api"
                  [
                   ["/authtoken" :authtoken]
-                  ["/departments" {""             :departments-only
-                                   ["/employees"] :departments-and-employees}]
+                  ["/departments" {""                              :departments
+                                   ["/" [#"\d*" :id] "/employees"] :department-employees}]
                   [["/department?id=" [#"\d*" :id]] :department-by-id]
                   [["/department?name=" :name] :department-by-name]
                   ["/employees" :employees]

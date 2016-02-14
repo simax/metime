@@ -237,21 +237,29 @@
 ;;---------------------
 
 
-(defn employees-by-department []
-  (let [emps (emps/get-all-employees)
-        grouped-emps (group-by :department_id emps)
-        deps (deps/get-all-departments)
-        set-of-deps (rename (into #{} deps) {:id :department_id})
-        set-of-emps (into #{} (map #(hash-map :department_id %1 :employees %2)
-                                   (keys grouped-emps)
-                                   (sort-by :lastname (vals grouped-emps))))
-        deps-with-emps (join set-of-deps set-of-emps)
-        deps-without-emps (emps/get-departments-without-employees)]
-    (sort-by :department (concat deps-with-emps deps-without-emps)))
-  ;(emps/get-all-employees-by-department)
-  ;(emps/get-departments-with-employees)
-  ;(emps/get-departments-without-employees)
-  )
+;(defn employees-by-department []
+;  (let [
+;        ;emps (emps/get-all-employees)
+;        ;grouped-emps (group-by :department_id emps)
+;        ;deps (deps/get-all-departments)
+;        ;set-of-deps (rename (into #{} deps) {:id :department_id})
+;        ;set-of-emps
+;        ;(into #{} (map #(hash-map :department_id %1 :employees %2)
+;        ;               (keys grouped-emps)
+;        ;               (sort-by :lastname (vals grouped-emps))))
+;        ;deps-with-emps (join set-of-deps set-of-emps)
+;        deps (deps/get-all-departments)
+;        ;deps-without-emps (emps/get-departments-without-employees)
+;        ]
+;    (sort-by :department deps)
+;    )
+;  ;(emps/get-all-employees-by-department)
+;  ;(emps/get-departments-with-employees)
+;  ;(emps/get-departments-without-employees)
+;  )
+
+(defn fetch-department-employees [department-id]
+  (emps/get-department-employees department-id))
 
 (defn fetch-departments []
   (deps/get-all-departments))
@@ -278,14 +286,14 @@
 
 
 
-(defresource departments-and-employees []
-             (secured-resource)
+(defresource department-employees [department-id]
+             ;(secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :exists? (fn [ctx]
                         (if (requested-method ctx :get)
-                          [true {::departments {:departments (employees-by-department)}}]
+                          [true {::department-employees {:department-employees (fetch-department-employees department-id)}}]
                           ))
 
              :handle-created (fn [ctx]
@@ -293,7 +301,7 @@
                                  {:status 403 :body (::failure-message ctx)}
                                  {:location (::location ctx)}))
 
-             :handle-ok ::departments)
+             :handle-ok ::department-employees)
 
 (defresource departments []
              (secured-resource)

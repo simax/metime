@@ -172,7 +172,7 @@
 (register-handler
   :employee-add
   (fn hdlr-employee-add [db [_ departmentid]]
-    (let [dep (first (filter #(= (:departmentid %) departmentid) (:departments-and-employees db)))]
+    (let [dep (first (filter #(= (:departmentid %) departmentid) (:department-employees db)))]
       (-> db
           (merge
             {:nav-bar :employees
@@ -220,7 +220,7 @@
     (dispatch [:set-active-view :employees])
     db))
 
-(defn build-department-update-endpoint [department]
+(defn build-department-by-id-endpoint [department]
   (routes/api-endpoint-for :department-by-id :id (:id department)))
 
 (defn build-employee-update-endpoint [employee]
@@ -230,7 +230,7 @@
 (defn add-new-department [db department]
   "Add a new department via the API"
   (utils/send-data-to-api :POST
-                          (routes/api-endpoint-for :departments-only) (:authentication-token db) department
+                          (routes/api-endpoint-for :departments) (:authentication-token db) department
                           {:valid-token-handler   :switch-view-to-employees
                            :invalid-token-handler :department-save-failure
                            :response-keys         [:body :departments]}))
@@ -238,11 +238,10 @@
 (defn update-department [db department]
   "Update an existing department"
   (utils/send-data-to-api :PUT
-                          (build-department-update-endpoint department) (:authentication-token db) department
+                          (build-department-by-id-endpoint department) (:authentication-token db) department
                           {:valid-token-handler   :switch-view-to-employees ; Needs to be seq so we can send paramaters too
                            :invalid-token-handler :department-save-failure
                            :response-keys         [:body :departments]}))
-
 
 (defn add-new-employee [db employee]
   "Add a new employee via the API"
@@ -290,12 +289,19 @@
           (update-employee db employee)))
       db)))
 
+(defn close-department-drawer [db]
+  (assoc db :department-employees nil :department-draw-open-id ""))
+
+(defn open-department-drawer [db department-id]
+  (dispatch [:fetch-department-employees department-id])
+  (assoc db :department-employees nil :department-draw-open-id department-id))
+
 (register-handler
   :ui-department-drawer-status-toggle
-  (fn hdlr-ui-department-drawer-status-toggle [db [_ department]]
-    (if (= (:department-draw-open-id db) department)
-      (assoc db :department-draw-open-id "")
-      (assoc db :department-draw-open-id department))))
+  (fn hdlr-ui-department-drawer-status-toggle [db [_ department-id]]
+    (if (= (:department-draw-open-id db) department-id)
+      (close-department-drawer db)
+      (open-department-drawer db department-id))))
 
 (register-handler
   :ui-new-department-drawer-status-toggle
@@ -306,10 +312,9 @@
         (dispatch [:new-department])
         (assoc db :new-department-draw-open? true)))))
 
-
 (register-handler
   :new-department
-  (fn ndlr-new-department [db [_]]
+  (fn hdlr-new-department [db [_]]
     (assoc db :department {:id 0 :department "" :manager-id 0})))
 
 (register-handler

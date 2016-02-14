@@ -2,7 +2,7 @@
 -- Get all departments
 select
 -- Department info
-d.id, d.id as 'departmentid', d.department, d.manager_id,
+d.id as 'department-id', d.department, d.manager_id,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email'
 from departments d left join employees e on d.manager_id = e.id
@@ -170,6 +170,31 @@ from departments d
   left join employees e on e.department_id = d.id
 
 
+-- name: db-get-department-employees
+select
+-- Employee info
+e.id,
+e.firstname,
+e.lastname,
+e.email,
+e.department_id,
+e.manager_id,
+strftime('%d-%m-%Y', e.dob) as 'dob',
+strftime('%d-%m-%Y', e.startdate) as 'startdate',
+strftime('%d-%m-%Y', e.enddate) as 'enddate',
+e.password,
+e.prev_year_allowance,
+e.current_year_allowance,
+e.next_year_allowance,
+d.department as 'department',
+-- Manager info
+m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
+
+from departments d
+  inner join employees m on e.manager_id = m.id
+  inner join employees e on e.department_id = d.id
+where d.id = :id
+
 -- name: db-departments-with-employees
 select
 -- Employee info
@@ -195,14 +220,12 @@ from departments d
   inner join employees e on e.department_id = d.id
 
 
--- :department "Design", :manager-firstname "David", :departmentid 2, :manager-email "davidsharpe@ekmsystems.co.uk", :manager-lastname "Sharpe", :manager_id 10,
-
 -- name: db-departments-without-employees
 select
+d.id as 'department-id',
 d.department as 'department',
 -- Manager info
 m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email',
-d.id as 'departmentid'
 from departments d
   inner join employees m on d.manager_id = m.id
 where

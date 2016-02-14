@@ -75,24 +75,25 @@
 
 (defn view-employees []
   (dispatch [:set-active-navbar :employees])
-  (dispatch [:fetch-departments-and-employees])
-  (let [departments-and-employees (subscribe [:departments-and-employees])]
+  (dispatch [:fetch-departments])
+  (let [departments (subscribe [:departments])]
     (fn []
-      (if-not (seq @departments-and-employees)
+      (if-not (seq @departments)
         [loader-component]
-        [ev/departments-container @departments-and-employees]))))
+        [ev/departments-container @departments]))))
 
 (defn set-employee-department [departments emp]
-  (if (nil? (:department_id emp))
-    (let [dep (first departments)]
-      (assoc emp :department_id (:id dep)
-                 :managerid (:manager_id dep)
-                 :manager-firstname (:manager-firstname dep)
-                 :manager-email (:manager-email dep)))
-    emp))
+  (let [dep (filter #(= (:department_id emp) (:department-id %)) departments)]
+    (println (str "dep " (:department-id (first dep))))
+    (assoc emp
+               :department_id (:department-id dep)
+               :managerid (:manager_id dep)
+               :manager-firstname (:manager-firstname dep)
+               :manager-email (:manager-email dep)))
+  )
 
 (defn view-employee-add []
-  (dispatch [:fetch-departments-only])
+  (dispatch [:fetch-departments])
   (let [emp (subscribe [:employee])
         departments (subscribe [:departments])]
     (fn []
@@ -103,11 +104,11 @@
         [ev/employee-maintenance-form (set-employee-department @departments @emp)]))))
 
 (defn view-employee []
-  (dispatch [:fetch-departments-only])
+  (dispatch [:fetch-departments])
   (let [emp (subscribe [:employee])
         departments (subscribe [:departments])]
     (fn []
-      (if (not (or (:is-ready? @emp) (some? @departments)))
+      (if (not (and (:is-ready? @emp) (some? @departments)))
         [loader-component]
         (if (:not-found @emp)
           [ev/employee-not-found]

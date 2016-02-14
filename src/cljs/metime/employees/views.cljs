@@ -109,11 +109,12 @@
      ]]])
 
 
-(defn department-list-item [{:keys [departmentid department managerid manager-firstname manager-lastname manager-email employees]}]
-  (let [department-list-item (filter #(not= (:id %) managerid) employees)
+(defn department-list-item [{:keys [department-id department managerid manager-firstname manager-lastname manager-email ]}]
+  (let [employees (subscribe [:department-employees])
+        department-list-item (filter #(not= (:id %) managerid) @employees)
         rows-of-employees (partition 4 4 nil department-list-item)
         department-name (clojure.string/replace department #"[\s]" "-")
-        draw-open-class (subscribe [:department-draw-open-class departmentid])]
+        draw-open-class (subscribe [:department-draw-open-class department-id])]
     [:div#accordian.panel.panel-default.row {:style {:width "1100px"}}
      [:div.panel-heading.clearfix.panel-heading
       [:div.col-md-2.col-xs-2
@@ -136,36 +137,34 @@
            [md-icon-button
             :md-icon-name "zmdi-swap-vertical"              ;
             :size :larger
-            :on-click #(dispatch [:ui-department-drawer-status-toggle departmentid])
+            :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])
             ]]]]
         ]]]
      [:div {:class @draw-open-class :id department-name :style {:height "auto"}}
       (let [add-employee-label "Add a new employee to the department"]
-        (when (not-empty rows-of-employees)
-          [v-box
-           :gap "20px"
-           :children
-           [
-            [h-box
-             :gap "10px"
-             ;:style {:padding-left "55px"}
-             :justify :center
-             :align :center
-             :children [
-                        [md-circle-icon-button
-                         :md-icon-name "zmdi-plus"
-                         :emphasise? true
-                         :on-click #(dispatch [:employee-add-new departmentid])
-                         :tooltip add-employee-label]
-                        [label :label add-employee-label]
-                        ]]
-            [box :child
-             [:ul {:style {:margin-top "20px"}}
-              (for [employee-row rows-of-employees]
-                (for [employee-item employee-row]
-                  ^{:key (:id employee-item)} [employee-list-item employee-item])
-                )]]
-            ]]))]]))
+        [v-box
+         :gap "20px"
+         :children
+         [
+          [h-box
+           :gap "10px"
+           :justify :center
+           :align :center
+           :children [
+                      [md-circle-icon-button
+                       :md-icon-name "zmdi-plus"
+                       :emphasise? true
+                       :on-click #(dispatch [:employee-add-new department-id])
+                       :tooltip add-employee-label]
+                      [label :label add-employee-label]
+                      ]]
+          [box :child
+           [:ul {:style {:margin-top "20px"}}
+            (for [employee-row rows-of-employees]
+              (for [employee-item employee-row]
+                ^{:key (:id employee-item)} [employee-list-item employee-item])
+              )]]
+          ]])]]))
 
 (defn get-employees-with-department-name [xs]
   "Return a list of employees that include the department name for each employee"
@@ -181,7 +180,7 @@
         id-fn #(:id %)
         group-fn #(str (:department %))
         label-fn #(str (:firstname %) " " (:lastname %))
-        deps-emps (subscribe [:departments-and-employees])
+        deps-emps (subscribe [:department-employees])
         employees (sort-by (juxt :department :lastname) (get-employees-with-department-name @deps-emps))
         selected-employee-id (reagent/atom nil)]
     [h-box
@@ -195,9 +194,6 @@
         [input-text
          :width "315px"
          :model (:department @dep)
-         ;:status (when (seq (get-in employee [:validation-errors :firstname])) :error)
-         ;:status-icon? (seq (get-in employee [:validation-errors :firstname]))
-         ;:status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
          :placeholder "Department name"
          :on-change #(dispatch [:input-change-department :department %])
          :change-on-blur? false]]]
@@ -228,7 +224,7 @@
          ]]]
       ]]))
 
-(defn department-list [departments-and-employees]
+(defn department-list [departments]
   (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])]
     [:div.clearfix.accordian
      [h-box
@@ -259,11 +255,11 @@
         ]]
       ]
      [:ul
-      (for [department departments-and-employees]
+      (for [department departments]
         ^{:key (:department department)} [:li [department-list-item department]])
       ]]))
 
-(defn departments-container [departments-and-employees]
+(defn departments-container [departments]
   [v-box
    :gap "20px"
    :children
@@ -272,7 +268,7 @@
      :justify :center
      :align :center
      :child
-     [department-list departments-and-employees]]]])
+     [department-list departments]]]])
 
 (defn employee-not-found []
   [box :child [:div.well [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."]]])
@@ -316,8 +312,8 @@
 
 (defn department-list-choices [departments]
   (into []
-        (for [m @departments]
-          {:id (:departmentid m) :label (:department m)})))
+        (for [m departments]
+          {:id (:department-id m) :label (:department m)})))
 
 (defn department-drop-down-list [employee departments]
   [h-box
@@ -573,33 +569,32 @@
                 ]]
               ]])
 
-(defn employee-core-details []
+(defn employee-core-details [employee]
   (let [departments (subscribe [:departments])]
-    (fn [employee]
-      [v-box
-       :width "500px"
-       :class "panel panel-default"
+    [v-box
+     :width "500px"
+     :class "panel panel-default"
+     :children
+     [
+      [title :class "panel-heading panel-title" :label "Employee" :level :level3]
+      [h-box
+       :class "panel-body"
        :children
-       [
-        [title :class "panel-heading panel-title" :label "Employee" :level :level3]
-        [h-box
-         :class "panel-body"
+       [[v-box
+         :size "auto"
+         :gap "10px"
          :children
-         [[v-box
-           :size "auto"
-           :gap "10px"
-           :children
-           [
-            [department-drop-down-list employee departments]
-            [employee-first-name employee]
-            [employee-last-name employee]
-            [employee-email employee]
-            [employee-dob employee]
-            [employee-start-date employee]
-            [employee-end-date employee]
-            ]]]]
-        ]]
-      )))
+         [
+          [department-drop-down-list employee @departments]
+          [employee-first-name employee]
+          [employee-last-name employee]
+          [employee-email employee]
+          [employee-dob employee]
+          [employee-start-date employee]
+          [employee-end-date employee]
+          ]]]]
+      ]]
+    ))
 
 
 (defn employee-balances [employee]

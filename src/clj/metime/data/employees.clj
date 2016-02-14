@@ -21,6 +21,9 @@
         (dissoc :password-confirm)
         (assoc :password hashed-password))))
 
+(defn get-department-employees [department-id]
+  (db-get-department-employees {:id department-id} {:connection db/db-spec}))
+
 (defn get-all-employees []
   (db-get-all-employees {} {:connection db/db-spec}))
 

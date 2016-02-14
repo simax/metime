@@ -14,9 +14,9 @@
     (make-reaction (fn sub-current-employee [] (:employee @db)))))
 
 (register-sub
-  :departments-and-employees
+  :department-employees
   (fn [db _]
-    (make-reaction (fn sub-departments-and-employees [] (:departments-and-employees @db)))))
+    (make-reaction (fn sub-departments-employees [] (:department-employees @db)))))
 
 (register-sub
   :employee

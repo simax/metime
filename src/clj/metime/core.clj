@@ -44,7 +44,7 @@
            (context "/api" []
 
              (GET "/authtoken" [] (res/build-auth-token))       ; (fn [_] {:status 200 :body "Some text from Simon"})
-             (ANY "/departments/employees" [] (res/departments-and-employees))
+             (ANY "/departments/:id/employees" [id] (res/department-employees id))
              (ANY "/departments" [] (res/departments))
              (ANY "/departments/:id" [id] (res/department id))
              (ANY "/employees" [] (res/employees))
