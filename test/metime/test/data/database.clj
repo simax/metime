@@ -14,8 +14,8 @@
                 ]
 
     ;;(println (str "Using DB : " (:subname db/db-spec)))
-    (deps/delete-all-departments!)
-    (emps/delete-all-employees!)
+    (deps/delete-all-departments db/db-spec)
+    (emps/delete-all-employees db/db-spec)
 
     (work)))
 
@@ -26,20 +26,20 @@
                      1              (count inserted-departments)
                      "Department 1" (:department (first inserted-departments)))
                       (let [department-1-input {:department "Department 1" :managerid nil}]
-                        (deps/insert-department! department-1-input)
-                        (deps/get-all-departments)))
+                        (deps/insert-department db/db-spec department-1-input)
+                        (deps/get-all-departments db/db-spec)))
 
 
     ;; Expect a SQL exception if attempting to insert a duplicate department
     (expect java.sql.SQLException
             (let [department-1-input {:department "Department 1" :managerid nil}]
-              (deps/insert-department! department-1-input)
-              (deps/insert-department! department-1-input)))    ;; Expect a SQL exception if attempting to insert a duplicate department
+              (deps/insert-department db/db-spec department-1-input)
+              (deps/insert-department db/db-spec department-1-input)))    ;; Expect a SQL exception if attempting to insert a duplicate department
 
     ;; Expect to get a SQL exception if attempting to insert a department with no name
     (expect java.sql.SQLException
             (let [department-1-input {:department "" :managerid nil}]
-              (deps/insert-department! department-1-input)))
+              (deps/insert-department db/db-spec department-1-input)))
 
 
 
@@ -49,14 +49,14 @@
     (expect "Updated Department 1"
             (let [department-1-input {:department "Department 1" :managerid nil}
                   department-1-update {:id 1 :department "Updated Department 1" :managerid nil}]
-              (deps/insert-department! department-1-input)
-              (deps/update-department! department-1-update)
+              (deps/insert-department db/db-spec department-1-input)
+              (deps/update-department db/db-spec department-1-update)
               (:department (deps/get-department-by-id 1))))
 
     ;; Expect to receive nil if attempting to update a non existant department
     (expect nil
             (let [department-1-update {:id 1 :department "Updated Department 1" :managerid nil}]
-              (deps/update-department! department-1-update)
+              (deps/update-department db/db-spec department-1-update)
               (:department (deps/get-department-by-id 1))))
 
 
@@ -66,8 +66,8 @@
     ;; Providing the department contains no employees.
     (expect true
             (let [department-1-input {:department "Department 1" :managerid nil}]
-              (deps/insert-department! department-1-input)
-              (deps/delete-department! 1)))
+              (deps/insert-department db/db-spec department-1-input)
+              (deps/delete-department db/db-spec 1)))
 
     ;;Expect false if attempting to delete a department that contains employees
     (expect false
@@ -88,9 +88,9 @@
                                     }
                   department-1-input {:department "Department 1" :managerid nil}]
 
-              (emps/insert-employee! employee-1-input)
-              (deps/insert-department! department-1-input)
-              (deps/delete-department! 1)))
+              (emps/insert-employee db/db-spec employee-1-input)
+              (deps/insert-department db/db-spec department-1-input)
+              (deps/delete-department db/db-spec 1)))
 
 
     ;; ---------------------- Fetching departments ----------------------
@@ -99,29 +99,29 @@
     ;; department id that exists in the DB.
     (expect "Department 1"
             (let [department-1-input {:department "Department 1" :managerid nil}]
-              (deps/insert-department! department-1-input)
-              (:department (deps/get-department-by-id 1))))
+              (deps/insert-department db/db-spec department-1-input)
+              (:department (deps/get-department-by-id db/db-spec 1))))
 
     ;; Expect to get nil when using deps/get-department-by-id with
     ;; department id that does not exists in the DB.
     (expect nil
             (let [department-1-input {:department "Department 1" :managerid nil}]
-              (deps/insert-department! department-1-input)
-              (:department (deps/get-department-by-id 2))))
+              (deps/insert-department db/db-spec department-1-input)
+              (:department (deps/get-department-by-id db/db-spec 2))))
 
     ;; Expect to get correct department record when using deps/get-department-by-name with
     ;; department name that exists in the DB.
     (expect "Department 1"
             (let [department-1-input {:department "Department 1" :managerid nil}]
-              (deps/insert-department! department-1-input)
-              (:department (first (deps/get-department-by-name "Department 1")))))
+              (deps/insert-department db/db-spec department-1-input)
+              (:department (first (deps/get-department-by-name db/db-spec "Department 1")))))
 
     ;; Expect to get nil when using deps/get-department-by-name with
     ;; department name that does not exist in the DB.
     (expect nil
             (let [department-1-input {:department "Department 1" :managerid nil}]
-              (deps/insert-department! department-1-input)
-              (:department (first (deps/get-department-by-name "Incorrect Department")))))
+              (deps/insert-department db/db-spec department-1-input)
+              (:department (first (deps/get-department-by-name db/db-spec "Incorrect Department")))))
 
 
 
@@ -145,8 +145,8 @@
                                     :next_year_remaining 25
                                     }]
 
-              (emps/insert-employee! employee-1-input)
-              (count (emps/get-all-employees))))
+              (emps/insert-employee db/db-spec employee-1-input)
+              (count (emps/get-all-employees db/db-spec))))
 
     ;; Expect a SQL exception if attempting to insert an employee with a duplicate email address
     (expect java.sql.SQLException
@@ -168,8 +168,8 @@
                    }
                   duplicate-employee-input original-employee-input]
 
-              (emps/insert-employee! original-employee-input)
-              (emps/insert-employee! duplicate-employee-input)))
+              (emps/insert-employee db/db-spec original-employee-input)
+              (emps/insert-employee db/db-spec duplicate-employee-input)))
 
     ;; Expect to get a SQL exception if attempting to insert an employee
     ;; with no firstname, lastname or email address
@@ -194,7 +194,7 @@
                    :next_year_remaining 25
                    }]
 
-              (emps/insert-employee! invalid-employee-input)))
+              (emps/insert-employee db/db-spec invalid-employee-input)))
 
     ;; ---------------------- Updating employees ----------------------
 
@@ -234,9 +234,9 @@
                    :next_year_remaining 25
                    }]
 
-              (emps/insert-employee! employee-1-input)
-              (emps/update-employee! employee-1-update)
-              (:lastname (emps/get-employee-by-id 1))))
+              (emps/insert-employee db/db-spec employee-1-input)
+              (emps/update-employee db/db-spec employee-1-update)
+              (:lastname (emps/get-employee-by-id db/db-spec {:id 1}))))
 
     ;; Expect to receive nil if attempting to update a non existant department
     (expect nil
@@ -258,8 +258,8 @@
                    :next_year_remaining 25
                    }]
 
-              (emps/update-employee! missing-employee)
-              (:lastname (emps/get-employee-by-id 99))))
+              (emps/update-employee db/db-spec (emps/format-dates missing-employee))
+              (:lastname (emps/get-employee-by-id db/db-spec {:id 99}))))
 
 
 
@@ -284,11 +284,11 @@
                    :next_year_remaining 25
                    }]
 
-              (emps/insert-employee! employee-1-input)
-              (emps/delete-employee! 1)))
+              (emps/insert-employee db/db-spec employee-1-input)
+              (emps/delete-employee db/db-spec {:id 1})))
 
     ;;Expect false if attempting to delete an employee that doesn't exist
-    (expect false (emps/delete-employee! 99))
+    (expect false (emps/delete-employee db/db-spec {:id 99}))
 
 
     ;; ---------------------- Fetching employees ----------------------
@@ -311,11 +311,11 @@
                    :next_year_opening 25
                    :next_year_remaining 25
                    }]
-              (emps/insert-employee! employee-1-input)
-              (:email (emps/get-employee-by-id 1))))
+              (emps/insert-employee db/db-spec employee-1-input)
+              (:email (emps/get-employee-by-id db/db-spec {:id 1}))))
 
     ;; Expect to get nil when attempting to fetch employee that does not exists in the DB.
-    (expect nil (:email (emps/get-employee-by-id 99)))
+    (expect nil (:email (emps/get-employee-by-id db/db-spec {:id 99})))
 
 
 

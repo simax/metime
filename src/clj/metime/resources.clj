@@ -15,7 +15,8 @@
             [clojure.set :refer :all]
             [buddy.auth :refer [authenticated? throw-unauthorized]]
             [bouncer.core :as b]
-            [bouncer.validators :as v :refer [defvalidator]]))
+            [bouncer.validators :as v :refer [defvalidator]]
+            [metime.data.database :as db]))
 
 ;; convert the body to a reader. Useful for testing in the repl
 ;; where setting the body to a string is much simpler.
@@ -127,7 +128,7 @@
               (let [id (if (instance? String num)
                          (parse-number dept-id)
                          dept-id)]
-                (some? (deps/get-department-by-id id))))
+                (some? (deps/get-department-by-id db/db-spec {:id id}))))
 
 ;TODO: Need to improve duplicate email checking. Duplicate if current id
 ;      and email don't match an existing id and email
@@ -137,7 +138,7 @@
               {:default-message-format "Email already exists"}
               [email-value id-key subject] ; subject is the employee map
               (let [id (get subject (keyword id-key))]
-                (when-let [emp (emps/get-employee-by-email email-value)]
+                (when-let [emp (emps/get-employee-by-email db/db-spec {:email email-value})]
                   (= id (:id emp)))
                 true))
 
@@ -259,10 +260,10 @@
 ;  )
 
 (defn fetch-department-employees [department-id]
-  (emps/get-department-employees department-id))
+  (emps/get-department-employees db/db-spec {:id department-id}))
 
 (defn fetch-departments []
-  (deps/get-all-departments))
+  (deps/get-all-departments db/db-spec))
 
 ;;TODO: Need a password reset resource.
 
@@ -287,13 +288,13 @@
 
 
 (defresource department-employees [department-id]
-             ;(secured-resource)
+             (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :exists? (fn [ctx]
                         (if (requested-method ctx :get)
-                          [true {::department-employees {:department-employees (fetch-department-employees department-id)}}]
+                          [true {::department-employees {:department-employees (fetch-department-employees (read-string department-id))}}]
                           ))
 
              :handle-created (fn [ctx]
@@ -328,7 +329,7 @@
                       That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (deps/insert-department! (make-keyword-map (get-posted-data ctx)))]
+                          (when-let [new-id (deps/insert-department db/db-spec (make-keyword-map (get-posted-data ctx)))]
                             {::location (routes/api-endpoint-for :department-by-id :id new-id)})
                           (catch Exception e {::failure-message "Department already exists"}))))
 
@@ -374,7 +375,7 @@
 
              :conflict? (fn [ctx]
                           (let [new-department-name (:department (make-keyword-map (get-posted-data ctx)))
-                                existing-department (first (deps/get-department-by-name new-department-name))]
+                                existing-department (first (deps/get-department-by-name db/db-spec {:department new-department-name}))]
                             (and (not (nil? existing-department)) (not= (str id) (str (:id existing-department))))))
 
              :handle-conflict {:department ["Department already exists"]}
@@ -386,7 +387,7 @@
                      (let [new-data (make-keyword-map (get-posted-data ctx))
                            existing-data (::department ctx)
                            updated-data (merge existing-data new-data)]
-                       (deps/update-department! updated-data)
+                       (deps/update-department db/db-spec updated-data)
                        {::department updated-data}))
 
              :new? (fn [ctx] (nil? ::department))
@@ -408,7 +409,7 @@
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :exists? (fn [ctx]
                         (if (requested-method ctx :get)
-                          [true {::employees (emps/get-all-employees)}]))
+                          [true {::employees (emps/get-all-employees db/db-spec)}]))
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
@@ -424,7 +425,7 @@
              :post! (fn [ctx]
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (emps/insert-employee! (parse-employee (make-keyword-map (get-posted-data ctx))))]
+                          (when-let [new-id (emps/insert-employee db/db-spec (emps/prepare-for-insert (parse-employee (make-keyword-map (get-posted-data ctx)))))]
                             {::location (routes/api-endpoint-for :employee-by-id :id new-id)})
                           (catch Exception e {::failure-message (.getMessage e)}))))
 
@@ -438,19 +439,19 @@
 
 
 
-(defn find-employee-by [employee-finder-fn criteria]
+(defn find-employee-by [employee-finder-fn &criteria]
   (fn [ctx]
     (if (or (requested-method ctx :get) (requested-method ctx :put))
-      (let [employee (employee-finder-fn criteria)]
+      (let [employee (apply employee-finder-fn &criteria)]
         (if (empty? employee)
           false
           [(not (empty? employee)) {::employee employee}]))
       true)))
 
-(defn is-employee-processable? [employee-finder-fn criteria]
+(defn is-employee-processable? [employee-finder-fn &criteria]
   (fn [ctx]
     (if (or (requested-method ctx :delete) (requested-method ctx :put))
-      (if-let [employee (employee-finder-fn criteria)]
+      (if-let [employee (apply employee-finder-fn &criteria)]
         [true {::employee employee}]
         false)
       true)))
@@ -468,7 +469,7 @@
 (defn does-employee-conflict? []
   (fn [ctx]
     (let [new-employee (make-keyword-map (get-posted-data ctx))
-          existing-employee (emps/get-employee-by-email (:email new-employee))]
+          existing-employee (emps/get-employee-by-email db/db-spec {:email (:email new-employee)})]
       (and (not (nil? existing-employee)) (not= (:id new-employee) (str (:id existing-employee)))))))
 
 (defn update-existing-employee []
@@ -476,7 +477,7 @@
     (let [new-data (parse-employee (make-keyword-map (get-posted-data ctx)))
           existing-data (::employee ctx)
           updated-data (merge existing-data new-data)]
-      (emps/update-employee! updated-data)
+      (emps/update-employee db/db-spec (emps/format-dates updated-data))
       {::employee updated-data})))
 
 (defresource employee-by-id [id]
@@ -485,9 +486,9 @@
              :allowed-methods [:get :delete :put]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :can-put-to-missing? false
-             :exists? (find-employee-by emps/get-employee-by-id id)
+             :exists? (find-employee-by emps/get-employee-by-id [db/db-spec {:id id}])
 
-             :processable? (is-employee-processable? emps/get-employee-by-id id)
+             :processable? (is-employee-processable? emps/get-employee-by-id [db/db-spec {:id id}])
 
              :malformed? (is-employee-malformed?)
 
@@ -498,7 +499,7 @@
              :handle-conflict {:employee ["Employee already registered with this email address"]}
 
              :delete! (fn [_]
-                        (emps/delete-employee! id))
+                        (emps/delete-employee db/db-spec {:id id}))
 
              :put! (update-existing-employee)
 
@@ -514,9 +515,9 @@
              :allowed-methods [:get :put]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :can-put-to-missing? false
-             :exists? (find-employee-by emps/get-employee-by-email email)
+             :exists? (find-employee-by emps/get-employee-by-email [db/db-spec {:email email}])
 
-             :processable? (is-employee-processable? emps/get-employee-by-email email)
+             :processable? (is-employee-processable? emps/get-employee-by-email [db/db-spec {:email email}])
 
              :malformed? (is-employee-malformed?)
 
@@ -548,7 +549,7 @@
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :exists? (fn [ctx]
                         (if (requested-method ctx :get)
-                          [true {::holidays (hols/get-holidays)}]
+                          [true {::holidays (hols/get-holidays db/db-spec)}]
                           ))
 
              :malformed? (fn [ctx]
@@ -567,7 +568,7 @@
                       That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (hols/insert-holiday-request! (make-keyword-map (get-posted-data ctx)))]
+                          (when-let [new-id (hols/insert-holiday-request db/db-spec (make-keyword-map (get-posted-data ctx)))]
                             {::location (routes/api-endpoint-for :holiday-by-id :id new-id)})
                           (catch Exception e {::failure-message "Invaliday holiday request"}))))
 

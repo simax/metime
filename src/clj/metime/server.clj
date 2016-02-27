@@ -1,13 +1,11 @@
 (ns metime.server
-  (:require [clojure.java.io :as io]
+  (:require
             [metime.core :refer [app]]
             [compojure.core :refer [defroutes context ANY GET]]
             [compojure.route :refer [resources]]
             [compojure.handler :refer [api]]
             [net.cgrand.enlive-html :refer [deftemplate]]
-            [ring.middleware.reload :as reload]
             [environ.core :refer [env]]
-            [prone.middleware :as prone]
             [ring.adapter.jetty :refer [run-jetty]]))
 
 

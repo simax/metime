@@ -89,8 +89,7 @@
                :department_id (:department-id dep)
                :managerid (:manager_id dep)
                :manager-firstname (:manager-firstname dep)
-               :manager-email (:manager-email dep)))
-  )
+               :manager-email (:manager-email dep))))
 
 (defn view-employee-add []
   (dispatch [:fetch-departments])

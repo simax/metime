@@ -1,7 +1,7 @@
--- name: db-get-all-departments
+
 -- Get all departments
+-- :name get-all-departments :? :*
 select
--- Department info
 d.id as 'department-id', d.department, d.manager_id,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email'
@@ -9,9 +9,8 @@ from departments d left join employees e on d.manager_id = e.id
 order by d.department
 
 
--- name: db-get-all-departments-with-employees
 -- Get all department with employees
-
+-- :name get-all-departments-with-employees :? :*
 select
 -- Department info
 d.id, d.id as 'departmentid', d.id as 'departmentid', d.department, d.manager_id,
@@ -23,13 +22,13 @@ from departments d left join employees e on d.manager_id = e.id left join employ
 order by d.department, emps.lastname
 
 
--- name: db-get-department-by-name
 -- Get the department with the given name
+-- :name get-department-by-name :? :1
 select * from departments where department = :department
 
 
--- name: db-get-department-by-id
 -- Get the department with the given id
+-- :name get-department-by-id :? :1
 select
 -- Department info
 d.id, d.department, d.manager_id,
@@ -39,9 +38,8 @@ from departments d left join employees e on d.manager_id = e.id
 where d.id = :id
 order by department
 
--- name: db-get-department-by-id-with-employees
 -- Get the department with the given id and include the department employees
-
+-- :name get-department-by-id-with-employees :? :1
 select
 -- Department info
 d.id, d.department, d.manager_id,
@@ -54,27 +52,26 @@ where d.id = :id
 order by d.department, emps.lastname
 
 
--- name: db-insert-department<!
 -- Insert a new department
+-- :name insert-department :i!
 insert into departments (department, manager_id) values (:department, :manager_id)
 
--- name: db-update-department!
 -- Update department details
+-- :name update-department :! :n
 update departments
 set department = :department, manager_id = :managerid
 where id = :id
 
--- name: db-delete-department!
 -- Delete the department with the given id
+-- :name delete-department :! :n
 delete from departments where id = :id
 
--- name: db-delete-all-departments!
 -- Delete all the departments
+-- :name delete-all-departments :! :n
 delete from departments
 
-
--- name: db-get-all-employees
 -- Get all employees
+-- :name get-all-employees :? :*
 select
 id,
 firstname,
@@ -92,8 +89,8 @@ password
 from employees order by lastname
 
 
--- name: db-get-employee-by-id
 -- Get the employee with the given id
+-- :name get-employee-by-id :? :1
 select
 -- Employee info
 e.id,
@@ -118,8 +115,8 @@ from employees e
   left join departments d on e.department_id = d.id
 where e.id = :id
 
--- name: db-get-employee-by-email
 -- Get the employee with the given email address
+-- :name get-employee-by-email :? :1
 select
 -- Employee info
 e.id,
@@ -145,7 +142,7 @@ from employees e
 where e.email = :email
 
 
--- name: db-all-departments-and-employees
+-- :name all-departments-and-employees :? :n
 select
 -- Employee info
 e.id,
@@ -170,7 +167,7 @@ from departments d
   left join employees e on e.department_id = d.id
 
 
--- name: db-get-department-employees
+-- :name get-department-employees :? :n
 select
 -- Employee info
 e.id,
@@ -195,7 +192,7 @@ from departments d
   inner join employees e on e.department_id = d.id
 where d.id = :id
 
--- name: db-departments-with-employees
+-- :name departments-with-employees :? :n
 select
 -- Employee info
 e.id,
@@ -220,7 +217,7 @@ from departments d
   inner join employees e on e.department_id = d.id
 
 
--- name: db-departments-without-employees
+-- :name departments-without-employees :? :n
 select
 d.id as 'department-id',
 d.department as 'department',
@@ -232,13 +229,13 @@ where
   d.id not in (select department_id from employees)
 
 
--- name: db-insert-employee<!
 -- Insert a new employee
+-- :name insert-employee :i!
 insert into employees ( firstname,  lastname,  email, startdate,   enddate,  department_id,  manager_id,  dob,  password,  prev_year_allowance,  current_year_allowance,  next_year_allowance,  is_approver)
 values                (:firstname,:lastname,:email,   :startdate, :enddate, :department_id, :managerid,  :dob, :password, :prev_year_allowance, :current_year_allowance, :next_year_allowance, :is_approver)
 
--- name: db-update-employee!
 -- Update department details
+-- :name update-employee :! :n
 update employees
 set
   firstname = :firstname,
@@ -256,18 +253,17 @@ set
 
 where id = :id
 
-
--- name: db-delete-employee!
 -- Delete the employee with the given id
+-- :name delete-employee :!
 delete from employees where id = :id
 
--- name: db-delete-all-employees!
 -- Delete all the employees
+-- :name delete-all-employees :!
 delete from employees
 
 -- ============================= Holidays ===========================
--- name: db-insert-holiday-request<!
 -- Insert a new holiday request
+-- :name insert-holiday-request :i! :n
 insert into holidays (start_date,
                       start_type,
                       end_date,
@@ -296,8 +292,8 @@ insert into holidays (start_date,
                 )
 
 
--- name: db-get-holidays
 -- Get all holidays
+-- :name get-holidays :? :n
 select
 id,
 [start_date],

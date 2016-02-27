@@ -2,10 +2,11 @@
   (:require [buddy.sign.jws :as jws]
             [clj-time.core :as time]
             [buddy.hashers :as hashers]
-            [metime.data.employees :as emps]))
+            [metime.data.employees :as emps]
+            [metime.data.database :as db]))
 
 (defn auth-user [credentials]
-  (let [user (emps/get-employee-by-email (:email credentials))
+  (let [user (emps/get-employee-by-email db/db-spec {:email (:email credentials)})
         unauthed [false {:message "Invalid email or password"}]]
     (if user
       (if (hashers/check (:password credentials) (:password user))

@@ -24,7 +24,6 @@
                            [ring/ring-json "0.4.0"]
                            [compojure "1.4.0"]
                            [cljs-http "0.1.35"]
-                           [yesql "0.5.1"]
                            [buddy/buddy-core "0.8.2"]
                            [buddy/buddy-auth "0.8.1"]
                            [buddy/buddy-sign "0.8.1"]
@@ -34,6 +33,7 @@
                            [cheshire "5.5.0"]
                            [prone "0.8.2"]
                            [org.clojure/data.json "0.2.5"]
+                           [com.layerware/hugsql "0.4.3"]
                            [camel-snake-kebab "0.3.2"]
 
                            ;; UI
