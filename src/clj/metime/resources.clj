@@ -136,7 +136,7 @@
 
 (defvalidator unique-email
               {:default-message-format "Email already exists"}
-              [email-value id-key subject] ; subject is the employee map
+              [email-value id-key subject]                  ; subject is the employee map
               (let [id (get subject (keyword id-key))]
                 (when-let [emp (emps/get-employee-by-email db/db-spec {:email email-value})]
                   (= id (:id emp)))
@@ -181,7 +181,7 @@
                     (if (contains? req-rules rule-keyword)
                       (make-rule-required rule)
                       rule))
-                    )) partitioned-validation-set))
+                  )) partitioned-validation-set))
 
 (defn extract-keywords-from-validation-set [validation-set]
   (keep-indexed #(if (even? %1) %2) validation-set))
@@ -294,7 +294,9 @@
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :exists? (fn [ctx]
                         (if (requested-method ctx :get)
-                          [true {::department-employees {:department-employees (fetch-department-employees (read-string department-id))}}]
+                          [true {::department-employees
+                                 {:department-employees
+                                  (fetch-department-employees department-id)}}]
                           ))
 
              :handle-created (fn [ctx]
