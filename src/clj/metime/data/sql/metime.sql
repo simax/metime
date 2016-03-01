@@ -13,7 +13,7 @@ order by d.department
 -- :name get-all-departments-with-employees :? :*
 select
 -- Department info
-d.id, d.id as 'departmentid', d.id as 'departmentid', d.department, d.manager_id,
+d.id as 'department-id', d.department, d.manager_id,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email',
 -- Employee info
@@ -42,12 +42,13 @@ order by department
 -- :name get-department-by-id-with-employees :? :1
 select
 -- Department info
-d.id, d.department, d.manager_id,
+d.id, d.department,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email',
 -- Employee info
 emps.*
-from departments d left join employees e on d.manager_id = e.id left join employees emps on emps.department_id = d.id
+from departments d left join employees e on d.manager_id = e.id
+                   left join employees emps on emps.department_id = d.id
 where d.id = :id
 order by d.department, emps.lastname
 
