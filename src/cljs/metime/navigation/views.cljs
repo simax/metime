@@ -82,14 +82,15 @@
         [loader-component]
         [ev/departments-container @departments]))))
 
-(defn set-employee-department [departments emp]
-  (let [dep (filter #(= (:department_id emp) (:department-id %)) departments)]
-    (println (str "dep " (:department-id (first dep))))
-    (assoc emp
-               :department_id (:department-id dep)
-               :managerid (:manager_id dep)
-               :manager-firstname (:manager-firstname dep)
-               :manager-email (:manager-email dep))))
+;(defn set-employee-department [departments emp]
+;  (let [dep (filter #(= (:department-id emp) (:department-id %)) departments)]
+;    (println (str "manager-email " (:manager-email (first dep))))
+;    (assoc emp
+;               :department-id (:department-id dep)
+;               :manager-id (:manager-id dep)
+;               :manager-firstname (:manager-firstname dep)
+;               :manager-lastname (:manager-lastname dep)
+;               :manager-email (:manager-email dep))))
 
 (defn view-employee-add []
   (dispatch [:fetch-departments])
@@ -100,7 +101,7 @@
         (do
           (dispatch [:employee-add])
           [loader-component])
-        [ev/employee-maintenance-form (set-employee-department @departments @emp)]))))
+        [ev/employee-maintenance-form @emp]))))
 
 (defn view-employee []
   (dispatch [:fetch-departments])

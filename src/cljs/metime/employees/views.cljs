@@ -109,9 +109,9 @@
      ]]])
 
 
-(defn department-list-item [{:keys [department-id department managerid manager-firstname manager-lastname manager-email ]}]
+(defn department-list-item [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email ]}]
   (let [employees (subscribe [:department-employees])
-        department-list-item (filter #(not= (:id %) managerid) @employees)
+        department-list-item (filter #(not= (:id %) manager-id) @employees)
         rows-of-employees (partition 4 4 nil department-list-item)
         department-name (clojure.string/replace department #"[\s]" "-")
         draw-open-class (subscribe [:department-draw-open-class department-id])]
@@ -322,7 +322,7 @@
    [
     [box :width "150px" :child [label :class "control-label" :label "Department"]]
     [box :size "auto" :child [single-dropdown
-                              :model (:department_id employee)
+                              :model (:department-id employee)
                               :choices (department-list-choices departments)
                               :on-change #(dispatch [:department-change %])
                               ]]]
@@ -503,11 +503,11 @@
     [box :child [label :label "Previous year allowance"]]
     [box :child [input-text
                  :width "100px"
-                 :model (str (:prev_year_allowance employee))
-                 :status (when (seq (get-in employee [:validation-errors :prev_year_allowance])) :error)
-                 :status-icon? (seq (get-in employee [:validation-errors :prev_year_allowance]))
-                 :status-tooltip (apply str (get-in employee [:validation-errors :prev_year_allowance]))
-                 :on-change #(dispatch [:input-change-balances :prev_year_allowance %])
+                 :model (str (:prev-year-allowance employee))
+                 :status (when (seq (get-in employee [:validation-errors :prev-year-allowance])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :prev-year-allowance]))
+                 :status-tooltip (apply str (get-in employee [:validation-errors :prev-year-allowance]))
+                 :on-change #(dispatch [:input-change-balances :prev-year-allowance %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? true]]
     ]]
@@ -521,11 +521,11 @@
     [box :child [label :label "Current year allowance"]]
     [box :child [input-text
                  :width "100px"
-                 :model (str (:current_year_allowance employee))
-                 :status (when (seq (get-in employee [:validation-errors :current_year_allowance])) :error)
-                 :status-icon? (seq (get-in employee [:validation-errors :current_year_allowance]))
-                 :status-tooltip (apply str (get-in employee [:validation-errors :current_year_allowance]))
-                 :on-change #(dispatch [:input-change-balances :current_year_allowance %])
+                 :model (str (:current-year-allowance employee))
+                 :status (when (seq (get-in employee [:validation-errors :current-year-allowance])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :current-year-allowance]))
+                 :status-tooltip (apply str (get-in employee [:validation-errors :current-year-allowance]))
+                 :on-change #(dispatch [:input-change-balances :current-year-allowance %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]
@@ -539,11 +539,11 @@
     [box :child [label :label "Next year allowance"]]
     [box :child [input-text
                  :width "100px"
-                 :model (str (:next_year_allowance employee))
-                 :status (when (seq (get-in employee [:validation-errors :next_year_allowance])) :error)
-                 :status-icon? (seq (get-in employee [:validation-errors :next_year_allowance]))
-                 :status-tooltip (apply str (get-in employee [:validation-errors :next_year_allowance]))
-                 :on-change #(dispatch [:input-change-balances :next_year_allowance %])
+                 :model (str (:next-year-allowance employee))
+                 :status (when (seq (get-in employee [:validation-errors :next-year-allowance])) :error)
+                 :status-icon? (seq (get-in employee [:validation-errors :next-year-allowance]))
+                 :status-tooltip (apply str (get-in employee [:validation-errors :next-year-allowance]))
+                 :on-change #(dispatch [:input-change-balances :next-year-allowance %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
                  :change-on-blur? false]]
     ]]

@@ -3,8 +3,7 @@
     [clojure.string :as string]
     #?(:cljs [cljs-time.format :refer [formatter parse unparse]])
     #?(:cljs [cljs-time.core :refer [within? before? after? date-time now days minus day-of-week]])
-    #?(:cljs [cljs-time.coerce])
-       ))
+    #?(:cljs [cljs-time.coerce])))
 
 (defn pad-with-leading-zero [s]
   (if (= 1 (count s))

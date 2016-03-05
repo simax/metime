@@ -16,7 +16,9 @@
             [buddy.auth :refer [authenticated? throw-unauthorized]]
             [bouncer.core :as b]
             [bouncer.validators :as v :refer [defvalidator]]
-            [metime.data.database :as db]))
+            [metime.data.database :as db]
+            [buddy.hashers :as hashers]
+            [metime.formatting :as fmt]))
 
 ;; convert the body to a reader. Useful for testing in the repl
 ;; where setting the body to a string is much simpler.
@@ -237,27 +239,29 @@
 
 ;;---------------------
 
+(defn format-dates [employee]
+  (let [emp (assoc employee :dob (fmt/format-date-yyyy-mm-dd (:dob employee))
+                            :startdate (fmt/format-date-yyyy-mm-dd (:startdate employee))
+                            :enddate (fmt/format-date-yyyy-mm-dd (:enddate employee)))]
+    emp))
 
-;(defn employees-by-department []
-;  (let [
-;        ;emps (emps/get-all-employees)
-;        ;grouped-emps (group-by :department_id emps)
-;        ;deps (deps/get-all-departments)
-;        ;set-of-deps (rename (into #{} deps) {:id :department_id})
-;        ;set-of-emps
-;        ;(into #{} (map #(hash-map :department_id %1 :employees %2)
-;        ;               (keys grouped-emps)
-;        ;               (sort-by :lastname (vals grouped-emps))))
-;        ;deps-with-emps (join set-of-deps set-of-emps)
-;        deps (deps/get-all-departments)
-;        ;deps-without-emps (emps/get-departments-without-employees)
-;        ]
-;    (sort-by :department deps)
-;    )
-;  ;(emps/get-all-employees-by-department)
-;  ;(emps/get-departments-with-employees)
-;  ;(emps/get-departments-without-employees)
-;  )
+(defn prepare-for-insert [data]
+  "Prepare the incoming data ready for inserting into the DB."
+  "Generate a salted password and remove extraneous keys from the map"
+  (let [hashed-password (hashers/encrypt (:password data) {:alg :pbkdf2+sha256})]
+    (-> data
+        (format-dates)
+        (dissoc :password-confirm)
+        (assoc :password hashed-password))))
+
+(defn delete-department! [id]
+  "Delete the department with the given id - providing it doesn't contain any employees"
+  (let [department-with-employees (deps/get-department-by-id-with-employees db/db-spec {:id id})]
+    (if (empty? department-with-employees)
+      true
+      (if (every? #(nil? (:lastname %)) department-with-employees)
+        (= 1 (deps/delete-department db/db-spec {:id id}))
+        false))))
 
 (defn fetch-department-employees [department-id]
   (emps/get-department-employees db/db-spec {:id department-id}))
@@ -383,7 +387,7 @@
              :handle-conflict {:department ["Department already exists"]}
 
              :delete! (fn [ctx]
-                        (deps/delete-department! id))
+                        (delete-department! id))
 
              :put! (fn [ctx]
                      (let [new-data (make-keyword-map (get-posted-data ctx))
@@ -427,7 +431,7 @@
              :post! (fn [ctx]
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (emps/insert-employee db/db-spec (emps/prepare-for-insert (parse-employee (make-keyword-map (get-posted-data ctx)))))]
+                          (when-let [new-id (emps/insert-employee db/db-spec (prepare-for-insert (parse-employee (make-keyword-map (get-posted-data ctx)))))]
                             {::location (routes/api-endpoint-for :employee-by-id :id new-id)})
                           (catch Exception e {::failure-message (.getMessage e)}))))
 

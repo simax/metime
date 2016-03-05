@@ -67,9 +67,9 @@
    :dob [[v/required :message "Date of birth is required"] [v/datetime british-date-format :message "Must be a valid date"]]
    :startdate [[v/datetime british-date-format :message "Must be a valid date" :pre (comp seq :startdate)]]
    :enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
-   :prev_year_allowance [[v/integer :message "Must be an integer"]]
-   :current_year_allowance [[v/integer :message "Must be an integer"]]
-   :next_year_allowance [[v/integer :message "Must be an integer"]]])
+   :prev-year-allowance [[v/integer :message "Must be an integer"]]
+   :current-year-allowance [[v/integer :message "Must be an integer"]]
+   :next-year-allowance [[v/integer :message "Must be an integer"]]])
 
 (register-handler
   :save-department
@@ -113,11 +113,11 @@
   :department-change
   (fn hdlr-department-change [db [_ id]]
     (let [deps (:departments db)
-          dep (first (filter #(= (:departmentid %) (js/parseInt id)) deps))
+          dep (first (filter #(= (:department-id %) (js/parseInt id)) deps))
           updated-emp (assoc (:employee db)
-                        :department_id id
+                        :department-id id
                         :department (:department dep)
-                        :managerid (:manager_id dep)
+                        :manager-id (:manager-id dep)
                         :manager-email (:manager-email dep)
                         :manager-firstname (:manager-firstname dep)
                         :manager-lastname (:manager-lastname dep))]
@@ -172,7 +172,7 @@
 (register-handler
   :employee-add
   (fn hdlr-employee-add [db [_ departmentid]]
-    (let [dep (first (filter #(= (:departmentid %) departmentid) (:department-employees db)))]
+    (let [dep (first (filter #(= (:department-id %) departmentid) (:department-employees db)))]
       (-> db
           (merge
             {:nav-bar :employees
@@ -183,14 +183,14 @@
                        :firstname              ""
                        :lastname               ""
                        :email                  ""
-                       :prev_year_allowance    25
-                       :current_year_allowance 25
-                       :next_year_allowance    25
+                       :prev-year-allowance    25
+                       :current-year-allowance 25
+                       :next-year-allowance    25
                        :dob                    nil
                        :startdate              nil
                        :enddate                nil
-                       :department_id          departmentid
-                       :managerid              (:manager_id dep)
+                       :department-id          departmentid
+                       :manager-id             (:manager-id dep)
                        :manager-firstname      (:manager-firstname dep)
                        :manager-lastname       (:manager-lastname dep)
                        :manager-email          (:manager-email dep)

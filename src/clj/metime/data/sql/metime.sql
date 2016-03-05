@@ -39,7 +39,7 @@ where d.id = :id
 order by department
 
 -- Get the department with the given id and include the department employees
--- :name get-department-by-id-with-employees :? :1
+-- :name get-department-by-id-with-employees :? :*
 select
 -- Department info
 d.id, d.department,
@@ -55,12 +55,13 @@ order by d.department, emps.lastname
 
 -- Insert a new department
 -- :name insert-department :i!
-insert into departments (department, manager_id) values (:department, :manager_id)
+insert into departments (department, manager_id)
+values (:department, :manager-id)
 
 -- Update department details
 -- :name update-department :! :n
 update departments
-set department = :department, manager_id = :managerid
+set department = :department, manager_id = :manager-id
 where id = :id
 
 -- Delete the department with the given id
@@ -143,7 +144,7 @@ from employees e
 where e.email = :email
 
 
--- :name all-departments-and-employees :? :n
+-- :name all-departments-and-employees :? :*
 select
 -- Employee info
 e.id,
@@ -168,7 +169,7 @@ from departments d
   left join employees e on e.department_id = d.id
 
 
--- :name get-department-employees :? :n
+-- :name get-department-employees :? :*
 select
 -- Employee info
 e.id,
@@ -193,7 +194,7 @@ from departments d
   inner join employees e on e.department_id = d.id
 where d.id = :id
 
--- :name departments-with-employees :? :n
+-- :name departments-with-employees :? :*
 select
 -- Employee info
 e.id,
@@ -218,22 +219,48 @@ from departments d
   inner join employees e on e.department_id = d.id
 
 
--- :name departments-without-employees :? :n
-select
-d.id as 'department-id',
-d.department as 'department',
--- Manager info
-m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email',
-from departments d
-  inner join employees m on d.manager_id = m.id
-where
-  d.id not in (select department_id from employees)
+-- :--name-- departments-without-employees :? :*
+--select
+--d.id as 'department-id',
+--d.department as 'department',
+---- Manager info
+--m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
+--from departments d
+--    inner join employees m on d.manager_id = m.id
+--where
+--  d.id not in (select department_id from employees)
 
 
 -- Insert a new employee
 -- :name insert-employee :i!
-insert into employees ( firstname,  lastname,  email, startdate,   enddate,  department_id,  manager_id,  dob,  password,  prev_year_allowance,  current_year_allowance,  next_year_allowance,  is_approver)
-values                (:firstname,:lastname,:email,   :startdate, :enddate, :department_id, :managerid,  :dob, :password, :prev_year_allowance, :current_year_allowance, :next_year_allowance, :is_approver)
+insert into employees (
+    firstname,
+    lastname,
+    email,
+    startdate,
+    enddate,
+    department_id,
+    manager_id,
+    dob,
+    password,
+    prev_year_allowance,
+    current_year_allowance,
+    next_year_allowance,
+    is_approver)
+values (
+    :firstname,
+    :lastname,
+    :email,
+    :startdate,
+    :enddate,
+    :department-id,
+    :manager-id,
+    :dob,
+    :password,
+    :prev-year-allowance,
+    :current-year-allowance,
+    :next-year-allowance,
+    :is-approver)
 
 -- Update department details
 -- :name update-employee :! :n
@@ -244,12 +271,12 @@ set
   email = :email,
   startdate = :startdate,
   enddate = :enddate,
-  department_id = :department_id,
-  manager_id = :manager_id,
+  department_id = :department-id,
+  manager_id = :manager-id,
   dob = :dob,
-  prev_year_allowance = :prev_year_allowance,
-  current_year_allowance = :current_year_allowance,
-  next_year_allowance = :next_year_allowance,
+  prev_year_allowance = :prev-year-allowance,
+  current_year_allowance = :current-year-allowance,
+  next_year_allowance = :next-year-allowance,
   password = :password
 
 where id = :id
@@ -278,13 +305,13 @@ insert into holidays (start_date,
                       status,
                       unit)
                 values (
-                      :start_date,
-                      :start_type,
-                      :end_date,
-                      :employee_id,
-                      :employee_name,
-                      :leave_type_id,
-                      :leave_type,
+                      :start-date,
+                      :start-type,
+                      :end-date,
+                      :employee-id,
+                      :employee-name,
+                      :leave-type-id,
+                      :leave-type,
                       :duration,
                       :deduction,
                       :reason,
@@ -294,7 +321,7 @@ insert into holidays (start_date,
 
 
 -- Get all holidays
--- :name get-holidays :? :n
+-- :name get-holidays :? :*
 select
 id,
 [start_date],
