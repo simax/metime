@@ -77,6 +77,13 @@
       (assoc db :department-employees value))))
 
 (register-handler
+  :process-employees-response
+  (fn hdlr-process-employees-response [db [_ employees]]
+    (println (str "employees: " (count employees)))
+    (let [value (js->clj employees)]
+      (assoc db :employees value))))
+
+(register-handler
   :process-departments-response
   (fn hdlr-process-departments-response [db [_ departments]]
     (let [value (js->clj departments)]
@@ -123,6 +130,15 @@
                     {:valid-token-handler   :process-department-employees-response
                      :invalid-token-handler :log-out
                      :response-keys         [:body :department-employees]})
+    db))
+
+(register-handler
+  :fetch-employees
+  (fn hdlr-fetch-employees [db [_]]
+    (utils/call-api :GET (routes/api-endpoint-for :employees) (:authentication-token db)
+                    {:valid-token-handler   :process-employees-response
+                     :invalid-token-handler :log-out
+                     :response-keys         [:body]})
     db))
 
 (register-handler

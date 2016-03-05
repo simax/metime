@@ -80,14 +80,7 @@ firstname,
 lastname,
 email,
 department_id,
-manager_id,
-strftime('%d-%m-%Y', dob) as 'dob',
-strftime('%d-%m-%Y', startdate) as 'startdate',
-strftime('%d-%m-%Y', enddate) as 'enddate',
-prev_year_allowance,
-current_year_allowance,
-next_year_allowance,
-password
+manager_id
 from employees order by lastname
 
 
@@ -217,19 +210,6 @@ m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as
 from departments d
   inner join employees m on e.manager_id = m.id
   inner join employees e on e.department_id = d.id
-
-
--- :--name-- departments-without-employees :? :*
---select
---d.id as 'department-id',
---d.department as 'department',
----- Manager info
---m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as 'manager-email'
---from departments d
---    inner join employees m on d.manager_id = m.id
---where
---  d.id not in (select department_id from employees)
-
 
 -- Insert a new employee
 -- :name insert-employee :i!

@@ -40,7 +40,6 @@
 
 (defn view-home []
   (dispatch [:set-active-navbar :home])
-  ;(dispatch [:set-active-route [:home]])
   [:div {:style {:height "500px"}}
    [:h1 "Home page"]
    [:div
@@ -76,6 +75,7 @@
 (defn view-employees []
   (dispatch [:set-active-navbar :employees])
   (dispatch [:fetch-departments])
+  (dispatch [:fetch-employees])
   (let [departments (subscribe [:departments])]
     (fn []
       (if-not (seq @departments)

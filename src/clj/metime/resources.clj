@@ -483,7 +483,7 @@
     (let [new-data (parse-employee (make-keyword-map (get-posted-data ctx)))
           existing-data (::employee ctx)
           updated-data (merge existing-data new-data)]
-      (emps/update-employee db/db-spec (emps/format-dates updated-data))
+      (emps/update-employee db/db-spec (format-dates updated-data))
       {::employee updated-data})))
 
 (defresource employee-by-id [id]

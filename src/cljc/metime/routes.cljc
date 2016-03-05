@@ -27,11 +27,11 @@
 (def api-routes ["http://localhost:3000/api"
                  [
                   ["/authtoken" :authtoken]
+                  ["/employees" :employees]
                   ["/departments" {""                              :departments
                                    ["/" [#"\d*" :id] "/employees"] :department-employees}]
                   [["/department?id=" [#"\d*" :id]] :department-by-id]
                   [["/department?name=" :name] :department-by-name]
-                  ["/employees" :employees]
                   [["/employee?id=" [#"\d*" :id]] :employee-by-id]
                   [["/employee?email=" :email] :employee-by-email]
                   ]

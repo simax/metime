@@ -13,6 +13,11 @@
     (make-reaction (fn sub-departments [] (:departments @db)))))
 
 (register-sub
+  :employees
+  (fn [db _]
+    (make-reaction (fn sub-employees [] (:employees @db)))))
+
+(register-sub
   :department-id
   (fn [db _]
     (make-reaction (fn sub-department-id [] (:department-id @db)))))

@@ -258,7 +258,7 @@
                    :next_year_remaining 25
                    }]
 
-              (emps/update-employee db/db-spec (emps/format-dates missing-employee))
+              (emps/update-employee db/db-spec (format-dates missing-employee))
               (:lastname (emps/get-employee-by-id db/db-spec {:id 99}))))
 
 
