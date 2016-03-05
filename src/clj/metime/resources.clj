@@ -415,7 +415,7 @@
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :exists? (fn [ctx]
                         (if (requested-method ctx :get)
-                          [true {::employees (emps/get-all-employees db/db-spec)}]))
+                          [true {::employees (emps/get-all-departments-with-employees db/db-spec)}]))
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)

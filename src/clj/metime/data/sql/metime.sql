@@ -13,11 +13,9 @@ order by d.department
 -- :name get-all-departments-with-employees :? :*
 select
 -- Department info
-d.id as 'department-id', d.department, d.manager_id,
--- Manager info
-e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email',
+d.id as 'department-id', d.department,
 -- Employee info
-emps.*
+emps.id, emps.firstname, emps.lastname
 from departments d left join employees e on d.manager_id = e.id left join employees emps on emps.department_id = d.id
 order by d.department, emps.lastname
 
@@ -210,6 +208,7 @@ m.firstname as 'manager-firstname', m.lastname as 'manager-lastname', m.email as
 from departments d
   inner join employees m on e.manager_id = m.id
   inner join employees e on e.department_id = d.id
+
 
 -- Insert a new employee
 -- :name insert-employee :i!

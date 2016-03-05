@@ -166,22 +166,13 @@
               )]]
           ]])]]))
 
-(defn associate-employees-with-departments [xs]
-  "Return a list of employees that include the department name for each employee"
-  (mapcat identity
-          (for [x xs
-                :let [dep (:department x)
-                      employees (:employees x)]]
-            (for [emp employees]
-              {:department dep :id (:id emp) :firstname (:firstname emp) :lastname (:lastname emp)}))))
-
 (defn new-department-container []
   (let [dep (subscribe [:department])
-        employees (subscribe [:employees])
+        dep-emps (subscribe [:departments-with-employees])
         id-fn #(:id %)
         group-fn #(str (:department %))
         label-fn #(str (:firstname %) " " (:lastname %))
-        sorted-employees (sort-by (juxt :department :lastname) (associate-employees-with-departments @employees))
+        sorted-employees (sort-by (juxt :department :lastname) @dep-emps)
         selected-employee-id (reagent/atom nil)]
     [h-box
      :gap "20px"

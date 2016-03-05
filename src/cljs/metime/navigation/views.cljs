@@ -75,7 +75,7 @@
 (defn view-employees []
   (dispatch [:set-active-navbar :employees])
   (dispatch [:fetch-departments])
-  (dispatch [:fetch-employees])
+  (dispatch [:fetch-departments-with-employees])
   (let [departments (subscribe [:departments])]
     (fn []
       (if-not (seq @departments)
