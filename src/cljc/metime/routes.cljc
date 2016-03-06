@@ -3,9 +3,9 @@
     [bidi.bidi :as bidi]
     #?(:cljs [pushy.core :refer [pushy set-token! start!]])
     #?(:cljs [re-frame.core :refer [register-handler
-                           path
-                           dispatch
-                           subscribe]])))
+                                    path
+                                    dispatch
+                                    subscribe]])))
 
 (def site-routes ["/"
                   [
@@ -27,11 +27,11 @@
 (def api-routes ["http://localhost:3000/api"
                  [
                   ["/authtoken" :authtoken]
-                  ["/employees" :employees]
                   ["/departments" {""                              :departments
+                                   ["/" [#"\d*" :id] ""]           :department-by-id
                                    ["/" [#"\d*" :id] "/employees"] :department-employees}]
-                  [["/department?id=" [#"\d*" :id]] :department-by-id]
                   [["/department?name=" :name] :department-by-name]
+                  ["/employees" :employees]
                   [["/employee?id=" [#"\d*" :id]] :employee-by-id]
                   [["/employee?email=" :email] :employee-by-email]
                   ]

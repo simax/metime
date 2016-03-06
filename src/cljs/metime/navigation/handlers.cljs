@@ -107,7 +107,7 @@
 
 (register-handler
   :fetch-department
-  (fn hdlr-fetch-departments [db [_ id]]
+  (fn hdlr-fetch-department [db [_ id]]
     (utils/call-api :GET (routes/api-endpoint-for :department-by-id :id id) (:authentication-token db)
                     {:valid-token-handler   :process-department-response
                      :invalid-token-handler :log-out

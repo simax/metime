@@ -73,7 +73,7 @@
       (cond
         (= status 200) (dispatch [valid-token-handler (get-in response response-keys)])
         (= status 404) (dispatch [valid-token-handler {:not-found true}])
-        :else (dispatch [invalid-token-handler])
+        :else (dispatch [invalid-token-handler] {})
         ))))
 
 (defn send-data-to-secure-url [verb url token data]
@@ -81,7 +81,7 @@
     :POST (http/post url (merge (build-authorization-header token) {:form-params data}))
     :PUT (http/put url (merge (build-authorization-header token) {:form-params data}))))
 
-(defn post-data-to-secure-api [verb url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
+(defn post-data-to-secure-api [verb url token data {:keys [valid-fn invalid-fn]}]
   "Make a secure url call with authorization header.
    Dispatch redirect to login if unauthorized."
   ;; The following go block will "park" until the http request returns data
@@ -89,11 +89,10 @@
     (let [response (<! (send-data-to-secure-url verb url token data))
           status (:status response)]
       (if (= status 201)
-        (dispatch [valid-token-handler])
-        (dispatch [invalid-token-handler])))))
+        (valid-fn)
+        (invalid-fn)))))
 
-
-(defn put-data-to-secure-api [verb url token data {:keys [valid-token-handler invalid-token-handler response-keys]}]
+(defn put-data-to-secure-api [verb url token data {:keys [valid-fn invalid-fn]}]
   "Make a secure url call with authorization header.
    Dispatch redirect to login if unauthorized."
   ;; The following go block will "park" until the http request returns data
@@ -102,8 +101,8 @@
     (let [response (<! (send-data-to-secure-url verb url token data))
           status (:status response)]
       (if (= status 200)
-        (dispatch [valid-token-handler])
-        (dispatch [invalid-token-handler])))))
+        (valid-fn)
+        (invalid-fn)))))
 
 
 ; Dispatch on the 1st parameter, namely, verb

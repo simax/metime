@@ -196,7 +196,7 @@
                        :manager-email          (:manager-email dep)
                        :password               "password1"
                        :confirmation           "password1"
-                       :is_approver            false
+                       :is-approver            false
                        }})))))
 
 
@@ -217,6 +217,7 @@
 (register-handler
   :switch-view-to-employees
   (fn hdlr-switch-view-to-employees [db [_ _]]
+    (dispatch [:fetch-department-employees (:department-draw-open-id db)])
     (dispatch [:set-active-view :employees])
     db))
 
@@ -231,33 +232,33 @@
   "Add a new department via the API"
   (utils/send-data-to-api :POST
                           (routes/api-endpoint-for :departments) (:authentication-token db) department
-                          {:valid-token-handler   :switch-view-to-employees
-                           :invalid-token-handler :department-save-failure
-                           :response-keys         [:body :departments]}))
+                          {:valid-fn      #(dispatch [:fetch-departments])
+                           :invalid-fn    #(dispatch [:department-save-failure])
+                           :response-keys [:body :departments]}))
 
 (defn update-department [db department]
   "Update an existing department"
   (utils/send-data-to-api :PUT
                           (build-department-by-id-endpoint department) (:authentication-token db) department
-                          {:valid-token-handler   :switch-view-to-employees ; Needs to be seq so we can send paramaters too
-                           :invalid-token-handler :department-save-failure
-                           :response-keys         [:body :departments]}))
+                          {:valid-fn      #(dispatch [:fetch-departments])
+                           :invalid-fn    #(dispatch [:department-save-failure])
+                           :response-keys [:body :departments]}))
 
 (defn add-new-employee [db employee]
   "Add a new employee via the API"
   (utils/send-data-to-api :POST
                           (routes/api-endpoint-for :employees) (:authentication-token db) employee
-                          {:valid-token-handler   :switch-view-to-employees
-                           :invalid-token-handler :employee-save-failure
-                           :response-keys         [:body :departments]}))
+                          {:valid-fn      #(dispatch [:switch-view-to-employees])
+                           :invalid-fn    #(dispatch [:employee-save-failure])
+                           :response-keys [:body :departments]}))
 
 (defn update-employee [db employee]
   "Update an existing employee"
   (utils/send-data-to-api :PUT
                           (build-employee-update-endpoint employee) (:authentication-token db) employee
-                          {:valid-token-handler   :switch-view-to-employees ; Needs to be seq so we can send paramaters too
-                           :invalid-token-handler :employee-save-failure
-                           :response-keys         [:body :departments]}))
+                          {:valid-fn      #(dispatch [:switch-view-to-employees])
+                           :invalid-fn    #(dispatch [:employee-save-failure])
+                           :response-keys [:body :departments]}))
 
 
 
@@ -293,8 +294,9 @@
   (assoc db :department-employees nil :department-draw-open-id ""))
 
 (defn open-department-drawer [db department-id]
+  (dispatch [:fetch-department department-id])
   (dispatch [:fetch-department-employees department-id])
-  (assoc db :department-employees nil :department-draw-open-id department-id))
+  (assoc db :department-draw-open-id department-id))
 
 (register-handler
   :ui-department-drawer-status-toggle

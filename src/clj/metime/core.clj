@@ -42,14 +42,16 @@
 (defroutes app-routes
            (GET "/" [] root-handler)
            (context "/api" []
-
-             (GET "/authtoken" [] (res/build-auth-token))       ; (fn [_] {:status 200 :body "Some text from Simon"})
-             (ANY "/departments/:id/employees" [id] (res/department-employees id))
-             (ANY "/departments" [] (res/departments))
-             (ANY "/departments/:id" [id] (res/department id))
              (ANY "/employees" [] (res/employees))
              (ANY "/employee" [id email] (employee-by-id-or-email-handler id email))
              (ANY "/holidays" [] (res/holidays))
+             (GET "/authtoken" [] (res/build-auth-token))       ; (fn [_] {:status 200 :body "Some text from Simon"})
+             (context "/departments"
+                (GET "/:id" [id] (fn [_] {:status 200 :body "Some text from Simon"}))
+                ;(context "/:id" [id]
+                ;  (ANY "" (fn [_] {:status 200 :body "Some text from Simon"}))
+                ;  (ANY "/employees" (res/department-employees id)))
+                )
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))
            ;; All other routes failed. Just serve the app again

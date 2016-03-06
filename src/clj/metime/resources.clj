@@ -167,10 +167,10 @@
    :firstname [[v/string] [v/min-count 1] [v/max-count 30]]
    :lastname [[v/string] [v/min-count 1] [v/max-count 30]]
    :password [[v/matches #"(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}" :message "Password must be alpha numeric with at least one number"]]
-   :department_id [[department-exists]]
+   :department-id [[department-exists]]
    :dob [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
    ;:startdate [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Start date can't be in the future"]]
-   :is_approver [[v/boolean]]
+   :is-approver [[v/boolean]]
    ])
 
 (defn make-rule-required [validation-rule]
@@ -213,7 +213,7 @@
           errors (doall (remove nil? result))]
       errors)))
 
-(def new-employee-required-fields #{:firstname :lastname :password :confirmation :is_approver})
+(def new-employee-required-fields #{:firstname :lastname :password :confirmation :is-approver})
 (def employee-validator (partial validate-employee employee-validation-set new-employee-required-fields))
 
 (def holiday-request-types #{"Morning" "Afternoon" "All day"})
@@ -406,7 +406,7 @@
 (def truthy? (complement #{"false"}))
 
 (defn parse-employee [emp]
-  (assoc emp :is_approver (truthy? (:is_approver emp))))
+  (assoc emp :is-approver (truthy? (:is-approver emp))))
 
 (defresource employees []
              (secured-resource)
@@ -431,8 +431,9 @@
              :post! (fn [ctx]
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (emps/insert-employee db/db-spec (prepare-for-insert (parse-employee (make-keyword-map (get-posted-data ctx)))))]
-                            {::location (routes/api-endpoint-for :employee-by-id :id new-id)})
+                          (let [emp (prepare-for-insert (make-keyword-map (get-posted-data ctx)))]
+                            (when-let [new-id (emps/insert-employee db/db-spec emp)]
+                              {::location (routes/api-endpoint-for :employee-by-id :id new-id)}))
                           (catch Exception e {::failure-message (.getMessage e)}))))
 
              :post-redirect? false

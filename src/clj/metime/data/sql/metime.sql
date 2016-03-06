@@ -16,7 +16,9 @@ select
 d.id as 'department-id', d.department,
 -- Employee info
 emps.id, emps.firstname, emps.lastname
-from departments d left join employees e on d.manager_id = e.id left join employees emps on emps.department_id = d.id
+from departments d
+    left join employees e on d.manager_id = e.id
+    inner join employees emps on emps.department_id = d.id
 order by d.department, emps.lastname
 
 
