@@ -20,6 +20,7 @@
             [goog.date]
             [re-frame.core :refer [dispatch subscribe]]
             [reagent.core :as reagent]
+            [reagent.ratom :refer [make-reaction]]
             [clairvoyant.core :refer-macros [trace-forms]]
             [re-frame-tracer.core :refer [tracer]]
             [cljs.pprint :refer [pprint]]))
@@ -168,11 +169,10 @@
 
 (defn new-department-container []
   (let [dep (subscribe [:department])
-        dep-emps (subscribe [:departments-with-employees])
+        sorted-employees (subscribe [:sorted-departments-with-employees])
         id-fn #(:id %)
         group-fn #(str (:department %))
         label-fn #(str (:firstname %) " " (:lastname %))
-        sorted-employees (sort-by (juxt :department :lastname) @dep-emps)
         selected-employee-id (reagent/atom nil)]
     [h-box
      :gap "20px"
@@ -195,7 +195,7 @@
         [single-dropdown
          :width "315px"
          :placeholder "Manager"
-         :choices sorted-employees
+         :choices @sorted-employees
          :id-fn id-fn
          :label-fn label-fn
          :group-fn group-fn

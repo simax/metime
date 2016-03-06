@@ -13,9 +13,12 @@
     (make-reaction (fn sub-departments [] (:departments @db)))))
 
 (register-sub
-  :departments-with-employees
+  :sorted-departments-with-employees
   (fn [db _]
-    (make-reaction (fn sub-employees [] (:departments-with-employees @db)))))
+    ;; This setup is moreefficient because deps-with-employees reaction will always be computed whenever app-db changes.
+    ;; However, the sort-by function will only ever be executed if deps-with-employees has changed IN VALUE
+    (let [deps-with-employees (reagent.ratom/reaction (get-in @db [:departments-with-employees]))]
+      (make-reaction (fn sub-sorted-employees [] (sort-by (juxt :department :lastname) @deps-with-employees))))))
 
 (register-sub
   :department-id
