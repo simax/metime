@@ -1,6 +1,7 @@
 (ns metime.employees.views
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [metime.formatting :as fmt]
+            [metime.common.views :as common-components]
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [metime.navigation.subs]
             [metime.employees.subs]
@@ -110,62 +111,66 @@
      ]]])
 
 
-(defn department-list-item [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email ]}]
+(defn employees-list [rows-of-employees]
+  [box :child
+   [:ul {:style {:margin-top "20px"}}
+    (for [employee-row rows-of-employees]
+      (for [employee-item employee-row]
+        ^{:key (:id employee-item)} [employee-list-item employee-item])
+      )]])
+
+(defn department-list-item [{:keys [department-id ]}]
   (let [employees (subscribe [:department-employees])
-        department-list-item (filter #(not= (:id %) manager-id) @employees)
-        rows-of-employees (partition 4 4 nil department-list-item)
-        department-name (clojure.string/replace department #"[\s]" "-")
         draw-open-class (subscribe [:department-draw-open-class department-id])]
-    [:div#accordian.panel.panel-default.row {:style {:width "1100px"}}
-     [:div.panel-heading.clearfix.panel-heading
-      [:div.col-md-2.col-xs-2
-       [:div.col-md-4.col-xs-4 [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]]
-       [:div.col-md-8.col-xs-8
-        [:h5 (str manager-firstname " " manager-lastname)]
-        ]
-       ]
-      [:div.col-md-10.col-xs-10
-       [:div.col-md-11.col-xs-11
-        [:h2 department]
-        ]
-       [:div.col-md-1.col-xs-1
-        [v-box
-         :align :center
-         :height "50px"
-         :children
-         [
-          [box :child
-           [md-icon-button
-            :md-icon-name "zmdi-swap-vertical"              ;
-            :size :larger
-            :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])
-            ]]]]
-        ]]]
-     [:div {:class @draw-open-class :id department-name :style {:height "auto"}}
-      (let [add-employee-label "Add a new employee to the department"]
-        [v-box
-         :gap "20px"
-         :children
-         [
-          [h-box
-           :gap "10px"
-           :justify :center
-           :align :center
-           :children [
-                      [md-circle-icon-button
-                       :md-icon-name "zmdi-plus"
-                       :emphasise? true
-                       :on-click #(dispatch [:employee-add-new department-id])
-                       :tooltip add-employee-label]
-                      [label :label add-employee-label]
-                      ]]
-          [box :child
-           [:ul {:style {:margin-top "20px"}}
-            (for [employee-row rows-of-employees]
-              (for [employee-item employee-row]
-                ^{:key (:id employee-item)} [employee-list-item employee-item])
-              )]]
-          ]])]]))
+    (fn [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email]}]
+      (let [department-list-item (filter #(not= (:id %) manager-id) @employees)
+            rows-of-employees (partition 4 4 nil department-list-item)
+            department-name (clojure.string/replace department #"[\s]" "-")]
+        [:div#accordian.panel.panel-default.row {:style {:width "1100px"}}
+         [:div.panel-heading.clearfix.panel-heading
+          [:div.col-md-2.col-xs-2
+           [:div.col-md-4.col-xs-4 [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]]
+           [:div.col-md-8.col-xs-8
+            [:h5 (str manager-firstname " " manager-lastname)]
+            ]
+           ]
+          [:div.col-md-10.col-xs-10
+           [:div.col-md-11.col-xs-11
+            [:h2 department]
+            ]
+           [:div.col-md-1.col-xs-1
+            [v-box
+             :align :center
+             :height "50px"
+             :children
+             [
+              [box :child
+               [md-icon-button
+                :md-icon-name "zmdi-swap-vertical"          ;
+                :size :larger
+                :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])
+                ]]]]
+            ]]]
+         [:div {:class @draw-open-class :id department-name :style {:height "auto"}}
+          (let [add-employee-label "Add a new employee to the department"]
+            [v-box
+             :gap "20px"
+             :children
+             [
+              [h-box
+               :gap "10px"
+               :justify :center
+               :align :center
+               :children [
+                          [md-circle-icon-button
+                           :md-icon-name "zmdi-plus"
+                           :emphasise? true
+                           :on-click #(dispatch [:employee-add-new department-id])
+                           :tooltip add-employee-label]
+                          [label :label add-employee-label]
+                          ]]
+              [employees-list rows-of-employees]
+              ]])]]))))
 
 (defn new-department-container []
   (let [dep (subscribe [:department])

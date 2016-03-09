@@ -291,7 +291,10 @@
       db)))
 
 (defn close-department-drawer [db]
-  (assoc db :department-employees nil :department-draw-open-id ""))
+  (assoc db
+    :department {:id 0 :department "" :manager-id 0 :validation-errors nil}
+    :department-employees ()
+    :department-draw-open-id ""))
 
 (defn open-department-drawer [db department-id]
   (dispatch [:fetch-department department-id])

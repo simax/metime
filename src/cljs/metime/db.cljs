@@ -4,7 +4,7 @@
          {:authentication-failed-msg  ""
           :employee                   {:is-ready? false :validation-errors nil}
           :department                 {:id 0 :department "" :manager-id 0 :validation-errors nil}
-          :department-employees       nil
+          :department-employees       ()
           :departments                nil
           :view                       :home
           :route-params               [:home]

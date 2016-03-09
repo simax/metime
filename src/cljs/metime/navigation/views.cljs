@@ -4,6 +4,7 @@
             [metime.navigation.subs]
             [metime.employees.views :as ev]
             [metime.routes :as routes]
+            [metime.common.views :as common-components]
             [re-com.core :refer [box throbber]]
             [re-frame.core :refer [register-handler
                                    path
@@ -24,15 +25,6 @@
                {:id :logout :text "Log out" :path (routes/site-url-for :login)}
                {:id :test :text "Test" :path (routes/site-url-for :test)}
                ])
-
-
-(defn loader-component []
-  [box
-   :height "650px"
-   :size "auto"
-   :align :center
-   :justify :center
-   :child [:div (throbber :size :large :color "lime")]])
 
 (defn view-login []
   (let [msg (subscribe [:authentication-failed])]
@@ -79,7 +71,7 @@
   (let [departments (subscribe [:departments])]
     (fn []
       (if-not (seq @departments)
-        [loader-component]
+        [common-components/loader-component]
         [ev/departments-container @departments]))))
 
 
@@ -91,8 +83,8 @@
       (if (not (or (:is-ready? @emp) (some? @departments)))
         (do
           (dispatch [:employee-add])
-          [loader-component])
-        [ev/employee-maintenance-form @emp]))))
+          [common-components/loader-component]
+        [ev/employee-maintenance-form @emp])))))
 
 (defn view-employee []
   (dispatch [:fetch-departments])
@@ -100,7 +92,7 @@
         departments (subscribe [:departments])]
     (fn []
       (if (not (and (:is-ready? @emp) (some? @departments)))
-        [loader-component]
+        [common-components/loader-component]
         (if (:not-found @emp)
           [ev/employee-not-found]
           [ev/employee-maintenance-form @emp])))))
@@ -163,6 +155,6 @@
   (let [ready? (subscribe [:initialised?])]
     (fn []
       (if-not @ready?
-        [loader-component]
+        [common-components/loader-component]
         [main-panel]))))
 ;)
