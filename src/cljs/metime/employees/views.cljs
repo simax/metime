@@ -100,10 +100,14 @@
       [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
       ]
      [:div {:class "info-user"}
-      [:span {:aria-hidden "true" :class "li_user fs1"}]
+      ;[:span {:aria-hidden "true" :class "li_user fs1"}]
       [:span {:aria-hidden "true" :class "li_calendar fs1"}]
-      [:span {:aria-hidden "true" :class "li_mail fs1"}]
-      [:span {:aria-hidden "true" :class "glyphicon glyphicon-trash fs1"}]
+      ;[:span {:aria-hidden "true" :class "li_mail fs1"}]
+      [:span {:aria-hidden "true"
+              :class "glyphicon glyphicon-trash fs1"
+              :on-click    (fn [e]
+                             (dispatch [:employee-delete id])
+                             (.preventDefault e))}]
       ]
 
      ;; For now, just simulate the number of days remaining
@@ -119,7 +123,7 @@
         ^{:key (:id employee-item)} [employee-list-item employee-item])
       )]])
 
-(defn department-list-item [{:keys [department-id ]}]
+(defn department-list-item [{:keys [department-id]}]
   (let [employees (subscribe [:department-employees])
         draw-open-class (subscribe [:department-draw-open-class department-id])]
     (fn [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email]}]

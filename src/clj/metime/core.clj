@@ -47,11 +47,11 @@
              (ANY "/employees" [] (res/employees))
              (ANY "/employee" [id email] (employee-by-id-or-email-handler id email))
              (ANY "/holidays" [] (res/holidays))
-             (GET "/authtoken" [] (res/build-auth-token))   ; (fn [_] {:status 200 :body "Some text from Simon"})
+             (GET "/authtoken" [] (res/build-auth-token))
              (context "/departments" []
-               (GET "/" [] (res/departments)) ; fn [_] {:status 200 :body "This is the /departments route"}
-               (GET "/:id" [id] (res/department id)) ; (fn [id] {:status 200 :body "/departments with :id"})
-               (GET "/:id/employees" [id] (res/department-employees id))) ;fn [_] {:status 200 :body "/departments with :id"}
+               (ANY "/" [] (res/departments)) ; fn [_] {:status 200 :body "This is the /departments route"}
+               (GET "/:id" [id] (res/department id))
+               (GET "/:id/employees" [id] (res/department-employees id)))
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))
 

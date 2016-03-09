@@ -100,50 +100,62 @@
   :process-employee-response
   (fn hdlr-process-employee-response [db [_ employee]]
     (let [emp (js->clj employee)]
-      (if (nil? (:id emp))
-        (assoc db :employee (assoc {} :is-ready? true :not-found true))
-        (assoc db :employee (assoc emp :is-ready? true :not-found false)))
-      )))
+      (assoc db :employee (assoc emp :is-ready? true :not-found false)))))
+
+(register-handler
+  :employee-not-found
+  (fn hndle-employee-not-found [db [_]]
+    (assoc db :employee (assoc {} :is-ready? true :not-found true))))
 
 
 (register-handler
   :fetch-department
   (fn hdlr-fetch-department [db [_ id]]
-3    (utils/call-api :GET (routes/api-endpoint-for :department-by-id :id id) db
-                    {:valid-token-handler   :process-department-response
-                     :response-keys         [:body]})
+    (utils/call-api :GET (routes/api-endpoint-for :department-by-id :id id) db
+                    {:success-handler-key :process-department-response
+                     :response-keys       [:body]})
     db))
 
 (register-handler
   :fetch-departments
   (fn hdlr-fetch-departments [db [_]]
     (utils/call-api :GET (routes/api-endpoint-for :departments) db
-                    {:valid-token-handler   :process-departments-response
-                     :response-keys         [:body :departments]})
+                    {:success-handler-key :process-departments-response
+                     :response-keys       [:body :departments]})
     db))
 
 (register-handler
   :fetch-department-employees
   (fn hdlr-fetch-department-employees [db [_ department-id]]
     (utils/call-api :GET (routes/api-endpoint-for :department-employees :id department-id) db
-                    {:valid-token-handler   :process-department-employees-response
-                     :response-keys         [:body :department-employees]})
+                    {:success-handler-key :process-department-employees-response
+                     :response-keys       [:body :department-employees]})
     db))
 
 (register-handler
   :fetch-departments-with-employees
   (fn hdlr-fetch-employees [db [_]]
     (utils/call-api :GET (routes/api-endpoint-for :employees) db
-                    {:valid-token-handler   :process-employees-response
-                     :response-keys         [:body]})
+                    {:success-handler-key :process-employees-response
+                     :response-keys       [:body]})
     db))
 
 (register-handler
   :fetch-employee
   (fn hdlr-fetch-employee [db [_ id]]
     (utils/call-api :GET (routes/api-endpoint-for :employee-by-id :id id) db
-                    {:valid-token-handler   :process-employee-response
-                     :response-keys         [:body]})
+                    {:success-handler-key :process-employee-response
+                     :failure-handler-key :employee-not-found
+                     :response-keys       [:body]})
+    db))
+
+
+(register-handler
+  :employee-delete
+  (fn hdlr-employee-delete [db [_ id]]
+    (utils/call-api :DELETE (routes/api-endpoint-for :employee-by-id :id id) db
+                    {:success-handler-key [:fetch-department-employees id]
+                     :response-keys       [:body]})
     db))
 
 ;)

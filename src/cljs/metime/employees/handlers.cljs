@@ -227,7 +227,6 @@
 (defn build-employee-update-endpoint [employee]
   (routes/api-endpoint-for :employee-by-id :id (:id employee)))
 
-
 (defn add-new-department [db department]
   "Add a new department via the API"
   (utils/send-data-to-api :POST
@@ -259,8 +258,6 @@
                           {:valid-fn      #(dispatch [:switch-view-to-employees])
                            :invalid-fn    #(dispatch [:employee-save-failure])
                            :response-keys [:body :departments]}))
-
-
 
 
 (register-handler

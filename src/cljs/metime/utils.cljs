@@ -65,20 +65,28 @@
     :GET (http/get url (build-authorization-header token))
     :DELETE (http/delete url (build-authorization-header token))))
 
-(defn call-secure-api [verb url db {:keys [valid-token-handler invalid-token-handler response-keys]}]
+(defn success-handler [handler response response-keys]
+  "If the handler is a dispatch vector, simply dispatch it.
+  Otherwise dispatch passing the results of the api-call."
+  (if (vector? handler)
+    (dispatch handler)
+    (dispatch [handler (get-in response response-keys)])))
+
+(defn call-secure-api [verb url db {:keys [success-handler-key failure-handler-key response-keys]} & invalid-token-handler]
   "Make a secure url call (GET or DELETE) with authorization header.
   Dispatch redirect to login if unauthorized."
   (go
     (let [token (:authentication-token db)
-          unauthenticated-handler (or invalid-token-handler :log-out)
+          unauthenticated-handler (or (first invalid-token-handler) :log-out)
           response (<! (call-secure-url verb token url))
           status (:status response)]
       (println (str "Completed fetching from ...") url)
-      (cond
-        (= status 200) (dispatch [valid-token-handler (get-in response response-keys)])
-        (= status 404) (dispatch [valid-token-handler {:not-found true}])
-        :else (dispatch [unauthenticated-handler] {})
-        ))))
+      (if (= status 401)
+        (dispatch [unauthenticated-handler])
+        (cond
+          (= status 200) (success-handler success-handler-key response response-keys)
+          (= status 404) (dispatch [failure-handler-key])
+          )))))
 
 (defn send-data-to-secure-url [verb url token data]
   (case verb
@@ -92,6 +100,7 @@
   (go
     (let [response (<! (send-data-to-secure-url verb url token data))
           status (:status response)]
+      (println (str "status: " status))
       (if (= status 201)
         (valid-fn)
         (invalid-fn)))))
