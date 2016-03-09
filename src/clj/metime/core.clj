@@ -39,21 +39,22 @@
 (defn employee-by-id-or-email-handler [id email]
   (if (some? id) (res/employee-by-id id) (res/employee-by-email email)))
 
+
 (defroutes app-routes
+
            (GET "/" [] root-handler)
            (context "/api" []
              (ANY "/employees" [] (res/employees))
              (ANY "/employee" [id email] (employee-by-id-or-email-handler id email))
              (ANY "/holidays" [] (res/holidays))
-             (GET "/authtoken" [] (res/build-auth-token))       ; (fn [_] {:status 200 :body "Some text from Simon"})
-             (context "/departments"
-                (GET "/:id" [id] (fn [_] {:status 200 :body "Some text from Simon"}))
-                ;(context "/:id" [id]
-                ;  (ANY "" (fn [_] {:status 200 :body "Some text from Simon"}))
-                ;  (ANY "/employees" (res/department-employees id)))
-                )
+             (GET "/authtoken" [] (res/build-auth-token))   ; (fn [_] {:status 200 :body "Some text from Simon"})
+             (context "/departments" []
+               (GET "/" [] (res/departments)) ; fn [_] {:status 200 :body "This is the /departments route"}
+               (GET "/:id" [id] (res/department id)) ; (fn [id] {:status 200 :body "/departments with :id"})
+               (GET "/:id/employees" [id] (res/department-employees id))) ;fn [_] {:status 200 :body "/departments with :id"}
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))
+
            ;; All other routes failed. Just serve the app again
            ;; and let the client take over.
            (ANY "*" [] root-handler))

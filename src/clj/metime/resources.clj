@@ -352,7 +352,7 @@
              :can-put-to-missing? false
              :exists? (fn [ctx]
                         (if (or (requested-method ctx :get) (requested-method ctx :put))
-                          (let [department (deps/get-department-by-id id)]
+                          (let [department (deps/get-department-by-id db/db-spec {:id id})]
                             (if (empty? department)
                               false
                               [true {::department department}]))
@@ -360,7 +360,7 @@
 
              :processable? (fn [ctx]
                              (if (requested-method ctx :delete)
-                               (let [department (deps/get-department-by-id id)]
+                               (let [department (deps/get-department-by-id db/db-spec {:id id})]
                                  (if (empty? (:employees department))
                                    true
                                    [false {::failure-message "Unable to delete, the department contains employees"}]))
