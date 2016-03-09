@@ -171,8 +171,8 @@
 
 (register-handler
   :employee-add
-  (fn hdlr-employee-add [db [_ departmentid]]
-    (let [dep (first (filter #(= (:department-id %) departmentid) (:department-employees db)))]
+  (fn hdlr-employee-add [db [_ department-id]]
+    (let [dep (:department db)]
       (-> db
           (merge
             {:nav-bar :employees
@@ -189,7 +189,7 @@
                        :dob                    nil
                        :startdate              nil
                        :enddate                nil
-                       :department-id          departmentid
+                       :department-id          department-id
                        :manager-id             (:manager-id dep)
                        :manager-firstname      (:manager-firstname dep)
                        :manager-lastname       (:manager-lastname dep)

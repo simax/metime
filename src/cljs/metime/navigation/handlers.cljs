@@ -41,11 +41,12 @@
 
 (register-handler
   :employee-add-new
-  (fn hdlr-employee-add-new [db [_ departmentid]]
+  (fn hdlr-employee-add-new [db [_ department-id]]
     (dispatch [:clear-employee])
-    (dispatch [:employee-add departmentid])
+    (dispatch [:employee-add department-id])
     (routes/set-route-token! [:employee-add])
-    (assoc db :nav-bar :employees :view :employee-editor)))
+    (assoc db :nav-bar :employees
+              :view :employee-editor)))
 
 (register-handler
   :clear-employee
@@ -108,45 +109,40 @@
 (register-handler
   :fetch-department
   (fn hdlr-fetch-department [db [_ id]]
-    (utils/call-api :GET (routes/api-endpoint-for :department-by-id :id id) (:authentication-token db)
+3    (utils/call-api :GET (routes/api-endpoint-for :department-by-id :id id) db
                     {:valid-token-handler   :process-department-response
-                     :invalid-token-handler :log-out
                      :response-keys         [:body]})
     db))
 
 (register-handler
   :fetch-departments
   (fn hdlr-fetch-departments [db [_]]
-    (utils/call-api :GET (routes/api-endpoint-for :departments) (:authentication-token db)
+    (utils/call-api :GET (routes/api-endpoint-for :departments) db
                     {:valid-token-handler   :process-departments-response
-                     :invalid-token-handler :log-out
                      :response-keys         [:body :departments]})
     db))
 
 (register-handler
   :fetch-department-employees
   (fn hdlr-fetch-department-employees [db [_ department-id]]
-    (utils/call-api :GET (routes/api-endpoint-for :department-employees :id department-id) (:authentication-token db)
+    (utils/call-api :GET (routes/api-endpoint-for :department-employees :id department-id) db
                     {:valid-token-handler   :process-department-employees-response
-                     :invalid-token-handler :log-out
                      :response-keys         [:body :department-employees]})
     db))
 
 (register-handler
   :fetch-departments-with-employees
   (fn hdlr-fetch-employees [db [_]]
-    (utils/call-api :GET (routes/api-endpoint-for :employees) (:authentication-token db)
+    (utils/call-api :GET (routes/api-endpoint-for :employees) db
                     {:valid-token-handler   :process-employees-response
-                     :invalid-token-handler :log-out
                      :response-keys         [:body]})
     db))
 
 (register-handler
   :fetch-employee
   (fn hdlr-fetch-employee [db [_ id]]
-    (utils/call-api :GET (routes/api-endpoint-for :employee-by-id :id id) (:authentication-token db)
+    (utils/call-api :GET (routes/api-endpoint-for :employee-by-id :id id) db
                     {:valid-token-handler   :process-employee-response
-                     :invalid-token-handler :log-out
                      :response-keys         [:body]})
     db))
 

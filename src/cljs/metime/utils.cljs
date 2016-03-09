@@ -60,20 +60,24 @@
   {:headers {"authorization" (str "Token " token)}})
 
 (defn call-secure-url [verb token url]
+  (println (str "Fetching from ... " url))
   (case verb
     :GET (http/get url (build-authorization-header token))
     :DELETE (http/delete url (build-authorization-header token))))
 
-(defn call-secure-api [verb url token {:keys [valid-token-handler invalid-token-handler response-keys]}]
+(defn call-secure-api [verb url db {:keys [valid-token-handler invalid-token-handler response-keys]}]
   "Make a secure url call (GET or DELETE) with authorization header.
   Dispatch redirect to login if unauthorized."
   (go
-    (let [response (<! (call-secure-url verb token url))
+    (let [token (:authentication-token db)
+          unauthenticated-handler (or invalid-token-handler :log-out)
+          response (<! (call-secure-url verb token url))
           status (:status response)]
+      (println (str "Completed fetching from ...") url)
       (cond
         (= status 200) (dispatch [valid-token-handler (get-in response response-keys)])
         (= status 404) (dispatch [valid-token-handler {:not-found true}])
-        :else (dispatch [invalid-token-handler] {})
+        :else (dispatch [unauthenticated-handler] {})
         ))))
 
 (defn send-data-to-secure-url [verb url token data]
@@ -111,8 +115,8 @@
            response map {:valid-dispatch and :invalid-dispatch handlers
            and :response keys of fetched data to display}"
           identity)
-(defmethod call-api :GET [verb url token response-map] (call-secure-api verb url token response-map))
-(defmethod call-api :DELETE [verb url token response-map] (call-secure-api verb url token response-map))
+(defmethod call-api :GET [verb url db response-map] (call-secure-api verb url db response-map))
+(defmethod call-api :DELETE [verb url db response-map] (call-secure-api verb url db response-map))
 
 ; Dispatch on the 1st parameter, namely, verb
 (defmulti send-data-to-api

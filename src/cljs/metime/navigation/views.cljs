@@ -83,8 +83,8 @@
       (if (not (or (:is-ready? @emp) (some? @departments)))
         (do
           (dispatch [:employee-add])
-          [common-components/loader-component]
-        [ev/employee-maintenance-form @emp])))))
+          [common-components/loader-component])
+        [ev/employee-maintenance-form @emp]))))
 
 (defn view-employee []
   (dispatch [:fetch-departments])
