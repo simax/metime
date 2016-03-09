@@ -165,7 +165,7 @@
                           [md-circle-icon-button
                            :md-icon-name "zmdi-plus"
                            :emphasise? true
-                           :on-click #(dispatch [:employee-add-new department-id])
+                           :on-click #(dispatch [:employee-add-new])
                            :tooltip add-employee-label]
                           [label :label add-employee-label]
                           ]]

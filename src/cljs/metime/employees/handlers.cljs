@@ -171,7 +171,7 @@
 
 (register-handler
   :employee-add
-  (fn hdlr-employee-add [db [_ department-id]]
+  (fn hdlr-employee-add [db [_]]
     (let [dep (:department db)]
       (-> db
           (merge
@@ -189,7 +189,7 @@
                        :dob                    nil
                        :startdate              nil
                        :enddate                nil
-                       :department-id          department-id
+                       :department-id          (:id dep)
                        :manager-id             (:manager-id dep)
                        :manager-firstname      (:manager-firstname dep)
                        :manager-lastname       (:manager-lastname dep)

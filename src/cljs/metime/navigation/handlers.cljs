@@ -41,9 +41,9 @@
 
 (register-handler
   :employee-add-new
-  (fn hdlr-employee-add-new [db [_ department-id]]
+  (fn hdlr-employee-add-new [db [_]]
     (dispatch [:clear-employee])
-    (dispatch [:employee-add department-id])
+    (dispatch [:employee-add])
     (routes/set-route-token! [:employee-add])
     (assoc db :nav-bar :employees
               :view :employee-editor)))
