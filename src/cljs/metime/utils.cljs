@@ -6,6 +6,12 @@
                                    register-sub
                                    dispatch
                                    subscribe]]
+            [re-com.core :refer [h-box v-box box gap
+                                 title single-dropdown label
+                                 input-text input-textarea datepicker datepicker-dropdown button
+                                 popover-anchor-wrapper popover-content-wrapper
+                                 popover-tooltip md-icon-button md-circle-icon-button row-button]
+             :refer-macros [handler-fn]]
             [goog.net.cookies]
             [cljs.reader :as reader]
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
@@ -14,7 +20,7 @@
 (defn gravatar [data]
   (let [email-address (or (:gravatar-email data) "")
         size (or (:gravatar-size data) 100)]
-    [:img.gravatar.img-circle {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?size=" size "&r=PG&d=mm")}]))
+    [box :child [:img.gravatar.img-circle {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?size=" size "&r=PG&d=mm")}]]))
 
 ;(defn set-hash! [loc]
 ;  "Set the hash portion of the url in the address bar.

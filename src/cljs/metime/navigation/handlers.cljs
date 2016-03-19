@@ -80,7 +80,6 @@
 (register-handler
   :process-employees-response
   (fn hdlr-process-employees-response [db [_ employees]]
-    ;(println (str "departments-with-employees: " (count employees)))
     (let [value (js->clj employees)]
       (assoc db :departments-with-employees value))))
 

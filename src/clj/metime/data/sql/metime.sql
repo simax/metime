@@ -5,6 +5,7 @@ select
 d.id as 'department-id', d.department, d.manager_id,
 -- Manager info
 e.firstname as 'manager-firstname', e.lastname as 'manager-lastname', e.email as 'manager-email'
+, (select count(*) from employees where employees.department_id = d.id) as employee_count
 from departments d left join employees e on d.manager_id = e.id
 order by d.department
 

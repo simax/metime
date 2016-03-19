@@ -190,6 +190,7 @@
                        :startdate              nil
                        :enddate                nil
                        :department-id          (:id dep)
+                       :department             (:department dep)
                        :manager-id             (:manager-id dep)
                        :manager-firstname      (:manager-firstname dep)
                        :manager-lastname       (:manager-lastname dep)
