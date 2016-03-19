@@ -122,6 +122,7 @@
       (for [employee-item employee-row]
         ^{:key (:id employee-item)} [employee-list-item employee-item])
       )]])
+
 (defn new-department-container []
   (let [dep (subscribe [:department])
         sorted-employees (subscribe [:sorted-departments-with-employees])
@@ -177,131 +178,134 @@
     (fn [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email employee-count]}]
       (let [department-list-item (filter #(not= (:id %) manager-id) @employees)
             rows-of-employees (partition 4 4 nil department-list-item)
-            department-name (clojure.string/replace department #"[\s]" "-")]
-        [box
-         :class "panel panel-default"
-         :style {:border-width "1" :border-style "solid" :border-color "white"}
-         :child
-         [h-box
-          :class "panel-body row"
-          :height "65px"
-          :justify :between
-          :children
-          [
+            department-name (clojure.string/replace department #"[\s]" "-")
+            add-employee-label "Add a new employee to the department"]
+        [v-box
+         :children
+         [
+          [box
+           :class "panel panel-default"
+           ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+           :child
            [h-box
-            :gap "20px"
-            :align :center
+            :class "panel-body row"
+            :height "65px"
+            :justify :between
             :children
             [
-             [box
-              :style {:border-width "1" :border-style "solid" :border-color "white"}
-              :child
-              [h-box
-               :gap "10px"
-               :width "350px"
-               :align :center
-               :children
-               [
-                [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]
-                [box :child [:h5 (str manager-firstname " " manager-lastname)]]]]]
-             [box
-              :style {:border-width "1" :border-style "solid" :border-color "white"}
-              :width "500px"
-              :child [:h2 department-name]]
-             ]]
-           [h-box
-            :align :center
-            :gap "10px"
-            :width "100px"
-            :justify :end
-            :children
-            [
-             (when (zero? employee-count)
+             [h-box
+              :gap "20px"
+              :align :center
+              :children
+              [
                [box
-                :style {:border-width "1" :border-style "solid" :border-color "white"}
+                ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+                :child
+                [h-box
+                 :gap "10px"
+                 :width "350px"
+                 :align :center
+                 :children
+                 [
+                  [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]
+                  [box :child [:h5 (str manager-firstname " " manager-lastname)]]]]]
+               [box
+                ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+                :width "500px"
+                :child [:h2 department-name]]
+               ]]
+             [h-box
+              :align :center
+              :gap "10px"
+              :width "100px"
+              :justify :end
+              :children
+              [
+               (when (zero? employee-count)
+                 [box
+                  ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+                  :child
+                  [md-icon-button
+                   :md-icon-name "zmdi-delete"              ;
+                   :size :regular
+                   :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])
+                   ]])
+               [box
+                ;:style {:border-width "1" :border-style "solid" :border-color "white"}
                 :child
                 [md-icon-button
-                 :md-icon-name "zmdi-delete"                ;
-                 :size :regular
+                 :md-icon-name "zmdi-swap-vertical"         ;
+                 :size :larger
                  :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])
-                 ]])
-             [box
-              :style {:border-width "1" :border-style "solid" :border-color "white"}
-              :child
-              [md-icon-button
-               :md-icon-name "zmdi-swap-vertical"           ;
-               :size :larger
-               :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])
-               ]]]]]
-          ]]
+                 ]]]]]
+            ]]
 
-        ;[:div {:class @draw-open-class :id department-name :style {:height "auto"}}
-        ; (let [add-employee-label "Add a new employee to the department"]
-        ;   [v-box
-        ;    :gap "20px"
-        ;    :children
-        ;    [
-        ;     [h-box
-        ;      :gap "10px"
-        ;      :justify :center
-        ;      :align :center
-        ;      :children [
-        ;                 [md-circle-icon-button
-        ;                  :md-icon-name "zmdi-plus"
-        ;                  :emphasise? true
-        ;                  :on-click #(dispatch [:employee-add-new])
-        ;                  :tooltip add-employee-label]
-        ;                 [label :label add-employee-label]
-        ;                 ]]
-        ;     [employees-list rows-of-employees]
-        ;     ]])]
-        ))))
+          [box
+           :class @draw-open-class
+           :style {:height "auto"}
+           :child
+           [v-box
+            :gap "20px"
+            :children
+            [
+             [h-box
+              :gap "10px"
+              :justify :center
+              :align :center
+              :children [
+                         [md-circle-icon-button
+                          :md-icon-name "zmdi-plus"
+                          :emphasise? true
+                          :on-click #(dispatch [:employee-add-new])
+                          :tooltip add-employee-label]
+                         [label :label add-employee-label]
+                         ]]
+             [employees-list rows-of-employees]
+             ]]]
+
+          ]]))))
 
 (defn department-list [departments]
-  (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])
-        x (first departments)]
+  (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])]
     [v-box
-     ;:gap "20px"
+     :class "panel-body row"
+     :height "65px"
      :justify :start
      :children
      [
-      ;[h-box
-      ; :align :center
-      ; :justify :center
-      ; :children
-      ; [
-      ;  [box
-      ;   :child
-      ;   [:div.panel.panel-default.row {:style {:width "1100px"}}
-      ;    [:div.panel-heading.clearfix.panel-heading
-      ;     [h-box
-      ;      :style {:padding-left "30px"}
-      ;      :align :center
-      ;      :gap "140px"
-      ;      :children
-      ;      [
-      ;       [md-circle-icon-button
-      ;        :md-icon-name "zmdi-plus"
-      ;        :emphasise? true
-      ;        :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
-      ;        :tooltip "Add a new department"]
-      ;       [box :child [:h2 "Add a new department"]]
-      ;       ]]]]]
-      ;  [box
-      ;   :child
-      ;   [:div {:class @new-department-draw-open-class :id "new-department" :style {:height "auto"}}
-      ;    [new-department-container]
-      ;    ]]
-      ;  ]
-      ; ]
+      [h-box
+       :align :center
+       :justify :center
+       :children
+       [
+        [box
+         :class "panel panel-default"
+         :child
+         [h-box
+          :style {:padding-left "30px"}
+          :align :center
+          :gap "140px"
+          :children
+          [
+           [md-circle-icon-button
+            :md-icon-name "zmdi-plus"
+            :emphasise? true
+            :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
+            :tooltip "Add a new department"]
+           [box :child [:h2 "Add a new department"]]
+           ]]]
+        [box
+         :child
+         [:div {:class @new-department-draw-open-class :id "new-department" :style {:height "auto"}}
+          [new-department-container]
+          ]]
+        ]]
       [v-box
        :gap "20px"
        :class "panel-default"
        :width "1100px"
        :children
        [
-        ;[box :class "panel panel-body row" :style {:border-width "1" :border-style "solid" :border-color "white"} :child [:label "aaaaa"]]
-        ;[box :class "panel panel-body row" :style {:border-width "1" :border-style "solid" :border-color "white"} :child [:label "bbbbb"]]
         (for [department departments]
           ^{:key (:department department)}
           [department-list-item department])
