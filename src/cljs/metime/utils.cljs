@@ -66,7 +66,8 @@
   {:headers {"authorization" (str "Token " token)}})
 
 (defn call-secure-url [verb token url]
-  (println (str "Fetching from ... " url))
+  (println (str "Started fetching from ... " url))
+  (dispatch [:fetching])
   (case verb
     :GET (http/get url (build-authorization-header token))
     :DELETE (http/delete url (build-authorization-header token))))
@@ -79,7 +80,7 @@
     (dispatch [handler (get-in response response-keys)])))
 
 (defn call-secure-api [verb url db {:keys [success-handler-key failure-handler-key response-keys]} & invalid-token-handler]
-  "Make a secure url call (GET or DELETE) with authorization header.
+  "Make a secure API call (GET or DELETE) with authorization header.
   Dispatch redirect to login if unauthorized."
   (go
     (let [token (:authentication-token db)

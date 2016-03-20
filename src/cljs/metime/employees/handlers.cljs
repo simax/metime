@@ -288,6 +288,8 @@
           (update-employee db employee)))
       db)))
 
+
+
 (register-handler
   :close-department-drawer
   (fn hdlr-close-department-drawer [db [_]]
@@ -311,6 +313,8 @@
       (dispatch [:close-department-drawer])
       (dispatch [:open-department-drawer department-id]))
     db))
+
+
 
 (register-handler
   :close-new-department-drawer
@@ -340,7 +344,7 @@
     (assoc-in db [:employee :validation-errors] errors)))
 
 (defn set-auth-cookie! [token]
-  (let [expiry (* 60 60 24 30)]                             ; 30 days (secs mins hours days)
+  (let [expiry (* 60 60 24 30)] ; 30 days (secs mins hours days)
     (utils/set-cookie! "auth" token {:max-age expiry :path "/"})))
 
 (register-handler

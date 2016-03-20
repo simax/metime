@@ -9,6 +9,11 @@
 ; {:tracer (tracer :color "brown")}
 
 (register-sub
+  :fetching-dep-employees-status
+  (fn [db _]
+    (make-reaction (fn sub-fetching-status [] (:fetching-dep-employees? @db)))))
+
+(register-sub
   :current-employee
   (fn [db _]
     (make-reaction (fn sub-current-employee [] (:employee @db)))))

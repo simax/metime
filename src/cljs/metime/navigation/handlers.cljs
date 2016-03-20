@@ -40,6 +40,16 @@
                  :view :home)))))
 
 (register-handler
+  :fetching
+  (fn hdlr-fetching [db [_]]
+    (assoc db :fetching-dep-employees? true)))
+
+(register-handler
+  :fetching-complete
+  (fn hdlr-fetching [db [_]]
+    (assoc db :fetching-dep-employees? false)))
+
+(register-handler
   :employee-add-new
   (fn hdlr-employee-add-new [db [_]]
     (dispatch [:clear-employee])
@@ -75,6 +85,7 @@
   :process-department-employees-response
   (fn hdlr-process-department-employees-response [db [_ department-employees]]
     (let [value (js->clj department-employees)]
+      (dispatch [:fetching-complete])
       (assoc db :department-employees value))))
 
 (register-handler

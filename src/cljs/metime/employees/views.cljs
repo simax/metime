@@ -81,21 +81,19 @@
              :on-click #(dispatch [:log-in])
              :label "Login"]]]])
 
-
-
-
 (defn employee-name [firstname lastname]
   (let [disp-name (str firstname " " lastname)
         name-length (count disp-name)]
     (if (> name-length 20) (str (subs disp-name 0 17) "...") disp-name)))
 
+; TODO: Refactor to re-com components
 (defn employee-list-item [{:keys [lastname firstname email id]}]
   [:div {:class "col-md-3 col-lg-3"}
    [:div {:class "dash-unit"}
     [:div {:class "thumbnail" :style {:margin-top "20px"}}
-     [:a {:href (routes/site-url-for :employee-editor :id id) :on-click (fn [e]
-                                                                          (dispatch [:employee-to-edit id])
-                                                                          (.preventDefault e))}
+     [:a {:href     (routes/site-url-for :employee-editor :id id)
+          :on-click (fn [e] (.preventDefault e) (dispatch [:employee-to-edit id]))}
+
       [:h1 (employee-name firstname lastname)]
       [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]]
 
@@ -114,14 +112,21 @@
      [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]]]])
 
 
+(defn list-employees [rows-of-employees]
+  (for [employee-row rows-of-employees]
+    (for [employee-item employee-row]
+      ^{:key (:id employee-item)} [employee-list-item employee-item])))
 
 (defn employees-list [rows-of-employees]
-  [box :child
-   [:ul {:style {:margin-top "20px"}}
-    (for [employee-row rows-of-employees]
-      (for [employee-item employee-row]
-        ^{:key (:id employee-item)} [employee-list-item employee-item]))]])
-
+  (let [fetching? (subscribe [:fetching-dep-employees-status])]
+    (println (str "@fetching?: " @fetching?))
+    (if (= @fetching? true)
+      [common-components/loader-component]
+      ; TODO: Refactor to re-com v-box
+      [box
+       :child
+       [:ul {:style {:margin-top "20px"}}
+        (list-employees rows-of-employees)]])))
 
 (defn new-department-container []
   (let [dep (subscribe [:department])
