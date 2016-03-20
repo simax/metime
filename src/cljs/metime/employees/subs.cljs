@@ -71,13 +71,10 @@
     (make-reaction (fn sub-manager-id [] (:manager-id @db)))))
 
 (register-sub
-  :department-draw-open-class
-  (fn [db [_ department-id]]
-    (make-reaction
-      (fn sub-department-draw-open-class []
-        (if (= (:department-draw-open-id @db) department-id)
-          "panel-body panel-collapse collapse in"
-          "panel-body panel-collapse collapse")))))
+  :department-draw-open-id
+  (fn [db [_]]
+    (make-reaction (fn sub-department-draw-open-class [] (:department-draw-open-id @db)))))
+
 (register-sub
   :new-department-draw-open-class
   (fn [db [_]]

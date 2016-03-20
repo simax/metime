@@ -23,8 +23,8 @@
                {:id :tables :text "Tables" :path (routes/site-url-for :tables)}
                {:id :user :text "User" :path (routes/site-url-for :user)}
                {:id :logout :text "Log out" :path (routes/site-url-for :login)}
-               {:id :test :text "Test" :path (routes/site-url-for :test)}
-               ])
+               {:id :test :text "Test" :path (routes/site-url-for :test)}])
+
 
 (defn view-login []
   (let [msg (subscribe [:authentication-failed])]
@@ -109,14 +109,14 @@
      [:button.navbar-toggle {:data-toggle "collapse" :data-target ".navbar-collapse"}
       [:span.icon-bar]
       [:span.icon-bar]
-      [:span.icon-bar]
-      ]
+      [:span.icon-bar]]
+
      [:a.navbar-brand {:href (routes/site-url-for :home)} [:img {:src "/assets/img/logo30.png" :alt "MeTime Dashboard"}]]]
     [:div#nav-bar.navbar-collapse.collapse
      [:ul.nav.navbar-nav
       (for [nav-bar-item nav-bars]
-        ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item current-nav-bar-id])]
-     ]]])
+        ^{:key (:id nav-bar-item)} [nav-menu-item nav-bar-item current-nav-bar-id])]]]])
+
 
 
 (defmulti set-active-view identity)
@@ -148,8 +148,8 @@
                ;; Display active navbar
                (set-active-navbar @current-nav-bar @current-view)
                ;; Display active view
-               [(set-active-view @current-view)]
-               ]])))
+               [(set-active-view @current-view)]]])))
+
 
 (defn initial-panel []
   (let [ready? (subscribe [:initialised?])]

@@ -42,8 +42,8 @@
     (try
       (if (isNaN (js/parseInt s)) 0 (js/parseInt s))
       (catch js/Error _ 0)
-      (catch js/Object _ 0)
-      )))
+      (catch js/Object _ 0))))
+
 
 (defn input-value [component] (-> component .-target .-value))
 
@@ -91,8 +91,8 @@
         (dispatch [unauthenticated-handler])
         (cond
           (= status 200) (success-handler success-handler-key response response-keys)
-          (= status 404) (dispatch [failure-handler-key])
-          )))))
+          (= status 404) (dispatch [failure-handler-key]))))))
+
 
 (defn send-data-to-secure-url [verb url token data]
   (case verb

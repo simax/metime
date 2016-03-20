@@ -10,4 +10,4 @@
           :route-params               [:home]
           :authentication-token       ""
           :nav-bar                    nil
-          :department-draw-open-id    0})
+          :department-draw-open-id    nil})

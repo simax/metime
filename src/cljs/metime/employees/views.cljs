@@ -45,8 +45,8 @@
                               :status-tooltip (apply str (get-in credentials [:validation-errors :email]))
                               :placeholder "Email"
                               :on-change #(dispatch [:input-change-no-validate :email %])
-                              :change-on-blur? false]]
-    ]])
+                              :change-on-blur? false]]]])
+
 
 
 (defn login-password [credentials]
@@ -64,8 +64,8 @@
                               :placeholder "Password"
                               :on-change #(dispatch [:input-change-no-validate :password %])
                               :change-on-blur? false
-                              :attr {:type "password"}]]
-    ]])
+                              :attr {:type "password"}]]]])
+
 
 (defn login-button [msg]
   [h-box
@@ -79,9 +79,9 @@
      :child [button
              :class "btn btn-primary"
              :on-click #(dispatch [:log-in])
-             :label "Login"]
-     ]
-    ]])
+             :label "Login"]]]])
+
+
 
 
 (defn employee-name [firstname lastname]
@@ -97,8 +97,8 @@
                                                                           (dispatch [:employee-to-edit id])
                                                                           (.preventDefault e))}
       [:h1 (employee-name firstname lastname)]
-      [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]
-      ]
+      [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]]
+
      [:div {:class "info-user"}
       ;[:span {:aria-hidden "true" :class "li_user fs1"}]
       [:span {:aria-hidden "true" :class "li_calendar fs1"}]
@@ -107,12 +107,12 @@
               :class       "glyphicon glyphicon-trash fs1"
               :on-click    (fn [e]
                              (dispatch [:employee-delete id])
-                             (.preventDefault e))}]
-      ]
+                             (.preventDefault e))}]]
+
 
      ;; For now, just simulate the number of days remaining
-     [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]
-     ]]])
+     [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]]]])
+
 
 
 (defn employees-list [rows-of-employees]
@@ -120,8 +120,8 @@
    [:ul {:style {:margin-top "20px"}}
     (for [employee-row rows-of-employees]
       (for [employee-item employee-row]
-        ^{:key (:id employee-item)} [employee-list-item employee-item])
-      )]])
+        ^{:key (:id employee-item)} [employee-list-item employee-item]))]])
+
 
 (defn new-department-container []
   (let [dep (subscribe [:department])
@@ -157,8 +157,8 @@
          :group-fn group-fn
          :model selected-employee-id
          :filter-box? true
-         :on-change #(dispatch [:set-department-manager-id %])
-         ]]]
+         :on-change #(dispatch [:set-department-manager-id %])]]]
+
       [v-box
        :justify :end
        :children
@@ -167,103 +167,100 @@
          :emphasise? true
          :md-icon-name "zmdi-floppy"
          :tooltip "Save department"
-         :on-click #(dispatch [:department-save])
-         ]]]
-      ]]))
+         :on-click #(dispatch [:department-save])]]]]]))
 
 
-(defn department-list-item [{:keys [department-id]}]
+
+
+(defn department-list-item [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email employee-count]}]
   (let [employees (subscribe [:department-employees])
-        draw-open-class (subscribe [:department-draw-open-class department-id])]
-    (fn [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email employee-count]}]
-      (let [department-list-item (filter #(not= (:id %) manager-id) @employees)
-            rows-of-employees (partition 4 4 nil department-list-item)
-            department-name (clojure.string/replace department #"[\s]" "-")
-            add-employee-label "Add a new employee to the department"]
-        [v-box
-         :children
-         [
-          [box
-           :class "panel panel-default"
-           ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-           :child
+        department-drawer-open-id (subscribe [:department-draw-open-id])
+        department-list-item (filter #(not= (:id %) manager-id) @employees)
+        rows-of-employees (partition 4 4 nil department-list-item)
+        department-name (clojure.string/replace department #"[\s]" "-")
+        add-employee-label "Add a new employee to the department"]
+    [v-box
+     :children
+     [
+      [box
+       :class "panel panel-default"
+       ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+       :child
+       [h-box
+        :class "panel-body row"
+        :height "65px"
+        :justify :between
+        :children
+        [
+         [h-box
+          :gap "20px"
+          :align :center
+          :children
+          [
+           [box
+            ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+            :child
+            [h-box
+             :gap "10px"
+             :width "350px"
+             :align :center
+             :children
+             [
+              [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]
+              [box :child [:h5 (str manager-firstname " " manager-lastname)]]]]]
+           [box
+            ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+            :width "500px"
+            :child [:h2 department-name]]]]
+
+         [h-box
+          :align :center
+          :gap "10px"
+          :width "100px"
+          :justify :end
+          :children
+          [
+           (when (zero? employee-count)
+             [box
+              ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+              :child
+              [md-icon-button
+               :md-icon-name "zmdi-delete"                  ;
+               :size :regular
+               :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]])
+
+           [box
+            ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+            :child
+            [md-icon-button
+             :md-icon-name "zmdi-swap-vertical"             ;
+             :size :larger
+             :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]]]]]]]
+
+
+      (when (= @department-drawer-open-id department-id)
+        [box
+         :style {:height "auto"}
+         :child
+         [v-box
+          :gap "20px"
+          :children
+          [
            [h-box
-            :class "panel-body row"
-            :height "65px"
-            :justify :between
-            :children
-            [
-             [h-box
-              :gap "20px"
-              :align :center
-              :children
-              [
-               [box
-                ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-                :child
-                [h-box
-                 :gap "10px"
-                 :width "350px"
-                 :align :center
-                 :children
-                 [
-                  [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]
-                  [box :child [:h5 (str manager-firstname " " manager-lastname)]]]]]
-               [box
-                ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-                :width "500px"
-                :child [:h2 department-name]]
-               ]]
-             [h-box
-              :align :center
-              :gap "10px"
-              :width "100px"
-              :justify :end
-              :children
-              [
-               (when (zero? employee-count)
-                 [box
-                  ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-                  :child
-                  [md-icon-button
-                   :md-icon-name "zmdi-delete"              ;
-                   :size :regular
-                   :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])
-                   ]])
-               [box
-                ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-                :child
-                [md-icon-button
-                 :md-icon-name "zmdi-swap-vertical"         ;
-                 :size :larger
-                 :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])
-                 ]]]]]
-            ]]
+            :gap "10px"
+            :justify :center
+            :align :center
+            :children [
+                       [md-circle-icon-button
+                        :md-icon-name "zmdi-plus"
+                        :emphasise? true
+                        :on-click #(dispatch [:employee-add-new])
+                        :tooltip add-employee-label]
+                       [label :label add-employee-label]]]
 
-          [box
-           :class @draw-open-class
-           :style {:height "auto"}
-           :child
-           [v-box
-            :gap "20px"
-            :children
-            [
-             [h-box
-              :gap "10px"
-              :justify :center
-              :align :center
-              :children [
-                         [md-circle-icon-button
-                          :md-icon-name "zmdi-plus"
-                          :emphasise? true
-                          :on-click #(dispatch [:employee-add-new])
-                          :tooltip add-employee-label]
-                         [label :label add-employee-label]
-                         ]]
-             [employees-list rows-of-employees]
-             ]]]
+           [employees-list rows-of-employees]]]])]]))
 
-          ]]))))
+
 
 (defn department-list [departments]
   (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])]
@@ -292,14 +289,14 @@
             :emphasise? true
             :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
             :tooltip "Add a new department"]
-           [box :child [:h2 "Add a new department"]]
-           ]]]
+           [box :child [:h2 "Add a new department"]]]]]
+
         [box
          :child
          [:div {:class @new-department-draw-open-class :id "new-department" :style {:height "auto"}}
-          [new-department-container]
-          ]]
-        ]]
+          [new-department-container]]]]]
+
+
       [v-box
        :gap "20px"
        :class "panel-default"
@@ -308,12 +305,8 @@
        [
         (for [department departments]
           ^{:key (:department department)}
-          [department-list-item department])
-        ]
-       ]
-      ]
-     ]
-    ))
+          [department-list-item department])]]]]))
+
 
 (defn departments-container [departments]
   [v-box
@@ -322,6 +315,7 @@
     [box
      :child
      [department-list departments]]]])
+
 
 (defn employee-not-found []
   [box :child [:div.well [:h1 {:style {:color "red"}} "Sorry, we couldn't find that employee."]]])
@@ -340,8 +334,8 @@
       :justify :center
       :children
       [[box :child [:h1 (str (:firstname employee) " " (:lastname employee))]]
-       [:h2 {:style {:color "grey"}} (:department employee)]
-       ]]]]])
+       [:h2 {:style {:color "grey"}} (:department employee)]]]]]])
+
 
 (defn manager-gravatar [employee]
   [v-box
@@ -350,8 +344,8 @@
    :children
    [[box :child [:h6 "Manager"]]
     [box :child [utils/gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75}]]
-    [box :child [:h5 (str (:manager-firstname employee) " " (:manager-lastname employee))]]
-    ]])
+    [box :child [:h5 (str (:manager-firstname employee) " " (:manager-lastname employee))]]]])
+
 
 (defn employee-core-heading [employee]
   [h-box
@@ -360,8 +354,8 @@
    :class "panel panel-default"
    :children [[box :child [employee-gravatar employee]]
               [gap :size "1"]
-              [box :child [manager-gravatar employee]]
-              ]])
+              [box :child [manager-gravatar employee]]]])
+
 
 (defn department-list-choices [departments]
   (into []
@@ -377,9 +371,9 @@
     [box :size "auto" :child [single-dropdown
                               :model (:department-id employee)
                               :choices (department-list-choices departments)
-                              :on-change #(dispatch [:department-change %])
-                              ]]]
-   ])
+                              :on-change #(dispatch [:department-change %])]]]])
+
+
 
 (defn employee-first-name [employee]
   [h-box
@@ -395,8 +389,8 @@
                               :status-tooltip (apply str (get-in employee [:validation-errors :firstname]))
                               :placeholder "Employee first name"
                               :on-change #(dispatch [:input-change :firstname %])
-                              :change-on-blur? false]]
-    ]])
+                              :change-on-blur? false]]]])
+
 
 
 (defn employee-last-name [employee]
@@ -413,8 +407,8 @@
                               :status-tooltip (apply str (get-in employee [:validation-errors :lastname]))
                               :placeholder "Employee last name"
                               :on-change #(dispatch [:input-change :lastname %])
-                              :change-on-blur? false]]
-    ]])
+                              :change-on-blur? false]]]])
+
 
 (defn employee-email [employee]
   [h-box
@@ -430,8 +424,8 @@
                               :status-tooltip (apply str (get-in employee [:validation-errors :email]))
                               :placeholder "Employee email address"
                               :on-change #(dispatch [:input-change :email %])
-                              :change-on-blur? true]]
-    ]])
+                              :change-on-blur? true]]]])
+
 
 
 (defn date-input-with-popup [date-field date-value showing? title selectable-fn]
@@ -484,9 +478,9 @@
                                         :on-mouse-over (handler-fn (reset! showing-tooltip? true))
                                         :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
                                         :style         {:color     "red"
-                                                        :font-size "130%"}}]
-                              ]
-                             ))
+                                                        :font-size "130%"}}]]))
+
+
 
 
 (defn date-component
@@ -513,8 +507,8 @@
                       :width "120px"
                       :change-on-blur? true
                       :on-change #(dispatch [:input-change-dates field %])]]
-         (date-input-with-popup field (field db-model) showing-date-popup? place-holder selectable-fn)
-         ]]
+         (date-input-with-popup field (field db-model) showing-date-popup? place-holder selectable-fn)]]
+
        (show-date-error error-message showing-error-icon? showing-tooltip?)]])))
 
 
@@ -562,9 +556,9 @@
                  :status-tooltip (apply str (get-in employee [:validation-errors :prev-year-allowance]))
                  :on-change #(dispatch [:input-change-balances :prev-year-allowance %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
-                 :change-on-blur? true]]
-    ]]
-  )
+                 :change-on-blur? true]]]])
+
+
 
 (defn employee-current-year-allowance [employee]
   [h-box
@@ -580,9 +574,9 @@
                  :status-tooltip (apply str (get-in employee [:validation-errors :current-year-allowance]))
                  :on-change #(dispatch [:input-change-balances :current-year-allowance %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
-                 :change-on-blur? false]]
-    ]]
-  )
+                 :change-on-blur? false]]]])
+
+
 
 (defn employee-next-year-allowance [employee]
   [h-box
@@ -598,9 +592,9 @@
                  :status-tooltip (apply str (get-in employee [:validation-errors :next-year-allowance]))
                  :on-change #(dispatch [:input-change-balances :next-year-allowance %])
                  :validation-regex #"^(-{0,1})(\d{0,2})$"
-                 :change-on-blur? false]]
-    ]]
-  )
+                 :change-on-blur? false]]]])
+
+
 
 
 (defn save-button []
@@ -617,10 +611,10 @@
                  :child [button
                          :class "btn btn-primary"
                          :on-click #(dispatch [:employee-save])
-                         :label "Save"]
-                 ]
-                ]]
-              ]])
+                         :label "Save"]]]]]])
+
+
+
 
 (defn employee-core-details [employee]
   (let [departments (subscribe [:departments])]
@@ -644,10 +638,10 @@
           [employee-email employee]
           [employee-dob employee]
           [employee-start-date employee]
-          [employee-end-date employee]
-          ]]]]
-      ]]
-    ))
+          [employee-end-date employee]]]]]]]))
+
+
+
 
 
 (defn employee-balances [employee]
@@ -668,11 +662,11 @@
        [
         [employee-prev-year-allowance employee]
         [employee-current-year-allowance employee]
-        [employee-next-year-allowance employee]
-        ]]]]
-    ]]
+        [employee-next-year-allowance employee]]]]]]])
 
-  )
+
+
+
 
 (defn employee-errors []
   (let [employee-errors (subscribe [:employee-errors])]
@@ -683,8 +677,8 @@
        :width "600px"
        :rows 10
        :disabled? true
-       :on-change (fn [] identity)
-       ])))
+       :on-change (fn [] identity)])))
+
 
 (defn employee-maintenance-form [employee]
   [v-box
@@ -706,10 +700,10 @@
                 ;             :disabled? true
                 ;             :on-change #(dispatch [:none %])]]
 
-                [box :class "panel panel-body" :child [save-button]]
-                ]]
-              ]
-   ])
+                [box :class "panel panel-body" :child [save-button]]]]]])
+
+
+
 
 
 (defn login-form [msg]
@@ -722,8 +716,8 @@
      [
       [login-email credentials]
       [login-password credentials]
-      [login-button msg]
-      ]
-     ]
-    ))
+      [login-button msg]]]))
+
+
+
 ; )

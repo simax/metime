@@ -144,8 +144,8 @@
 
 (defn check-date-validity [input-date]
   (let [formatted-date (fmt/format-date-dd-mm-yyyy
-                   (first
-                     (re-find #"^([0]?[1-9]|[1|2][0-9]|[3][0|1])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4})$" input-date)))]
+                        (first
+                          (re-find #"^([0]?[1-9]|[1|2][0-9]|[3][0|1])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4})$" input-date)))]
     (if (try (parse (formatter "dd-MM-yyyy") formatted-date) (catch js/Error _ false))
       formatted-date
       input-date)))
@@ -197,8 +197,8 @@
                        :manager-email          (:manager-email dep)
                        :password               "password1"
                        :confirmation           "password1"
-                       :is-approver            false
-                       }})))))
+                       :is-approver            false}})))))
+
 
 
 (register-handler
@@ -288,29 +288,43 @@
           (update-employee db employee)))
       db)))
 
-(defn close-department-drawer [db]
-  (assoc db
-    :department {:id 0 :department "" :manager-id 0 :validation-errors nil}
-    :department-employees ()
-    :department-draw-open-id ""))
+(register-handler
+  :close-department-drawer
+  (fn hdlr-close-department-drawer [db [_]]
+    (assoc db
+      :department {:id 0 :department "" :manager-id 0 :validation-errors nil}
+      :department-employees ()
+      :department-draw-open-id nil)))
 
-(defn open-department-drawer [db department-id]
-  (dispatch [:fetch-department department-id])
-  (dispatch [:fetch-department-employees department-id])
-  (assoc db :department-draw-open-id department-id))
+(register-handler
+  :open-department-drawer
+  (fn hndlr-open-department-drawer [db [_ department-id]]
+    (dispatch [:fetch-department department-id])
+    (dispatch [:fetch-department-employees department-id])
+    (assoc db :department-draw-open-id department-id)))
 
 (register-handler
   :ui-department-drawer-status-toggle
   (fn hdlr-ui-department-drawer-status-toggle [db [_ department-id]]
+    (dispatch  [:close-new-department-drawer])
     (if (= (:department-draw-open-id db) department-id)
-      (close-department-drawer db)
-      (open-department-drawer db department-id))))
+      (dispatch [:close-department-drawer])
+      (dispatch [:open-department-drawer department-id]))
+    db))
+
+(register-handler
+  :close-new-department-drawer
+  (fn hdlr-close-new-department-drawer [db [_]]
+    (assoc db :new-department-draw-open? false)))
 
 (register-handler
   :ui-new-department-drawer-status-toggle
   (fn hdlr-ui-new-department-drawer-status-toggle [db [_]]
+    (dispatch [:close-department-drawer])
     (if (:new-department-draw-open? db)
-      (assoc db :new-department-draw-open? false)
+      (do
+        (dispatch [:close-new-department-drawer])
+        (assoc db :new-department-draw-open? false))
       (do
         (dispatch [:new-department])
         (assoc db :new-department-draw-open? true)))))
