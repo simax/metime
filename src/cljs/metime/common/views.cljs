@@ -3,12 +3,12 @@
                                  title single-dropdown label
                                  input-text input-textarea datepicker datepicker-dropdown button
                                  popover-anchor-wrapper popover-content-wrapper
-                                 popover-tooltip md-icon-button md-circle-icon-button row-button]]
-            ))
+                                 popover-tooltip md-icon-button md-circle-icon-button row-button]]))
 
-(defn loader-component []
+
+(defn loader-component [height]
   [box
-   :height "650px"
+   :height (or height "650px")
    :size "auto"
    :align :center
    :justify :center
