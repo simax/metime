@@ -121,7 +121,7 @@
   (let [fetching? (subscribe [:fetching-dep-employees-status])]
     (println (str "@fetching?: " @fetching?))
     (if (= @fetching? true)
-      [common-components/loader-component]
+      [common-components/loader-component "200px"]
       ; TODO: Refactor to re-com v-box
       [box
        :child
@@ -175,6 +175,11 @@
          :on-click #(dispatch [:department-save])]]]]]))
 
 
+(defn empty-department []
+  ([h-box
+    :justify :center
+    :children
+    [[label :label "No employees in department"]]]))
 
 
 (defn department-list-item [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email employee-count]}]
@@ -242,7 +247,6 @@
              :size :larger
              :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]]]]]]]
 
-
       (when (= @department-drawer-open-id department-id)
         [box
          :style {:height "auto"}
@@ -253,17 +257,22 @@
           [
            [h-box
             :gap "10px"
-            :justify :center
+            :justify :start
             :align :center
-            :children [
-                       [md-circle-icon-button
-                        :md-icon-name "zmdi-plus"
-                        :emphasise? true
-                        :on-click #(dispatch [:employee-add-new])
-                        :tooltip add-employee-label]
-                       [label :label add-employee-label]]]
-
-           [employees-list rows-of-employees]]]])]]))
+            :children
+            [
+             [md-circle-icon-button
+              :md-icon-name "zmdi-plus"
+              :emphasise? true
+              :on-click #(dispatch [:employee-add-new])
+              :tooltip add-employee-label]]]
+           (if (zero? (count rows-of-employees))
+             [h-box
+              :justify :center
+              :children
+              [
+               [box :child [:h2 "No employees in department"]]]]
+             [employees-list rows-of-employees])]]])]]))
 
 
 
