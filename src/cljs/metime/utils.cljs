@@ -66,8 +66,6 @@
   {:headers {"authorization" (str "Token " token)}})
 
 (defn call-secure-url [verb token url]
-  (println (str "Started fetching from ... " url))
-  (dispatch [:fetching])
   (case verb
     :GET (http/get url (build-authorization-header token))
     :DELETE (http/delete url (build-authorization-header token))))
@@ -87,7 +85,6 @@
           unauthenticated-handler (or (first invalid-token-handler) :log-out)
           response (<! (call-secure-url verb token url))
           status (:status response)]
-      (println (str "Completed fetching from ...") url)
       (if (= status 401)
         (dispatch [unauthenticated-handler])
         (cond

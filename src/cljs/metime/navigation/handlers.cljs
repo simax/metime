@@ -40,11 +40,6 @@
                  :view :home)))))
 
 (register-handler
-  :fetching
-  (fn hdlr-fetching [db [_]]
-    (assoc db :fetching-dep-employees? true)))
-
-(register-handler
   :fetching-complete
   (fn hdlr-fetching [db [_]]
     (assoc db :fetching-department-employees? false)))
