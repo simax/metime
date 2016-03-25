@@ -9,7 +9,6 @@
 (defn loader-component [height]
   [box
    :height (or height "650px")
-   :size "auto"
    :align :center
    :justify :center
    :child [:div (throbber :size :large :color "lime")]])

@@ -260,7 +260,6 @@
                            :invalid-fn    #(dispatch [:employee-save-failure])
                            :response-keys [:body :departments]}))
 
-
 (register-handler
   :department-save
   (enrich validate-department)
@@ -288,14 +287,12 @@
           (update-employee db employee)))
       db)))
 
-
-
 (register-handler
   :close-department-drawer
   (fn hdlr-close-department-drawer [db [_]]
     (assoc db
       :department {:id 0 :department "" :manager-id 0 :validation-errors nil}
-      :department-employees ()
+      :department-employees nil
       :department-draw-open-id nil)))
 
 (register-handler
@@ -303,7 +300,10 @@
   (fn hndlr-open-department-drawer [db [_ department-id]]
     (dispatch [:fetch-department department-id])
     (dispatch [:fetch-department-employees department-id])
-    (assoc db :department-draw-open-id department-id)))
+    (assoc db
+      :department {:id 0 :department "" :manager-id 0 :validation-errors nil}
+      :department-employees nil
+      :department-draw-open-id department-id)))
 
 (register-handler
   :ui-department-drawer-status-toggle
@@ -313,8 +313,6 @@
       (dispatch [:close-department-drawer])
       (dispatch [:open-department-drawer department-id]))
     db))
-
-
 
 (register-handler
   :close-new-department-drawer
@@ -365,7 +363,6 @@
 
 (defn build-url [db]
   (str (routes/api-endpoint-for :authtoken) "?email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password])))
-
 
 (register-handler
   :log-in

@@ -71,7 +71,7 @@
   (let [departments (subscribe [:departments])]
     (fn []
       (if-not (seq @departments)
-        [common-components/loader-component ]
+        [common-components/loader-component]
         [ev/departments-container @departments]))))
 
 

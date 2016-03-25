@@ -47,7 +47,7 @@
 (register-handler
   :fetching-complete
   (fn hdlr-fetching [db [_]]
-    (assoc db :fetching-dep-employees? false)))
+    (assoc db :fetching-department-employees? false)))
 
 (register-handler
   :employee-add-new
@@ -140,7 +140,7 @@
     (utils/call-api :GET (routes/api-endpoint-for :department-employees :id department-id) db
                     {:success-handler-key :process-department-employees-response
                      :response-keys       [:body :department-employees]})
-    db))
+    (assoc db :fetching-department-employees? true)))
 
 (register-handler
   :fetch-departments-with-employees

@@ -112,22 +112,6 @@
      [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]]]])
 
 
-(defn list-employees [rows-of-employees]
-  (for [employee-row rows-of-employees]
-    (for [employee-item employee-row]
-      ^{:key (:id employee-item)} [employee-list-item employee-item])))
-
-(defn employees-list [rows-of-employees]
-  (let [fetching? (subscribe [:fetching-dep-employees-status])]
-    (println (str "@fetching?: " @fetching?))
-    (if (= @fetching? true)
-      [common-components/loader-component "200px"]
-      ; TODO: Refactor to re-com v-box
-      [box
-       :child
-       [:ul {:style {:margin-top "20px"}}
-        (list-employees rows-of-employees)]])))
-
 (defn new-department-container []
   (let [dep (subscribe [:department])
         sorted-employees (subscribe [:sorted-departments-with-employees])
@@ -176,19 +160,57 @@
 
 
 (defn empty-department []
-  ([h-box
-    :justify :center
-    :children
-    [[label :label "No employees in department"]]]))
+  [h-box
+   :justify :center
+   :children
+   [[:h2 {:style {:font-weight :bold}} "No employees in department"]]])
+
+
+(defn department-employees-list [manager-id]
+  (let [employees (subscribe [:department-employees])
+        department-list-item (filter #(not= (:id %) manager-id) @employees)
+        rows-of-employees (partition 4 4 nil department-list-item)]
+    (if (zero? (count @employees))
+      [empty-department]
+      [box
+       :child
+       [:ul {:style {:margin-top "20px"}}
+        (for [employee-row rows-of-employees]
+          (for [employee-item employee-row]
+            ^{:key (:id employee-item)} [employee-list-item employee-item]))]])))
+
+
+(defn department-employees-panel [department-drawer-open-id department-id manager-id]
+  (let [fetching-department-employees? (subscribe [:fetching-department-employees?])]
+    (when (= department-drawer-open-id department-id)
+      [box
+       :style {:height "auto"}
+       :child
+       [v-box
+        :gap "20px"
+        :min-height "220px"
+        :children
+        [
+         [h-box
+          :gap "10px"
+          :justify :start
+          :align :center
+          :children
+          [
+           [md-circle-icon-button
+            :md-icon-name "zmdi-plus"
+            :emphasise? true
+            :on-click #(dispatch [:employee-add-new])
+            :tooltip "Add a new employee to the department"]]]
+         (if @fetching-department-employees?
+           [common-components/loader-component "200px"]
+           [department-employees-list manager-id])]]])))
 
 
 (defn department-list-item [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email employee-count]}]
-  (let [employees (subscribe [:department-employees])
-        department-drawer-open-id (subscribe [:department-draw-open-id])
-        department-list-item (filter #(not= (:id %) manager-id) @employees)
-        rows-of-employees (partition 4 4 nil department-list-item)
-        department-name (clojure.string/replace department #"[\s]" "-")
-        add-employee-label "Add a new employee to the department"]
+  (let [department-drawer-open-id (subscribe [:department-draw-open-id])
+        department-name (clojure.string/replace department #"[\s]" "-")]
+
     [v-box
      :children
      [
@@ -247,32 +269,7 @@
              :size :larger
              :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]]]]]]]
 
-      (when (= @department-drawer-open-id department-id)
-        [box
-         :style {:height "auto"}
-         :child
-         [v-box
-          :gap "20px"
-          :children
-          [
-           [h-box
-            :gap "10px"
-            :justify :start
-            :align :center
-            :children
-            [
-             [md-circle-icon-button
-              :md-icon-name "zmdi-plus"
-              :emphasise? true
-              :on-click #(dispatch [:employee-add-new])
-              :tooltip add-employee-label]]]
-           (if (zero? (count rows-of-employees))
-             [h-box
-              :justify :center
-              :children
-              [
-               [box :child [:h2 "No employees in department"]]]]
-             [employees-list rows-of-employees])]]])]]))
+      [department-employees-panel @department-drawer-open-id department-id manager-id]]]))
 
 
 
