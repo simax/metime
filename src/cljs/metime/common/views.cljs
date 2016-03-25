@@ -6,10 +6,10 @@
                                  popover-tooltip md-icon-button md-circle-icon-button row-button]]))
 
 
-(defn loader-component [height]
+(defn loader-component [height color]
   [box
    :height (or height "650px")
    :align :center
    :justify :center
-   :child [:div (throbber :size :large :color "lime")]])
+   :child [:div (throbber :size :large :color (or color "lime"))]])
 

@@ -184,7 +184,7 @@
   (let [fetching-department-employees? (subscribe [:fetching-department-employees?])]
     (when (= department-drawer-open-id department-id)
       [box
-       :style {:height "auto"}
+       ;:style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
        :child
        [v-box
         :gap "20px"
