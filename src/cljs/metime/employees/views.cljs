@@ -273,40 +273,39 @@
 
 
 
-(defn department-list [departments]
+(defn departments-list [departments]
   (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])]
     [v-box
+     ;:style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
      :class "panel-body row"
-     :height "65px"
      :justify :start
      :children
      [
       [h-box
+       :height "120px"
        :align :center
-       :justify :center
+       :justify :between
        :children
        [
         [box
-         :class "panel panel-default"
          :child
-         [h-box
-          :style {:padding-left "30px"}
-          :align :center
-          :gap "140px"
-          :children
-          [
-           [md-circle-icon-button
-            :md-icon-name "zmdi-plus"
-            :emphasise? true
-            :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
-            :tooltip "Add a new department"]
-           [box :child [:h2 "Add a new department"]]]]]
+         [md-circle-icon-button
+          :md-icon-name "zmdi-plus"
+          :emphasise? true
+          :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
+          :tooltip "Add a new department"]]
 
         [box
          :child
-         [:div {:class @new-department-draw-open-class :id "new-department" :style {:height "auto"}}
-          [new-department-container]]]]]
+         [:div
+          {:class @new-department-draw-open-class
+           :style {:border-width "1" :border-style "solid" :border-color "white"}}
+          [new-department-container]]]
 
+        [box
+         :size "44px"
+         :child
+         [:div]]]]
 
       [v-box
        :gap "20px"
@@ -317,15 +316,6 @@
         (for [department departments]
           ^{:key (:department department)}
           [department-list-item department])]]]]))
-
-
-(defn departments-container [departments]
-  [v-box
-   :children
-   [
-    [box
-     :child
-     [department-list departments]]]])
 
 
 (defn employee-not-found []

@@ -72,7 +72,7 @@
     (fn []
       (if-not (seq @departments)
         [common-components/loader-component]
-        [ev/departments-container @departments]))))
+        [ev/departments-list @departments]))))
 
 
 (defn view-employee-add []

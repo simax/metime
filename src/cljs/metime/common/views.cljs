@@ -10,5 +10,6 @@
   [box
    :height (or height "650px")
    :align :center
+   :justify :center
    :child [:div (throbber :size :large :color (or color "lime"))]])
 
