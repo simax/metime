@@ -214,6 +214,13 @@
     (println "Problem saving department")
     db))
 
+(register-handler
+  :department-save-success
+  (fn hdlr-save-failure [db [_]]
+    (dispatch [:close-new-department-drawer])
+    (dispatch [:fetch-departments])
+    db))
+
 
 (register-handler
   :switch-view-to-employees
@@ -233,7 +240,7 @@
   "Add a new department via the API"
   (utils/send-data-to-api :POST
                           (routes/api-endpoint-for :departments) (:authentication-token db) department
-                          {:valid-fn      #(dispatch [:fetch-departments])
+                          {:valid-fn      #(dispatch [:department-save-success])
                            :invalid-fn    #(dispatch [:department-save-failure])
                            :response-keys [:body :departments]}))
 
