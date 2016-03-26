@@ -162,6 +162,7 @@
 (defn empty-department []
   [h-box
    :justify :center
+   :align :center
    :children
    [[:h2 {:style {:font-weight :bold}} "No employees in department"]]])
 
@@ -194,7 +195,6 @@
          [h-box
           :gap "10px"
           :justify :start
-          :align :center
           :children
           [
            [md-circle-icon-button
