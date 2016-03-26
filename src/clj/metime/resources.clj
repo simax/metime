@@ -170,8 +170,8 @@
    :department-id [[department-exists]]
    :dob [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Date of birth can't be in the future"]]
    ;:startdate [[v/datetime date-format :message "Must be a valid date"] [date-before-today :message "Start date can't be in the future"]]
-   :is-approver [[v/boolean]]
-   ])
+   :is-approver [[v/boolean]]])
+
 
 (defn make-rule-required [validation-rule]
   (reduce conj validation-rule [[v/required]]))
@@ -182,8 +182,9 @@
                         rule (second rule-set)]
                     (if (contains? req-rules rule-keyword)
                       (make-rule-required rule)
-                      rule))
-                  )) partitioned-validation-set))
+                      rule)
+                   ))
+                partitioned-validation-set)))
 
 (defn extract-keywords-from-validation-set [validation-set]
   (keep-indexed #(if (even? %1) %2) validation-set))
@@ -300,8 +301,8 @@
                         (if (requested-method ctx :get)
                           [true {::department-employees
                                  {:department-employees
-                                  (fetch-department-employees department-id)}}]
-                          ))
+                                  (fetch-department-employees department-id)}}]))
+
 
              :handle-created (fn [ctx]
                                (if (::failure-message ctx)
@@ -316,8 +317,8 @@
              :allowed-methods [:get :post]
              :exists? (fn [ctx]
                         (if (requested-method ctx :get)
-                          [true {::departments {:departments (fetch-departments)}}]
-                          ))
+                          [true {::departments {:departments (fetch-departments)}}]))
+
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
@@ -556,8 +557,8 @@
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :exists? (fn [ctx]
                         (if (requested-method ctx :get)
-                          [true {::holidays (hols/get-holidays db/db-spec)}]
-                          ))
+                          [true {::holidays (hols/get-holidays db/db-spec)}]))
+
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)

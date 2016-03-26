@@ -50,7 +50,7 @@
              (GET "/authtoken" [] (res/build-auth-token))
              (context "/departments" []
                (ANY "/" [] (res/departments)) ; fn [_] {:status 200 :body "This is the /departments route"}
-               (GET "/:id" [id] (res/department id))
+               (ANY "/:id" [id] (res/department id))
                (GET "/:id/employees" [id] (res/department-employees id)))
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))
@@ -82,7 +82,7 @@
       :access-control-allow-credentials "true"
       :access-control-allow-origin [#".*"]
       :access-control-allow-methods [:get :put :post :delete])
-    #_(liberator.dev/wrap-trace :header :ui)
-    ))
+    #_(liberator.dev/wrap-trace :header :ui)))
+
 
 
