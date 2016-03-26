@@ -20,9 +20,9 @@
                    ["employee" {"/add" :employee-add}]
                    ["employees" {""                 :employees
                                  ["/" [#"\d*" :id]] :employee-editor}]
-                   [true :not-found]
-                   ]
-                  ])
+                   [true :not-found]]])
+
+
 
 (def api-routes ["http://localhost:3000/api"
                  [
@@ -33,9 +33,9 @@
                   [["/department?name=" :name] :department-by-name]
                   ["/employees" :employees]
                   [["/employee?id=" [#"\d*" :id]] :employee-by-id]
-                  [["/employee?email=" :email] :employee-by-email]
-                  ]
-                 ])
+                  [["/employee?email=" :email] :employee-by-email]]])
+
+
 
 
 (defn parse-url [url]

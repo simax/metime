@@ -4,6 +4,7 @@
             [metime.common.views :as common-components]
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [metime.navigation.subs]
+            [metime.navigation.handlers]
             [metime.employees.subs]
             [metime.employees.handlers]
             [metime.routes :as routes]
@@ -46,7 +47,6 @@
                               :placeholder "Email"
                               :on-change #(dispatch [:input-change-no-validate :email %])
                               :change-on-blur? false]]]])
-
 
 
 (defn login-password [credentials]
@@ -259,7 +259,7 @@
               [md-icon-button
                :md-icon-name "zmdi-delete"                  ;
                :size :regular
-               :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]])
+               :on-click #(dispatch [:department-delete department-id])]])
 
            [box
             ;:style {:border-width "1" :border-style "solid" :border-color "white"}

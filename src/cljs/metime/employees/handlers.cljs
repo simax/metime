@@ -218,7 +218,8 @@
 (register-handler
   :switch-view-to-employees
   (fn hdlr-switch-view-to-employees [db [_ _]]
-    (dispatch [:fetch-department-employees (:department-draw-open-id db)])
+    (when-let [department-id (:department-draw-open-id db)]
+      (dispatch [:fetch-department-employees department-id]))
     (dispatch [:set-active-view :employees])
     db))
 

@@ -163,5 +163,14 @@
                      :response-keys       [:body]})
     db))
 
+
+(register-handler
+  :department-delete
+  (fn hdlr-department-delete [db [_ id]]
+    (utils/call-api :DELETE (routes/api-endpoint-for :department-by-id :id id) db
+                    {:success-handler-key :fetch-departments
+                     :response-keys       [:body]})
+    db))
+
 ;)
 

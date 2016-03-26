@@ -22,15 +22,6 @@
         size (or (:gravatar-size data) 100)]
     [box :child [:img.gravatar.img-circle {:src (str "http://www.gravatar.com/avatar/" (hashgen/md5 email-address) "?size=" size "&r=PG&d=mm")}]]))
 
-;(defn set-hash! [loc]
-;  "Set the hash portion of the url in the address bar.
-;  e.g. (set-hash! '/dip') => http://localhost:3000/#/dip"
-;  (set! (.-hash js/window.location) loc))
-
-;(defn get-current-location []
-;  "Get the url in the address bar, including the hash portion."
-;  (subs (.-hash js/window.location) 0))
-
 (defn isNaN [node]
   (and (= (.call js/toString node) (str "[object Number]"))
        (js/eval (str node " != +" node))))
@@ -88,7 +79,7 @@
       (if (= status 401)
         (dispatch [unauthenticated-handler])
         (cond
-          (= status 200) (success-handler success-handler-key response response-keys)
+          (or (= status 200) (= status 204)) (success-handler success-handler-key response response-keys)
           (= status 404) (dispatch [failure-handler-key]))))))
 
 
@@ -113,7 +104,6 @@
   "Make a secure url call with authorization header.
    Dispatch redirect to login if unauthorized."
   ;; The following go block will "park" until the http request returns data
-  (println (str "Attempting to put to: " url))
   (go
     (let [response (<! (send-data-to-secure-url verb url token data))
           status (:status response)]
