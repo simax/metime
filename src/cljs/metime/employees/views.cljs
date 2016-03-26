@@ -98,9 +98,7 @@
       [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]]
 
      [:div {:class "info-user"}
-      ;[:span {:aria-hidden "true" :class "li_user fs1"}]
       [:span {:aria-hidden "true" :class "li_calendar fs1"}]
-      ;[:span {:aria-hidden "true" :class "li_mail fs1"}]
       [:span {:aria-hidden "true"
               :class       "glyphicon glyphicon-trash fs1"
               :on-click    (fn [e]
@@ -203,7 +201,7 @@
             :on-click #(dispatch [:employee-add-new])
             :tooltip "Add a new employee to the department"]]]
          (if @fetching-department-employees?
-           [common-components/loader-component "200px"]
+           [common-components/loader-component "auto"]
            [department-employees-list manager-id])]]])))
 
 

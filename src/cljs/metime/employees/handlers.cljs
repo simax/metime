@@ -325,9 +325,7 @@
   (fn hdlr-ui-new-department-drawer-status-toggle [db [_]]
     (dispatch [:close-department-drawer])
     (if (:new-department-draw-open? db)
-      (do
-        (dispatch [:close-new-department-drawer])
-        (assoc db :new-department-draw-open? false))
+      (assoc db :new-department-draw-open? false)
       (do
         (dispatch [:new-department])
         (assoc db :new-department-draw-open? true)))))
