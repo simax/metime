@@ -395,16 +395,17 @@
 
 (register-handler
   :employee-delete-success
-  (fn hdlr-employee-delete-success [db [_ id]]
-    (dispatch [:fetch-department-employees id])
-    (dispatch [:fetch-departments])
+  (fn hdlr-employee-delete-success [db [_ _]]
+    (let [department-id (get-in db [:department :id])]
+      (dispatch [:fetch-department-employees department-id])
+      (dispatch [:fetch-departments]))
     db))
 
 (register-handler
   :employee-delete
   (fn hdlr-employee-delete [db [_ id]]
     (utils/call-api :DELETE (routes/api-endpoint-for :employee-by-id :id id) db
-                    {:success-handler-key [:employee-delete-success id]
+                    {:success-handler-key :employee-delete-success
                      :response-keys       [:body]})
     db))
 
