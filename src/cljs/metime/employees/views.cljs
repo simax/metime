@@ -48,7 +48,6 @@
                               :change-on-blur? false]]]])
 
 
-
 (defn login-password [credentials]
   [h-box
    :justify :between
@@ -259,7 +258,7 @@
               [md-icon-button
                :md-icon-name "zmdi-delete"                  ;
                :size :regular
-               :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]])
+               :on-click #(dispatch [:department-delete department-id])]])
 
            [box
             ;:style {:border-width "1" :border-style "solid" :border-color "white"}

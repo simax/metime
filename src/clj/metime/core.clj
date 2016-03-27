@@ -17,7 +17,7 @@
             [hiccup.middleware :refer [wrap-base-url]]
             [compojure.handler :as handler]
             [compojure.route :as route]
-            [compojure.core :refer [defroutes context GET POST ANY]]
+            [compojure.core :refer [defroutes context GET POST DELETE ANY]]
             [metime.resources :as res]
             [selmer.parser :refer [render-file]]
             [environ.core :refer [env]]
@@ -50,7 +50,8 @@
              (GET "/authtoken" [] (res/build-auth-token))
              (context "/departments" []
                (ANY "/" [] (res/departments)) ; fn [_] {:status 200 :body "This is the /departments route"}
-               (ANY "/:id" [id] (res/department id))
+               (GET "/:id" [id] (res/department id))
+               (DELETE "/:id" [id] (res/department id))
                (GET "/:id/employees" [id] (res/department-employees id)))
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))
