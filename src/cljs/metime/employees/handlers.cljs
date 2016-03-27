@@ -299,7 +299,7 @@
   :close-department-drawer
   (fn hdlr-close-department-drawer [db [_]]
     (assoc db
-      :department {:id 0 :department "" :manager-id 0 :validation-errors nil}
+      :department {:id 0 :department "" :manager-id nil :validation-errors nil}
       :department-employees nil
       :department-draw-open-id nil)))
 
@@ -309,7 +309,7 @@
     (dispatch [:fetch-department department-id])
     (dispatch [:fetch-department-employees department-id])
     (assoc db
-      :department {:id 0 :department "" :manager-id 0 :validation-errors nil}
+      :department {:id 0 :department "" :manager-id nil :validation-errors nil}
       :department-employees nil
       :department-draw-open-id department-id)))
 
@@ -325,7 +325,8 @@
 (register-handler
   :close-new-department-drawer
   (fn hdlr-close-new-department-drawer [db [_]]
-    (assoc db :new-department-draw-open? false)))
+    (assoc db :new-department-draw-open? false
+              :department {:id 0 :department "" :manager-id nil :validation-errors nil})))
 
 (register-handler
   :ui-new-department-drawer-status-toggle
@@ -340,7 +341,7 @@
 (register-handler
   :new-department
   (fn hdlr-new-department [db [_]]
-    (assoc db :department {:id 0 :department "" :manager-id 0})))
+    (assoc db :department {:id 0 :department "" :manager-id nil})))
 
 (register-handler
   :show-failed-save-attempt
