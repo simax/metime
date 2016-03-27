@@ -144,8 +144,8 @@
 
 (defn check-date-validity [input-date]
   (let [formatted-date (fmt/format-date-dd-mm-yyyy
-                        (first
-                          (re-find #"^([0]?[1-9]|[1|2][0-9]|[3][0|1])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4})$" input-date)))]
+                         (first
+                           (re-find #"^([0]?[1-9]|[1|2][0-9]|[3][0|1])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4})$" input-date)))]
     (if (try (parse (formatter "dd-MM-yyyy") formatted-date) (catch js/Error _ false))
       formatted-date
       input-date)))
@@ -316,7 +316,7 @@
 (register-handler
   :ui-department-drawer-status-toggle
   (fn hdlr-ui-department-drawer-status-toggle [db [_ department-id]]
-    (dispatch  [:close-new-department-drawer])
+    (dispatch [:close-new-department-drawer])
     (if (= (:department-draw-open-id db) department-id)
       (dispatch [:close-department-drawer])
       (dispatch [:open-department-drawer department-id]))
@@ -348,7 +348,7 @@
     (assoc-in db [:employee :validation-errors] errors)))
 
 (defn set-auth-cookie! [token]
-  (let [expiry (* 60 60 24 30)] ; 30 days (secs mins hours days)
+  (let [expiry (* 60 60 24 30)]                             ; 30 days (secs mins hours days)
     (utils/set-cookie! "auth" token {:max-age expiry :path "/"})))
 
 (register-handler
@@ -392,4 +392,30 @@
     (assoc db
       :view :login
       :authentication-failed-msg "")))
+
+(register-handler
+  :employee-delete-success
+  (fn hdlr-employee-delete-success [db [_ id]]
+    (dispatch [:fetch-department-employees id])
+    (dispatch [:fetch-departments])
+    db))
+
+(register-handler
+  :employee-delete
+  (fn hdlr-employee-delete [db [_ id]]
+    (utils/call-api :DELETE (routes/api-endpoint-for :employee-by-id :id id) db
+                    {:success-handler-key [:employee-delete-success id]
+                     :response-keys       [:body]})
+    db))
+
+
+(register-handler
+  :department-delete
+  (fn hdlr-department-delete [db [_ id]]
+    (utils/call-api :DELETE (routes/api-endpoint-for :department-by-id :id id) db
+                    {:success-handler-key :fetch-departments
+                     :response-keys       [:body]})
+    db))
+
+
 ;)
