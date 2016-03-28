@@ -8,7 +8,7 @@
             [metime.employees.handlers]
             [metime.routes :as routes]
             [metime.utils :as utils]
-            [re-com.core :refer [h-box v-box box gap
+            [re-com.core :refer [h-box v-box box gap scroller
                                  title single-dropdown label
                                  input-text input-textarea datepicker datepicker-dropdown button
                                  popover-anchor-wrapper popover-content-wrapper
@@ -335,50 +335,55 @@
 (defn departments-list [departments]
   (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])]
     (println @new-department-draw-open-class)
-    [v-box
-     ;:style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
-     :class "panel-body row"
-     :justify :start
-     :children
-     [
-      [box
-       :child
-       [md-circle-icon-button
-        :md-icon-name "zmdi-plus"
-        :size :larger
-        :emphasise? true
-        :style {:background-color "red" :border-color "red"}
-        :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
-        :tooltip "Add a new department"
-        :tooltip-position :right-center]]
-      [h-box
-       :style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
-       ;:height (if (= "collapse in" @new-department-draw-open-class) "120px" "0px")
-       :align :center
-       :justify :between
-       :children
-       [
-        [box
-         :child
-         [:div
-          {:class @new-department-draw-open-class
-           :style {:border-width "1" :border-style "solid" :border-color "white"}}
-          [new-department-panel]]]
+    [scroller
+     :v-scroll :auto
+     :height "650px"
+     :width "1000px"
+     :child
+     [v-box
+      ;:style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
+      :class "panel-body row"
+      :justify :start
+      :children
+      [
+       [box
+        :child
+        [md-circle-icon-button
+         :md-icon-name "zmdi-plus"
+         :size :larger
+         :emphasise? true
+         :style {:background-color "red" :border-color "red"}
+         :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
+         :tooltip "Add a new department"
+         :tooltip-position :right-center]]
+       [h-box
+        :style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
+        ;:height (if (= "collapse in" @new-department-draw-open-class) "120px" "0px")
+        :align :center
+        :justify :between
+        :children
+        [
+         [box
+          :child
+          [:div
+           {:class @new-department-draw-open-class
+            :style {:border-width "1" :border-style "solid" :border-color "white"}}
+           [new-department-panel]]]
 
-        [box
-         :size "44px"
-         :child
-         [:div]]]]
+         [box
+          :size "44px"
+          :child
+          [:div]]]]
 
-      [v-box
-       :gap "20px"
-       :class "panel-default"
-       :width "950px"
-       :children
-       [
-        (for [department departments]
-          ^{:key (:department department)}
-          [department-list-item department])]]]]))
+       [v-box
+        :gap "20px"
+        :class "panel-default"
+        :width "950px"
+        :children
+        [
+         (for [department departments]
+           ^{:key (:department department)}
+           [department-list-item department])]]]]]))
 
 
 (defn employee-not-found []
