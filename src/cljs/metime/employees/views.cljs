@@ -31,6 +31,41 @@
 ;  {:tracer (tracer :color "indigo")}
 
 
+(defn manager-gravatar [employee]
+  [v-box
+   :align :center
+   :width "150px"
+   :children
+   [[box :child [:h6 "Manager"]]
+    [box :child [utils/gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75}]]
+    [box :child [:h5 (str (:manager-firstname employee) " " (:manager-lastname employee))]]]])
+
+
+(def invalid-input-style {:border-radius "4px 4px 4px 4px"
+                          :border-color  "red"
+                          :border-style  "solid"
+                          :border-width  "1px"})
+
+(def valid-input-style {:border-radius "4px 4px 4px 4px"
+                        :border-color  "white"
+                        :border-style  "solid"
+                        :border-width  "1px"})
+
+
+(defn show-error [error-message showing-error-icon? showing-tooltip?]
+  (when @showing-error-icon? [popover-tooltip
+                              :label @error-message
+                              :position :right-center
+                              :showing? showing-tooltip?
+                              :status :error
+                              :width "150px"
+                              :anchor [:i
+                                       {:class         "zmdi zmdi-alert-circle"
+                                        :on-mouse-over (handler-fn (reset! showing-tooltip? true))
+                                        :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
+                                        :style         {:color     "red"
+                                                        :font-size "130%"}}]]))
+
 (defn login-email [credentials]
   [h-box
    :justify :between
@@ -109,32 +144,33 @@
      [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]]]])
 
 
-(defn new-department-container []
+(defn new-department-panel []
   (let [dep (subscribe [:department])
         sorted-employees (subscribe [:sorted-departments-with-employees])
         id-fn #(:id %)
         group-fn #(str (:department %))
         label-fn #(str (:firstname %) " " (:lastname %))
-        selected-employee-id (reagent/atom nil)]
+        selected-employee-id (reagent/atom (:manager-id @dep))
+        mgr-error-message (reagent/atom "A manager is required")
+        mgr-showing-error-icon? (reagent/atom (seq (get-in @dep [:validation-errors :manager-id])))
+        mgr-showing-tooltip? (reagent/atom false)]
     [h-box
+     :style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
      :gap "20px"
      :children
      [
       [v-box
        :gap "10px"
        :children
-       [[label :class "control-label" :label "Department"]
-        [input-text
-         :width "315px"
-         :model (:department @dep)
-         :placeholder "Department name"
-         :on-change #(dispatch [:input-change-department :department %])
-         :change-on-blur? false]]]
+       [
+        [utils/gravatar {:gravatar-email "simonlomax@ekmsystems.co.uk" :gravatar-size 35}]]]
       [v-box
-       :gap "10px"
+       :gap "20px"
+       :width "315px"
        :children
-       [[label :class "control-label" :label "Manager"]
+       [
         [single-dropdown
+         :style (if @mgr-showing-error-icon? invalid-input-style valid-input-style)
          :width "315px"
          :placeholder "Manager"
          :choices @sorted-employees
@@ -143,17 +179,42 @@
          :group-fn group-fn
          :model selected-employee-id
          :filter-box? true
-         :on-change #(dispatch [:set-department-manager-id %])]]]
-
+         :on-change #(dispatch [:input-change-department :manager-id %])]
+        (show-error mgr-error-message mgr-showing-error-icon? mgr-showing-tooltip?)]]
       [v-box
-       :justify :end
+       :gap "10px"
        :children
        [
-        [md-icon-button
+        [input-text
+         :width "315px"
+         :model (:department @dep)
+         :placeholder "Department name"
+         :on-change #(dispatch [:input-change-department :department %])
+         :status (when (seq (get-in @dep [:validation-errors :department])) :error)
+         :status-icon? (seq (get-in @dep [:validation-errors :department]))
+         :status-tooltip (apply str (get-in @dep [:validation-errors :department]))
+         :change-on-blur? false]]]
+
+      [v-box
+       :justify :center
+       :children
+       [
+        [md-circle-icon-button
          :emphasise? true
+         :size :smaller
          :md-icon-name "zmdi-floppy"
          :tooltip "Save department"
-         :on-click #(dispatch [:department-save])]]]]]))
+         :on-click #(dispatch [:department-save])]]]
+      [v-box
+       :justify :center
+       :children
+       [
+        [md-circle-icon-button
+         :emphasise? true
+         :size :smaller
+         :md-icon-name "zmdi-close-circle-o"
+         :tooltip "Cancel"
+         :on-click #(dispatch [:close-new-department-drawer])]]]]]))
 
 
 (defn empty-department []
@@ -198,7 +259,9 @@
             :md-icon-name "zmdi-plus"
             :emphasise? true
             :on-click #(dispatch [:employee-add-new])
-            :tooltip "Add a new employee to the department"]]]
+            :style {:background-color "red" :border-color "red"}
+            :tooltip "Add a new employee to the department"
+            :tooltip-position :right-center]]]
          (if @fetching-department-employees?
            [common-components/loader-component "auto"]
            [department-employees-list manager-id])]]])))
@@ -217,6 +280,7 @@
        :child
        [h-box
         :class "panel-body row"
+        ;:style {:border-width "1" :border-style "solid" :border-color "white"}
         :height "65px"
         :justify :between
         :children
@@ -226,20 +290,17 @@
           :align :center
           :children
           [
+           [h-box
+            :gap "10px"
+            :width "300px"
+            :align :center
+            :children
+            [
+             [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]
+             [box :child [:h5 (str manager-firstname " " manager-lastname)]]]]
            [box
             ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-            :child
-            [h-box
-             :gap "10px"
-             :width "350px"
-             :align :center
-             :children
-             [
-              [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]
-              [box :child [:h5 (str manager-firstname " " manager-lastname)]]]]]
-           [box
-            ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-            :width "500px"
+            :width "400px"
             :child [:h2 department-name]]]]
 
          [h-box
@@ -264,7 +325,8 @@
             [md-icon-button
              :md-icon-name "zmdi-swap-vertical"             ;
              :size :larger
-             :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]]]]]]]
+             :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]]]]
+         ]]]
 
       [department-employees-panel @department-drawer-open-id department-id manager-id]]]))
 
@@ -272,32 +334,36 @@
 
 (defn departments-list [departments]
   (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])]
+    (println @new-department-draw-open-class)
     [v-box
      ;:style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
      :class "panel-body row"
      :justify :start
      :children
      [
+      [box
+       :child
+       [md-circle-icon-button
+        :md-icon-name "zmdi-plus"
+        :size :larger
+        :emphasise? true
+        :style {:background-color "red" :border-color "red"}
+        :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
+        :tooltip "Add a new department"
+        :tooltip-position :right-center]]
       [h-box
-       :height "120px"
+       :style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
+       ;:height (if (= "collapse in" @new-department-draw-open-class) "120px" "0px")
        :align :center
        :justify :between
        :children
        [
         [box
          :child
-         [md-circle-icon-button
-          :md-icon-name "zmdi-plus"
-          :emphasise? true
-          :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
-          :tooltip "Add a new department"]]
-
-        [box
-         :child
          [:div
           {:class @new-department-draw-open-class
            :style {:border-width "1" :border-style "solid" :border-color "white"}}
-          [new-department-container]]]
+          [new-department-panel]]]
 
         [box
          :size "44px"
@@ -307,7 +373,7 @@
       [v-box
        :gap "20px"
        :class "panel-default"
-       :width "1100px"
+       :width "950px"
        :children
        [
         (for [department departments]
@@ -333,16 +399,6 @@
       :children
       [[box :child [:h1 (str (:firstname employee) " " (:lastname employee))]]
        [:h2 {:style {:color "grey"}} (:department employee)]]]]]])
-
-
-(defn manager-gravatar [employee]
-  [v-box
-   :align :center
-   :width "150px"
-   :children
-   [[box :child [:h6 "Manager"]]
-    [box :child [utils/gravatar {:gravatar-email (:manager-email employee) :gravatar-size 75}]]
-    [box :child [:h5 (str (:manager-firstname employee) " " (:manager-lastname employee))]]]])
 
 
 (defn employee-core-heading [employee]
@@ -453,34 +509,6 @@
                     :show-today? true
                     :on-change #(dispatch [:datepicker-change-dates date-field %])]]])
 
-(def inavlid-date-style {:border-radius "4px 4px 4px 4px"
-                         :border-color  "red"
-                         :border-style  "solid"
-                         :border-width  "1px"})
-
-(def valid-date-style {:border-radius "4px 4px 4px 4px"
-                       :border-color  "white"
-                       :border-style  "solid"
-                       :border-width  "1px"})
-
-
-(defn show-date-error [error-message showing-error-icon? showing-tooltip?]
-  (when @showing-error-icon? [popover-tooltip
-                              :label @error-message
-                              :position :right-center
-                              :showing? showing-tooltip?
-                              :status :error
-                              :width "150px"
-                              :anchor [:i
-                                       {:class         "zmdi zmdi-alert-circle"
-                                        :on-mouse-over (handler-fn (reset! showing-tooltip? true))
-                                        :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
-                                        :style         {:color     "red"
-                                                        :font-size "130%"}}]]))
-
-
-
-
 (defn date-component
   "A generic date input box with popup and validation features"
   ([db-model field field-label place-holder error-message showing-error-icon?]
@@ -495,7 +523,7 @@
       [
        [box :width "150px" :child [label :label field-label]]
        [h-box
-        :style (if @showing-error-icon? inavlid-date-style valid-date-style)
+        :style (if @showing-error-icon? invalid-input-style valid-input-style)
         :children
         [
          [box :child [input-text
@@ -507,7 +535,7 @@
                       :on-change #(dispatch [:input-change-dates field %])]]
          (date-input-with-popup field (field db-model) showing-date-popup? place-holder selectable-fn)]]
 
-       (show-date-error error-message showing-error-icon? showing-tooltip?)]])))
+       (show-error error-message showing-error-icon? showing-tooltip?)]])))
 
 
 (defn date-in-the-past? [date]
