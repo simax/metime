@@ -128,6 +128,7 @@
 
 (register-handler
   :set-department-manager-id
+  (enrich validate-department)
   (fn hdlr-set-department-manager-id [db [_ employee-id]]
     (dispatch [:set-department-manager-email employee-id])
     (assoc-in db [:department :manager-id] employee-id)))
