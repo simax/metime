@@ -144,78 +144,6 @@
      [:h2 {:class "text-center" :style {:color "red"}} (rand-int 25)]]]])
 
 
-(defn new-department-panel []
-  (let [dep (subscribe [:department])
-        sorted-employees (subscribe [:sorted-departments-with-employees])
-        id-fn #(:id %)
-        group-fn #(str (:department %))
-        label-fn #(str (:firstname %) " " (:lastname %))
-        selected-employee-id (reagent/atom (:manager-id @dep))
-        mgr-error-message (reagent/atom "A manager is required")
-        mgr-showing-error-icon? (reagent/atom (seq (get-in @dep [:validation-errors :manager-id])))
-        mgr-showing-tooltip? (reagent/atom false)]
-    [h-box
-     :style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
-     :gap "20px"
-     :children
-     [
-      [v-box
-       :gap "10px"
-       :children
-       [
-        [utils/gravatar {:gravatar-email "simonlomax@ekmsystems.co.uk" :gravatar-size 35}]]]
-      [v-box
-       :gap "20px"
-       :width "315px"
-       :children
-       [
-        [single-dropdown
-         :style (if @mgr-showing-error-icon? invalid-input-style valid-input-style)
-         :width "315px"
-         :placeholder "Manager"
-         :choices @sorted-employees
-         :id-fn id-fn
-         :label-fn label-fn
-         :group-fn group-fn
-         :model selected-employee-id
-         :filter-box? true
-         :on-change #(dispatch [:input-change-department :manager-id %])]
-        (show-error mgr-error-message mgr-showing-error-icon? mgr-showing-tooltip?)]]
-      [v-box
-       :gap "10px"
-       :children
-       [
-        [input-text
-         :width "315px"
-         :model (:department @dep)
-         :placeholder "Department name"
-         :on-change #(dispatch [:input-change-department :department %])
-         :status (when (seq (get-in @dep [:validation-errors :department])) :error)
-         :status-icon? (seq (get-in @dep [:validation-errors :department]))
-         :status-tooltip (apply str (get-in @dep [:validation-errors :department]))
-         :change-on-blur? false]]]
-
-      [v-box
-       :justify :center
-       :children
-       [
-        [md-circle-icon-button
-         :emphasise? true
-         :size :smaller
-         :md-icon-name "zmdi-floppy"
-         :tooltip "Save department"
-         :on-click #(dispatch [:department-save])]]]
-      [v-box
-       :justify :center
-       :children
-       [
-        [md-circle-icon-button
-         :emphasise? true
-         :size :smaller
-         :md-icon-name "zmdi-close-circle-o"
-         :tooltip "Cancel"
-         :on-click #(dispatch [:close-new-department-drawer])]]]]]))
-
 
 (defn empty-department []
   [h-box
@@ -266,124 +194,180 @@
            [common-components/loader-component "auto"]
            [department-employees-list manager-id])]]])))
 
+(defn manager-name-component [is-new? {:keys [manager-firstname manager-lastname] :as department}]
+  (let [sorted-employees (subscribe [:sorted-departments-with-employees])
+        id-fn #(:id %)
+        group-fn #(str (:department %))
+        label-fn #(str (:firstname %) " " (:lastname %))
+        selected-employee-id (reagent/atom (:manager-id department))
+        mgr-error-message (reagent/atom "A manager is required")
+        mgr-showing-error-icon? (reagent/atom (seq (get-in department [:validation-errors :manager-id])))
+        mgr-showing-tooltip? (reagent/atom false)]
 
-(defn department-list-item [{:keys [department-id department manager-id manager-firstname manager-lastname manager-email employee-count]}]
-  (let [department-drawer-open-id (subscribe [:department-draw-open-id])
-        department-name (clojure.string/replace department #"[\s]" "-")]
+    (if (= is-new? true)
+      [v-box
+       :gap "20px"
+       :width "315px"
+       :children
+       [
+        [single-dropdown
+         :style (if @mgr-showing-error-icon? invalid-input-style valid-input-style)
+         :width "315px"
+         :placeholder "Manager"
+         :choices @sorted-employees
+         :id-fn id-fn
+         :label-fn label-fn
+         :group-fn group-fn
+         :model selected-employee-id
+         :filter-box? true
+         :on-change #(dispatch [:input-change-department :manager-id %])]
+        (show-error mgr-error-message mgr-showing-error-icon? mgr-showing-tooltip?)]]
+      [box :child [:h5 (str manager-firstname " " manager-lastname)]])))
 
+(defn manager-component [is-new? department]
+  [h-box
+   :gap "10px"
+   :width "300px"
+   :align :center
+   :children
+   [
+    [utils/gravatar {:gravatar-email (:manager-email department) :gravatar-size 50}]
+    [manager-name-component is-new? department]]])
+
+(defn department-name-component [is-new? department]
+  (let [department-name (clojure.string/replace (:department department) #"[\s]" "-")]
+    (if (= is-new? true)
+      [v-box
+       :gap "10px"
+       :children
+       [
+        [input-text
+         :width "315px"
+         :model department-name
+         :placeholder "Department name"
+         :on-change #(dispatch [:input-change-department :department %])
+         :status (when (seq (get-in department [:validation-errors :department])) :error)
+         :status-icon? (seq (get-in department [:validation-errors :department]))
+         :status-tooltip (apply str (get-in department [:validation-errors :department]))
+         :change-on-blur? false]]]
+      [box
+       :width "400px"
+       :child [:h2 department-name]])))
+
+(defn department-buttons-component [is-new? {:keys [department-id employee-count]}]
+
+  (if (= is-new? true)
+    [h-box
+     :align :center
+     :gap "10px"
+     :width "100px"
+     :justify :end
+     :children
+     [
+      [md-circle-icon-button
+       :emphasise? true
+       :size :smaller
+       :md-icon-name "zmdi-floppy"
+       :tooltip "Save department"
+       :on-click #(dispatch [:department-save])]
+      [md-circle-icon-button
+       :emphasise? true
+       :size :smaller
+       :md-icon-name "zmdi-close-circle-o"
+       :tooltip "Cancel"
+       :on-click #(dispatch [:close-new-department-drawer])]]]
+
+    [h-box
+     :align :center
+     :gap "10px"
+     :width "100px"
+     :justify :end
+     :children
+     [
+      (when (zero? employee-count)
+        [md-icon-button
+         :md-icon-name "zmdi-delete"                        ;
+         :size :regular
+         :on-click #(dispatch [:department-delete department-id])])
+
+      [md-icon-button
+       :md-icon-name "zmdi-swap-vertical"                   ;
+       :size :larger
+       :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]]]))
+
+(defn department-component [is-new? department]
+  [box
+   :class "panel panel-default"
+   :child
+   [h-box
+    :class "panel-body row"
+    ;:style {:border-width "1" :border-style "solid" :border-color "white"}
+    :height "65px"
+    :justify :between
+    :children
+    [
+     [h-box
+      :gap "20px"
+      :align :center
+      :children
+      [
+       [manager-component is-new? department]
+       [department-name-component is-new? department]]]
+
+     [department-buttons-component is-new? department]]]])
+
+(defn new-department-panel [department]
+  [department-component true department])
+
+(defn department-list-item [department]
+  (let [department-drawer-open-id (subscribe [:department-draw-open-id])]
     [v-box
      :children
      [
-      [box
-       :class "panel panel-default"
-       ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-       :child
-       [h-box
-        :class "panel-body row"
-        ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-        :height "65px"
-        :justify :between
-        :children
-        [
-         [h-box
-          :gap "20px"
-          :align :center
-          :children
-          [
-           [h-box
-            :gap "10px"
-            :width "300px"
-            :align :center
-            :children
-            [
-             [utils/gravatar {:gravatar-email manager-email :gravatar-size 50}]
-             [box :child [:h5 (str manager-firstname " " manager-lastname)]]]]
-           [box
-            ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-            :width "400px"
-            :child [:h2 department-name]]]]
-
-         [h-box
-          :align :center
-          :gap "10px"
-          :width "100px"
-          :justify :end
-          :children
-          [
-           (when (zero? employee-count)
-             [box
-              ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-              :child
-              [md-icon-button
-               :md-icon-name "zmdi-delete"                  ;
-               :size :regular
-               :on-click #(dispatch [:department-delete department-id])]])
-
-           [box
-            ;:style {:border-width "1" :border-style "solid" :border-color "white"}
-            :child
-            [md-icon-button
-             :md-icon-name "zmdi-swap-vertical"             ;
-             :size :larger
-             :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]]]]
-         ]]]
-
-      [department-employees-panel @department-drawer-open-id department-id manager-id]]]))
-
+      [department-component false department]
+      [department-employees-panel @department-drawer-open-id (:department-id department) (:manager-id department)]]]))
 
 
 (defn departments-list [departments]
-  (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])]
-    (println @new-department-draw-open-class)
+  (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])
+        department (subscribe [:department])]
     [scroller
      :v-scroll :auto
-     :height "650px"
+     :height "780px"
      :width "1000px"
      :child
      [v-box
-      ;:style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
-      :class "panel-body row"
-      :justify :start
+      :gap "20px"
+      :class "panel-default"
+      :width "950px"
       :children
       [
-       [box
-        :child
-        [md-circle-icon-button
-         :md-icon-name "zmdi-plus"
-         :size :larger
-         :emphasise? true
-         :style {:background-color "red" :border-color "red"}
-         :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
-         :tooltip "Add a new department"
-         :tooltip-position :right-center]]
-       [h-box
-        :style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
-        ;:height (if (= "collapse in" @new-department-draw-open-class) "120px" "0px")
-        :align :center
-        :justify :between
-        :children
-        [
+       (when (seq @department)
          [box
+          ;:class @new-department-draw-open-class
           :child
-          [:div
-           {:class @new-department-draw-open-class
-            :style {:border-width "1" :border-style "solid" :border-color "white"}}
-           [new-department-panel]]]
+          [new-department-panel @department]])
+       (for [department departments]
+         ^{:key (:department department)}
+         [department-list-item department])]]]))
 
-         [box
-          :size "44px"
-          :child
-          [:div]]]]
 
-       [v-box
-        :gap "20px"
-        :class "panel-default"
-        :width "950px"
-        :children
-        [
-         (for [department departments]
-           ^{:key (:department department)}
-           [department-list-item department])]]]]]))
+(defn departments-list-layout [departments]
+  [h-box
+   :children
+   [(departments-list departments)
+    [box
+     :align :end
+     :child
+     [md-circle-icon-button
+      :md-icon-name "zmdi-plus"
+      :size :larger
+      :emphasise? true
+      :style {:background-color "red" :border-color "red"}
+      :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
+      :tooltip "Add a new department"
+      :tooltip-position :right-center]]
+    ]])
 
 
 (defn employee-not-found []
