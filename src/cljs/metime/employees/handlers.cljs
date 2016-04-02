@@ -76,10 +76,6 @@
   (fn hdlr-save-department [db [_]]
     db))
 
-(register-handler
-  :set-department-manager-id
-  (fn hdlr-set-department-manager-id [db [_ employee-id]]
-    (assoc-in db [:department :manager-id] employee-id)))
 
 (register-handler
   :email-uniqness-violation
@@ -131,10 +127,25 @@
     (assoc-in db [:employee property-name] new-value)))
 
 (register-handler
-  :input-change-department
+  :set-department-manager-id
+  (fn hdlr-set-department-manager-id [db [_ employee-id]]
+    (dispatch [:set-department-manager-email employee-id])
+    (assoc-in db [:department :manager-id] employee-id)))
+
+(register-handler
+  :set-department-manager-email
+  (fn hdlr-input-change [db [_ employee-id]]
+    (println (str "employee-id " employee-id))
+    (let [email(get (first (filter #(= employee-id (:id %)) (get-in @re-frame.db/app-db [:departments-with-employees]))) :email)]
+      (-> db
+          (assoc-in [:department :manager-email] email)))))
+
+(register-handler
+  :input-change-department-name
   (enrich validate-department)
-  (fn hdlr-input-change [db [_ property-name new-value]]
-    (assoc-in db [:department property-name] new-value)))
+  (fn hdlr-input-change [db [_ department-name]]
+    (assoc-in db [:department :department] department-name)))
+
 
 (register-handler
   :input-change-no-validate
@@ -299,7 +310,7 @@
   :close-department-drawer
   (fn hdlr-close-department-drawer [db [_]]
     (assoc db
-      :department {:id 0 :department "" :manager-id nil :validation-errors nil}
+      :department nil
       :department-employees nil
       :department-draw-open-id nil)))
 
@@ -309,7 +320,6 @@
     (dispatch [:fetch-department department-id])
     (dispatch [:fetch-department-employees department-id])
     (assoc db
-      :department {:id 0 :department "" :manager-id nil :validation-errors nil}
       :department-employees nil
       :department-draw-open-id department-id)))
 
@@ -326,7 +336,7 @@
   :close-new-department-drawer
   (fn hdlr-close-new-department-drawer [db [_]]
     (assoc db :new-department-draw-open? false
-              :department {:id 0 :department "" :manager-id nil :validation-errors nil})))
+              :department nil)))
 
 (register-handler
   :ui-new-department-drawer-status-toggle

@@ -10,13 +10,13 @@ from departments d left join employees e on d.manager_id = e.id
 order by d.department
 
 
--- Get all department with employees
+-- Get all departments with employees
 -- :name get-all-departments-with-employees :? :*
 select
 -- Department info
 d.id as 'department-id', d.department,
 -- Employee info
-emps.id, emps.firstname, emps.lastname
+emps.id, emps.firstname, emps.lastname, emps.email
 from departments d
     left join employees e on d.manager_id = e.id
     inner join employees emps on emps.department_id = d.id

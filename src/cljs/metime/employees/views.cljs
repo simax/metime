@@ -205,14 +205,14 @@
         mgr-showing-tooltip? (reagent/atom false)]
 
     (if (= is-new? true)
-      [v-box
-       :gap "20px"
+      [h-box
+       :gap "5px"
        :width "315px"
        :children
        [
         [single-dropdown
          :style (if @mgr-showing-error-icon? invalid-input-style valid-input-style)
-         :width "315px"
+         :width "230px"
          :placeholder "Manager"
          :choices @sorted-employees
          :id-fn id-fn
@@ -220,36 +220,42 @@
          :group-fn group-fn
          :model selected-employee-id
          :filter-box? true
-         :on-change #(dispatch [:input-change-department :manager-id %])]
+         :on-change #(dispatch [:set-department-manager-id %])]
         (show-error mgr-error-message mgr-showing-error-icon? mgr-showing-tooltip?)]]
       [box :child [:h5 (str manager-firstname " " manager-lastname)]])))
 
 (defn manager-component [is-new? department]
-  [h-box
-   :gap "10px"
-   :width "300px"
-   :align :center
-   :children
-   [
-    [utils/gravatar {:gravatar-email (:manager-email department) :gravatar-size 50}]
-    [manager-name-component is-new? department]]])
+  (let [manager-email (subscribe [:department-manager-email])]
+    (if (= is-new? true)
+      [h-box
+       :gap "10px"
+       :width "300px"
+       :align :center
+       :children
+       [
+        [utils/gravatar {:gravatar-email @manager-email :gravatar-size 50}]
+        [manager-name-component is-new? department]]]
+      [h-box
+       :gap "10px"
+       :width "300px"
+       :align :center
+       :children
+       [
+        [utils/gravatar {:gravatar-email (:manager-email department) :gravatar-size 50}]
+        [manager-name-component is-new? department]]])))
 
 (defn department-name-component [is-new? department]
   (let [department-name (clojure.string/replace (:department department) #"[\s]" "-")]
     (if (= is-new? true)
-      [v-box
-       :gap "10px"
-       :children
-       [
-        [input-text
-         :width "315px"
-         :model department-name
-         :placeholder "Department name"
-         :on-change #(dispatch [:input-change-department :department %])
-         :status (when (seq (get-in department [:validation-errors :department])) :error)
-         :status-icon? (seq (get-in department [:validation-errors :department]))
-         :status-tooltip (apply str (get-in department [:validation-errors :department]))
-         :change-on-blur? false]]]
+      [input-text
+       :width "400px"
+       :model department-name
+       :placeholder "Department name"
+       :on-change #(dispatch [:input-change-department-name %])
+       :status (when (seq (get-in department [:validation-errors :department])) :error)
+       :status-icon? (seq (get-in department [:validation-errors :department]))
+       :status-tooltip (apply str (get-in department [:validation-errors :department]))
+       :change-on-blur? false]
       [box
        :width "400px"
        :child [:h2 department-name]])))
@@ -297,11 +303,11 @@
 
 (defn department-component [is-new? department]
   [box
-   :class "panel panel-default"
+   :class (if (= is-new? true) "" "panel panel-default" )
+   :style (if (= is-new? true) {:border-width "1" :border-style "solid" :border-color "white"} {})
    :child
    [h-box
     :class "panel-body row"
-    ;:style {:border-width "1" :border-style "solid" :border-color "white"}
     :height "65px"
     :justify :between
     :children
@@ -316,8 +322,6 @@
 
      [department-buttons-component is-new? department]]]])
 
-(defn new-department-panel [department]
-  [department-component true department])
 
 (defn department-list-item [department]
   (let [department-drawer-open-id (subscribe [:department-draw-open-id])]
@@ -329,8 +333,7 @@
 
 
 (defn departments-list [departments]
-  (let [new-department-draw-open-class (subscribe [:new-department-draw-open-class])
-        department (subscribe [:department])]
+  (let [department (subscribe [:department])]
     [scroller
      :v-scroll :auto
      :height "780px"
@@ -342,11 +345,8 @@
       :width "950px"
       :children
       [
-       (when (seq @department)
-         [box
-          ;:class @new-department-draw-open-class
-          :child
-          [new-department-panel @department]])
+       (when (and (seq @department) (= (:id @department) 0))
+         [department-component true @department])
        (for [department departments]
          ^{:key (:department department)}
          [department-list-item department])]]]))
