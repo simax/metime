@@ -87,7 +87,7 @@
         [ev/employee-maintenance-form @emp]))))
 
 (defn view-employee []
-  (dispatch [:fetch-s])
+  (dispatch [:fetch-departments])
   (let [emp (subscribe [:employee])
         departments (subscribe [:departments])]
     (fn []
