@@ -71,11 +71,6 @@
    :current-year-allowance [[v/integer :message "Must be an integer"]]
    :next-year-allowance [[v/integer :message "Must be an integer"]]])
 
-(register-handler
-  :save-department
-  (fn hdlr-save-department [db [_]]
-    db))
-
 
 (register-handler
   :email-uniqness-violation
@@ -231,7 +226,7 @@
   (fn hdlr-save-failure [db [_]]
     (dispatch [:close-new-department-drawer])
     (dispatch [:fetch-departments])
-    db))
+    (assoc db :department nil)))
 
 
 (register-handler
@@ -243,7 +238,7 @@
     db))
 
 (defn build-department-by-id-endpoint [department]
-  (routes/api-endpoint-for :department-by-id :id (:id department)))
+  (routes/api-endpoint-for :department-by-id :id (:department-id department)))
 
 (defn build-employee-update-endpoint [employee]
   (routes/api-endpoint-for :employee-by-id :id (:id employee)))
@@ -260,7 +255,7 @@
   "Update an existing department"
   (utils/send-data-to-api :PUT
                           (build-department-by-id-endpoint department) (:authentication-token db) department
-                          {:valid-fn      #(dispatch [:fetch-departments])
+                          {:valid-fn      #(dispatch [:department-save-success])
                            :invalid-fn    #(dispatch [:department-save-failure])
                            :response-keys [:body :departments]}))
 
@@ -288,7 +283,7 @@
       (when (and
               (apply b/valid? department department-validation-rules)
               (not (some? (get-in department [:validation-errors]))))
-        (if (is-new-department? (:id department))
+        (if (is-new-department? (:department-id department))
           (add-new-department db department)
           (update-department db department)))
       db)))
@@ -318,7 +313,6 @@
 (register-handler
   :open-department-drawer
   (fn hndlr-open-department-drawer [db [_ department-id]]
-    (dispatch [:fetch-department department-id])
     (dispatch [:fetch-department-employees department-id])
     (assoc db
       :department-employees nil
@@ -352,7 +346,15 @@
 (register-handler
   :new-department
   (fn hdlr-new-department [db [_]]
-    (assoc db :department {:id 0 :department "" :manager-id nil})))
+    (assoc db :department {:department-id 0 :department "" :manager-id nil})))
+
+(register-handler
+  :edit-department
+  (fn hdlr-new-department [db [_ department-id]]
+    (dispatch [:fetch-department department-id])
+    db
+    ;(assoc db :department {::department-id 0 :department "" :manager-id nil})
+    ))
 
 (register-handler
   :show-failed-save-attempt

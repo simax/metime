@@ -26,9 +26,14 @@
     (make-reaction (fn department-manager-email [] (get-in @db [:department :manager-email])))))
 
 (register-sub
-  :department-id
-  (fn [db _]
-    (make-reaction (fn sub-department-id [] (:department-id @db)))))
+  :edit-mode
+  (fn [db [_ department-id]]
+    (make-reaction
+      (fn sub-department []
+        (cond
+          (and (= (get-in @db [:department :department-id]) 0) (= 0 department-id)) :add
+          (and (> (get-in @db [:department :department-id]) 0) (= (get-in @db [:department :department-id]) department-id)) :edit
+          :else :display)))))
 
 (register-sub
   :employee-dob-show-error

@@ -99,7 +99,7 @@
   :process-department-response
   (fn hdlr-process-department-response [db [_ department]]
     (let [value (js->clj department)]
-      (assoc db :department value))))
+      (assoc db :department (clojure.set/rename-keys value {:id :department-id})))))
 
 (register-handler
   :process-employee-response
@@ -128,6 +128,7 @@
                     {:success-handler-key :process-departments-response
                      :response-keys       [:body :departments]})
     db))
+
 
 (register-handler
   :fetch-department-employees

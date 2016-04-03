@@ -18,7 +18,11 @@
             [bouncer.validators :as v :refer [defvalidator]]
             [metime.data.database :as db]
             [buddy.hashers :as hashers]
-            [metime.formatting :as fmt]))
+            [metime.formatting :as fmt]
+            [taoensso.timbre :as timbre
+             :refer (log  trace  debug  info  warn  error  fatal  report
+                          logf tracef debugf infof warnf errorf fatalf reportf
+                          spy get-env log-env)]))
 
 ;; convert the body to a reader. Useful for testing in the repl
 ;; where setting the body to a string is much simpler.
@@ -381,9 +385,10 @@
              :handle-malformed ::failure-message
 
              :conflict? (fn [ctx]
-                          (let [new-department-name (:department (make-keyword-map (get-posted-data ctx)))
-                                existing-department (first (deps/get-department-by-name db/db-spec {:department new-department-name}))]
-                            (and (not (nil? existing-department)) (not= (str id) (str (:id existing-department))))))
+                          (let [new-department-name (-> ctx (get-posted-data) (make-keyword-map) (:department))
+                                existing-department (->> {:department new-department-name} (deps/get-department-by-name db/db-spec))]
+                            (info (str "existing department-name: " (:department existing-department)))
+                            (and (seq existing-department) (not= (str id) (str (:id existing-department))))))
 
              :handle-conflict {:department ["Department already exists"]}
 

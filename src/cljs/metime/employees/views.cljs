@@ -30,6 +30,12 @@
 ;(trace-forms
 ;  {:tracer (tracer :color "indigo")}
 
+(defn is-mode-change? [status]
+  "Return true if adding or editing"
+  (case status
+    :add true
+    :edit true
+    false))
 
 (defn manager-gravatar [employee]
   [v-box
@@ -194,7 +200,7 @@
            [common-components/loader-component "auto"]
            [department-employees-list manager-id])]]])))
 
-(defn manager-name-component [is-new? {:keys [manager-firstname manager-lastname] :as department}]
+(defn manager-name-component [edit-mode {:keys [manager-firstname manager-lastname] :as department}]
   (let [sorted-employees (subscribe [:sorted-departments-with-employees])
         id-fn #(:id %)
         group-fn #(str (:department %))
@@ -204,7 +210,7 @@
         mgr-showing-error-icon? (reagent/atom (seq (get-in department [:validation-errors :manager-id])))
         mgr-showing-tooltip? (reagent/atom false)]
 
-    (if (= is-new? true)
+    (if (is-mode-change? edit-mode)
       [h-box
        :gap "5px"
        :width "315px"
@@ -224,9 +230,9 @@
         (show-error mgr-error-message mgr-showing-error-icon? mgr-showing-tooltip?)]]
       [box :child [:h5 (str manager-firstname " " manager-lastname)]])))
 
-(defn manager-component [is-new? department]
+(defn manager-component [edit-mode department]
   (let [manager-email (subscribe [:department-manager-email])]
-    (if (= is-new? true)
+    (if (is-mode-change? edit-mode)
       [h-box
        :gap "10px"
        :width "300px"
@@ -234,7 +240,7 @@
        :children
        [
         [utils/gravatar {:gravatar-email @manager-email :gravatar-size 50}]
-        [manager-name-component is-new? department]]]
+        [manager-name-component edit-mode department]]]
       [h-box
        :gap "10px"
        :width "300px"
@@ -242,11 +248,11 @@
        :children
        [
         [utils/gravatar {:gravatar-email (:manager-email department) :gravatar-size 50}]
-        [manager-name-component is-new? department]]])))
+        [manager-name-component edit-mode department]]])))
 
-(defn department-name-component [is-new? department]
+(defn department-name-component [edit-mode department]
   (let [department-name (clojure.string/replace (:department department) #"[\s]" "-")]
-    (if (= is-new? true)
+    (if (is-mode-change? edit-mode)
       [input-text
        :width "400px"
        :model department-name
@@ -257,12 +263,13 @@
        :status-tooltip (apply str (get-in department [:validation-errors :department]))
        :change-on-blur? false]
       [box
+       ;:style {:border-color "Blue" :border-width "1px" :border-style "Solid"}
        :width "400px"
        :child [:h2 department-name]])))
 
-(defn department-buttons-component [is-new? {:keys [department-id employee-count]}]
+(defn department-buttons-component [edit-mode {:keys [department-id employee-count]}]
 
-  (if (= is-new? true)
+  (if (is-mode-change? edit-mode)
     [h-box
      :align :center
      :gap "10px"
@@ -290,37 +297,43 @@
      :justify :end
      :children
      [
-      (when (zero? employee-count)
-        [md-icon-button
-         :md-icon-name "zmdi-delete"                        ;
-         :size :regular
-         :on-click #(dispatch [:department-delete department-id])])
-
+      [md-icon-button
+       :md-icon-name "zmdi-edit"                            ;
+       :style {:color "Green"}
+       :on-click #(dispatch [:edit-department department-id])]
       [md-icon-button
        :md-icon-name "zmdi-swap-vertical"                   ;
-       :size :larger
-       :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]]]))
+       :on-click #(dispatch [:ui-department-drawer-status-toggle department-id])]
 
-(defn department-component [is-new? department]
-  [box
-   :class (if (= is-new? true) "" "panel panel-default" )
-   :style (if (= is-new? true) {:border-width "1" :border-style "solid" :border-color "white"} {})
-   :child
-   [h-box
-    :class "panel-body row"
-    :height "65px"
-    :justify :between
-    :children
-    [
+      (if (zero? employee-count)
+        [md-icon-button
+         :md-icon-name "zmdi-delete"                        ;
+         :style {:color "Red"}
+         :on-click #(dispatch [:department-delete department-id])]
+        [box :width "25px" :child [:div]])]]))
+
+(defn department-component [department]
+  (let [edit-mode (subscribe [:edit-mode (:department-id department)])]
+    ;(println (str "department id: " (:department-id department) " @edit-mode: " @edit-mode))
+    [box
+     :class (if (is-mode-change? @edit-mode) "" "panel panel-default")
+     :style (if (is-mode-change? @edit-mode) {:border-style "solid" :border-color "white"} {})
+     :child
      [h-box
-      :gap "20px"
-      :align :center
+      :class "panel-body row"
+      :height "65px"
+      :justify :between
       :children
       [
-       [manager-component is-new? department]
-       [department-name-component is-new? department]]]
+       [h-box
+        :gap "20px"
+        :align :center
+        :children
+        [
+         [manager-component @edit-mode department]
+         [department-name-component @edit-mode department]]]
 
-     [department-buttons-component is-new? department]]]])
+       [department-buttons-component @edit-mode department]]]]))
 
 
 (defn department-list-item [department]
@@ -328,7 +341,7 @@
     [v-box
      :children
      [
-      [department-component false department]
+      [department-component department]
       [department-employees-panel @department-drawer-open-id (:department-id department) (:manager-id department)]]]))
 
 
@@ -345,8 +358,8 @@
       :width "950px"
       :children
       [
-       (when (and (seq @department) (= (:id @department) 0))
-         [department-component true @department])
+       (when (and (seq @department) (= (:department-id @department) 0))
+         [department-component @department])
        (for [department departments]
          ^{:key (:department department)}
          [department-list-item department])]]]))

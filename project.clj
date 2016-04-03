@@ -44,6 +44,7 @@
                            [kibu/pushy "0.3.6"]
 
                            ;; Dev
+                           [com.taoensso/timbre "4.3.1"]
                            [org.clojure/tools.trace "0.7.8"]
                            [enlive "1.1.5"]
                            [selmer "0.8.0"]
