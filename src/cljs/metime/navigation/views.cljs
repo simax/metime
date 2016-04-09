@@ -24,6 +24,17 @@
                {:id :logout :text "Log out" :path (routes/site-url-for :login)}])
 
 
+(defn view-leave-types []
+  (dispatch [:set-active-navbar :leave-types])
+  ;(dispatch [:fetch-departments])
+  ;(dispatch [:fetch-departments-with-employees])
+  (let [leave-types (subscribe [:leave-types])]
+    (fn []
+      (if-not (seq @leave-types)
+        [common-components/loader-component]
+        [ev/departments-list-layout @leave-types]))))
+
+
 (defn view-login []
   (let [msg (subscribe [:authentication-failed])]
     (ev/login-form @msg)))
@@ -59,7 +70,6 @@
       (if-not (seq @departments)
         [common-components/loader-component]
         [ev/departments-list-layout @departments]))))
-
 
 (defn view-employee-add []
   (dispatch [:fetch-departments])
