@@ -13,7 +13,6 @@
 
                            [cljs-hash "0.0.2"]
                            [bouncer "1.0.0"]
-                           [metis "0.3.3"]
                            [ring-cors "0.1.7"]
                            [clj-time "0.9.0"]
                            [com.andrewmcveigh/cljs-time "0.3.13"]
