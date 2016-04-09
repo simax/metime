@@ -22,8 +22,7 @@
                {:id :calendar :text "Calendar" :path (routes/site-url-for :calendar)}
                {:id :tables :text "Tables" :path (routes/site-url-for :tables)}
                {:id :user :text "User" :path (routes/site-url-for :user)}
-               {:id :logout :text "Log out" :path (routes/site-url-for :login)}
-               {:id :test :text "Test" :path (routes/site-url-for :test)}])
+               {:id :logout :text "Log out" :path (routes/site-url-for :login)}])
 
 
 (defn view-login []
@@ -52,14 +51,6 @@
 (defn view-user []
   (dispatch [:set-active-navbar :user])
   [:div {:style {:height "500px"}} [:h1 "User page"]])
-
-(defn view-test []
-  (dispatch [:set-active-navbar :test])
-  [:div {:style {:height "500px"}} [:h1 "Test page"]])
-
-(defn view-test-level-2 []
-  (dispatch [:set-active-navbar :test])
-  [:div {:style {:height "500px"}} [:h1 "Test page - LEVEL 2"]])
 
 (defn view-not-found []
   [:div.well [:h1.text-center {:style {:color "red"}} "404 NOT FOUND !!!!!"]])
@@ -129,8 +120,6 @@
 (defmethod set-active-view :employees [] view-employees)
 (defmethod set-active-view :employee-add [] view-employee-add)
 (defmethod set-active-view :employee-editor [] view-employee)
-(defmethod set-active-view :test [] view-test)
-(defmethod set-active-view :test-level-2 [] view-test-level-2)
 (defmethod set-active-view :not-found [] view-not-found)
 
 (defn set-active-navbar [current-nav-bar current-view]
