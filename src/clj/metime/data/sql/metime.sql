@@ -1,4 +1,8 @@
 
+-- Get all leave types
+-- :name get-all-leave-types :? :*
+select id, leave_type, reduce_leave from leave_types order by leave_type
+
 -- Get all departments
 -- :name get-all-departments :? :*
 select

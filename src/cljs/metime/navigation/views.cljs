@@ -3,6 +3,8 @@
   (:require [metime.navigation.handlers]
             [metime.navigation.subs]
             [metime.employees.views :as ev]
+            [metime.leave-types.subs]
+            [metime.leave-types.views :as lvt]
             [metime.routes :as routes]
             [metime.common.views :as common-components]
             [re-com.core :refer [box throbber]]
@@ -26,13 +28,12 @@
 
 (defn view-leave-types []
   (dispatch [:set-active-navbar :leave-types])
-  ;(dispatch [:fetch-departments])
-  ;(dispatch [:fetch-departments-with-employees])
+  (dispatch [:fetch-leave-types])
   (let [leave-types (subscribe [:leave-types])]
     (fn []
       (if-not (seq @leave-types)
         [common-components/loader-component]
-        [ev/departments-list-layout @leave-types]))))
+        [lvt/leave-types-list-layout @leave-types]))))
 
 
 (defn view-login []
@@ -50,9 +51,9 @@
   (dispatch [:set-active-navbar :calendar])
   [:div {:style {:height "500px"}} [:h1 "Calendar page"]])
 
-(defn view-leave-types []
-  (dispatch [:set-active-navbar :leave-types])
-  [:div {:style {:height "500px"}} [:h1 "Leave types page"]])
+;(defn view-leave-types []
+;  (dispatch [:set-active-navbar :leave-types])
+;  [:div {:style {:height "500px"}} [:h1 "Leave types page"]])
 
 (defn view-user []
   (dispatch [:set-active-navbar :user])

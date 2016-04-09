@@ -6,6 +6,7 @@
           :department                     nil
           :department-employees           nil
           :departments                    nil
+          :leave-types                    nil
           :fetching-department-employees? false
           :view                           :home
           :route-params                   [:home]

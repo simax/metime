@@ -49,9 +49,13 @@
              (ANY "/holidays" [] (res/holidays))
              (GET "/authtoken" [] (res/build-auth-token))
              (context "/departments" []
-               (ANY "/" [] (res/departments)) ; fn [_] {:status 200 :body "This is the /departments route"}
+               (ANY "/" [] (res/departments))               ; fn [_] {:status 200 :body "This is the /departments route"}
                (ANY "/:id" [id] (res/department id))
                (GET "/:id/employees" [id] (res/department-employees id)))
+             (context "/leave-types" []
+               (ANY "/" [] (res/leave-types))               ; fn [_] {:status 200 :body "This is the /departments route"}
+               ;(ANY "/:id" [id] (res/leave-type id))
+               )
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))
 

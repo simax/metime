@@ -28,6 +28,9 @@
                                    ["/" [#"\d*" :id] ""]           :department-by-id
                                    ["/" [#"\d*" :id] "/employees"] :department-employees}]
                   [["/department?name=" :name] :department-by-name]
+                  ["/leave-types" {""                    :leave-types
+                                   ["/" [#"\d*" :id] ""] :leave-type-by-id}]
+                  [["/leave-type?name=" :name] :leave-type-by-name]
                   ["/employees" :employees]
                   [["/employee?id=" [#"\d*" :id]] :employee-by-id]
                   [["/employee?email=" :email] :employee-by-email]]])

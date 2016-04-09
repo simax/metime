@@ -1,6 +1,7 @@
 (ns metime.resources
   (:require [liberator.core :refer [resource defresource]]
             [liberator.representation :refer [as-response]]
+            [metime.data.departments :as ltypes]
             [metime.data.departments :as deps]
             [metime.data.employees :as emps]
             [metime.data.holidays :as hols]
@@ -274,6 +275,9 @@
 (defn fetch-departments []
   (deps/get-all-departments db/db-spec))
 
+(defn fetch-leave-types []
+  (ltypes/get-all-leave-types db/db-spec))
+
 ;;TODO: Need a password reset resource.
 
 (defn get-credentials [ctx]
@@ -347,7 +351,6 @@
              :post-redirect? false
 
              :handle-ok ::departments)
-
 
 (defresource department [id]
              (secured-resource)
@@ -449,6 +452,44 @@
                                  {:location (::location ctx)}))
 
              :handle-ok ::employees)
+
+
+(defresource leave-types []
+             (secured-resource)
+             :available-media-types ["application/edn" "application/json"]
+             :allowed-methods [:get :post]
+             :exists? (fn [ctx]
+                        (if (requested-method ctx :get)
+                          [true {::leave-types {:leave-types (fetch-leave-types)}}]))
+
+
+             ;:malformed? (fn [ctx]
+             ;              (if (requested-method ctx :post)
+             ;                (let [form-data (make-keyword-map (get-posted-data ctx))
+             ;                      validation-result (validate-department form-data)]
+             ;                  (if (seq validation-result)
+             ;                    [true {::failure-message validation-result}]
+             ;                    false))
+             ;                false))
+             ;
+             ;:handle-malformed ::failure-message
+             ;
+             ;:post! (fn [ctx]
+             ;         "We allow the DB to enforce its constraints here, rather than relying on the processable? descision point.
+             ;         That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
+             ;         (if (requested-method ctx :post)
+             ;           (try
+             ;             (when-let [new-id (deps/insert-department db/db-spec (make-keyword-map (get-posted-data ctx)))]
+             ;               {::location (routes/api-endpoint-for :department-by-id :id new-id)})
+             ;             (catch Exception e {::failure-message "Department already exists"}))))
+             ;
+             ;:post-redirect? false
+
+             :handle-ok ::leave-types)
+
+
+
+
 
 
 

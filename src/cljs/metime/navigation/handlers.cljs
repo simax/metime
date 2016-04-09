@@ -40,6 +40,20 @@
                  :view :home)))))
 
 (register-handler
+  :process-leave-types-response
+  (fn hdlr-process-leave-types-response [db [_ leave-types]]
+    (let [value (js->clj leave-types)]
+      (assoc db :leave-types value))))
+
+(register-handler
+  :fetch-leave-types
+  (fn hdlr-fetch-leave-types [db [_]]
+    (utils/call-api :GET (routes/api-endpoint-for :leave-types) db
+                    {:success-handler-key :process-leave-types-response
+                     :response-keys       [:body :leave-types]})
+    db))
+
+(register-handler
   :fetching-complete
   (fn hdlr-fetching [db [_]]
     (assoc db :fetching-department-employees? false)))
