@@ -351,10 +351,9 @@
 (register-handler
   :edit-department
   (fn hdlr-new-department [db [_ department-id]]
+    (dispatch [:close-department-drawer])
     (dispatch [:fetch-department department-id])
-    db
-    ;(assoc db :department {::department-id 0 :department "" :manager-id nil})
-    ))
+    db))
 
 (register-handler
   :show-failed-save-attempt

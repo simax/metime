@@ -268,7 +268,6 @@
        :child [:h2 department-name]])))
 
 (defn department-buttons-component [edit-mode {:keys [department-id employee-count]}]
-
   (if (is-mode-change? edit-mode)
     [h-box
      :align :center
@@ -314,10 +313,9 @@
 
 (defn department-component [department]
   (let [edit-mode (subscribe [:edit-mode (:department-id department)])]
-    ;(println (str "department id: " (:department-id department) " @edit-mode: " @edit-mode))
     [box
      :class (if (is-mode-change? @edit-mode) "" "panel panel-default")
-     :style (if (is-mode-change? @edit-mode) {:border-style "solid" :border-color "white"} {})
+     :style (if (is-mode-change? @edit-mode) {:border-style "solid" :border-color "white" :margin-bottom "20px"} {})
      :child
      [h-box
       :class "panel-body row"
@@ -353,8 +351,7 @@
      :width "1000px"
      :child
      [v-box
-      :gap "20px"
-      :class "panel-default"
+      ;:gap "20px"
       :width "950px"
       :children
       [
