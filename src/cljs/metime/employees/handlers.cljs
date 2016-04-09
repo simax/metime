@@ -196,7 +196,7 @@
                        :dob                    nil
                        :startdate              nil
                        :enddate                nil
-                       :department-id          (:id dep)
+                       :department-id          (:department-id dep)
                        :department             (:department dep)
                        :manager-id             (:manager-id dep)
                        :manager-firstname      (:manager-firstname dep)
@@ -313,6 +313,7 @@
 (register-handler
   :open-department-drawer
   (fn hndlr-open-department-drawer [db [_ department-id]]
+    (dispatch [:fetch-department department-id])
     (dispatch [:fetch-department-employees department-id])
     (assoc db
       :department-employees nil

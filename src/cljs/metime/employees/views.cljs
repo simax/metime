@@ -30,7 +30,7 @@
 ;(trace-forms
 ;  {:tracer (tracer :color "indigo")}
 
-(defn is-mode-change? [status]
+(defn is-mutating-mode? [status]
   "Return true if adding or editing"
   (case status
     :add true
@@ -210,7 +210,7 @@
         mgr-showing-error-icon? (reagent/atom (seq (get-in department [:validation-errors :manager-id])))
         mgr-showing-tooltip? (reagent/atom false)]
 
-    (if (is-mode-change? edit-mode)
+    (if (is-mutating-mode? edit-mode)
       [h-box
        :gap "5px"
        :width "315px"
@@ -232,7 +232,7 @@
 
 (defn manager-component [edit-mode department]
   (let [manager-email (subscribe [:department-manager-email])]
-    (if (is-mode-change? edit-mode)
+    (if (is-mutating-mode? edit-mode)
       [h-box
        :gap "10px"
        :width "300px"
@@ -252,7 +252,7 @@
 
 (defn department-name-component [edit-mode department]
   (let [department-name (clojure.string/replace (:department department) #"[\s]" "-")]
-    (if (is-mode-change? edit-mode)
+    (if (is-mutating-mode? edit-mode)
       [input-text
        :width "400px"
        :model department-name
@@ -267,7 +267,7 @@
        :child [:h2 department-name]])))
 
 (defn department-buttons-component [edit-mode {:keys [department-id employee-count]}]
-  (if (is-mode-change? edit-mode)
+  (if (is-mutating-mode? edit-mode)
     [h-box
      :align :center
      :gap "10px"
@@ -312,10 +312,10 @@
 
 (defn department-component [dept]
   (let [edit-mode (subscribe [:edit-mode (:department-id dept)])
-        department (if (is-mode-change? @edit-mode) (subscribe [:department]) (reagent.ratom/reaction dept))]
+        department (if (is-mutating-mode? @edit-mode) (deref (subscribe [:department])) dept)]
     [box
-     :class (if (is-mode-change? @edit-mode) "" "panel panel-default")
-     :style (if (is-mode-change? @edit-mode) {:border-style "solid" :border-color "white" :margin-bottom "20px"} {})
+     :class (if (is-mutating-mode? @edit-mode) "" "panel panel-default")
+     :style (if (is-mutating-mode? @edit-mode) {:border-style "solid" :border-color "white" :margin-bottom "20px"} {})
      :child
      [h-box
       :class "panel-body row"
@@ -328,10 +328,10 @@
         :align :center
         :children
         [
-         [manager-component @edit-mode @department]
-         [department-name-component @edit-mode @department]]]
+         [manager-component @edit-mode department]
+         [department-name-component @edit-mode department]]]
 
-       [department-buttons-component @edit-mode @department]]]]))
+       [department-buttons-component @edit-mode department]]]]))
 
 
 (defn department-list-item [department]

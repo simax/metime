@@ -31,8 +31,8 @@
     (make-reaction
       (fn sub-department []
         (cond
-          (and (= (get-in @db [:department :department-id]) 0) (= 0 department-id)) :add
-          (and (> (get-in @db [:department :department-id]) 0) (= (get-in @db [:department :department-id]) department-id)) :edit
+          (and (= (get-in @db [:department-draw-open-id]) nil) (= (get-in @db [:department :department-id]) 0) (= 0 department-id)) :add
+          (and (= (get-in @db [:department-draw-open-id]) nil) (> (get-in @db [:department :department-id]) 0) (= (get-in @db [:department :department-id]) department-id)) :edit
           :else :display)))))
 
 (register-sub
