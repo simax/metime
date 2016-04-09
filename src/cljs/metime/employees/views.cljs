@@ -263,7 +263,6 @@
        :status-tooltip (apply str (get-in department [:validation-errors :department]))
        :change-on-blur? false]
       [box
-       ;:style {:border-color "Blue" :border-width "1px" :border-style "Solid"}
        :width "400px"
        :child [:h2 department-name]])))
 
@@ -311,8 +310,9 @@
          :on-click #(dispatch [:department-delete department-id])]
         [box :width "25px" :child [:div]])]]))
 
-(defn department-component [department]
-  (let [edit-mode (subscribe [:edit-mode (:department-id department)])]
+(defn department-component [dept]
+  (let [edit-mode (subscribe [:edit-mode (:department-id dept)])
+        department (if (is-mode-change? @edit-mode) (subscribe [:department]) (reagent.ratom/reaction dept))]
     [box
      :class (if (is-mode-change? @edit-mode) "" "panel panel-default")
      :style (if (is-mode-change? @edit-mode) {:border-style "solid" :border-color "white" :margin-bottom "20px"} {})
@@ -328,10 +328,10 @@
         :align :center
         :children
         [
-         [manager-component @edit-mode department]
-         [department-name-component @edit-mode department]]]
+         [manager-component @edit-mode @department]
+         [department-name-component @edit-mode @department]]]
 
-       [department-buttons-component @edit-mode department]]]]))
+       [department-buttons-component @edit-mode @department]]]]))
 
 
 (defn department-list-item [department]
