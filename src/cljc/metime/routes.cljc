@@ -10,9 +10,8 @@
 (def site-routes ["/"
                   [
                    ["" :home]
-                   ["tables" :tables]
+                   ["leave-types" :leave-types]
                    ["calendar" :calendar]
-                   ["file-manager" :file-manager]
                    ["user" :user]
                    ["login" :login]
                    ["employee" {"/add" :employee-add}]

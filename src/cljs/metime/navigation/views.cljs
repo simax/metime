@@ -18,9 +18,8 @@
 
 (def nav-bars [
                {:id :employees :text "Employees" :path (routes/site-url-for :employees)}
-               {:id :file-manager :text "File Manager" :path (routes/site-url-for :file-manager)}
                {:id :calendar :text "Calendar" :path (routes/site-url-for :calendar)}
-               {:id :tables :text "Tables" :path (routes/site-url-for :tables)}
+               {:id :leave-types :text "Leave types" :path (routes/site-url-for :leave-types)}
                {:id :user :text "User" :path (routes/site-url-for :user)}
                {:id :logout :text "Log out" :path (routes/site-url-for :login)}])
 
@@ -40,13 +39,9 @@
   (dispatch [:set-active-navbar :calendar])
   [:div {:style {:height "500px"}} [:h1 "Calendar page"]])
 
-(defn view-tables []
-  (dispatch [:set-active-navbar :tables])
-  [:div {:style {:height "500px"}} [:h1 "Tables page"]])
-
-(defn view-file-manager []
-  (dispatch [:set-active-navbar :file-manager])
-  [:div {:style {:height "500px"}} [:h1 "File manager page"]])
+(defn view-leave-types []
+  (dispatch [:set-active-navbar :leave-types])
+  [:div {:style {:height "500px"}} [:h1 "Leave types page"]])
 
 (defn view-user []
   (dispatch [:set-active-navbar :user])
@@ -113,9 +108,8 @@
 (defmulti set-active-view identity)
 (defmethod set-active-view :home [] view-home)
 (defmethod set-active-view :login [] view-login)
-(defmethod set-active-view :tables [] view-tables)
+(defmethod set-active-view :leave-types [] view-leave-types)
 (defmethod set-active-view :calendar [] view-calendar)
-(defmethod set-active-view :file-manager [] view-file-manager)
 (defmethod set-active-view :user [] view-user)
 (defmethod set-active-view :employees [] view-employees)
 (defmethod set-active-view :employee-add [] view-employee-add)
