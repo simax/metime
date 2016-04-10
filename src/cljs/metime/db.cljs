@@ -13,5 +13,5 @@
           :route-params                   [:home]
           :authentication-token           ""
           :nav-bar                        nil
-          :department-draw-open-id        nil
-          :leave-type-draw-open-id        nil})
+          :department-drawer-open-id      nil
+          :leave-type-drawer-open-id      nil})

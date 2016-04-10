@@ -46,6 +46,15 @@
       (assoc db :leave-types value))))
 
 (register-handler
+  :fetch-leave-type
+  (fn hdlr-fetch-leave-type [db [_ id]]
+    (utils/call-api :GET (routes/api-endpoint-for :leave-type-by-id :id id) db
+                    {:success-handler-key :api-response->leave-type
+                     :response-keys       [:body]})
+    db))
+
+
+(register-handler
   :fetch-leave-types
   (fn hdlr-fetch-leave-types [db [_]]
     (utils/call-api :GET (routes/api-endpoint-for :leave-types) db

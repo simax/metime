@@ -24,41 +24,91 @@
             [re-frame-tracer.core :refer [tracer]]
             [metime.common.handlers]))
 
+(def leave-type-validation-rules
+  [:leave-type [[v/required :message "leave type name is required"]]])
+
+(defn validate-leave-type [db]
+  (let [leave-type (:leave-type db)
+        result [(first (apply b/validate leave-type leave-type-validation-rules))]
+        errors (first result)]
+    (assoc-in db [:leave-type :validation-errors] errors)))
+
+
+(register-handler
+  :input-change-leave-type-name
+  (enrich validate-leave-type)
+  (fn hdlr-input-change [db [_ leave-type-name]]
+    (assoc-in db [:leave-type :leave-type] leave-type-name)))
+
+
+(register-handler
+  :new-leave-type
+  (fn hdlr-new-leave-type [db [_]]
+    (assoc db :leave-type {:leave-type-id 0 :leave-type "" })))
+
+(register-handler
+  :edit-leave-type
+  (fn hdlr-new-leave-type [db [_ leave-type-id]]
+    (dispatch [:close-leave-type-drawer])
+    (dispatch [:fetch-leave-type leave-type-id])
+    db))
+
+
 (register-handler
   :close-leave-type-drawer
   (fn hdlr-close-leave-type-drawer [db [_]]
     (assoc db
       :leave-type nil
-      :leave-type-draw-open-id nil)))
+      :leave-type-drawer-open-id nil)))
 
 (register-handler
   :open-leave-type-drawer
   (fn hndlr-open-leave-type-drawer [db [_ leave-type-id]]
     (dispatch [:fetch-leave-type leave-type-id])
     (assoc db
-      :leave-type-draw-open-id leave-type-id)))
+      :leave-type-drawer-open-id leave-type-id)))
 
 (register-handler
   :ui-leave-type-drawer-status-toggle
   (fn hdlr-ui-leave-type-drawer-status-toggle [db [_ leave-type-id]]
     (dispatch [:close-new-leave-type-drawer])
-    (if (= (:leave-type-draw-open-id db) leave-type-id)
+    (if (= (:leave-type-drawer-open-id db) leave-type-id)
       (dispatch [:close-leave-type-drawer])
       (dispatch [:open-leave-type-drawer leave-type-id]))
     db))
 
 (register-handler
-  :close-new-department-drawer
-  (fn hdlr-close-new-department-drawer [db [_]]
-    (assoc db :new-department-draw-open? false
-              :department nil)))
+  :close-new-leave-type-drawer
+  (fn hdlr-close-new-leave-type-drawer [db [_]]
+    (assoc db :new-leave-type-drawer-open? false
+              :leave-type nil)))
 
 (register-handler
-  :ui-new-department-drawer-status-toggle
-  (fn hdlr-ui-new-department-drawer-status-toggle [db [_]]
-    (dispatch [:close-department-drawer])
-    (if (:new-department-draw-open? db)
-      (assoc db :new-department-draw-open? false)
+  :ui-new-leave-type-drawer-status-toggle
+  (fn hdlr-ui-new-leave-type-drawer-status-toggle [db [_]]
+    (dispatch [:close-leave-type-drawer])
+    (if (:new-leave-type-drawer-open? db)
+      (assoc db :new-leave-type-drawer-open? false)
       (do
-        (dispatch [:new-department])
-        (assoc db :new-department-draw-open? true)))))
+        (dispatch [:new-leave-type])
+        (assoc db :new-leave-type-drawer-open? true)))))
+
+(register-handler
+  :close-new-leave-type-drawer
+  (fn hdlr-close-new-leave-type-drawer [db [_]]
+    (assoc db :new-leave-type-drawer-open? false
+              :leave-type nil)))
+
+(register-handler
+  :ui-new-leave-type-drawer-status-toggle
+  (fn hdlr-ui-new-leave-type-drawer-status-toggle [db [_]]
+    (dispatch [:close-leave-type-drawer])
+    (if (:new-leave-type-drawer-open? db)
+      (assoc db :new-leave-type-drawer-open? false)
+      (do
+        (dispatch [:new-leave-type])
+        (assoc db :new-leave-type-drawer-open? true)))))
+
+
+
+

@@ -335,7 +335,7 @@
 
 
 (defn department-list-item [department]
-  (let [department-drawer-open-id (subscribe [:department-draw-open-id])]
+  (let [department-drawer-open-id (subscribe [:department-drawer-open-id])]
     [v-box
      :children
      [
@@ -351,7 +351,6 @@
      :width "1000px"
      :child
      [v-box
-      ;:gap "20px"
       :width "950px"
       :children
       [

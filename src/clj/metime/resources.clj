@@ -1,7 +1,7 @@
 (ns metime.resources
   (:require [liberator.core :refer [resource defresource]]
             [liberator.representation :refer [as-response]]
-            [metime.data.departments :as ltypes]
+            [metime.data.leave-types :as ltypes]
             [metime.data.departments :as deps]
             [metime.data.employees :as emps]
             [metime.data.holidays :as hols]
@@ -278,6 +278,17 @@
 (defn fetch-leave-types []
   (ltypes/get-all-leave-types db/db-spec))
 
+(defn delete-leave-type! [id]
+  "Delete the leave-type with the given id - providing it isn't used on a booking"
+  (let [absence=bookings (deps/get-department-by-id-with-employees db/db-spec {:id id})]
+    (if (empty? department-with-employees)
+      true
+      (if (every? #(nil? (:lastname %)) department-with-employees)
+        (= 1 (deps/delete-department db/db-spec {:id id}))
+        false))))
+
+
+
 ;;TODO: Need a password reset resource.
 
 (defn get-credentials [ctx]
@@ -466,7 +477,7 @@
              ;:malformed? (fn [ctx]
              ;              (if (requested-method ctx :post)
              ;                (let [form-data (make-keyword-map (get-posted-data ctx))
-             ;                      validation-result (validate-department form-data)]
+             ;                      validation-result (validate-leave-type form-data)]
              ;                  (if (seq validation-result)
              ;                    [true {::failure-message validation-result}]
              ;                    false))
@@ -479,19 +490,72 @@
              ;         That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
              ;         (if (requested-method ctx :post)
              ;           (try
-             ;             (when-let [new-id (deps/insert-department db/db-spec (make-keyword-map (get-posted-data ctx)))]
-             ;               {::location (routes/api-endpoint-for :department-by-id :id new-id)})
-             ;             (catch Exception e {::failure-message "Department already exists"}))))
+             ;             (when-let [new-id (deps/insert-leave-type db/db-spec (make-keyword-map (get-posted-data ctx)))]
+             ;               {::location (routes/api-endpoint-for :leave-type-by-id :id new-id)})
+             ;             (catch Exception e {::failure-message "leave-type already exists"}))))
              ;
              ;:post-redirect? false
 
              :handle-ok ::leave-types)
 
+(defresource leave-type [id]
+             (secured-resource)
+             :available-media-types ["application/edn" "application/json"]
+             :allowed-methods [:get :delete :put]
+             :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
+             :can-put-to-missing? false
+             :exists? (fn [ctx]
+                        (if (or (requested-method ctx :get) (requested-method ctx :put))
+                          (let [leave-type (ltypes/get-leave-type-by-id db/db-spec {:id id})]
+                            (if (empty? leave-type)
+                              false
+                              [true {::leave-type leave-type}]))
+                          true))
 
+             :processable? (fn [ctx]
+                             (if (requested-method ctx :delete)
+                               (let [leave-type (ltypes/get-leave-type-by-id db/db-spec {:id id})]
+                                 (if (empty? (:employees leave-type))
+                                   true
+                                   [false {::failure-message "Unable to delete, the leave-type contains employees"}]))
+                               true))
 
+             :handle-unprocessable-entity ::failure-message
 
+             ;:malformed? (fn [ctx]
+             ;              (if (requested-method ctx :put)
+             ;                (let [form-data (make-keyword-map (get-posted-data ctx))
+             ;                      validation-result (validate-leave-type form-data)]
+             ;                  (if (seq validation-result)
+             ;                    [true {::failure-message validation-result}]
+             ;                    false))
+             ;                false))
+             ;
+             ;:handle-malformed ::failure-message
 
+             :conflict? (fn [ctx]
+                          (let [new-leave-type-name (-> ctx (get-posted-data) (make-keyword-map) (:leave-type))
+                                existing-leave-type (->> {:leave-type new-leave-type-name} (ltypes/get-leave-type-by-name db/db-spec))]
+                            (info (str "existing leave-type-name: " (:leave-type existing-leave-type)))
+                            (and (seq existing-leave-type) (not= (str id) (str (:id existing-leave-type))))))
 
+             :handle-conflict {:leave-type ["leave-type already exists"]}
+
+             :delete! (fn [ctx]
+                        (delete-leave-type! id))
+
+             :put! (fn [ctx]
+                     (let [new-data (make-keyword-map (get-posted-data ctx))
+                           existing-data (::leave-type ctx)
+                           updated-data (merge existing-data new-data)]
+                       (ltypes/update-leave-type db/db-spec updated-data)
+                       {::leave-type updated-data}))
+
+             :new? (fn [ctx] (nil? ::leave-type))
+             :respond-with-entity? (fn [ctx] (not (empty? (::leave-type ctx))))
+             :multiple-representations? false
+             :handle-ok ::leave-type
+             :handle-not-found "leave-type not found")
 
 (defn find-employee-by [employee-finder-fn &criteria]
   (fn [ctx]

@@ -233,7 +233,7 @@
 (register-handler
   :switch-view-to-employees
   (fn hdlr-switch-view-to-employees [db [_ _]]
-    (when-let [department-id (:department-draw-open-id db)]
+    (when-let [department-id (:department-drawer-open-id db)]
       (dispatch [:fetch-department-employees department-id]))
     (dispatch [:set-active-view :employees])
     db))
@@ -309,7 +309,7 @@
     (assoc db
       :department nil
       :department-employees nil
-      :department-draw-open-id nil)))
+      :department-drawer-open-id nil)))
 
 (register-handler
   :open-department-drawer
@@ -318,13 +318,13 @@
     (dispatch [:fetch-department-employees department-id])
     (assoc db
       :department-employees nil
-      :department-draw-open-id department-id)))
+      :department-drawer-open-id department-id)))
 
 (register-handler
   :ui-department-drawer-status-toggle
   (fn hdlr-ui-department-drawer-status-toggle [db [_ department-id]]
     (dispatch [:close-new-department-drawer])
-    (if (= (:department-draw-open-id db) department-id)
+    (if (= (:department-drawer-open-id db) department-id)
       (dispatch [:close-department-drawer])
       (dispatch [:open-department-drawer department-id]))
     db))
@@ -332,18 +332,18 @@
 (register-handler
   :close-new-department-drawer
   (fn hdlr-close-new-department-drawer [db [_]]
-    (assoc db :new-department-draw-open? false
+    (assoc db :new-department-drawer-open? false
               :department nil)))
 
 (register-handler
   :ui-new-department-drawer-status-toggle
   (fn hdlr-ui-new-department-drawer-status-toggle [db [_]]
     (dispatch [:close-department-drawer])
-    (if (:new-department-draw-open? db)
-      (assoc db :new-department-draw-open? false)
+    (if (:new-department-drawer-open? db)
+      (assoc db :new-department-drawer-open? false)
       (do
         (dispatch [:new-department])
-        (assoc db :new-department-draw-open? true)))))
+        (assoc db :new-department-drawer-open? true)))))
 
 (register-handler
   :new-department
