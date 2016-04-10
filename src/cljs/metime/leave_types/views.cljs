@@ -221,7 +221,7 @@
       :emphasise? true
       :style {:background-color "red" :border-color "red"}
       :on-click #(dispatch [:ui-new-department-drawer-status-toggle])
-      :tooltip "Add a new leave-type"
+      :tooltip "Add a new leave type"
       :tooltip-position :right-center]]
     ]])
 

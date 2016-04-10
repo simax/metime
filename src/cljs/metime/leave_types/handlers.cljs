@@ -21,4 +21,5 @@
             [bouncer.core :as b]
             [bouncer.validators :as v]
             [clairvoyant.core :refer-macros [trace-forms]]
-            [re-frame-tracer.core :refer [tracer]]))
+            [re-frame-tracer.core :refer [tracer]]
+            [metime.common.handlers]))

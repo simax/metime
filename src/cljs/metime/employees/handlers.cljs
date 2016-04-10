@@ -21,7 +21,8 @@
             [bouncer.core :as b]
             [bouncer.validators :as v]
             [clairvoyant.core :refer-macros [trace-forms]]
-            [re-frame-tracer.core :refer [tracer]]))
+            [re-frame-tracer.core :refer [tracer]]
+            [metime.common.handlers]))
 
 ;(trace-forms
 ; {:tracer (tracer :color "green")}
@@ -244,7 +245,7 @@
   (routes/api-endpoint-for :employee-by-id :id (:id employee)))
 
 (defn add-new-department [db department]
-  "Add a new department via the API"
+  "Add a new department"
   (utils/send-data-to-api :POST
                           (routes/api-endpoint-for :departments) (:authentication-token db) department
                           {:valid-fn      #(dispatch [:department-save-success])
@@ -361,52 +362,6 @@
   (fn hdlr-show-failed-save-attempt [db [_ errors]]
     (assoc-in db [:employee :validation-errors] errors)))
 
-(defn set-auth-cookie! [token]
-  (let [expiry (* 60 60 24 30)]                             ; 30 days (secs mins hours days)
-    (utils/set-cookie! "auth" token {:max-age expiry :path "/"})))
-
-(register-handler
-  :authenticated
-  (fn hdlr-authenticated [db [_ token]]
-    (routes/set-route-token! [:home])
-    (assoc db :authentication-token token :authentication-failed-msg "" :nav-bar nil :view :home)))
-
-(register-handler
-  :authentication-failed
-  (fn hdlr-authentication-failed [db [_]]
-    (assoc db :authentication-token ""
-              :authentication-failed-msg "Invalid email/password"
-              :view :login)))
-
-(defn response-ok? [response]
-  (= 200 (:status response)))
-
-(defn build-url [db]
-  (str (routes/api-endpoint-for :authtoken) "?email=" (get-in db [:employee :email]) "&" "password=" (get-in db [:employee :password])))
-
-(register-handler
-  :log-in
-  (fn hdlr-log-in [db [_]]
-    (go
-      (let [url (build-url db)
-            response (<! (http/get url))
-            token (if (response-ok? response)
-                    ((js->clj (response :body)) :token)
-                    "")]
-        (set-auth-cookie! token)
-        (if (empty? token)
-          (dispatch [:authentication-failed])
-          (dispatch [:authenticated token]))))
-    db))
-
-(register-handler
-  :log-out
-  (fn hdlr-log-out [db [_]]
-    (utils/remove-cookie! "auth")
-    (assoc db
-      :view :login
-      :authentication-failed-msg "")))
-
 (register-handler
   :employee-delete-success
   (fn hdlr-employee-delete-success [db [_ _]]
@@ -431,6 +386,7 @@
                     {:success-handler-key :fetch-departments
                      :response-keys       [:body]})
     db))
+
 
 
 ;)
