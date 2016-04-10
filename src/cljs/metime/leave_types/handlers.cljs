@@ -23,3 +23,42 @@
             [clairvoyant.core :refer-macros [trace-forms]]
             [re-frame-tracer.core :refer [tracer]]
             [metime.common.handlers]))
+
+(register-handler
+  :close-leave-type-drawer
+  (fn hdlr-close-leave-type-drawer [db [_]]
+    (assoc db
+      :leave-type nil
+      :leave-type-draw-open-id nil)))
+
+(register-handler
+  :open-leave-type-drawer
+  (fn hndlr-open-leave-type-drawer [db [_ leave-type-id]]
+    (dispatch [:fetch-leave-type leave-type-id])
+    (assoc db
+      :leave-type-draw-open-id leave-type-id)))
+
+(register-handler
+  :ui-leave-type-drawer-status-toggle
+  (fn hdlr-ui-leave-type-drawer-status-toggle [db [_ leave-type-id]]
+    (dispatch [:close-new-leave-type-drawer])
+    (if (= (:leave-type-draw-open-id db) leave-type-id)
+      (dispatch [:close-leave-type-drawer])
+      (dispatch [:open-leave-type-drawer leave-type-id]))
+    db))
+
+(register-handler
+  :close-new-department-drawer
+  (fn hdlr-close-new-department-drawer [db [_]]
+    (assoc db :new-department-draw-open? false
+              :department nil)))
+
+(register-handler
+  :ui-new-department-drawer-status-toggle
+  (fn hdlr-ui-new-department-drawer-status-toggle [db [_]]
+    (dispatch [:close-department-drawer])
+    (if (:new-department-draw-open? db)
+      (assoc db :new-department-draw-open? false)
+      (do
+        (dispatch [:new-department])
+        (assoc db :new-department-draw-open? true)))))

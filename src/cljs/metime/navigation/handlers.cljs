@@ -40,8 +40,8 @@
                  :view :home)))))
 
 (register-handler
-  :process-leave-types-response
-  (fn hdlr-process-leave-types-response [db [_ leave-types]]
+  :api-resposne->leave-types
+  (fn hdlr-api-reposne->leave-types [db [_ leave-types]]
     (let [value (js->clj leave-types)]
       (assoc db :leave-types value))))
 
@@ -49,12 +49,12 @@
   :fetch-leave-types
   (fn hdlr-fetch-leave-types [db [_]]
     (utils/call-api :GET (routes/api-endpoint-for :leave-types) db
-                    {:success-handler-key :process-leave-types-response
+                    {:success-handler-key :api-resposne->leave-types
                      :response-keys       [:body :leave-types]})
     db))
 
 (register-handler
-  :fetching-complete
+  :fetching-department-employees-complete
   (fn hdlr-fetching [db [_]]
     (assoc db :fetching-department-employees? false)))
 
@@ -91,33 +91,33 @@
     (assoc db :nav-bar nav-bar-id)))
 
 (register-handler
-  :process-department-employees-response
-  (fn hdlr-process-department-employees-response [db [_ department-employees]]
+  :api-response->department-employees
+  (fn hdlr-api-response->department-employees [db [_ department-employees]]
     (let [value (js->clj department-employees)]
-      (dispatch [:fetching-complete])
+      (dispatch [:fetching-department-employees-complete])
       (assoc db :department-employees value))))
 
 (register-handler
-  :process-employees-response
-  (fn hdlr-process-employees-response [db [_ employees]]
+  :api-response->employees
+  (fn hdlr-api-response->employees [db [_ employees]]
     (let [value (js->clj employees)]
       (assoc db :departments-with-employees value))))
 
 (register-handler
-  :process-departments-response
-  (fn hdlr-process-departments-response [db [_ departments]]
+  :api-response->departments
+  (fn hdlr-api-response->departments [db [_ departments]]
     (let [value (js->clj departments)]
       (assoc db :departments value))))
 
 (register-handler
-  :process-department-response
-  (fn hdlr-process-department-response [db [_ department]]
+  :api-response->department
+  (fn hdlr-api-response->department [db [_ department]]
     (let [value (js->clj department)]
       (assoc db :department (clojure.set/rename-keys value {:id :department-id})))))
 
 (register-handler
-  :process-employee-response
-  (fn hdlr-process-employee-response [db [_ employee]]
+  :api-response->employee
+  (fn hdlr-api-response->employee [db [_ employee]]
     (let [emp (js->clj employee)]
       (assoc db :employee (assoc emp :is-ready? true :not-found false)))))
 
@@ -131,7 +131,7 @@
   :fetch-department
   (fn hdlr-fetch-department [db [_ id]]
     (utils/call-api :GET (routes/api-endpoint-for :department-by-id :id id) db
-                    {:success-handler-key :process-department-response
+                    {:success-handler-key :api-response->department
                      :response-keys       [:body]})
     db))
 
@@ -139,7 +139,7 @@
   :fetch-departments
   (fn hdlr-fetch-departments [db [_]]
     (utils/call-api :GET (routes/api-endpoint-for :departments) db
-                    {:success-handler-key :process-departments-response
+                    {:success-handler-key :api-response->departments
                      :response-keys       [:body :departments]})
     db))
 
@@ -148,7 +148,7 @@
   :fetch-department-employees
   (fn hdlr-fetch-department-employees [db [_ department-id]]
     (utils/call-api :GET (routes/api-endpoint-for :department-employees :id department-id) db
-                    {:success-handler-key :process-department-employees-response
+                    {:success-handler-key :api-response->department-employees
                      :response-keys       [:body :department-employees]})
     (assoc db :fetching-department-employees? true)))
 
@@ -156,7 +156,7 @@
   :fetch-departments-with-employees
   (fn hdlr-fetch-employees [db [_]]
     (utils/call-api :GET (routes/api-endpoint-for :employees) db
-                    {:success-handler-key :process-employees-response
+                    {:success-handler-key :api-response->employees
                      :response-keys       [:body]})
     db))
 
@@ -164,7 +164,7 @@
   :fetch-employee
   (fn hdlr-fetch-employee [db [_ id]]
     (utils/call-api :GET (routes/api-endpoint-for :employee-by-id :id id) db
-                    {:success-handler-key :process-employee-response
+                    {:success-handler-key :api-response->employee
                      :failure-handler-key :employee-not-found
                      :response-keys       [:body]})
     db))
