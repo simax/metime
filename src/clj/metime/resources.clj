@@ -280,10 +280,10 @@
 
 (defn delete-leave-type! [id]
   "Delete the leave-type with the given id - providing it isn't used on a booking"
-  (let [absence=bookings (deps/get-department-by-id-with-employees db/db-spec {:id id})]
-    (if (empty? department-with-employees)
+  (let [absence-bookings (deps/get-department-by-id-with-employees db/db-spec {:id id})]
+    (if (empty? absence-bookings)
       true
-      (if (every? #(nil? (:lastname %)) department-with-employees)
+      (if (every? #(nil? (:lastname %)) absence-bookings)
         (= 1 (deps/delete-department db/db-spec {:id id}))
         false))))
 
@@ -544,12 +544,12 @@
              :delete! (fn [ctx]
                         (delete-leave-type! id))
 
-             :put! (fn [ctx]
-                     (let [new-data (make-keyword-map (get-posted-data ctx))
-                           existing-data (::leave-type ctx)
-                           updated-data (merge existing-data new-data)]
-                       (ltypes/update-leave-type db/db-spec updated-data)
-                       {::leave-type updated-data}))
+             ;:put! (fn [ctx]
+             ;        (let [new-data (make-keyword-map (get-posted-data ctx))
+             ;              existing-data (::leave-type ctx)
+             ;              updated-data (merge existing-data new-data)]
+             ;          (ltypes/update-leave-type db/db-spec updated-data)
+             ;          {::leave-type updated-data}))
 
              :new? (fn [ctx] (nil? ::leave-type))
              :respond-with-entity? (fn [ctx] (not (empty? (::leave-type ctx))))
