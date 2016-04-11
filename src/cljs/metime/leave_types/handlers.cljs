@@ -33,13 +33,11 @@
         errors (first result)]
     (assoc-in db [:leave-type :validation-errors] errors)))
 
-
 (register-handler
   :input-change-leave-type-name
   (enrich validate-leave-type)
   (fn hdlr-input-change [db [_ leave-type-name]]
     (assoc-in db [:leave-type :leave-type] leave-type-name)))
-
 
 (register-handler
   :new-leave-type
@@ -48,11 +46,11 @@
 
 (register-handler
   :edit-leave-type
-  (fn hdlr-new-leave-type [db [_ leave-type-id]]
+  (fn hdlr-edit-leave-type [db [_ leave-type-id]]
+    (println (str "leave-type-id: " leave-type-id))
     (dispatch [:close-leave-type-drawer])
     (dispatch [:fetch-leave-type leave-type-id])
     db))
-
 
 (register-handler
   :close-leave-type-drawer

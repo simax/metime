@@ -17,6 +17,13 @@
             [cljs.core.async :refer [put! take! <! >! chan timeout]]
             [cljs-http.client :as http]))
 
+(defn is-mutating-mode? [status]
+  "Return true if adding or editing"
+  (case status
+    :add true
+    :edit true
+    false))
+
 (defn gravatar [data]
   (let [email-address (or (:gravatar-email data) "")
         size (or (:gravatar-size data) 100)]

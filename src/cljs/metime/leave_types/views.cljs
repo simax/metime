@@ -27,18 +27,9 @@
             [re-frame-tracer.core :refer [tracer]]
             [cljs.pprint :refer [pprint]]))
 
-(defn is-mutating-mode? [status]
-  "Return true if adding or editing"
-  (case status
-    :add true
-    :edit true
-    false))
-
-
-
 (defn leave-type-name-component [edit-mode leave-type]
   (let [leave-type-name (clojure.string/replace (:leave-type leave-type) #"[\s]" "-")]
-    (if (is-mutating-mode? edit-mode)
+    (if (utils/is-mutating-mode? edit-mode)
       [input-text
        :width "400px"
        :model leave-type-name
@@ -52,8 +43,8 @@
        :width "375px"
        :child [:h2 leave-type-name]])))
 
-(defn leave-type-buttons-component [edit-mode {:keys [leave-type-id employee-count]}]
-  (if (is-mutating-mode? edit-mode)
+(defn leave-type-buttons-component [edit-mode {:keys [leave-type-id]}]
+  (if (utils/is-mutating-mode? edit-mode)
     [h-box
      :align :center
      :gap "10px"
@@ -93,11 +84,11 @@
       [box :child [:div]]]]))
 
 (defn leave-type-component [ltype]
-  (let [edit-mode (subscribe [:edit-mode (:leave-type-id ltype)])
-        leave-type (if (is-mutating-mode? @edit-mode) (deref (subscribe [:leave-type])) ltype)]
+  (let [edit-mode (subscribe [:leave-type-edit-mode (:leave-type-id ltype)])
+        leave-type (if (utils/is-mutating-mode? @edit-mode) (deref (subscribe [:leave-type])) ltype)]
     [box
-     :class (if (is-mutating-mode? @edit-mode) "" "panel panel-default")
-     :style (if (is-mutating-mode? @edit-mode) {:border-style "solid" :border-color "white" :margin-bottom "20px"} {})
+     :class (if (utils/is-mutating-mode? @edit-mode) "" "panel panel-default")
+     :style (if (utils/is-mutating-mode? @edit-mode) {:border-style "solid" :border-color "white" :margin-bottom "20px"} {})
      :child
      [h-box
       :class "panel-body row"

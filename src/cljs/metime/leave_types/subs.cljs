@@ -11,10 +11,11 @@
     (make-reaction (fn sub-leave-types [] (:leave-types @db)))))
 
 (register-sub
-  :edit-mode
+  :leave-type-edit-mode
   (fn [db [_ leave-type-id]]
     (make-reaction
       (fn sub-leave-type []
+        (println (str "leave-type-id: " leave-type-id))
         (cond
           (and (= (get-in @db [:leave-type-drawer-open-id]) nil) (= (get-in @db [:leave-type :leave-type-id]) 0) (= 0 leave-type-id)) :add
           (and (= (get-in @db [:leave-type-drawer-open-id]) nil) (> (get-in @db [:leave-type :leave-type-id]) 0) (= (get-in @db [:leave-type :leave-type-id]) leave-type-id)) :edit

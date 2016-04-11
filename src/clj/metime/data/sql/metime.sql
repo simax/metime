@@ -1,15 +1,15 @@
 -- Get the leave-type with the given id
 -- :name get-leave-type-by-id :? :1
-select * from leave-types where id = :id
+select id as 'leave-type-id', leave-type, reduce-leave from leave-types where id = :id
 
 -- Get the leave-type with the given name
 -- :name get-leave-type-by-name :? :1
-select * from leave-types where leave-type = :leave-type
+select id as 'leave-type-id', leave-type, reduce-leave from leave-types where leave-type = :leave-type
 
 
 -- Get all leave types
 -- :name get-all-leave-types :? :*
-select id, leave_type, reduce_leave from leave_types order by leave_type
+select id as 'leave-type-id', leave_type, reduce_leave from leave_types order by leave_type
 
 -- Get all departments
 -- :name get-all-departments :? :*

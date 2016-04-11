@@ -26,10 +26,11 @@
     (make-reaction (fn department-manager-email [] (get-in @db [:department :manager-email])))))
 
 (register-sub
-  :edit-mode
+  :department-edit-mode
   (fn [db [_ department-id]]
     (make-reaction
       (fn sub-department []
+        ;(println (str "department-id: " department-id))
         (cond
           (and (= (get-in @db [:department-drawer-open-id]) nil) (= (get-in @db [:department :department-id]) 0) (= 0 department-id)) :add
           (and (= (get-in @db [:department-drawer-open-id]) nil) (> (get-in @db [:department :department-id]) 0) (= (get-in @db [:department :department-id]) department-id)) :edit

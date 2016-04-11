@@ -40,17 +40,24 @@
                  :view :home)))))
 
 (register-handler
-  :api-resposne->leave-types
+  :api-response->leave-types
   (fn hdlr-api-reposne->leave-types [db [_ leave-types]]
     (let [value (js->clj leave-types)]
       (assoc db :leave-types value))))
 
 (register-handler
+  :api-response->leave-type
+  (fn hdlr-api-reponse->leave-type [db [_ leave-type]]
+    (let [value (js->clj leave-type)]
+      (assoc db :leave-type value))))
+
+(register-handler
   :fetch-leave-type
   (fn hdlr-fetch-leave-type [db [_ id]]
+    (println (str "id: " id))
     (utils/call-api :GET (routes/api-endpoint-for :leave-type-by-id :id id) db
                     {:success-handler-key :api-response->leave-type
-                     :response-keys       [:body]})
+                     :response-keys       [:body :leave-type]})
     db))
 
 
@@ -58,7 +65,7 @@
   :fetch-leave-types
   (fn hdlr-fetch-leave-types [db [_]]
     (utils/call-api :GET (routes/api-endpoint-for :leave-types) db
-                    {:success-handler-key :api-resposne->leave-types
+                    {:success-handler-key :api-response->leave-types
                      :response-keys       [:body :leave-types]})
     db))
 
