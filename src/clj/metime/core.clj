@@ -54,7 +54,7 @@
                (GET "/:id/employees" [id] (res/department-employees id)))
              (context "/leave-types" []
                (ANY "/" [] (res/leave-types))               ; fn [_] {:status 200 :body "This is the /departments route"}
-               ;(ANY "/:id" [id] (res/leave-type id))
+               (ANY "/:id" [id] (res/leave-type id))
                )
              ;(ANY "/holidays/:id" [id] (holiday id))
              (route/not-found "Not Found"))

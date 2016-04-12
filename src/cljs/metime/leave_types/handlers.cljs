@@ -47,39 +47,8 @@
 (register-handler
   :edit-leave-type
   (fn hdlr-edit-leave-type [db [_ leave-type-id]]
-    (println (str "leave-type-id: " leave-type-id))
-    (dispatch [:close-leave-type-drawer])
     (dispatch [:fetch-leave-type leave-type-id])
     db))
-
-(register-handler
-  :close-leave-type-drawer
-  (fn hdlr-close-leave-type-drawer [db [_]]
-    (assoc db
-      :leave-type nil
-      :leave-type-drawer-open-id nil)))
-
-(register-handler
-  :open-leave-type-drawer
-  (fn hndlr-open-leave-type-drawer [db [_ leave-type-id]]
-    (dispatch [:fetch-leave-type leave-type-id])
-    (assoc db
-      :leave-type-drawer-open-id leave-type-id)))
-
-(register-handler
-  :ui-leave-type-drawer-status-toggle
-  (fn hdlr-ui-leave-type-drawer-status-toggle [db [_ leave-type-id]]
-    (dispatch [:close-new-leave-type-drawer])
-    (if (= (:leave-type-drawer-open-id db) leave-type-id)
-      (dispatch [:close-leave-type-drawer])
-      (dispatch [:open-leave-type-drawer leave-type-id]))
-    db))
-
-(register-handler
-  :close-new-leave-type-drawer
-  (fn hdlr-close-new-leave-type-drawer [db [_]]
-    (assoc db :new-leave-type-drawer-open? false
-              :leave-type nil)))
 
 (register-handler
   :ui-new-leave-type-drawer-status-toggle
@@ -90,12 +59,6 @@
       (do
         (dispatch [:new-leave-type])
         (assoc db :new-leave-type-drawer-open? true)))))
-
-(register-handler
-  :close-new-leave-type-drawer
-  (fn hdlr-close-new-leave-type-drawer [db [_]]
-    (assoc db :new-leave-type-drawer-open? false
-              :leave-type nil)))
 
 (register-handler
   :ui-new-leave-type-drawer-status-toggle

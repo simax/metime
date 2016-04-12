@@ -15,21 +15,17 @@
   (fn [db [_ leave-type-id]]
     (make-reaction
       (fn sub-leave-type []
-        (println (str "leave-type-id: " leave-type-id))
         (cond
           (and (= (get-in @db [:leave-type-drawer-open-id]) nil) (= (get-in @db [:leave-type :leave-type-id]) 0) (= 0 leave-type-id)) :add
           (and (= (get-in @db [:leave-type-drawer-open-id]) nil) (> (get-in @db [:leave-type :leave-type-id]) 0) (= (get-in @db [:leave-type :leave-type-id]) leave-type-id)) :edit
           :else :display)))))
-
 
 (register-sub
   :leave-type-id
   (fn [db _]
     (make-reaction (fn sub-leave-type-id [] (:leave-type-id @db)))))
 
-
 (register-sub
   :leave-type-drawer-open-id
   (fn [db [_]]
     (make-reaction (fn sub-leave-type-drawer-open-class [] (:leave-type-drawer-open-id @db)))))
-
