@@ -225,7 +225,7 @@
 (register-handler
   :department-save-success
   (fn hdlr-save-failure [db [_]]
-    (dispatch [:close-new-department-drawer])
+    (dispatch [:close-department-drawer])
     (dispatch [:fetch-departments])
     (assoc db :department nil)))
 
@@ -323,17 +323,17 @@
 (register-handler
   :ui-department-drawer-status-toggle
   (fn hdlr-ui-department-drawer-status-toggle [db [_ department-id]]
-    (dispatch [:close-new-department-drawer])
+    ;(dispatch [:close-department-drawer])
     (if (= (:department-drawer-open-id db) department-id)
       (dispatch [:close-department-drawer])
       (dispatch [:open-department-drawer department-id]))
     db))
 
-(register-handler
-  :close-new-department-drawer
-  (fn hdlr-close-new-department-drawer [db [_]]
-    (assoc db :new-department-drawer-open? false
-              :department nil)))
+;(register-handler
+;  :close-new-department-drawer
+;  (fn hdlr-close-new-department-drawer [db [_]]
+;    (assoc db :new-department-drawer-open? false
+;              :department nil)))
 
 (register-handler
   :ui-new-department-drawer-status-toggle

@@ -63,7 +63,7 @@
        :size :smaller
        :md-icon-name "zmdi-close-circle-o"
        :tooltip "Cancel"
-       :on-click #(dispatch [:close-new-leave-type-drawer])]]]
+       :on-click #(dispatch [:close-leave-type-drawer])]]]
 
     [h-box
      :align :center
