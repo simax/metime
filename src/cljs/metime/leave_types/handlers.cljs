@@ -33,6 +33,56 @@
         errors (first result)]
     (assoc-in db [:leave-type :validation-errors] errors)))
 
+(defn is-new-leave-type? [id]
+  (zero? id))
+
+(register-handler
+  :leave-type-save-failure
+  (fn hdlr-save-failure [db [_]]
+    ; Potentially show some kind of boostrap alert?
+    (println "Problem saving leave-type")
+    db))
+
+(register-handler
+  :leave-type-save-success
+  (fn hdlr-save-failure [db [_]]
+    (dispatch [:close-leave-type-drawer])
+    (dispatch [:fetch-leave-types])
+    (assoc db :leave-type nil)))
+
+(defn build-leave-type-by-id-endpoint [leave-type]
+  (routes/api-endpoint-for :leave-type-by-id :id (:leave-type-id leave-type)))
+
+(defn add-new-leave-type [db leave-type]
+  "Add a new leave-type"
+  (utils/send-data-to-api :POST
+                          (routes/api-endpoint-for :leave-types) (:authentication-token db) leave-type
+                          {:valid-fn      #(dispatch [:leave-type-save-success])
+                           :invalid-fn    #(dispatch [:leave-type-save-failure])
+                           :response-keys [:body :leave-types]}))
+
+(defn update-leave-type [db leave-type]
+  "Update an existing leave-type"
+  (utils/send-data-to-api :PUT
+                          (build-leave-type-by-id-endpoint leave-type) (:authentication-token db) leave-type
+                          {:valid-fn      #(dispatch [:leave-type-save-success])
+                           :invalid-fn    #(dispatch [:leave-type-save-failure])
+                           :response-keys [:body :leave-types]}))
+
+(register-handler
+  :leave-type-save
+  (enrich validate-leave-type)
+  (fn hdlr-leave-type-save [db [_]]
+    (let [leave-type (:leave-type db)]
+      (when (and
+              (apply b/valid? leave-type leave-type-validation-rules)
+              (not (some? (get-in leave-type [:validation-errors]))))
+        (if (is-new-leave-type? (:leave-type-id leave-type))
+          (add-new-leave-type db leave-type)
+          (update-leave-type db leave-type)))
+      db)))
+
+
 (register-handler
   :input-change-leave-type-name
   (enrich validate-leave-type)
@@ -57,11 +107,6 @@
       :leave-type nil
       :leave-type-drawer-open-id nil)))
 
-;(register-handler
-;  :close-new-leave-type-drawer
-;  (fn hdlr-close-new-leave-type-drawer [db [_]]
-;    (assoc db :new-leave-type-drawer-open? false
-;              :leave-type nil)))
 
 (register-handler
   :ui-new-leave-type-drawer-status-toggle
@@ -82,7 +127,3 @@
       (do
         (dispatch [:new-leave-type])
         (assoc db :new-leave-type-drawer-open? true)))))
-
-
-
-

@@ -522,16 +522,16 @@
 
              :handle-unprocessable-entity ::failure-message
 
-             ;:malformed? (fn [ctx]
-             ;              (if (requested-method ctx :put)
-             ;                (let [form-data (make-keyword-map (get-posted-data ctx))
-             ;                      validation-result (validate-leave-type form-data)]
-             ;                  (if (seq validation-result)
-             ;                    [true {::failure-message validation-result}]
-             ;                    false))
-             ;                false))
-             ;
-             ;:handle-malformed ::failure-message
+             :malformed? (fn [ctx]
+                           (if (requested-method ctx :put)
+                             (let [form-data (make-keyword-map (get-posted-data ctx))
+                                   validation-result (validate-leave-type form-data)]
+                               (if (seq validation-result)
+                                 [true {::failure-message validation-result}]
+                                 false))
+                             false))
+
+             :handle-malformed ::failure-message
 
              :conflict? (fn [ctx]
                           (let [new-leave-type-name (-> ctx (get-posted-data) (make-keyword-map) (:leave-type))
@@ -544,12 +544,12 @@
              :delete! (fn [ctx]
                         (delete-leave-type! id))
 
-             ;:put! (fn [ctx]
-             ;        (let [new-data (make-keyword-map (get-posted-data ctx))
-             ;              existing-data (::leave-type ctx)
-             ;              updated-data (merge existing-data new-data)]
-             ;          (ltypes/update-leave-type db/db-spec updated-data)
-             ;          {::leave-type updated-data}))
+             :put! (fn [ctx]
+                     (let [new-data (make-keyword-map (get-posted-data ctx))
+                           existing-data (::leave-type ctx)
+                           updated-data (merge existing-data new-data)]
+                       (ltypes/update-leave-type db/db-spec updated-data)
+                       {::leave-type updated-data}))
 
              :new? (fn [ctx] (nil? ::leave-type))
              :respond-with-entity? (fn [ctx] (not (empty? (::leave-type ctx))))
