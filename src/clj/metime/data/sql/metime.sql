@@ -11,6 +11,30 @@ select id as 'leave-type-id', leave_type, reduce_leave from leave_types where le
 -- :name get-all-leave-types :? :*
 select id as 'leave-type-id', leave_type, reduce_leave from leave_types order by leave_type
 
+
+-- Insert a new leave_type
+-- :name insert-leave_type :i!
+insert into leave_types (leave_type, reduce_leave)
+values (:leave_type, :reduce_leave)
+
+
+-- Update leave-type
+-- :name update-leave-type :! :n
+update leave_types
+set leave_type = :leave_type, reduce_leave = :reduce-leave
+where id = :id
+
+
+-- Delete the leave-type with the given id
+-- :name delete-leave-type :! :n
+delete from leave_types where id = :id
+
+
+-- Delete all the leave_types
+-- :name delete-all-leave-types :! :n
+delete from leave_types
+
+
 -- Get all departments
 -- :name get-all-departments :? :*
 select

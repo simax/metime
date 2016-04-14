@@ -21,9 +21,9 @@
             [buddy.hashers :as hashers]
             [metime.formatting :as fmt]
             [taoensso.timbre :as timbre
-             :refer (log  trace  debug  info  warn  error  fatal  report
-                          logf tracef debugf infof warnf errorf fatalf reportf
-                          spy get-env log-env)]))
+             :refer (log trace debug info warn error fatal report
+                         logf tracef debugf infof warnf errorf fatalf reportf
+                         spy get-env log-env)]))
 
 ;; convert the body to a reader. Useful for testing in the repl
 ;; where setting the body to a string is much simpler.
@@ -117,6 +117,12 @@
         errors (first result)]
     errors))
 
+(defn validate-leave-type [leave-type]
+  (let [leave-type-validation-rules [:leave-type [[v/required] [v/max-count 30]]]
+        result (apply b/validate leave-type leave-type-validation-rules)
+        errors (first result)]
+    errors))
+
 (defn validate-user-format [user]
   (let [user-validation-rules [:email [[v/required] [v/email]]
                                :password [[v/required]]]
@@ -188,7 +194,7 @@
                     (if (contains? req-rules rule-keyword)
                       (make-rule-required rule)
                       rule)
-                   ))
+                    ))
                 partitioned-validation-set)))
 
 (defn extract-keywords-from-validation-set [validation-set]
