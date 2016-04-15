@@ -20,6 +20,8 @@
             [metime.data.database :as db]
             [buddy.hashers :as hashers]
             [metime.formatting :as fmt]
+            [camel-snake-kebab.core :as csk]
+            [camel-snake-kebab.extras :refer [transform-keys]]
             [taoensso.timbre :as timbre
              :refer (log trace debug info warn error fatal report
                          logf tracef debugf infof warnf errorf fatalf reportf
@@ -505,7 +507,7 @@
              :handle-ok ::leave-types)
 
 (defresource leave-type [id]
-             (secured-resource)
+             ;(secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :delete :put]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
@@ -521,7 +523,7 @@
              :processable? (fn [ctx]
                              (if (requested-method ctx :delete)
                                (let [leave-type (ltypes/get-leave-type-by-id db/db-spec {:id id})]
-                                 (if (empty? (:employees leave-type))
+                                 (if true                   ; Check not used on any absense bookings
                                    true
                                    [false {::failure-message "Unable to delete, the leave-type contains employees"}]))
                                true))
@@ -541,7 +543,7 @@
 
              :conflict? (fn [ctx]
                           (let [new-leave-type-name (-> ctx (get-posted-data) (make-keyword-map) (:leave-type))
-                                existing-leave-type (->> {:leave-type new-leave-type-name} (ltypes/get-leave-type-by-name db/db-spec))]
+                                existing-leave-type (->> {(csk/->snake_case_keyword :leave-type) new-leave-type-name} (ltypes/get-leave-type-by-name db/db-spec))]
                             (info (str "existing leave-type-name: " (:leave-type existing-leave-type)))
                             (and (seq existing-leave-type) (not= (str id) (str (:id existing-leave-type))))))
 
@@ -554,14 +556,14 @@
                      (let [new-data (make-keyword-map (get-posted-data ctx))
                            existing-data (::leave-type ctx)
                            updated-data (merge existing-data new-data)]
-                       (ltypes/update-leave-type db/db-spec updated-data)
+                       (ltypes/update-leave-type db/db-spec (transform-keys csk/->snake_case_keyword updated-data))
                        {::leave-type updated-data}))
 
              :new? (fn [ctx] (nil? ::leave-type))
              :respond-with-entity? (fn [ctx] (not (empty? (::leave-type ctx))))
              :multiple-representations? false
              :handle-ok ::leave-type
-             :handle-not-found "leave-type not found")
+             :handle-not-found "Leave type not found")
 
 (defn find-employee-by [employee-finder-fn &criteria]
   (fn [ctx]

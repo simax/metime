@@ -4,7 +4,7 @@ select id as 'leave-type-id', leave_type, reduce_leave from leave_types where id
 
 -- Get the leave-type with the given name
 -- :name get-leave-type-by-name :? :1
-select id as 'leave-type-id', leave_type, reduce_leave from leave_types where leave_type = :leave_type
+select * from leave_types where leave_type = :leave_type
 
 
 -- Get all leave types
@@ -21,7 +21,7 @@ values (:leave_type, :reduce_leave)
 -- Update leave-type
 -- :name update-leave-type :! :n
 update leave_types
-set leave_type = :leave_type, reduce_leave = :reduce-leave
+set leave_type = :leave_type, reduce_leave = :reduce_leave
 where id = :id
 
 
