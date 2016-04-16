@@ -31,7 +31,7 @@
   (let [leave-type-name (clojure.string/replace (:leave-type leave-type) #"[\s]" "-")]
     (if (utils/is-mutating-mode? edit-mode)
       [input-text
-       :width "400px"
+       :width "300px"
        :model leave-type-name
        :placeholder "Leave type"
        :on-change #(dispatch [:input-change-leave-type-name %])
@@ -42,6 +42,14 @@
       [box
        :width "375px"
        :child [:h2 leave-type-name]])))
+
+(defn leave-type-reduce-leave-component [edit-mode leave-type]
+  (let [reduce-leave? (reagent/atom (:reduce-leave leave-type))]
+    [checkbox
+     :disabled? (not (utils/is-mutating-mode? edit-mode))
+     :model reduce-leave?
+     :label "Reduce leave?"
+     :on-change #(dispatch [:checkbox-change-leave-type-reduce-leave %])]))
 
 (defn leave-type-buttons-component [edit-mode {:keys [leave-type-id]}]
   (if (utils/is-mutating-mode? edit-mode)
@@ -98,6 +106,7 @@
       :children
       [
        [leave-type-name-component @edit-mode leave-type]
+       [leave-type-reduce-leave-component @edit-mode leave-type]
        [leave-type-buttons-component @edit-mode leave-type]
        ]]]))
 

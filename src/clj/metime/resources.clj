@@ -471,6 +471,10 @@
              :handle-ok ::employees)
 
 
+(defn fix-up-lt [data]
+  (let [fixed-data (assoc data :reduce-leave (if (= (:reduce-leave data) "true") 1 0))]
+    (transform-keys csk/->snake_case_keyword fixed-data)))
+
 (defresource leave-types []
              (secured-resource)
              :available-media-types ["application/edn" "application/json"]
@@ -496,7 +500,8 @@
                       That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
                       (if (requested-method ctx :post)
                         (try
-                          (let [data (assoc (transform-keys csk/->snake_case_keyword (make-keyword-map (get-posted-data ctx))) :reduce_leave 1)]
+                          (let [leave-type-data (make-keyword-map (get-posted-data ctx))
+                                data (fix-up-lt leave-type-data)]
                             (when-let [new-id (ltypes/insert-leave-type db/db-spec data)]
                               {::location (routes/api-endpoint-for :leave-type-by-id :id new-id)}))
                           (catch Exception e {::failure-message "leave-type already exists"}))))
@@ -553,9 +558,9 @@
 
              :put! (fn [ctx]
                      (let [new-data (make-keyword-map (get-posted-data ctx))
-                           existing-data (::leave-type ctx)
-                           updated-data (merge existing-data new-data)]
-                       (ltypes/update-leave-type db/db-spec (transform-keys csk/->snake_case_keyword updated-data))
+                           updated-data (fix-up-lt new-data)
+                           ]
+                       (ltypes/update-leave-type db/db-spec updated-data)
                        {::leave-type updated-data}))
 
              :new? (fn [ctx] (nil? ::leave-type))

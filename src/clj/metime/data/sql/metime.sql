@@ -21,7 +21,8 @@ values (:leave_type, :reduce_leave)
 -- Update leave-type
 -- :name update-leave-type :! :n
 update leave_types
-set leave_type = :leave_type, reduce_leave = :reduce_leave
+set leave_type = :leave_type,
+reduce_leave = :reduce_leave
 where id = :id
 
 

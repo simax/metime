@@ -90,14 +90,18 @@
                      :response-keys       [:body]})
     db))
 
-
-
-
 (register-handler
   :input-change-leave-type-name
   (enrich validate-leave-type)
   (fn hdlr-input-change [db [_ leave-type-name]]
     (assoc-in db [:leave-type :leave-type] leave-type-name)))
+
+(register-handler
+  :checkbox-change-leave-type-reduce-leave
+  (enrich validate-leave-type)
+  (fn hdlr-checkbox-change-leave-type-reduce-leave [db [_ leave-type-reduce-leave]]
+    ;(println (str "leave-type-reduce-leave: " leave-type-reduce-leave))
+    (assoc-in db [:leave-type :reduce-leave] leave-type-reduce-leave)))
 
 (register-handler
   :new-leave-type

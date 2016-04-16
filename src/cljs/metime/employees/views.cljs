@@ -145,11 +145,15 @@
 
 
 (defn empty-department []
-  [h-box
+  [v-box
    :justify :center
    :align :center
    :children
-   [[:h2 {:style {:font-weight :bold}} "No employees in department"]]])
+   [[:span {:aria-hidden "true"
+            :style {:font-size "50px"}
+            :class       "glyphicon glyphicon-exclamation-sign fs2"
+            }]
+    [:h2 {:style {:font-weight :bold}} "No employees in department"]]])
 
 
 (defn department-employees-list [manager-id]
