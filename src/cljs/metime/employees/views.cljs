@@ -311,8 +311,8 @@
   (let [edit-mode (subscribe [:department-edit-mode (:department-id dept)])
         department (if (utils/is-mutating-mode? @edit-mode) (deref (subscribe [:department])) dept)]
     [box
-     :class (if (utils/is-mutating-mode? @edit-mode) "" "panel panel-default")
-     :style (if (utils/is-mutating-mode? @edit-mode) {:border-style "solid" :border-color "white" :margin-bottom "20px"} {})
+     :class (if (utils/is-mutating-mode? @edit-mode) "mutating" "panel panel-default")
+     ;:style (if (utils/is-mutating-mode? @edit-mode) {:background-color "Gainsboro" :border-width "1px" :border-style "solid" :border-color "white" :margin-bottom "20px"} {})
      :child
      [h-box
       :class "panel-body row"

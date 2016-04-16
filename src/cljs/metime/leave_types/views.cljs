@@ -31,7 +31,7 @@
   (let [leave-type-name (clojure.string/replace (:leave-type leave-type) #"[\s]" "-")]
     (if (utils/is-mutating-mode? edit-mode)
       [input-text
-       :width "300px"
+       :width "255px"
        :model leave-type-name
        :placeholder "Leave type"
        :on-change #(dispatch [:input-change-leave-type-name %])
@@ -40,7 +40,7 @@
        :status-tooltip (apply str (get-in leave-type [:validation-errors :leave-type]))
        :change-on-blur? false]
       [box
-       :width "375px"
+       :width "300px"
        :child [:h2 leave-type-name]])))
 
 (defn leave-type-reduce-leave-component [edit-mode leave-type]
@@ -95,8 +95,7 @@
   (let [edit-mode (subscribe [:leave-type-edit-mode (:leave-type-id ltype)])
         leave-type (if (utils/is-mutating-mode? @edit-mode) (deref (subscribe [:leave-type])) ltype)]
     [box
-     :class (if (utils/is-mutating-mode? @edit-mode) "" "panel panel-default")
-     :style (if (utils/is-mutating-mode? @edit-mode) {:border-style "solid" :border-color "white" :margin-bottom "20px"} {})
+     :class (if (utils/is-mutating-mode? @edit-mode) "mutating" "panel panel-default")
      :child
      [h-box
       :class "panel-body row"

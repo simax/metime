@@ -8,6 +8,15 @@ ul {
   list-style-type: none;
 }
 
+.mutating {
+ background-color: Gainsboro;
+ border-radius: 3px;
+ border-width:  1px;
+ border-style:  solid;
+ border-color:  white;
+ margin-bottom: 20px;
+}
+
 .gravatar {
   display: block;
   margin-left: auto;
