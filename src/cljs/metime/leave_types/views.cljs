@@ -74,7 +74,7 @@
      [
       [md-icon-button
        :md-icon-name "zmdi-edit"                            ;
-       :style {:color "Green"}
+       :style {:color "#b2c831"}
        :on-click #(dispatch [:edit-leave-type leave-type-id])]
 
       [md-icon-button

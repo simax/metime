@@ -290,7 +290,7 @@
      [
       [md-icon-button
        :md-icon-name "zmdi-edit"                            ;
-       :style {:color "Green"}
+       :style {:color "#b2c831"}
        :on-click #(dispatch [:edit-department department-id])]
       [md-icon-button
        :md-icon-name "zmdi-swap-vertical"                   ;
@@ -624,7 +624,7 @@
                :children
                [
                 [box
-                 :class "panel panel-body"
+                 :class "panel-body"
                  :child [button
                          :class "btn btn-primary"
                          :on-click #(dispatch [:employee-save])
@@ -640,7 +640,7 @@
      :class "panel panel-default"
      :children
      [
-      [title :class "panel-heading panel-title" :label "Employee" :level :level3]
+      [title :style {:color "white"} :class "panel-heading panel-title" :label "Employee" :level :level2]
       [h-box
        :class "panel-body"
        :children
@@ -668,7 +668,7 @@
    :class "panel panel-default"
    :children
    [
-    [title :class "panel-heading panel-title" :label "Balances" :level :level3]
+    [title :style {:color "white"} :class "panel-heading panel-title" :label "Balances" :level :level2]
     [h-box
      :children
      [[v-box
@@ -699,25 +699,27 @@
 
 (defn employee-maintenance-form [employee]
   [v-box
-   :children [
-              [employee-core-heading employee]
-              [h-box
-               :style {:flex-flow "row wrap"}
-               :class "panel"
-               :justify :between
-               :children
-               [
-                [box :class "panel panel-body" :child [employee-core-details employee]]
-                [box :class "panel panel-body" :child [employee-balances employee]]
+   :children
+   [
+    [employee-core-heading employee]
+    [h-box
+     :style {:flex-flow "row wrap"}
+     ;:class "panel"
+     :justify :between
+     :gap "10px"
+     :children
+     [
+      [box :child [employee-core-details employee]]
+      [box :child [employee-balances employee]]
 
-                ;[box :child [employee-errors]]
-                ;[box :child [input-text
-                ;             :width "100px"
-                ;             :model (:startdate employee)
-                ;             :disabled? true
-                ;             :on-change #(dispatch [:none %])]]
-
-                [box :class "panel panel-body" :child [save-button]]]]]])
+      ;[box :child [employee-errors]]
+      ;[box :child [input-text
+      ;             :width "100px"
+      ;             :model (:startdate employee)
+      ;             :disabled? true
+      ;             :on-change #(dispatch [:none %])]]
+      ]]
+    [box :child [save-button]]]])
 
 
 
