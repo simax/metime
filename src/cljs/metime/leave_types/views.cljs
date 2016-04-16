@@ -48,7 +48,7 @@
     [checkbox
      :disabled? (not (utils/is-mutating-mode? edit-mode))
      :model reduce-leave?
-     :label "Reduce leave?"
+     :label "Reduce leave"
      :on-change #(dispatch [:checkbox-change-leave-type-reduce-leave %])]))
 
 (defn leave-type-buttons-component [edit-mode {:keys [leave-type-id]}]
