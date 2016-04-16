@@ -13,7 +13,7 @@ select id as 'leave-type-id', leave_type, reduce_leave from leave_types order by
 
 
 -- Insert a new leave_type
--- :name insert-leave_type :i!
+-- :name insert-leave-type :i!
 insert into leave_types (leave_type, reduce_leave)
 values (:leave_type, :reduce_leave)
 

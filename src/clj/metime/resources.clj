@@ -288,12 +288,10 @@
 
 (defn delete-leave-type! [id]
   "Delete the leave-type with the given id - providing it isn't used on a booking"
-  (let [absence-bookings (deps/get-department-by-id-with-employees db/db-spec {:id id})]
+  (let [absence-bookings {}] ; (ltypes/get-leave-type-by-id-with-employees db/db-spec {:id id})
     (if (empty? absence-bookings)
-      true
-      (if (every? #(nil? (:lastname %)) absence-bookings)
-        (= 1 (deps/delete-department db/db-spec {:id id}))
-        false))))
+      (= 1 (deps/delete-leave-type db/db-spec {:id id}))
+      false)))
 
 
 
@@ -482,32 +480,33 @@
                           [true {::leave-types {:leave-types (fetch-leave-types)}}]))
 
 
-             ;:malformed? (fn [ctx]
-             ;              (if (requested-method ctx :post)
-             ;                (let [form-data (make-keyword-map (get-posted-data ctx))
-             ;                      validation-result (validate-leave-type form-data)]
-             ;                  (if (seq validation-result)
-             ;                    [true {::failure-message validation-result}]
-             ;                    false))
-             ;                false))
-             ;
-             ;:handle-malformed ::failure-message
-             ;
-             ;:post! (fn [ctx]
-             ;         "We allow the DB to enforce its constraints here, rather than relying on the processable? descision point.
-             ;         That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
-             ;         (if (requested-method ctx :post)
-             ;           (try
-             ;             (when-let [new-id (deps/insert-leave-type db/db-spec (make-keyword-map (get-posted-data ctx)))]
-             ;               {::location (routes/api-endpoint-for :leave-type-by-id :id new-id)})
-             ;             (catch Exception e {::failure-message "leave-type already exists"}))))
-             ;
-             ;:post-redirect? false
+             :malformed? (fn [ctx]
+                           (if (requested-method ctx :post)
+                             (let [form-data (make-keyword-map (get-posted-data ctx))
+                                   validation-result (validate-leave-type form-data)]
+                               (if (seq validation-result)
+                                 [true {::failure-message validation-result}]
+                                 false))
+                             false))
+
+             :handle-malformed ::failure-message
+
+             :post! (fn [ctx]
+                      "We allow the DB to enforce its constraints here, rather than relying on the processable? descision point.
+                      That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
+                      (if (requested-method ctx :post)
+                        (try
+                          (let [data (assoc (transform-keys csk/->snake_case_keyword (make-keyword-map (get-posted-data ctx))) :reduce_leave 1)]
+                            (when-let [new-id (ltypes/insert-leave-type db/db-spec data)]
+                              {::location (routes/api-endpoint-for :leave-type-by-id :id new-id)}))
+                          (catch Exception e {::failure-message "leave-type already exists"}))))
+
+             :post-redirect? false
 
              :handle-ok ::leave-types)
 
 (defresource leave-type [id]
-             ;(secured-resource)
+             (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :delete :put]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])

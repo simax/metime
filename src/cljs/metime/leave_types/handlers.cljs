@@ -45,7 +45,7 @@
 
 (register-handler
   :leave-type-save-success
-  (fn hdlr-save-failure [db [_]]
+  (fn hdlr-save-success [db [_]]
     (dispatch [:close-leave-type-drawer])
     (dispatch [:fetch-leave-types])
     (assoc db :leave-type nil)))
@@ -81,6 +81,16 @@
           (add-new-leave-type db leave-type)
           (update-leave-type db leave-type)))
       db)))
+
+(register-handler
+  :leave-type-delete
+  (fn hdlr-leave-type-delete [db [_ id]]
+    (utils/call-api :DELETE (routes/api-endpoint-for :leave-type-by-id :id id) db
+                    {:success-handler-key :fetch-leave-types
+                     :response-keys       [:body]})
+    db))
+
+
 
 
 (register-handler
