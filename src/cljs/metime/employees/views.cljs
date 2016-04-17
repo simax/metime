@@ -248,7 +248,7 @@
         [manager-name-component edit-mode department]]])))
 
 (defn department-name-component [edit-mode department]
-  (let [department-name (clojure.string/replace (:department department) #"[\s]" "-")]
+  (let [department-name (:department department)]
     (if (utils/is-mutating-mode? edit-mode)
       [input-text
        :width "400px"

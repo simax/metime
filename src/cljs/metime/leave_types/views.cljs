@@ -28,7 +28,7 @@
             [cljs.pprint :refer [pprint]]))
 
 (defn leave-type-name-component [edit-mode leave-type]
-  (let [leave-type-name (clojure.string/replace (:leave-type leave-type) #"[\s]" "-")]
+  (let [leave-type-name (:leave-type leave-type)]
     (if (utils/is-mutating-mode? edit-mode)
       [input-text
        :width "255px"
