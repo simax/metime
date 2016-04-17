@@ -3,6 +3,7 @@
     [cljs.core.async.macros :refer [go]]
     [bouncer.validators :refer [defvalidator]])
   (:require [metime.formatting :as fmt]
+            [clojure.string :as s]
             [cljs.core.async :refer [<! >! chan]]
             [metime.utils :as utils]
             [metime.routes :as routes]
@@ -72,6 +73,18 @@
    :current-year-allowance [[v/integer :message "Must be an integer"]]
    :next-year-allowance [[v/integer :message "Must be an integer"]]])
 
+
+(register-handler
+  :input-change-employee-search
+  (fn hdlr-input-change-employee-search [db [_ search-criteria]]
+    (let [employees (get-in db [:department-employees])
+          filtered-employees (filter #(or
+                                       (> (.indexOf (s/lower-case (:firstname %)) (s/lower-case search-criteria)) -1)
+                                       (> (.indexOf (s/lower-case (:lastname %)) (s/lower-case search-criteria)) -1)) employees)]
+      (println (count filtered-employees))
+      (-> db
+          (assoc-in [:search-criteria] search-criteria)
+          (assoc-in [:filtered-department-employees] filtered-employees)))))
 
 (register-handler
   :email-uniqness-violation
@@ -307,6 +320,7 @@
   :close-department-drawer
   (fn hdlr-close-department-drawer [db [_]]
     (assoc db
+      :search-criteria ""
       :department nil
       :department-employees nil
       :department-drawer-open-id nil)))
@@ -317,6 +331,7 @@
     (dispatch [:fetch-department department-id])
     (dispatch [:fetch-department-employees department-id])
     (assoc db
+      :search-criteria ""
       :department-employees nil
       :department-drawer-open-id department-id)))
 

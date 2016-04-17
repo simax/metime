@@ -3,7 +3,9 @@
 (defonce default-db
          {:authentication-failed-msg      ""
           :employee                       {:is-ready? false :validation-errors nil}
+          :search-criteria                ""
           :department-employees           nil
+          :filtered-department-employees  nil
           :department                     nil
           :departments                    nil
           :leave-type                     nil

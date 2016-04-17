@@ -110,7 +110,9 @@
   (fn hdlr-api-response->department-employees [db [_ department-employees]]
     (let [value (js->clj department-employees)]
       (dispatch [:fetching-department-employees-complete])
-      (assoc db :department-employees value))))
+      (assoc db
+        :filtered-department-employees value
+        :department-employees value))))
 
 (register-handler
   :api-response->employees

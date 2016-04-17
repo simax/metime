@@ -24,6 +24,16 @@
     (make-reaction (fn sub-departments-employees [] (:department-employees @db)))))
 
 (register-sub
+  :search-criteria
+  (fn [db _]
+    (make-reaction (fn sub-search-criteria [] (:search-criteria @db)))))
+
+(register-sub
+  :filtered-department-employees
+  (fn [db _]
+    (make-reaction (fn sub-filtered-departments-employees [] (:filtered-department-employees @db)))))
+
+(register-sub
   :employee
   (fn [db _]
     (make-reaction (fn sub-employee [] (:employee @db)))))

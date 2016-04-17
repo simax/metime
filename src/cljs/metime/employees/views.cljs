@@ -131,12 +131,11 @@
       [:div {:style {:margin-top "20px"}} [utils/gravatar {:gravatar-email email}]]]
 
      [:div {:class "info-user"}
-      [:span {:aria-hidden "true" :class "li_calendar fs1"}]
-      [:span {:aria-hidden "true"
-              :class       "glyphicon glyphicon-trash fs1"
-              :on-click    (fn [e]
-                             (dispatch [:employee-delete id])
-                             (.preventDefault e))}]]
+      [:span {:class "li_calendar fs1"}]
+      [:span {:class    "glyphicon glyphicon-trash fs1"
+              :on-click (fn [e]
+                          (dispatch [:employee-delete id])
+                          (.preventDefault e))}]]
 
 
      ;; For now, just simulate the number of days remaining
@@ -149,15 +148,15 @@
    :justify :center
    :align :center
    :children
-   [[:span {:aria-hidden "true"
+   [[:span {
             :style {:font-size "50px"}
-            :class       "glyphicon glyphicon-exclamation-sign fs2"
+            :class "glyphicon glyphicon-exclamation-sign fs2"
             }]
     [:h2 {:style {:font-weight :bold}} "No employees in department"]]])
 
 
 (defn department-employees-list [manager-id]
-  (let [employees (subscribe [:department-employees])
+  (let [employees (subscribe [:filtered-department-employees])
         department-list-item (filter #(not= (:id %) manager-id) @employees)
         rows-of-employees (partition 4 4 nil department-list-item)]
     (if (zero? (count @employees))
@@ -171,7 +170,9 @@
 
 
 (defn department-employees-panel [department-drawer-open-id department-id manager-id]
-  (let [fetching-department-employees? (subscribe [:fetching-department-employees?])]
+  (let [fetching-department-employees? (subscribe [:fetching-department-employees?])
+        department-employees (subscribe [:department-employees])
+        search-criteria (subscribe [:search-criteria])]
     (when (= department-drawer-open-id department-id)
       [box
        ;:style {:height "auto" :border-width "1" :border-style "solid" :border-color "white"}
@@ -182,10 +183,25 @@
         :children
         [
          [h-box
-          :gap "10px"
-          :justify :start
+          :justify :between
           :children
           [
+           (if (seq @department-employees)
+             [h-box
+              :gap "5px"
+              :align :center
+              :children
+              [
+               [:span {:style {:font-size "25px"}
+                       :class "glyphicon glyphicon-search"
+                       }]
+               [input-text
+                :width "300px"
+                :model @search-criteria
+                :placeholder "Search employees..."
+                :on-change #(dispatch [:input-change-employee-search %])
+                :change-on-blur? false]]]
+             [:div])
            [md-circle-icon-button
             :md-icon-name "zmdi-plus"
             :emphasise? true
