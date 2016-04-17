@@ -1,7 +1,12 @@
 (ns metime.db)
 
 (defonce default-db
-         {:authentication-failed-msg      ""
+         {
+          :authentication-token           ""
+          :authentication-failed-msg      ""
+          :route-params                   [:home]
+          :nav-bar                        nil
+          :view                           :home
           :employee                       {:is-ready? false :validation-errors nil}
           :search-criteria                ""
           :department-employees           nil
@@ -11,9 +16,5 @@
           :leave-type                     nil
           :leave-types                    nil
           :fetching-department-employees? false
-          :view                           :home
-          :route-params                   [:home]
-          :authentication-token           ""
-          :nav-bar                        nil
           :department-drawer-open-id      nil
           :leave-type-drawer-open-id      nil})
