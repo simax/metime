@@ -15,7 +15,7 @@
                                  popover-tooltip md-icon-button md-circle-icon-button row-button]
              :refer-macros [handler-fn]]
             [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
-            [cljs-time.core :refer [within? before? after? date-time now days minus day-of-week]]
+            [cljs-time.core :refer [within? before? after? date-time now days minus day-of-week first-day-of-the-month]]
             [cljs-time.format :refer [formatter parse unparse]]
             [cljs-time.coerce]
             [goog.date]

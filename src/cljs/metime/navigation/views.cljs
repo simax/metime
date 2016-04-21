@@ -3,6 +3,7 @@
   (:require [metime.navigation.handlers]
             [metime.navigation.subs]
             [metime.employees.views :as ev]
+            [metime.calendar.views :as cv]
             [metime.leave-types.subs]
             [metime.leave-types.views :as lvt]
             [metime.routes :as routes]
