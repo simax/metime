@@ -1,4 +1,4 @@
-(ns metime.Calendar.handlers
+(ns metime.calendar.handlers
   (:require-macros
     [cljs.core.async.macros :refer [go]]
     [bouncer.validators :refer [defvalidator]])
@@ -26,6 +26,22 @@
             [metime.common.handlers]))
 
 ;(trace-forms
-; {:tracer (tracer :color "green")})
+; {:tracer (tracer :color "green")}
 
-; )
+(register-handler
+  :fetch-my-bookings
+  (fn hdlr-fetch-my-bookings [db [_]]
+    (utils/call-api :GET (routes/api-endpoint-for :employee-bookings :id (:logged-in-user-id db)) db
+                    {:success-handler-key :api-response->bookings-by-employee-id
+                     :response-keys       [:body]})
+    db))
+
+(register-handler
+  :api-response->bookings-by-employee-id
+  (fn hdlr-:api-response->bookings-by-employee-id [db [_ employee-bookings]]
+    (let [value (js->clj employee-bookings)]
+      (assoc db :employee-bookings value))))
+
+;)
+
+
