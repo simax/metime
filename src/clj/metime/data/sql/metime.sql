@@ -308,10 +308,10 @@ delete from employees where id = :id
 -- :name delete-all-employees :!
 delete from employees
 
--- ============================= Holidays ===========================
--- Insert a new holiday request
--- :name insert-holiday-request :i! :n
-insert into holidays (start_date,
+-- ============================= Bookings ===========================
+-- Insert a new booking request
+-- :name insert-booking-request :i! :n
+insert into bookings (start_date,
                       start_type,
                       end_date,
                       employee_id,
@@ -339,8 +339,8 @@ insert into holidays (start_date,
                 )
 
 
--- Get all holidays
--- :name get-holidays :? :*
+-- Get all bookings
+-- :name get-bookings :? :*
 select
 id,
 [start_date],
@@ -358,6 +358,11 @@ id,
 [status],
 [unit]
 
-from holidays
+from bookings
 order by [start_date] desc
+
+
+-- Get the bookings by employee
+-- :name get-employee-bookings :? :*
+select * from bookings where employee_id = :id
 

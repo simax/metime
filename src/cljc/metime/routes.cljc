@@ -19,6 +19,8 @@
                                  ["/" [#"\d*" :id]] :employee-editor}]
                    [true :not-found]]])
 
+;["/bookings" {""                                 :bookings
+;              ["/" [#"\d*" :id] ""]           :booking-by-id}]
 
 
 (def api-routes ["http://localhost:3000/api"
@@ -27,11 +29,14 @@
                   ["/departments" {""                              :departments
                                    ["/" [#"\d*" :id] ""]           :department-by-id
                                    ["/" [#"\d*" :id] "/employees"] :department-employees}]
+                  ["/employee-bookings"
+                               {["/" [#"\d*" :id] ""]              :employee-bookings}]
                   [["/department?name=" :name] :department-by-name]
                   ["/leave-types" {""                    :leave-types
                                    ["/" [#"\d*" :id] ""] :leave-type-by-id}]
                   [["/leave-type?name=" :name] :leave-type-by-name]
                   ["/employees" :employees]
+
                   [["/employee?id=" [#"\d*" :id]] :employee-by-id]
                   [["/employee?email=" :email] :employee-by-email]]])
 

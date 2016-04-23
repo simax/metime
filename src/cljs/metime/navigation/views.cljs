@@ -50,11 +50,12 @@
 
 (defn view-calendar []
   (dispatch [:set-active-navbar :calendar])
-  [:div {:style {:height "500px"}} [:h1 "Calendar page"]])
-
-;(defn view-leave-types []
-;  (dispatch [:set-active-navbar :leave-types])
-;  [:div {:style {:height "500px"}} [:h1 "Leave types page"]])
+  (dispatch [:fetch-my-bookings])
+  (let [my-bookings (subscribe [:my-bookings])]
+    (fn []
+      (if-not (seq @my-bookings)
+        [common-components/loader-component]
+        [cv/bookings-list-layout @my-bookings]))))
 
 (defn view-user []
   (dispatch [:set-active-navbar :user])

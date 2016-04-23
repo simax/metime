@@ -1,4 +1,4 @@
-(ns metime.data.holidays
+(ns metime.data.bookings
   (:require [metime.data.database :as db]
             [hugsql.core :as hugsql]))
 

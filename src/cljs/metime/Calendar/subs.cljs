@@ -1,4 +1,4 @@
-(ns metime.Calendar.subs
+(ns metime.calendar.subs
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
   (:require [reagent.ratom :refer [make-reaction]]
             [re-frame.core :refer [register-sub]]
@@ -6,8 +6,6 @@
             [re-frame-tracer.core :refer [tracer]]))
 
 
-;(trace-forms {:tracer (tracer :color "brown")}
+(trace-forms {:tracer (tracer :color "brown")}
 
-
-
-;)
+)

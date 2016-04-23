@@ -2,6 +2,7 @@
 
 (defonce default-db
          {
+          :logged-in-user-id              37
           :authentication-token           ""
           :authentication-failed-msg      ""
           :route-params                   [:home]

@@ -4,7 +4,7 @@
             [metime.data.leave-types :as ltypes]
             [metime.data.departments :as deps]
             [metime.data.employees :as emps]
-            [metime.data.holidays :as hols]
+            [metime.data.bookings :as bkngs]
             [metime.routes :as routes]
             [metime.security :as sec]
             [clojure.java.io :as io]
@@ -230,12 +230,12 @@
 (def new-employee-required-fields #{:firstname :lastname :password :confirmation :is-approver})
 (def employee-validator (partial validate-employee employee-validation-set new-employee-required-fields))
 
-(def holiday-request-types #{"Morning" "Afternoon" "All day"})
-(def holiday-request-units #{"Days" "Hours"})
+(def booking-request-types #{"Morning" "Afternoon" "All day"})
+(def booking-request-units #{"Days" "Hours"})
 
-(def holiday-request-validation-rules
+(def booking-request-validation-rules
   [:start_date [[v/required] [v/datetime date-format :message "Must be a valid date"]]
-   :start_type [[v/member holiday-request-types :message (apply (partial str "Must be one of ") (interpose ", " holiday-request-types))]]
+   :start_type [[v/member booking-request-types :message (apply (partial str "Must be one of ") (interpose ", " booking-request-types))]]
    :end_date [[v/required] [v/datetime date-format :message "Must be a valid date"]]
    :employee_id [[v/required] [v/integer] [v/positive]]
    :employee_name [[v/required :message "Employee name is required"]]
@@ -243,11 +243,11 @@
    :leave_type [[v/required :message "Leave type is required"]]
    :duration [[v/required] [v/number] [v/positive]]
    :deduction [[v/required] [v/number] [v/positive]]
-   :unit [[v/member holiday-request-units :message (apply (partial str "Must be either ") (interpose " or " holiday-request-units))]]])
+   :unit [[v/member booking-request-units :message (apply (partial str "Must be either ") (interpose " or " booking-request-units))]]])
 
 
-(defn validate-holiday-request [holiday-request]
-  (let [result (apply b/validate holiday-request holiday-request-validation-rules)
+(defn validate-booking-request [booking-request]
+  (let [result (apply b/validate booking-request booking-request-validation-rules)
         errors (first result)]
     errors))
 
@@ -293,6 +293,8 @@
       (= 1 (deps/delete-leave-type db/db-spec {:id id}))
       false)))
 
+(defn fetch-employee-bookings [employee-id]
+  (bkngs/get-employee-bookings db/db-spec {:id employee-id}))
 
 
 ;;TODO: Need a password reset resource.
@@ -665,27 +667,27 @@
              :handle-ok ::employee
              :handle-not-found "Employee not found")
 
-(defn format-holiday-request [form-data]
+(defn format-booking-request [form-data]
   (assoc form-data
     :employee_id (parse-number (:employee_id form-data))
     :leave_type_id (parse-number (:leave_type_id form-data))
     :duration (parse-number (:duration form-data))
     :deduction (parse-number (:deduction form-data))))
 
-(defresource holidays []
+(defresource bookings []
              (secured-resource)
              :available-media-types ["application/edn" "application/json"]
              :allowed-methods [:get :post]
              :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
              :exists? (fn [ctx]
                         (if (requested-method ctx :get)
-                          [true {::holidays (hols/get-holidays db/db-spec)}]))
+                          [true {::bookings (bkngs/get-bookings db/db-spec)}]))
 
 
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
-                             (let [form-data (-> ctx (get-posted-data) (make-keyword-map) (format-holiday-request))
-                                   validation-result (validate-holiday-request form-data)]
+                             (let [form-data (-> ctx (get-posted-data) (make-keyword-map) (format-booking-request))
+                                   validation-result (validate-booking-request form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message (str validation-result)}]
                                  false))
@@ -698,9 +700,9 @@
                       That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (hols/insert-holiday-request db/db-spec (make-keyword-map (get-posted-data ctx)))]
-                            {::location (routes/api-endpoint-for :holiday-by-id :id new-id)})
-                          (catch Exception e {::failure-message "Invaliday holiday request"}))))
+                          (when-let [new-id (bkngs/insert-booking-request db/db-spec (make-keyword-map (get-posted-data ctx)))]
+                            {::location (routes/api-endpoint-for :booking-by-id :id new-id)})
+                          (catch Exception e {::failure-message "Invalid booking request"}))))
 
              :post-redirect? false
              :handle-created (fn [ctx]
@@ -708,6 +710,20 @@
                                  {:status 403 :body (::failure-message ctx)}
                                  {:location (::location ctx)}))
 
-             :handle-ok ::holidays)
+             :handle-ok ::bookings)
 
+(defresource employee-bookings [id]
+             (secured-resource)
+             :available-media-types ["application/edn" "application/json"]
+             :allowed-methods [:get :post]
+             :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
+             :exists? (fn [ctx]
+                        (if (requested-method ctx :get)
+                          [true {::my-bookings (fetch-employee-bookings id)}]))
 
+             :handle-created (fn [ctx]
+                               (if (::failure-message ctx)
+                                 {:status 403 :body (::failure-message ctx)}
+                                 {:location (::location ctx)}))
+
+             :handle-ok ::my-bookings)

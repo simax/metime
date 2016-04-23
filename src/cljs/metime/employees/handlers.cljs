@@ -220,8 +220,6 @@
                        :confirmation           "password1"
                        :is-approver            false}})))))
 
-
-
 (register-handler
   :employee-save-failure
   (fn hdlr-save-failure [db [_]]
@@ -241,7 +239,6 @@
     (dispatch [:close-department-drawer])
     (dispatch [:fetch-departments])
     (assoc db :department nil)))
-
 
 (register-handler
   :switch-view-to-employees

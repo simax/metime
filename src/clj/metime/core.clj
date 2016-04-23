@@ -46,7 +46,7 @@
            (context "/api" []
              (ANY "/employees" [] (res/employees))
              (ANY "/employee" [id email] (employee-by-id-or-email-handler id email))
-             (ANY "/holidays" [] (res/holidays))
+             ;(ANY "/holidays" [] (res/holidays))
              (GET "/authtoken" [] (res/build-auth-token))
              (context "/departments" []
                (ANY "/" [] (res/departments))               ; fn [_] {:status 200 :body "This is the /departments route"}
@@ -54,9 +54,11 @@
                (GET "/:id/employees" [id] (res/department-employees id)))
              (context "/leave-types" []
                (ANY "/" [] (res/leave-types))               ; fn [_] {:status 200 :body "This is the /departments route"}
-               (ANY "/:id" [id] (res/leave-type id))
-               )
-             ;(ANY "/holidays/:id" [id] (holiday id))
+               (ANY "/:id" [id] (res/leave-type id)))
+             ;(context "/bookings" []
+             ;  (ANY "/:id" [id] (res/bookings id)))
+             (context "/employee-bookings" []
+               (ANY "/:id" [id] (res/employee-bookings id)))
              (route/not-found "Not Found"))
 
            ;; All other routes failed. Just serve the app again
