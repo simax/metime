@@ -16,6 +16,7 @@
           :departments                    nil
           :leave-type                     nil
           :leave-types                    nil
+          :employee-bookings              nil
           :fetching-department-employees? false
           :department-drawer-open-id      nil
           :leave-type-drawer-open-id      nil})
