@@ -27,6 +27,9 @@
             [re-frame-tracer.core :refer [tracer]]
             [cljs.pprint :refer [pprint]]))
 
+;(trace-forms
+;  {:tracer (tracer :color "indigo")}
+
 (defn leave-type-name-component [edit-mode leave-type]
   (let [leave-type-name (:leave-type leave-type)]
     (if (utils/is-mutating-mode? edit-mode)
@@ -118,7 +121,6 @@
     ]])
 
 
-
 (defn leave-types-list [leave-types]
   (let [leave-type (subscribe [:leave-type])]
     [scroller
@@ -155,4 +157,4 @@
       :tooltip-position :right-center]]
     ]])
 
-
+; )

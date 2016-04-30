@@ -121,7 +121,6 @@
       :leave-type nil
       :leave-type-drawer-open-id nil)))
 
-
 (register-handler
   :ui-new-leave-type-drawer-status-toggle
   (fn hdlr-ui-new-leave-type-drawer-status-toggle [db [_]]
@@ -133,11 +132,32 @@
         (assoc db :new-leave-type-drawer-open? true)))))
 
 (register-handler
-  :ui-new-leave-type-drawer-status-toggle
-  (fn hdlr-ui-new-leave-type-drawer-status-toggle [db [_]]
-    (dispatch [:close-leave-type-drawer])
-    (if (:new-leave-type-drawer-open? db)
-      (assoc db :new-leave-type-drawer-open? false)
-      (do
-        (dispatch [:new-leave-type])
-        (assoc db :new-leave-type-drawer-open? true)))))
+  :api-response->leave-type
+  (fn hdlr-api-reponse->leave-type [db [_ leave-type]]
+    (let [value (js->clj leave-type)]
+      (assoc db :leave-type value))))
+
+(register-handler
+  :fetch-leave-type
+  (fn hdlr-fetch-leave-type [db [_ id]]
+    (utils/call-api :GET (routes/api-endpoint-for :leave-type-by-id :id id) db
+                    {:success-handler-key :api-response->leave-type
+                     :response-keys       [:body]})
+    db))
+
+
+
+
+(register-handler
+  :fetch-leave-types
+  (fn hdlr-fetch-leave-types [db [_]]
+    (utils/call-api :GET (routes/api-endpoint-for :leave-types) db
+                    {:success-handler-key :api-response->leave-types
+                     :response-keys       [:body :leave-types]})
+    db))
+
+(register-handler
+  :api-response->leave-types
+  (fn hdlr-api-reposne->leave-types [db [_ leave-types]]
+    (let [value (js->clj leave-types)]
+      (assoc db :leave-types value))))

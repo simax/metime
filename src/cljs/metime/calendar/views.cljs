@@ -28,6 +28,61 @@
 ;(trace-forms
 ;  {:tracer (tracer :color "indigo")}
 
+(defn booking-buttons-component [edit-mode {:keys [booking-id]}]
+  (if (utils/is-mutating-mode? edit-mode)
+    [h-box
+     :align :center
+     :gap "10px"
+     :width "250px"
+     :justify :end
+     :children
+     [
+      [md-circle-icon-button
+       :emphasise? true
+       :size :smaller
+       :md-icon-name "zmdi-floppy"
+       :tooltip "Save booking"
+       :on-click #(dispatch [:booking-save])]
+      [md-circle-icon-button
+       :emphasise? true
+       :size :smaller
+       :md-icon-name "zmdi-close-circle-o"
+       :tooltip "Cancel"
+       :on-click #(dispatch [:close-booking-drawer])]]]
+
+    [h-box
+     :align :center
+     :gap "10px"
+     :width "300px"
+     :justify :end
+     :children
+     [
+      [md-icon-button
+       :md-icon-name "zmdi-edit"                            ;
+       :style {:color "#b2c831"}
+       :on-click #(dispatch [:edit-booking booking-id])]
+
+      [md-icon-button
+       :md-icon-name "zmdi-delete"                          ;
+       :style {:color "Red"}
+       :on-click #(dispatch [:booking-delete booking-id])]
+      [box :child [:div]]]]))
+
+
+(defn booking-type [edit-mode booking]
+  (let [booking-type (:leave-type booking)]
+    (if (utils/is-mutating-mode? edit-mode)
+      [input-text
+       :width "400px"
+       :model booking-type
+       :on-change #(dispatch [:input-change-booking-type %])
+       :status (when (seq (get-in booking [:validation-errors :booking])) :error)
+       :status-icon? (seq (get-in booking [:validation-errors :booking]))
+       :status-tooltip (apply str (get-in booking [:validation-errors :booking]))
+       :change-on-blur? false]
+      [box
+       :width "100px"
+       :child [:h2 booking-type]])))
 
 (defn booking-start-date [edit-mode booking]
   (let [start-date (:start-date booking)]
@@ -47,12 +102,11 @@
 
 
 (defn booking-component [bkng]
-  (let [
-        edit-mode (subscribe [:booking-edit-mode (:id bkng)])
-        ;booking (if (utils/is-mutating-mode? @edit-mode) (deref (subscribe [:booking])) bkng)
-        ]
+  (let [edit-mode (subscribe [:booking-edit-mode (:booking-id bkng)])
+        booking (if (utils/is-mutating-mode? @edit-mode) (deref (subscribe [:booking])) bkng)]
+    (println (str "edit-mode" @edit-mode))
     [box
-     ;:class (if (utils/is-mutating-mode? @edit-mode) "mutating" "panel panel-default")
+     :class (if (utils/is-mutating-mode? @edit-mode) "mutating" "panel panel-default")
      ;:style (if (utils/is-mutating-mode? @edit-mode) {:background-color "Gainsboro" :border-width "1px" :border-style "solid" :border-color "white" :margin-bottom "20px"} {})
      :child
      [h-box
@@ -67,10 +121,11 @@
         :children
         [
          ;[manager-component @edit-mode booking]
-         [booking-start-date @edit-mode bkng]
+         [booking-start-date @edit-mode booking]
+         [booking-type @edit-mode booking]
          ]]
 
-       ;[booking-buttons-component @edit-mode booking]
+       [booking-buttons-component @edit-mode booking]
        ]]]))
 
 (defn booking-list-item [booking]
@@ -81,7 +136,7 @@
 
 
 (defn bookings-list [bookings]
-  (let [my-booking (subscribe [:my-bookings])]
+  (let [booking (subscribe [:booking])]
     [scroller
      :v-scroll :auto
      :height "780px"
@@ -91,10 +146,10 @@
       :width "950px"
       :children
       [
-       (when (and (seq @my-booking) (= (:booking-id @my-booking) 0))
-         [booking-component @my-booking])
+       (when (and (seq @booking) (= (:booking-id @booking) 0))
+         [booking-component @booking])
        (for [booking bookings]
-         ^{:key (:id booking)}
+         ^{:key (:booking-id booking)}
          [booking-list-item booking])]]]))
 
 
@@ -115,7 +170,7 @@
       :tooltip-position :right-center]]
     ]])
 
-  ; )
+; )
 
 
 

@@ -40,35 +40,6 @@
                  :view :home)))))
 
 (register-handler
-  :api-response->leave-types
-  (fn hdlr-api-reposne->leave-types [db [_ leave-types]]
-    (let [value (js->clj leave-types)]
-      (assoc db :leave-types value))))
-
-(register-handler
-  :api-response->leave-type
-  (fn hdlr-api-reponse->leave-type [db [_ leave-type]]
-    (let [value (js->clj leave-type)]
-      (assoc db :leave-type value))))
-
-(register-handler
-  :fetch-leave-type
-  (fn hdlr-fetch-leave-type [db [_ id]]
-    (utils/call-api :GET (routes/api-endpoint-for :leave-type-by-id :id id) db
-                    {:success-handler-key :api-response->leave-type
-                     :response-keys       [:body]})
-    db))
-
-
-(register-handler
-  :fetch-leave-types
-  (fn hdlr-fetch-leave-types [db [_]]
-    (utils/call-api :GET (routes/api-endpoint-for :leave-types) db
-                    {:success-handler-key :api-response->leave-types
-                     :response-keys       [:body :leave-types]})
-    db))
-
-(register-handler
   :fetching-department-employees-complete
   (fn hdlr-fetching [db [_]]
     (assoc db :fetching-department-employees? false)))
@@ -143,7 +114,6 @@
   (fn hndle-employee-not-found [db [_]]
     (assoc db :employee (assoc {} :is-ready? true :not-found true))))
 
-
 (register-handler
   :fetch-department
   (fn hdlr-fetch-department [db [_ id]]
@@ -159,7 +129,6 @@
                     {:success-handler-key :api-response->departments
                      :response-keys       [:body :departments]})
     db))
-
 
 (register-handler
   :fetch-department-employees

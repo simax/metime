@@ -28,6 +28,120 @@
 ;(trace-forms
 ; {:tracer (tracer :color "green")}
 
+(def booking-validation-rules
+  [:booking [[v/required :message "leave type name is required"]]])
+
+(defn validate-booking [db]
+  (let [booking (:booking db)
+        result [(first (apply b/validate booking booking-validation-rules))]
+        errors (first result)]
+    (assoc-in db [:booking :validation-errors] errors)))
+
+(defn is-new-booking? [id]
+  (zero? id))
+
+(register-handler
+  :booking-save-failure
+  (fn hdlr-save-failure [db [_]]
+    ; Potentially show some kind of boostrap alert?
+    (println "Problem saving booking")
+    db))
+
+(register-handler
+  :booking-save-success
+  (fn hdlr-save-success [db [_]]
+    (dispatch [:close-booking-drawer])
+    (dispatch [:fetch-bookings])
+    (assoc db :booking nil)))
+
+(defn build-booking-by-id-endpoint [booking]
+  (routes/api-endpoint-for :booking-by-id :id (:booking-id booking)))
+
+(defn add-new-booking [db booking]
+  "Add a new booking"
+  (utils/send-data-to-api :POST
+                          (routes/api-endpoint-for :bookings) (:authentication-token db) booking
+                          {:valid-fn      #(dispatch [:booking-save-success])
+                           :invalid-fn    #(dispatch [:booking-save-failure])
+                           :response-keys [:body :bookings]}))
+
+(defn update-booking [db booking]
+  "Update an existing booking"
+  (utils/send-data-to-api :PUT
+                          (build-booking-by-id-endpoint booking) (:authentication-token db) booking
+                          {:valid-fn      #(dispatch [:booking-save-success])
+                           :invalid-fn    #(dispatch [:booking-save-failure])
+                           :response-keys [:body :bookings]}))
+
+(register-handler
+  :booking-save
+  (enrich validate-booking)
+  (fn hdlr-booking-save [db [_]]
+    (let [booking (:booking db)]
+      (when (and
+              (apply b/valid? booking booking-validation-rules)
+              (not (some? (get-in booking [:validation-errors]))))
+        (if (is-new-booking? (:booking-id booking))
+          (add-new-booking db booking)
+          (update-booking db booking)))
+      db)))
+
+(register-handler
+  :booking-delete
+  (fn hdlr-booking-delete [db [_ id]]
+    (utils/call-api :DELETE (routes/api-endpoint-for :booking-by-id :id id) db
+                    {:success-handler-key :fetch-bookings
+                     :response-keys       [:body]})
+    db))
+
+(register-handler
+  :input-change-booking-type
+  (enrich validate-booking)
+  (fn hdlr-input-change [db [_ booking-type]]
+    (assoc-in db [:booking :booking-type] booking-type)))
+
+(register-handler
+  :new-booking
+  (fn hdlr-new-booking [db [_]]
+    (assoc db :booking {:booking-id 0 :booking "" })))
+
+(register-handler
+  :edit-booking
+  (fn hdlr-edit-booking [db [_ booking-id]]
+    (dispatch [:fetch-booking booking-id])
+    db))
+
+(register-handler
+  :close-booking-drawer
+  (fn hdlr-close-booking-drawer [db [_]]
+    (assoc db
+      :booking nil
+      :booking-drawer-open-id nil)))
+
+(register-handler
+  :ui-new-booking-drawer-status-toggle
+  (fn hdlr-ui-new-booking-drawer-status-toggle [db [_]]
+    (dispatch [:close-booking-drawer])
+    (if (:new-booking-drawer-open? db)
+      (assoc db :new-booking-drawer-open? false)
+      (do
+        (dispatch [:new-booking])
+        (assoc db :new-booking-drawer-open? true)))))
+
+(register-handler
+  :api-response->booking
+  (fn hdlr-api-reponse->booking [db [_ booking]]
+    (let [value (js->clj booking)]
+      (assoc db :booking value))))
+
+(register-handler
+  :fetch-booking
+  (fn hdlr-fetch-booking [db [_ id]]
+    (utils/call-api :GET (routes/api-endpoint-for :booking-by-id :id id) db
+                    {:success-handler-key :api-response->booking
+                     :response-keys       [:body]})
+    db))
+
 (register-handler
   :fetch-my-bookings
   (fn hdlr-fetch-my-bookings [db [_]]

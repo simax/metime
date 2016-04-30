@@ -39,12 +39,6 @@
     (make-reaction (fn sub-employee [] (:employee @db)))))
 
 (register-sub
-  :leave-type
-  (fn [db _]
-    (make-reaction (fn sub-leave-type [] (:leave-type @db)))))
-
-
-(register-sub
   :department
   (fn [db _]
     (make-reaction (fn sub-department [] (:department @db)))))

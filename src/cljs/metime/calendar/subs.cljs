@@ -8,22 +8,40 @@
 
 ;(trace-forms {:tracer (tracer :color "brown")}
 
-  (register-sub
-    :booking-edit-mode
-    (fn [db [_ booking-id]]
-      (make-reaction
-        (fn sub-booking []
-          ;(println (str "booking-id: " booking-id))
-          ;(cond
-          ;  (and (= (get-in @db [:booking-drawer-open-id]) nil) (= (get-in @db [:booking :booking-id]) 0) (= 0 booking-id)) :add
-          ;  (and (= (get-in @db [:booking-drawer-open-id]) nil) (> (get-in @db [:booking :booking-id]) 0) (= (get-in @db [:booking :booking-id]) booking-id)) :edit
-          ;  :else :display)
-          :display))))
 
+(register-sub
+  :booking
+  (fn [db _]
+    (make-reaction (fn sub-booking [] (:booking @db)))))
 
-  (register-sub
-    :my-bookings
-    (fn [db _]
-      (make-reaction (fn sub-my-bookings [] (:employee-bookings @db)))))
+(register-sub
+  :my-bookings
+  (fn [db _]
+    (make-reaction (fn sub-my-bookings [] (:employee-bookings @db)))))
+
+(register-sub
+  :booking-edit-mode
+  (fn [db [_ booking-id]]
+    (make-reaction
+      (fn sub-booking []
+        ;(println (str "booking-id: " booking-id))
+        (let [is-adding? (and (= (get-in @db [:booking-drawer-open-id]) nil) (= (get-in @db [:booking :booking-id]) 0) (= 0 booking-id))
+              is-editing? (and (= (get-in @db [:booking-drawer-open-id]) nil) (> (get-in @db [:booking :booking-id]) 0) (= (get-in @db [:booking :booking-id]) booking-id))]
+          (cond
+            is-adding? :add
+            is-editing? :edit
+            :else :display))
+        :display))))
+
+(register-sub
+  :booking-id
+  (fn [db _]
+    (make-reaction (fn sub-booking-id [] (:booking-id @db)))))
+
+(register-sub
+  :booking-drawer-open-id
+  (fn [db [_]]
+    (make-reaction (fn sub-booking-drawer-open-class [] (:booking-drawer-open-id @db)))))
+
 
 ;)

@@ -5,6 +5,12 @@
             [clairvoyant.core :refer-macros [trace-forms]]
             [re-frame-tracer.core :refer [tracer]]))
 
+
+(register-sub
+  :leave-type
+  (fn [db _]
+    (make-reaction (fn sub-leave-type [] (:leave-type @db)))))
+
 (register-sub
   :leave-types
   (fn [db _]
@@ -15,10 +21,12 @@
   (fn [db [_ leave-type-id]]
     (make-reaction
       (fn sub-leave-type []
-        (cond
-          (and (= (get-in @db [:leave-type-drawer-open-id]) nil) (= (get-in @db [:leave-type :leave-type-id]) 0) (= 0 leave-type-id)) :add
-          (and (= (get-in @db [:leave-type-drawer-open-id]) nil) (> (get-in @db [:leave-type :leave-type-id]) 0) (= (get-in @db [:leave-type :leave-type-id]) leave-type-id)) :edit
-          :else :display)))))
+        (let [is-adding? (and (= (get-in @db [:leave-type-drawer-open-id]) nil) (= (get-in @db [:leave-type :leave-type-id]) 0) (= 0 leave-type-id))
+              is-editing? (and (= (get-in @db [:leave-type-drawer-open-id]) nil) (> (get-in @db [:leave-type :leave-type-id]) 0) (= (get-in @db [:leave-type :leave-type-id]) leave-type-id))]
+          (cond
+            is-adding? :add
+            is-editing? :edit
+            :else :display))))))
 
 (register-sub
   :leave-type-id

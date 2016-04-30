@@ -342,7 +342,7 @@ insert into bookings (start_date,
 -- Get all bookings
 -- :name get-bookings :? :*
 select
-id,
+id as 'booking-id',
 [start_date],
 [start_type],
 [end_date],
@@ -364,5 +364,21 @@ order by [start_date] desc
 
 -- Get the bookings by employee
 -- :name get-employee-bookings :? :*
-select * from bookings where employee_id = :id
+select
+id as 'booking-id',
+[start_date],
+[start_type],
+[end_date],
+[employee_id],
+[employee_name],
+[leave_type_id],
+[leave_type],
+[duration],
+[deduction],
+[actioned_by_id],
+[reason],
+[declined_reason],
+[status],
+[unit]
+from bookings where employee_id = :id
 

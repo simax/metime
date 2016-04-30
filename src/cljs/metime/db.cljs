@@ -19,4 +19,5 @@
           :employee-bookings              nil
           :fetching-department-employees? false
           :department-drawer-open-id      nil
-          :leave-type-drawer-open-id      nil})
+          :leave-type-drawer-open-id      nil
+          :booking-drawer-open-id         nil})
