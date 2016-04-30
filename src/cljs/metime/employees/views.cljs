@@ -299,7 +299,7 @@
        :size :smaller
        :md-icon-name "zmdi-close-circle-o"
        :tooltip "Cancel"
-       :on-click #(dispatch [:close-department-drawer])]]]
+       :on-click #(dispatch [:close-all-department-drawers])]]]
 
     [h-box
      :align :center

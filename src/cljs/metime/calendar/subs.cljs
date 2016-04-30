@@ -24,14 +24,15 @@
   (fn [db [_ booking-id]]
     (make-reaction
       (fn sub-booking []
-        ;(println (str "booking-id: " booking-id))
         (let [is-adding? (and (= (get-in @db [:booking-drawer-open-id]) nil) (= (get-in @db [:booking :booking-id]) 0) (= 0 booking-id))
               is-editing? (and (= (get-in @db [:booking-drawer-open-id]) nil) (> (get-in @db [:booking :booking-id]) 0) (= (get-in @db [:booking :booking-id]) booking-id))]
+          (println (str "is-adding?: " is-adding?))
+          ;(println (str "is-adding?: " is-editing?))
           (cond
             is-adding? :add
             is-editing? :edit
             :else :display))
-        :display))))
+        ))))
 
 (register-sub
   :booking-id

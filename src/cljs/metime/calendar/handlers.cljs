@@ -98,12 +98,12 @@
   :input-change-booking-type
   (enrich validate-booking)
   (fn hdlr-input-change [db [_ booking-type]]
-    (assoc-in db [:booking :booking-type] booking-type)))
+    (assoc-in db [:booking :leave-type] booking-type)))
 
 (register-handler
   :new-booking
   (fn hdlr-new-booking [db [_]]
-    (assoc db :booking {:booking-id 0 :booking "" })))
+    (assoc db :booking {:booking-id 0 :leave-type "" :start-date "" })))
 
 (register-handler
   :edit-booking
@@ -114,9 +114,16 @@
 (register-handler
   :close-booking-drawer
   (fn hdlr-close-booking-drawer [db [_]]
+    ()
     (assoc db
       :booking nil
       :booking-drawer-open-id nil)))
+
+(register-handler
+  :close-all-booking-drawers
+  (fn hdlr-close-all-booking-drawers [db [_]]
+    (dispatch [:close-booking-drawer])
+    (assoc db :new-booking-drawer-open? false)))
 
 (register-handler
   :ui-new-booking-drawer-status-toggle

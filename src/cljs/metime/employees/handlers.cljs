@@ -323,6 +323,12 @@
       :department-drawer-open-id nil)))
 
 (register-handler
+  :close-all-department-drawers
+  (fn hdlr-close-all-department-drawer [db [_]]
+    (dispatch [:close-department-drawer])
+    (assoc db :new-department-drawer-open? false)))
+
+(register-handler
   :open-department-drawer
   (fn hndlr-open-department-drawer [db [_ department-id]]
     (dispatch [:fetch-department department-id])

@@ -122,6 +122,13 @@
       :leave-type-drawer-open-id nil)))
 
 (register-handler
+  :close-all-leave-type-drawers
+  (fn hdlr-close-new-leave-type-drawer [db [_]]
+    (dispatch [:close-leave-type-drawer])
+    (assoc db :new-leave-type-drawer-open? false)))
+
+
+(register-handler
   :ui-new-leave-type-drawer-status-toggle
   (fn hdlr-ui-new-leave-type-drawer-status-toggle [db [_]]
     (dispatch [:close-leave-type-drawer])
