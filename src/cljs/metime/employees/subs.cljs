@@ -28,13 +28,15 @@
 (register-sub
   :department-edit-mode
   (fn [db [_ department-id]]
+    ;(println (str "department-id: " department-id))
     (make-reaction
       (fn sub-department []
-        ;(println (str "department-id: " department-id))
-        (cond
-          (and (= (get-in @db [:department-drawer-open-id]) nil) (= (get-in @db [:department :department-id]) 0) (= 0 department-id)) :add
-          (and (= (get-in @db [:department-drawer-open-id]) nil) (> (get-in @db [:department :department-id]) 0) (= (get-in @db [:department :department-id]) department-id)) :edit
-          :else :display)))))
+        (let [is-adding? (and (= (get-in @db [:department-drawer-open-id]) nil) (= (get-in @db [:department :department-id]) 0) (= 0 department-id))
+              is-editing? (and (= (get-in @db [:department-drawer-open-id]) nil) (> (get-in @db [:department :department-id]) 0) (= (get-in @db [:department :department-id]) department-id))]
+          (cond
+            is-adding? :add
+            is-editing? :edit
+            :else :display))))))
 
 (register-sub
   :employee-dob-show-error
