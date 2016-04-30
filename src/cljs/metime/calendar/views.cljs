@@ -82,7 +82,7 @@
        :change-on-blur? false]
       [box
        :width "100px"
-       :child [:h2 booking-type]])))
+       :child [:span booking-type]])))
 
 (defn booking-start-date [edit-mode booking]
   (let [start-date (:start-date booking)]
@@ -97,7 +97,7 @@
        :change-on-blur? false]
       [box
        :width "400px"
-       :child [:h2 start-date]])))
+       :child [:span start-date]])))
 
 (defn booking-component [bkng]
   (let [edit-mode (subscribe [:booking-edit-mode (:booking-id bkng)])
@@ -124,11 +124,33 @@
        [booking-buttons-component @edit-mode booking]
        ]]]))
 
+(defn booking-component-display [bkng]
+  [box
+   :class "panel panel-default"
+   :child
+   [h-box
+    :class "panel-body row"
+    :height "65px"
+    :justify :between
+    :children
+    [
+     [h-box
+      :gap "20px"
+      :align :center
+      :children
+      [
+       [booking-start-date :display bkng]
+       [booking-type :display bkng]
+       ]]
+
+     [booking-buttons-component :display bkng]
+     ]]])
+
 (defn booking-list-item [booking]
   [v-box
    :children
    [
-    [booking-component booking]]])
+    [booking-component-display booking]]])
 
 
 (defn bookings-list [bookings]
