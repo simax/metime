@@ -8,6 +8,19 @@
 
 ;(trace-forms {:tracer (tracer :color "brown")}
 
+(register-sub
+  :booking-start-date-show-error
+  (fn [db _]
+    (make-reaction (fn sub-booking-start-date-show-error []
+                     (not (empty? (seq (get-in @db [:booking :validation-errors :start-date]))))))))
+
+(register-sub
+  :booking-start-date-error-message
+  (fn [db _]
+    (make-reaction (fn sub-booking-start-date-error-message []
+                     (if-let [errors (seq (get-in @db [:booking :validation-errors :start-date]))]
+                       (first errors)
+                       "")))))
 
 (register-sub
   :booking

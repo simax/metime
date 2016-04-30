@@ -59,7 +59,7 @@
    :popover [popover-content-wrapper
              :showing? showing?
              :title title
-             :position :above-right
+             :position :below-center
              :backdrop-opacity 0.5
              :width "250px"
              :no-clip? true

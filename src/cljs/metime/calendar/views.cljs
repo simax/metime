@@ -1,28 +1,28 @@
 (ns metime.calendar.views
   (:require-macros [cljs.core.async.macros :refer [go alt!]])
-  (:require [metime.formatting :as fmt]
-            [metime.common.views :as common-components]
-            [cljs.core.async :refer [put! take! <! >! chan timeout]]
-            [metime.navigation.subs]
-            [metime.calendar.subs]
-            [metime.calendar.handlers]
-            [re-com.core :refer [h-box v-box box gap scroller
-                                 title single-dropdown label
-                                 input-text input-textarea datepicker datepicker-dropdown button
-                                 popover-anchor-wrapper popover-content-wrapper
-                                 popover-tooltip md-icon-button md-circle-icon-button row-button]
-             :refer-macros [handler-fn]]
-            [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
-            [cljs-time.core :refer [within? before? after? date-time now days minus day-of-week first-day-of-the-month]]
-            [cljs-time.format :refer [formatter parse unparse]]
-            [cljs-time.coerce]
-            [goog.date]
-            [re-frame.core :refer [dispatch subscribe]]
-            [reagent.ratom :refer [make-reaction]]
-            [clairvoyant.core :refer-macros [trace-forms]]
-            [re-frame-tracer.core :refer [tracer]]
-            [cljs.pprint :refer [pprint]]
-            [metime.utils :as utils]))
+  (:require
+    [metime.common.views :refer [loader-component date-component show-error valid-input-style invalid-input-style]]
+    [cljs.core.async :refer [put! take! <! >! chan timeout]]
+    [metime.navigation.subs]
+    [metime.calendar.subs]
+    [metime.calendar.handlers]
+    [re-com.core :refer [h-box v-box box gap scroller
+                         title single-dropdown label
+                         input-text input-textarea datepicker datepicker-dropdown button
+                         popover-anchor-wrapper popover-content-wrapper
+                         popover-tooltip md-icon-button md-circle-icon-button row-button]
+     :refer-macros [handler-fn]]
+    [re-com.datepicker :refer [iso8601->date datepicker-args-desc]]
+    [cljs-time.core :refer [within? before? after? date-time now days minus day-of-week first-day-of-the-month]]
+    [cljs-time.format :refer [formatter parse unparse]]
+    [cljs-time.coerce]
+    [goog.date]
+    [re-frame.core :refer [dispatch subscribe]]
+    [reagent.ratom :refer [make-reaction]]
+    [clairvoyant.core :refer-macros [trace-forms]]
+    [re-frame-tracer.core :refer [tracer]]
+    [cljs.pprint :refer [pprint]]
+    [metime.utils :as utils]))
 
 
 ;(trace-forms
@@ -84,17 +84,18 @@
        :width "100px"
        :child [:span booking-type]])))
 
+
+;(defn booking-start-date [booking]
+;  (let [error-message (subscribe [:booking-start-date-error-message])
+;        showing-error-icon? (subscribe [:booking-start-date-show-error])]
+;    (date-component booking :start-date "Start date" "start-date" error-message showing-error-icon? false)))
+
 (defn booking-start-date [edit-mode booking]
-  (let [start-date (:start-date booking)]
+  (let [start-date (:start-date booking)
+        error-message (subscribe [:booking-start-date-error-message])
+        showing-error-icon? (subscribe [:booking-start-date-show-error])]
     (if (utils/is-mutating-mode? edit-mode)
-      [input-text
-       :width "200px"
-       :model start-date
-       :on-change #(dispatch [:input-change-booking-name %])
-       :status (when (seq (get-in booking [:validation-errors :booking])) :error)
-       :status-icon? (seq (get-in booking [:validation-errors :booking]))
-       :status-tooltip (apply str (get-in booking [:validation-errors :booking]))
-       :change-on-blur? false]
+      (date-component booking :start-date "Start date" "Start date" error-message showing-error-icon? #())
       [box
        :width "400px"
        :child [:span start-date]])))
