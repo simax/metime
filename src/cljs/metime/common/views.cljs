@@ -33,20 +33,20 @@
    :child [:div (throbber :size :large :color (or color "lime"))]])
 
 (defn show-error [error-message showing-error-icon? showing-tooltip?]
-  (when @showing-error-icon? [popover-tooltip
-                              :label @error-message
-                              :position :right-center
-                              :showing? showing-tooltip?
-                              :status :error
-                              :width "150px"
-                              :anchor [:i
-                                       {:class         "zmdi zmdi-alert-circle"
-                                        :on-mouse-over (handler-fn (reset! showing-tooltip? true))
-                                        :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
-                                        :style         {:color     "red"
-                                                        :font-size "130%"}}]]))
+  (when @showing-error-icon?
+    [popover-tooltip
+     :label @error-message
+     :position :right-center
+     :showing? showing-tooltip?
+     :status :error
+     :width "150px"
+     :anchor [:i
+              {:class         "zmdi zmdi-alert-circle"
+               :on-mouse-over (handler-fn (reset! showing-tooltip? true))
+               :on-mouse-out  (handler-fn (reset! showing-tooltip? false))
+               :style         {:color "red" :font-size "130%"}}]]))
 
-(defn date-input-with-popup [date-field date-value showing? title selectable-fn]
+(defn date-input-with-popup [date-field date-value showing? title selectable-fn popup-position]
   "Displays a popup for the given date field"
   [popover-anchor-wrapper
    :showing? showing?
@@ -59,7 +59,7 @@
    :popover [popover-content-wrapper
              :showing? showing?
              :title title
-             :position :below-center
+             :position popup-position
              :backdrop-opacity 0.5
              :width "250px"
              :no-clip? true
@@ -76,10 +76,17 @@
 
 (defn date-component
   "A generic date input box with popup and validation features"
-  ([db-model field field-label place-holder error-message showing-error-icon?]
-   (date-component db-model field field-label place-holder error-message showing-error-icon? (partial constantly true)))
-
-  ([db-model field field-label place-holder error-message showing-error-icon? selectable-fn]
+  ;([db-model field field-label place-holder error-message showing-error-icon?]
+  ; (date-component db-model field field-label place-holder error-message showing-error-icon? (constantly true)))
+  ([& {:keys [db-model field field-label popup-position place-holder error-message showing-error-icon? selectable-fn]
+       :or {field-label ""
+            place-holder ""
+            error-message ""
+            popup-position :above-center
+            showing-error-icon? false
+            selectable-fn (constantly true)}
+       }]
+    {:pre [(and db-model field)]}
    (let [showing-date-popup? (reagent/atom false)
          showing-tooltip? (reagent/atom false)]
      [h-box
@@ -98,6 +105,7 @@
                       :width "120px"
                       :change-on-blur? true
                       :on-change #(dispatch [:input-change-dates field %])]]
-         (date-input-with-popup field (field db-model) showing-date-popup? place-holder selectable-fn)]]
+         (date-input-with-popup field (field db-model)
+                                showing-date-popup? place-holder selectable-fn popup-position)]]
 
        (show-error error-message showing-error-icon? showing-tooltip?)]])))

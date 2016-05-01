@@ -95,7 +95,14 @@
         error-message (subscribe [:booking-start-date-error-message])
         showing-error-icon? (subscribe [:booking-start-date-show-error])]
     (if (utils/is-mutating-mode? edit-mode)
-      (date-component booking :start-date "Start date" "Start date" error-message showing-error-icon? #())
+      (date-component
+        :db-model booking
+        :field :start-date
+        :field-label "Start date"
+        :place-holder "Start date"
+        :popup-position :below-center
+        :error-message error-message
+        :showing-error-icon? showing-error-icon?)
       [box
        :width "400px"
        :child [:span start-date]])))
