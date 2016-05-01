@@ -163,28 +163,6 @@
     (assoc-in db [:employee property-name] new-value)))
 
 
-(defn check-date-validity [input-date]
-  (let [formatted-date (fmt/format-date-dd-mm-yyyy
-                         (first
-                           (re-find #"^([0]?[1-9]|[1|2][0-9]|[3][0|1])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4})$" input-date)))]
-    (if (try (parse (formatter "dd-MM-yyyy") formatted-date) (catch js/Error _ false))
-      formatted-date
-      input-date)))
-
-(register-handler
-  :datepicker-change-dates
-  (fn hdlr-datepicker-change-dates [db [_ model-key property-name new-value]]
-    (let [date-value (fmt/date->str new-value)]
-      (dispatch [:input-change-dates model-key property-name date-value])
-      (assoc-in db [model-key property-name] date-value))))
-
-(register-handler
-  :input-change-dates
-  (enrich validate-employee)
-  (fn hdlr-input-change-dates [db [_ model-key property-name new-value]]
-    (let [date-value (check-date-validity new-value)]
-      (assoc-in db [model-key property-name] date-value))))
-
 (register-handler
   :input-change-balances
   (fn hdlr-input-change-balances [db [_ property-name new-value]]

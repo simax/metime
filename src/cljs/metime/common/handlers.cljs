@@ -6,6 +6,7 @@
             [cljs.core.async :refer [<! >! chan]]
             [metime.routes :as routes]
             [cljs-http.client :as http]
+            [cljs-time.format :as f :refer [formatter parse unparse]]
             [re-frame.core :refer [register-handler
                                    path
                                    debug
@@ -13,7 +14,8 @@
                                    enrich
                                    register-sub
                                    dispatch
-                                   subscribe]]))
+                                   subscribe]]
+            [metime.formatting :as fmt]))
 
 
 (defn set-auth-cookie! [token]
@@ -61,5 +63,27 @@
     (assoc db
       :view :login
       :authentication-failed-msg "")))
+
+(defn check-date-validity [input-date]
+  (let [formatted-date (fmt/format-date-dd-mm-yyyy
+                         (first
+                           (re-find #"^([0]?[1-9]|[1|2][0-9]|[3][0|1])[-]([0]?[1-9]|[1][0-2])[-]([0-9]{4})$" input-date)))]
+    (if (try (parse (formatter "dd-MM-yyyy") formatted-date) (catch js/Error _ false))
+      formatted-date
+      input-date)))
+
+(register-handler
+  :datepicker-change-dates
+  (fn hdlr-datepicker-change-dates [db [_ model-key property-name new-value]]
+    (let [date-value (fmt/date->str new-value)]
+      (dispatch [:input-change-dates model-key property-name date-value])
+      (assoc-in db [model-key property-name] date-value))))
+
+(register-handler
+  :input-change-dates
+  ;(enrich validate-employee)
+  (fn hdlr-input-change-dates [db [_ model-key property-name new-value]]
+    (let [date-value (check-date-validity new-value)]
+      (assoc-in db [model-key property-name] date-value))))
 
 
