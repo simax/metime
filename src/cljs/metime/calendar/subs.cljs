@@ -9,6 +9,26 @@
 ;(trace-forms {:tracer (tracer :color "brown")}
 
 (register-sub
+  :leave-types
+  (fn [db _]
+    (make-reaction (fn sub-leave-types [] (:leave-types @db)))))
+
+
+(register-sub
+  :booking-end-date-show-error
+  (fn [db _]
+    (make-reaction (fn sub-booking-end-date-show-error []
+                     (not (empty? (seq (get-in @db [:booking :validation-errors :end-date]))))))))
+
+(register-sub
+  :booking-end-date-error-message
+  (fn [db _]
+    (make-reaction (fn sub-booking-end-date-error-message []
+                     (if-let [errors (seq (get-in @db [:booking :validation-errors :end-date]))]
+                       (first errors)
+                       "")))))
+
+(register-sub
   :booking-start-date-show-error
   (fn [db _]
     (make-reaction (fn sub-booking-start-date-show-error []

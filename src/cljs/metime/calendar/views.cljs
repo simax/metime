@@ -69,6 +69,25 @@
       [box :child [:div]]]]))
 
 
+(defn leave-type-choices [leave-types]
+  (into []
+        (for [m leave-types]
+          {:id (:leave-type-id m) :label (:department m)})))
+
+
+(defn booking-type-ddl [booking leave-types]
+  [h-box
+   :justify :start
+   :children
+   [
+    [box :width "150px" :child [label :class "control-label" :label "Department"]]
+    [box :size "auto" :child [single-dropdown
+                              :model (:leave-type-id booking)
+                              :choices (leave-type-choices leave-types)
+                              :on-change #(dispatch [:department-change %])]]]])
+
+
+
 (defn booking-type [edit-mode booking]
   (let [booking-type (:leave-type booking)]
     (if (utils/is-mutating-mode? edit-mode)
@@ -76,19 +95,31 @@
        :width "200px"
        :model booking-type
        :on-change #(dispatch [:input-change-booking-type %])
-       :status (when (seq (get-in booking [:validation-errors :booking])) :error)
-       :status-icon? (seq (get-in booking [:validation-errors :booking]))
-       :status-tooltip (apply str (get-in booking [:validation-errors :booking]))
+       :status (when (seq (get-in booking [:validation-errors :leave-type])) :error)
+       :status-icon? (seq (get-in booking [:validation-errors :leave-type]))
+       :status-tooltip (apply str (get-in booking [:validation-errors :leave-type]))
        :change-on-blur? false]
       [box
        :width "100px"
        :child [:span booking-type]])))
 
-
-;(defn booking-start-date [booking]
-;  (let [error-message (subscribe [:booking-start-date-error-message])
-;        showing-error-icon? (subscribe [:booking-start-date-show-error])]
-;    (date-component booking :start-date "Start date" "start-date" error-message showing-error-icon? false)))
+(defn booking-end-date [edit-mode booking]
+  (let [end-date (:end-date booking)
+        error-message (subscribe [:booking-end-date-error-message])
+        showing-error-icon? (subscribe [:booking-end-date-show-error])]
+    (if (utils/is-mutating-mode? edit-mode)
+      (date-component
+        :model-key :booking
+        :model booking
+        :field :end-date
+        :field-label "End date"
+        :place-holder "End date"
+        :popup-position :below-center
+        :error-message error-message
+        :showing-error-icon? showing-error-icon?)
+      [box
+       :width "400px"
+       :child [:span end-date]])))
 
 (defn booking-start-date [edit-mode booking]
   (let [start-date (:start-date booking)
@@ -96,7 +127,8 @@
         showing-error-icon? (subscribe [:booking-start-date-show-error])]
     (if (utils/is-mutating-mode? edit-mode)
       (date-component
-        :db-model booking
+        :model-key :booking
+        :model booking
         :field :start-date
         :field-label "Start date"
         :place-holder "Start date"
@@ -126,6 +158,7 @@
         :children
         [
          [booking-start-date @edit-mode booking]
+         [booking-end-date @edit-mode booking]
          [booking-type @edit-mode booking]
          ]]
 

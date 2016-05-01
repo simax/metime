@@ -173,17 +173,17 @@
 
 (register-handler
   :datepicker-change-dates
-  (fn hdlr-datepicker-change-dates [db [_ property-name new-value]]
+  (fn hdlr-datepicker-change-dates [db [_ model-key property-name new-value]]
     (let [date-value (fmt/date->str new-value)]
-      (dispatch [:input-change-dates property-name date-value])
-      (assoc-in db [:employee property-name] date-value))))
+      (dispatch [:input-change-dates model-key property-name date-value])
+      (assoc-in db [model-key property-name] date-value))))
 
 (register-handler
   :input-change-dates
   (enrich validate-employee)
-  (fn hdlr-input-change-dates [db [_ property-name new-value]]
+  (fn hdlr-input-change-dates [db [_ model-key property-name new-value]]
     (let [date-value (check-date-validity new-value)]
-      (assoc-in db [:employee property-name] date-value))))
+      (assoc-in db [model-key property-name] date-value))))
 
 (register-handler
   :input-change-balances

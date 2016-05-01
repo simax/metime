@@ -6,7 +6,7 @@
             [re-frame-tracer.core :refer [tracer]]))
 
 ;(trace-forms {:tracer (tracer :color "brown")}
-
+ 3
 (register-sub
   :departments
   (fn [db _]

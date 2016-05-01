@@ -477,12 +477,12 @@
     (when (not (nil? dob))
       (after? date (parse (formatter "dd-MM-yyyy") dob)))))
 
-
 (defn employee-dob [employee]
   (let [error-message (subscribe [:employee-dob-error-message])
         showing-error-icon? (subscribe [:employee-dob-show-error])]
     (date-component
-      :db-model employee
+      :model-key :employee
+      :model employee
       :field :dob
       :field-label "Date of birth"
       :place-holder "Date of birth"
@@ -495,7 +495,8 @@
   (let [error-message (subscribe [:employee-startdate-error-message])
         showing-error-icon? (subscribe [:employee-startdate-show-error])]
     (date-component
-      :db-model employee
+      :model-key :employee
+      :model employee
       :field :startdate
       :field-label "Start date"
       :place-holder "Start date"
@@ -511,7 +512,8 @@
               (when (not (nil? (:dob employee)))
                 (after? date (parse (formatter "dd-MM-yyyy") (:dob employee)))))]
       (date-component
-        :db-model employee
+        :model-key :employee
+        :model employee
         :field :enddate
         :field-label "End date"
         :place-holder "End date"

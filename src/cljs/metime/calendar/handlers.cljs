@@ -29,7 +29,7 @@
 ; {:tracer (tracer :color "green")}
 
 (def booking-validation-rules
-  [:booking [[v/required :message "leave type name is required"]]])
+  [:leave-type [[v/required :message "leave type is required"]]])
 
 (defn validate-booking [db]
   (let [booking (:booking db)
