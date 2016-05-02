@@ -52,6 +52,9 @@
   (dispatch [:set-active-navbar :calendar])
   (dispatch [:fetch-leave-types])
   (dispatch [:fetch-my-bookings])
+  (dispatch [:fetch-departments-with-employees])
+  (dispatch [:fetch-start-types])
+  (dispatch [:fetch-end-types])
   (let [my-bookings (subscribe [:my-bookings])]
     (fn []
       (if-not (seq @my-bookings)

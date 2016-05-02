@@ -8,6 +8,17 @@
 
 ;(trace-forms {:tracer (tracer :color "brown")}
 
+
+(register-sub
+  :start-types
+  (fn [db _]
+    (make-reaction (fn sub-start-types [] (:start-types @db)))))
+
+(register-sub
+  :end-types
+  (fn [db _]
+    (make-reaction (fn sub-end-types [] (:end-types @db)))))
+
 (register-sub
   :leave-types
   (fn [db _]

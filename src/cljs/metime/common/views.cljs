@@ -73,7 +73,7 @@
                     :show-today? true
                     :on-change #(dispatch [:datepicker-change-dates model-key date-field %])]]])
 
-
+;TODO Add a way to include validation enrich? middleware
 (defn date-component
   "A generic date input box with popup and validation features"
   ;([db-model field field-label place-holder error-message showing-error-icon?]

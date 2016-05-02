@@ -104,27 +104,54 @@
     ))
 
 
-(defn booking-type-ddl [edit-mode booking]
-  (let [leave-types (subscribe [:sorted-leave-types-by-deduction])
-        booking-type (:leave-type booking)]
+(defn booking-start-types [edit-mode booking]
+  (let [start-stypes (subscribe [:start-types])]
     (if (utils/is-mutating-mode? edit-mode)
-      [h-box
+      [v-box
        :justify :start
        :children
        [
-        [box :width "150px" :child [label :class "control-label" :label "leave types"]]
-        [box :size "150px"
-         :child [single-dropdown
-                 :model (:leave-type-id booking)
-                 :choices @leave-types
-                 :id-fn #(:leave-type-id %)
-                 :group-fn #(if (= (:reduce-leave %) 1) "Deductable" "Non-deductable")
-                 :label-fn #(:leave-type %)
-                 :on-change #(dispatch [:leave-type-change %])]]]]
-      [box
-       :width "100px"
-       :child [:span booking-type]])))
+        [box :width "150px" :child [label :class "control-label" :label "Start types"]]
+        [single-dropdown
+         :width "150px"
+         :model (:start-type booking)
+         :choices @start-stypes
+         :on-change #(dispatch [:start-type-change %])]]]
+      )))
 
+(defn booking-end-types [edit-mode booking]
+  (let [end-stypes (subscribe [:end-types])]
+    (if (utils/is-mutating-mode? edit-mode)
+      [v-box
+       :justify :start
+       :children
+       [
+        [box :width "150px" :child [label :class "control-label" :label "End types"]]
+        [single-dropdown
+         :width "150px"
+         :model (:end-type booking)
+         :choices @end-stypes
+         :on-change #(dispatch [:start-type-change %])]]]
+      )))
+
+(defn booking-type-ddl [edit-mode booking]
+  (let [leave-types (subscribe [:sorted-leave-types-by-deduction])]
+    (if (utils/is-mutating-mode? edit-mode)
+      [v-box
+       :justify :start
+       :children
+       [
+        [box :width "150px" :child [label :class "control-label" :label "Type"]]
+        [single-dropdown
+         :width "150px"
+         :model (:leave-type-id booking)
+         :placeholder "Leave type"
+         :choices @leave-types
+         :id-fn #(:leave-type-id %)
+         :group-fn #(if (= (:reduce-leave %) 1) "Deductable" "Non-deductable")
+         :label-fn #(:leave-type %)
+         :on-change #(dispatch [:leave-type-change %])]]]
+      )))
 
 (defn booking-type [edit-mode booking]
   (let [booking-type (:leave-type booking)]
@@ -146,14 +173,24 @@
         error-message (subscribe [:booking-end-date-error-message])
         showing-error-icon? (subscribe [:booking-end-date-show-error])]
     (if (utils/is-mutating-mode? edit-mode)
-      (date-component
-        :model-key :booking
-        :model booking
-        :field :end-date
-        :place-holder "End date"
-        :popup-position :below-center
-        :error-message error-message
-        :showing-error-icon? showing-error-icon?)
+      [h-box
+       :gap "20px"
+       :children
+       [
+        [v-box
+         :children
+         [
+          [box :width "150px" :child [label :class "control-label" :label "To"]]
+          (date-component
+            :model-key :booking
+            :model booking
+            :field :end-date
+            :place-holder "End date"
+            :popup-position :below-center
+            :error-message error-message
+            :showing-error-icon? showing-error-icon?)]]
+        [booking-end-types edit-mode booking]
+        ]]
       [box
        :width "400px"
        :child [:span end-date]])))
@@ -163,14 +200,23 @@
         error-message (subscribe [:booking-start-date-error-message])
         showing-error-icon? (subscribe [:booking-start-date-show-error])]
     (if (utils/is-mutating-mode? edit-mode)
-      (date-component
-        :model-key :booking
-        :model booking
-        :field :start-date
-        :place-holder "Start date"
-        :popup-position :below-center
-        :error-message error-message
-        :showing-error-icon? showing-error-icon?)
+      [h-box
+       :gap "20px"
+       :children
+       [
+        [v-box
+         :children
+         [
+          [box :width "150px" :child [label :class "control-label" :label "From"]]
+          (date-component
+            :model-key :booking
+            :model booking
+            :field :start-date
+            :place-holder "Start date"
+            :popup-position :below-center
+            :error-message error-message
+            :showing-error-icon? showing-error-icon?)]]
+        [booking-start-types edit-mode booking]]]
       [box
        :width "400px"
        :child [:span start-date]])))
@@ -187,23 +233,27 @@
         emp-showing-tooltip? (reagent/atom false)]
 
     (if (utils/is-mutating-mode? edit-mode)
-      [h-box
-       :gap "5px"
-       :width "315px"
+      [v-box
        :children
        [
-        [single-dropdown
-         :style (if @emp-showing-error-icon? invalid-input-style valid-input-style)
-         :width "230px"
-         :placeholder "Employee"
-         :choices @sorted-employees
-         :id-fn id-fn
-         :label-fn label-fn
-         :group-fn group-fn
-         :model selected-employee-id
-         :filter-box? true
-         :on-change #(dispatch [:set-booking-employee-id %])]
-        (show-error emp-error-message emp-showing-error-icon? emp-showing-tooltip?)]]
+        [box :width "150px" :child [label :class "control-label" :label "For"]]
+        [h-box
+         :gap "5px"
+         :width "315px"
+         :children
+         [
+          [single-dropdown
+           :style (if @emp-showing-error-icon? invalid-input-style valid-input-style)
+           :width "230px"
+           :placeholder "Employee"
+           :choices @sorted-employees
+           :id-fn id-fn
+           :label-fn label-fn
+           :group-fn group-fn
+           :model selected-employee-id
+           :filter-box? true
+           :on-change #(dispatch [:set-booking-employee-id %])]
+          (show-error emp-error-message emp-showing-error-icon? emp-showing-tooltip?)]]]]
       )))
 
 
@@ -258,7 +308,6 @@
        [booking-start-date :display bkng]
        [booking-type :display bkng]
        ]]
-
      [booking-close-button-component :display bkng]
      ]]])
 

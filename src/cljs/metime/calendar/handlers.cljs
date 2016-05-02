@@ -108,19 +108,35 @@
 
 (register-handler
   :new-booking
+  ;TODO: Default to current employee
   (fn hdlr-new-booking [db [_]]
     (assoc db :booking {:booking-id 0
-                        :employee-id 0
+                        :employee-id nil
                         :employee-name ""
-                        :leave-type-id 0
+                        :leave-type-id nil
                         :leave-type ""
                         :start-date "" })))
+
+
 
 (register-handler
   :edit-booking
   (fn hdlr-edit-booking [db [_ booking-id]]
     (dispatch [:fetch-booking booking-id])
     db))
+
+(register-handler
+  :fetch-start-types
+  (fn hdlr-fetch-start-types [db [_]]
+    (assoc db
+      :start-types [{:id "Morning" :label "Morning"}
+                    {:id "Afternoon" :label "Afternoon"}])))
+(register-handler
+  :fetch-end-types
+  (fn hdlr-fetch-end-types [db [_]]
+    (assoc db
+      :end-types [{:id "Lunchtime" :label "Lunchtime"}
+                    {:id "End of the day" :label "End of the day"}])))
 
 (register-handler
   :close-booking-drawer
