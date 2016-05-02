@@ -70,7 +70,7 @@
        :tooltip "Save leave-type"
        :on-click #(dispatch [:leave-type-save])]
       [md-circle-icon-button
-       :emphasise? true
+       :emphasise? false
        :size :smaller
        :md-icon-name "zmdi-close-circle-o"
        :tooltip "Cancel"

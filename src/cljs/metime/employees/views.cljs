@@ -270,7 +270,7 @@
        :tooltip "Save department"
        :on-click #(dispatch [:department-save])]
       [md-circle-icon-button
-       :emphasise? true
+       :emphasise? false
        :size :smaller
        :md-icon-name "zmdi-close-circle-o"
        :tooltip "Cancel"
