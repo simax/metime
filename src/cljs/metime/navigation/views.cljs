@@ -50,6 +50,7 @@
 
 (defn view-calendar []
   (dispatch [:set-active-navbar :calendar])
+  (dispatch [:fetch-leave-types])
   (dispatch [:fetch-my-bookings])
   (let [my-bookings (subscribe [:my-bookings])]
     (fn []

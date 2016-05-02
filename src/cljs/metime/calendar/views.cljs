@@ -4,6 +4,7 @@
     [metime.common.views :refer [loader-component date-component show-error valid-input-style invalid-input-style]]
     [cljs.core.async :refer [put! take! <! >! chan timeout]]
     [metime.navigation.subs]
+    [metime.employees.subs]
     [metime.calendar.subs]
     [metime.calendar.handlers]
     [re-com.core :refer [h-box v-box box gap scroller
@@ -22,29 +23,25 @@
     [clairvoyant.core :refer-macros [trace-forms]]
     [re-frame-tracer.core :refer [tracer]]
     [cljs.pprint :refer [pprint]]
-    [metime.utils :as utils]))
+    [metime.utils :as utils]
+    [reagent.core :as reagent]))
 
 
 ;(trace-forms
 ;  {:tracer (tracer :color "indigo")}
 
-(defn booking-buttons-component [edit-mode {:keys [booking-id]}]
+(defn booking-close-button-component [edit-mode {:keys [booking-id]}]
   (if (utils/is-mutating-mode? edit-mode)
     [h-box
      :align :center
-     :gap "10px"
-     :width "250px"
+     ;:gap "10px"
+     ;:width "250px"
      :justify :end
      :children
      [
       [md-circle-icon-button
-       :emphasise? true
-       :size :smaller
-       :md-icon-name "zmdi-floppy"
-       :tooltip "Save booking"
-       :on-click #(dispatch [:booking-save])]
-      [md-circle-icon-button
-       :emphasise? true
+       :style {:margin "10px"}
+       :emphasise? false
        :size :smaller
        :md-icon-name "zmdi-close-circle-o"
        :tooltip "Cancel"
@@ -68,24 +65,65 @@
        :on-click #(dispatch [:booking-delete booking-id])]
       [box :child [:div]]]]))
 
-
-(defn leave-type-choices [leave-types]
-  (into []
-        (for [m leave-types]
-          {:id (:leave-type-id m) :label (:department m)})))
-
-
-(defn booking-type-ddl [booking leave-types]
+(defn booking-edit-delete-buttons-component [edit-mode {:keys [booking-id]}]
   [h-box
-   :justify :start
+   :align :center
+   :gap "10px"
+   :width "300px"
+   :justify :end
    :children
    [
-    [box :width "150px" :child [label :class "control-label" :label "Department"]]
-    [box :size "auto" :child [single-dropdown
-                              :model (:leave-type-id booking)
-                              :choices (leave-type-choices leave-types)
-                              :on-change #(dispatch [:department-change %])]]]])
+    [md-icon-button
+     :md-icon-name "zmdi-edit"                              ;
+     :style {:color "#b2c831"}
+     :on-click #(dispatch [:edit-booking booking-id])]
 
+    [md-icon-button
+     :md-icon-name "zmdi-delete"                            ;
+     :style {:color "Red"}
+     :on-click #(dispatch [:booking-delete booking-id])]
+    [box :child [:div]]]])
+
+
+(defn booking-save-button-component [edit-mode {:keys [booking-id]}]
+  (if (utils/is-mutating-mode? edit-mode)
+    [h-box
+     :align :center
+     ;:gap "10px"
+     ;:width "250px"
+     :justify :end
+     :children
+     [
+      [md-circle-icon-button
+       :style {:margin "10px"}
+       :emphasise? true
+       :size :smaller
+       :md-icon-name "zmdi-floppy"
+       :tooltip "Save booking"
+       :on-click #(dispatch [:booking-save])]]]
+    ))
+
+
+(defn booking-type-ddl [edit-mode booking]
+  (let [leave-types (subscribe [:sorted-leave-types-by-deduction])
+        booking-type (:leave-type booking)]
+    (if (utils/is-mutating-mode? edit-mode)
+      [h-box
+       :justify :start
+       :children
+       [
+        [box :width "150px" :child [label :class "control-label" :label "leave types"]]
+        [box :size "150px"
+         :child [single-dropdown
+                 :model (:leave-type-id booking)
+                 :choices @leave-types
+                 :id-fn #(:leave-type-id %)
+                 :group-fn #(if (= (:reduce-leave %) 1) "Deductable" "Non-deductable")
+                 :label-fn #(:leave-type %)
+                 :on-change #(dispatch [:leave-type-change %])]]]]
+      [box
+       :width "100px"
+       :child [:span booking-type]])))
 
 
 (defn booking-type [edit-mode booking]
@@ -112,7 +150,6 @@
         :model-key :booking
         :model booking
         :field :end-date
-        :field-label "End date"
         :place-holder "End date"
         :popup-position :below-center
         :error-message error-message
@@ -130,7 +167,6 @@
         :model-key :booking
         :model booking
         :field :start-date
-        :field-label "Start date"
         :place-holder "Start date"
         :popup-position :below-center
         :error-message error-message
@@ -139,31 +175,70 @@
        :width "400px"
        :child [:span start-date]])))
 
+
+(defn booking-employee-ddl [edit-mode booking]
+  (let [sorted-employees (subscribe [:sorted-departments-with-employees])
+        id-fn #(:id %)
+        group-fn #(str (:department %))
+        label-fn #(str (:firstname %) " " (:lastname %))
+        selected-employee-id (reagent/atom (:employee-id booking))
+        emp-error-message (reagent/atom "An employee is required")
+        emp-showing-error-icon? (reagent/atom (seq (get-in booking [:validation-errors :employee-id])))
+        emp-showing-tooltip? (reagent/atom false)]
+
+    (if (utils/is-mutating-mode? edit-mode)
+      [h-box
+       :gap "5px"
+       :width "315px"
+       :children
+       [
+        [single-dropdown
+         :style (if @emp-showing-error-icon? invalid-input-style valid-input-style)
+         :width "230px"
+         :placeholder "Employee"
+         :choices @sorted-employees
+         :id-fn id-fn
+         :label-fn label-fn
+         :group-fn group-fn
+         :model selected-employee-id
+         :filter-box? true
+         :on-change #(dispatch [:set-booking-employee-id %])]
+        (show-error emp-error-message emp-showing-error-icon? emp-showing-tooltip?)]]
+      )))
+
+
+(defn booking-employee-and-type [edit-mode booking]
+  [h-box
+   :gap "20px"
+   :align :center
+   :children
+   [
+    [booking-type-ddl edit-mode booking]
+    [booking-employee-ddl edit-mode booking]
+    ]])
+
+(defn booking-dates [edit-mode booking]
+  [h-box
+   :gap "20px"
+   :align :center
+   :children
+   [
+    [booking-start-date edit-mode booking]
+    [booking-end-date edit-mode booking]]])
+
 (defn booking-component [bkng]
   (let [edit-mode (subscribe [:booking-edit-mode (:booking-id bkng)])
         booking (if (utils/is-mutating-mode? @edit-mode) (deref (subscribe [:booking])) bkng)]
-    [box
+    [v-box
      :class (if (utils/is-mutating-mode? @edit-mode) "mutating" "panel panel-default")
      ;:style (if (utils/is-mutating-mode? @edit-mode) {:background-color "Gainsboro" :border-width "1px" :border-style "solid" :border-color "white" :margin-bottom "20px"} {})
-     :child
-     [h-box
-      :class "panel-body row"
-      :height "65px"
-      :justify :between
-      :children
-      [
-       [h-box
-        :gap "20px"
-        :align :center
-        :children
-        [
-         [booking-start-date @edit-mode booking]
-         [booking-end-date @edit-mode booking]
-         [booking-type @edit-mode booking]
-         ]]
-
-       [booking-buttons-component @edit-mode booking]
-       ]]]))
+     :children
+     [
+      [booking-close-button-component @edit-mode booking]
+      [booking-dates @edit-mode booking]
+      [booking-employee-and-type @edit-mode booking]
+      [booking-save-button-component @edit-mode booking]
+      ]]))
 
 (defn booking-component-display [bkng]
   [box
@@ -184,7 +259,7 @@
        [booking-type :display bkng]
        ]]
 
-     [booking-buttons-component :display bkng]
+     [booking-close-button-component :display bkng]
      ]]])
 
 (defn booking-list-item [booking]

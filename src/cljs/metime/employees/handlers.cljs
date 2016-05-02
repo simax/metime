@@ -144,9 +144,9 @@
 
 (register-handler
   :set-department-manager-email
-  (fn hdlr-input-change [db [_ employee-id]]
+  (fn hdlr-set-department-manager-email [db [_ employee-id]]
     (println (str "employee-id " employee-id))
-    (let [email(get (first (filter #(= employee-id (:id %)) (get-in @re-frame.db/app-db [:departments-with-employees]))) :email)]
+    (let [email (get (first (filter #(= employee-id (:id %)) (get-in db [:departments-with-employees]))) :email)]
       (-> db
           (assoc-in [:department :manager-email] email)))))
 

@@ -13,6 +13,13 @@
   (fn [db _]
     (make-reaction (fn sub-leave-types [] (:leave-types @db)))))
 
+(register-sub
+  :sorted-leave-types-by-deduction
+  (fn [db _]
+    (let [leave-types-by-deduction (reagent.ratom/reaction (get-in @db [:leave-types]))]
+      (make-reaction (fn sub-leave-types-by-deduction [] (sort-by (juxt :reduce-leave :leave-type) @leave-types-by-deduction))))))
+
+
 
 (register-sub
   :booking-end-date-show-error

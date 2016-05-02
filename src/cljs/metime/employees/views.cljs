@@ -480,30 +480,37 @@
 (defn employee-dob [employee]
   (let [error-message (subscribe [:employee-dob-error-message])
         showing-error-icon? (subscribe [:employee-dob-show-error])]
-    (date-component
-      :model-key :employee
-      :model employee
-      :field :dob
-      :field-label "Date of birth"
-      :place-holder "Date of birth"
-      :popup-position :above-center
-      :error-message error-message
-      :showing-error-icon? showing-error-icon?
-      :selectable-fn date-in-the-past?)))
+
+    [h-box
+     :children
+     [[box :width "150px" :child [label :label "Date of birth"]]
+      (date-component
+        :model-key :employee
+        :model employee
+        :field :dob
+        :field-label "Date of birth"
+        :place-holder "Date of birth"
+        :popup-position :above-center
+        :error-message error-message
+        :showing-error-icon? showing-error-icon?
+        :selectable-fn date-in-the-past?)]]))
 
 (defn employee-start-date [employee]
   (let [error-message (subscribe [:employee-startdate-error-message])
         showing-error-icon? (subscribe [:employee-startdate-show-error])]
-    (date-component
-      :model-key :employee
-      :model employee
-      :field :startdate
-      :field-label "Start date"
-      :place-holder "Start date"
-      :popup-position :above-center
-      :error-message error-message
-      :showing-error-icon? showing-error-icon?
-      :selectable-fn after-dob?)))
+    [h-box
+     :children
+     [[box :width "150px" :child [label :label "Start date"]]
+      (date-component
+        :model-key :employee
+        :model employee
+        :field :startdate
+        :field-label "Start date"
+        :place-holder "Start date"
+        :popup-position :above-center
+        :error-message error-message
+        :showing-error-icon? showing-error-icon?
+        :selectable-fn after-dob?)]]))
 
 (defn employee-end-date [employee]
   (let [error-message (subscribe [:employee-enddate-error-message])
@@ -511,16 +518,19 @@
     (letfn [(after-startdate? [date]
               (when (not (nil? (:dob employee)))
                 (after? date (parse (formatter "dd-MM-yyyy") (:dob employee)))))]
-      (date-component
-        :model-key :employee
-        :model employee
-        :field :enddate
-        :field-label "End date"
-        :place-holder "End date"
-        :popup-position :above-center
-        :error-message error-message
-        :showing-error-icon? showing-error-icon?
-        :selectable-fn after-startdate?))))
+      [h-box
+       :children
+       [[box :width "150px" :child [label :label "End date"]]
+        (date-component
+          :model-key :employee
+          :model employee
+          :field :enddate
+          :field-label "End date"
+          :place-holder "End date"
+          :popup-position :above-center
+          :error-message error-message
+          :showing-error-icon? showing-error-icon?
+          :selectable-fn after-startdate?)]])))
 
 (defn employee-prev-year-allowance [employee]
   [h-box

@@ -78,9 +78,8 @@
   "A generic date input box with popup and validation features"
   ;([db-model field field-label place-holder error-message showing-error-icon?]
   ; (date-component db-model field field-label place-holder error-message showing-error-icon? (constantly true)))
-  ([& {:keys [model-key model field field-label popup-position place-holder error-message showing-error-icon? selectable-fn]
-       :or {field-label         ""
-            place-holder        ""
+  ([& {:keys [model-key model field popup-position place-holder error-message showing-error-icon? selectable-fn]
+       :or {place-holder        ""
             error-message       ""
             popup-position      :above-center
             showing-error-icon? false
@@ -93,7 +92,7 @@
       :justify :start
       :children
       [
-       [box :width "150px" :child [label :label field-label]]
+       ;[box :width "150px" :child [label :label field-label]]
        [h-box
         :style (if @showing-error-icon? invalid-input-style valid-input-style)
         :children

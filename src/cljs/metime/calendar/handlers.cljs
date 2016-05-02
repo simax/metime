@@ -41,6 +41,11 @@
   (zero? id))
 
 (register-handler
+  :leave-type-change
+  (fn hdlr-leave-type-change [db [_ leave-type-id]]
+    (assoc-in db [:booking :leave-type-id] leave-type-id)))
+
+(register-handler
   :booking-save-failure
   (fn hdlr-save-failure [db [_]]
     ; Potentially show some kind of boostrap alert?
@@ -73,6 +78,7 @@
                            :invalid-fn    #(dispatch [:booking-save-failure])
                            :response-keys [:body :bookings]}))
 
+
 (register-handler
   :booking-save
   (enrich validate-booking)
@@ -103,7 +109,12 @@
 (register-handler
   :new-booking
   (fn hdlr-new-booking [db [_]]
-    (assoc db :booking {:booking-id 0 :leave-type "" :start-date "" })))
+    (assoc db :booking {:booking-id 0
+                        :employee-id 0
+                        :employee-name ""
+                        :leave-type-id 0
+                        :leave-type ""
+                        :start-date "" })))
 
 (register-handler
   :edit-booking
@@ -159,10 +170,25 @@
 
 (register-handler
   :api-response->bookings-by-employee-id
-  (fn hdlr-:api-response->bookings-by-employee-id [db [_ employee-bookings]]
+  (fn hdlr-api-response->bookings-by-employee-id [db [_ employee-bookings]]
     (let [value (js->clj employee-bookings)]
       (assoc db :employee-bookings value))))
 
+(register-handler
+  :set-booking-employee-name
+  (fn hdlr-set-department-employee-name [db [_ employee-id]]
+    (println (str "employee-id " employee-id))
+    (let [emp (first (filter #(= employee-id (:id %)) (get-in db [:departments-with-employees])))
+          emp-name (str (:firstname emp) " " (:lastname emp))]
+      (-> db
+          (assoc-in [:booking :employee-name] emp-name)))))
+
+(register-handler
+  :set-booking-employee-id
+  ;(enrich validate-department)
+  (fn hdlr-set-booking-employee-id [db [_ employee-id]]
+    (dispatch [:set-booking-employee-name employee-id])
+    (assoc-in db [:booking :employee-id] employee-id)))
 
 ;)
 
