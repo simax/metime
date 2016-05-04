@@ -276,84 +276,95 @@
     [booking-start-date edit-mode booking]
     [booking-end-date edit-mode booking]]])
 
-(defn booking-component [bkng]
-  (let [edit-mode (subscribe [:booking-edit-mode (:booking-id bkng)])
-        booking (if (utils/is-mutating-mode? @edit-mode) (deref (subscribe [:booking])) bkng)]
+(defn booking-reason-component [edit-mode booking]
+  (if (utils/is-mutating-mode? edit-mode)
+    [box :size "auto" :child [input-text
+                              :width "315px"
+                              :model (:reason booking)
+                              :placeholder "Reason (optional)"
+                              :on-change #(dispatch [:input-change :firstname %])
+                              :change-on-blur? false]]))
+
+
+  (defn booking-component [bkng]
+    (let [edit-mode (subscribe [:booking-edit-mode (:booking-id bkng)])
+          booking (if (utils/is-mutating-mode? @edit-mode) (deref (subscribe [:booking])) bkng)]
+      [v-box
+       :class (if (utils/is-mutating-mode? @edit-mode) "mutating" "panel panel-default")
+       ;:style (if (utils/is-mutating-mode? @edit-mode) {:background-color "Gainsboro" :border-width "1px" :border-style "solid" :border-color "white" :margin-bottom "20px"} {})
+       :children
+       [
+        [booking-close-button-component @edit-mode booking]
+        [booking-dates @edit-mode booking]
+        [booking-employee-and-type @edit-mode booking]
+        [booking-reason-component @edit-mode booking]
+        [booking-save-button-component @edit-mode booking]
+        ]]))
+
+  (defn booking-component-display [bkng]
+    [box
+     :class "panel panel-default"
+     :child
+     [h-box
+      :class "panel-body row"
+      :height "65px"
+      :justify :between
+      :children
+      [
+       [h-box
+        :gap "20px"
+        :align :center
+        :children
+        [
+         [booking-start-date :display bkng]
+         [booking-type :display bkng]
+         ]]
+       [booking-close-button-component :display bkng]
+       ]]])
+
+  (defn booking-list-item [booking]
     [v-box
-     :class (if (utils/is-mutating-mode? @edit-mode) "mutating" "panel panel-default")
-     ;:style (if (utils/is-mutating-mode? @edit-mode) {:background-color "Gainsboro" :border-width "1px" :border-style "solid" :border-color "white" :margin-bottom "20px"} {})
      :children
      [
-      [booking-close-button-component @edit-mode booking]
-      [booking-dates @edit-mode booking]
-      [booking-employee-and-type @edit-mode booking]
-      [booking-save-button-component @edit-mode booking]
-      ]]))
-
-(defn booking-component-display [bkng]
-  [box
-   :class "panel panel-default"
-   :child
-   [h-box
-    :class "panel-body row"
-    :height "65px"
-    :justify :between
-    :children
-    [
-     [h-box
-      :gap "20px"
-      :align :center
-      :children
-      [
-       [booking-start-date :display bkng]
-       [booking-type :display bkng]
-       ]]
-     [booking-close-button-component :display bkng]
-     ]]])
-
-(defn booking-list-item [booking]
-  [v-box
-   :children
-   [
-    [booking-component-display booking]]])
+      [booking-component-display booking]]])
 
 
-(defn bookings-list [bookings]
-  (let [booking (subscribe [:booking])]
-    [scroller
-     :v-scroll :auto
-     :height "780px"
-     :width "1000px"
-     :child
-     [v-box
-      :width "950px"
-      :children
-      [
-       (when (and (seq @booking) (= (:booking-id @booking) 0))
-         [booking-component @booking])
-       (for [booking bookings]
-         ^{:key (:booking-id booking)}
-         [booking-list-item booking])]]]))
+  (defn bookings-list [bookings]
+    (let [booking (subscribe [:booking])]
+      [scroller
+       :v-scroll :auto
+       :height "780px"
+       :width "1000px"
+       :child
+       [v-box
+        :width "950px"
+        :children
+        [
+         (when (and (seq @booking) (= (:booking-id @booking) 0))
+           [booking-component @booking])
+         (for [booking bookings]
+           ^{:key (:booking-id booking)}
+           [booking-list-item booking])]]]))
 
 
-(defn bookings-list-layout [bookings]
-  [h-box
-   :children
-   [(bookings-list bookings)
-    [box
-     :align :end
-     :child
-     [md-circle-icon-button
-      :md-icon-name "zmdi-plus"
-      :size :larger
-      :emphasise? true
-      :style {:background-color "red" :border-color "red"}
-      :on-click #(dispatch [:ui-new-booking-drawer-status-toggle])
-      :tooltip "Add a new booking"
-      :tooltip-position :right-center]]
-    ]])
+  (defn bookings-list-layout [bookings]
+    [h-box
+     :children
+     [(bookings-list bookings)
+      [box
+       :align :end
+       :child
+       [md-circle-icon-button
+        :md-icon-name "zmdi-plus"
+        :size :larger
+        :emphasise? true
+        :style {:background-color "red" :border-color "red"}
+        :on-click #(dispatch [:ui-new-booking-drawer-status-toggle])
+        :tooltip "Add a new booking"
+        :tooltip-position :right-center]]
+      ]])
 
-; )
+  ; )
 
 
 

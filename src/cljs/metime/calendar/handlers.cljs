@@ -115,9 +115,14 @@
                         :employee-name ""
                         :leave-type-id nil
                         :leave-type ""
-                        :start-date "" })))
+                        :start-date ""
+                        :reason ""})))
 
-
+(register-handler
+  :input-change-reason
+  ;(enrich validate-employee)
+  (fn hdlr-input-change [db [_ property-name new-value]]
+    (assoc-in db [:booking property-name] new-value)))
 
 (register-handler
   :edit-booking
