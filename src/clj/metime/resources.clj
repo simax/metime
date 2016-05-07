@@ -485,7 +485,6 @@
                         (if (requested-method ctx :get)
                           [true {::leave-types {:leave-types (fetch-leave-types)}}]))
 
-
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
                              (let [form-data (make-keyword-map (get-posted-data ctx))

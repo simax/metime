@@ -29,8 +29,10 @@
                   ["/departments" {""                              :departments
                                    ["/" [#"\d*" :id] ""]           :department-by-id
                                    ["/" [#"\d*" :id] "/employees"] :department-employees}]
+                  ["/bookings" {""                    :bookings
+                                ["/" [#"\d*" :id] ""] :lbooking-by-id}]
                   ["/employee-bookings"
-                               {["/" [#"\d*" :id] ""]              :employee-bookings}]
+                   {["/" [#"\d*" :id] ""] :employee-bookings}]
                   [["/department?name=" :name] :department-by-name]
                   ["/leave-types" {""                    :leave-types
                                    ["/" [#"\d*" :id] ""] :leave-type-by-id}]

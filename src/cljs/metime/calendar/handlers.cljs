@@ -8,7 +8,7 @@
             [metime.utils :as utils]
             [metime.routes :as routes]
             [cljs-http.client :as http]
-            [cljs-time.core :refer [date-time local-date now days minus day-of-week]]
+            [cljs-time.core :refer [date-time local-date now days minus today day-of-week]]
             [cljs-time.format :as f :refer [formatter parse unparse]]
             [re-frame.core :refer [register-handler
                                    path
@@ -107,7 +107,6 @@
                            :invalid-fn    #(dispatch [:booking-save-failure])
                            :response-keys [:body :bookings]}))
 
-
 (register-handler
   :booking-save
   (enrich validate-booking)
@@ -139,7 +138,7 @@
   :new-booking
   ;TODO: Default to current employee
   (fn hdlr-new-booking [db [_]]
-    (let [current-date "01-01-2000"
+    (let [current-date (unparse (formatter "dd-MM-yyyy") (now))
           default-leave-type (:leave-type-id (first (filter #(= "Holiday" (:leave-type %)) (:leave-types @re-frame.db/app-db))))]
       (assoc db :booking {:booking-id    0
                           :employee-id   (:logged-in-user-id db)
