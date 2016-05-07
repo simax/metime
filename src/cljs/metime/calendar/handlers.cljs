@@ -139,13 +139,16 @@
   :new-booking
   ;TODO: Default to current employee
   (fn hdlr-new-booking [db [_]]
-    (assoc db :booking {:booking-id    0
-                        :employee-id   nil
-                        :employee-name ""
-                        :leave-type-id nil
-                        :leave-type    ""
-                        :start-date    ""
-                        :reason        ""})))
+    (let [current-date "01-01-2000"
+          default-leave-type (:leave-type-id (first (filter #(= "Holiday" (:leave-type %)) (:leave-types @re-frame.db/app-db))))]
+      (assoc db :booking {:booking-id    0
+                          :employee-id   (:logged-in-user-id db)
+                          :leave-type-id default-leave-type
+                          :start-date    current-date
+                          :start-type    "Morning"
+                          :end-date      current-date
+                          :end-type      "End of the day"
+                          :reason        ""}))))
 
 (register-handler
   :input-change-reason

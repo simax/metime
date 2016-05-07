@@ -134,12 +134,6 @@
          :on-change #(dispatch [:start-type-change %])]]]
       )))
 
-;(defn booking-type-ddl [edit-mode booking]
-;  (let []
-;    (if (utils/is-mutating-mode? edit-mode)
-;
-;      )))
-
 (defn booking-type-ddl [edit-mode booking]
   (let [leave-types (subscribe [:sorted-leave-types-by-deduction])
         type-error-message (reagent/atom "An type is required")
