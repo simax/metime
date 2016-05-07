@@ -92,7 +92,6 @@
       :justify :start
       :children
       [
-       ;[box :width "150px" :child [label :label field-label]]
        [h-box
         :style (if @showing-error-icon? invalid-input-style valid-input-style)
         :children

@@ -28,8 +28,37 @@
 ;(trace-forms
 ; {:tracer (tracer :color "green")}
 
+
+;[start_date]      date null,
+;[start_type]      varchar(30) null,
+;[end_date]        date null,
+;[employee_id]     integer,
+;[employee_name]   varchar(255) null,
+;[leave_type_id]   integer,
+;[leave_type]      varchar(255) null,
+;[duration]        real,
+;[deduction]       real,
+;[actioned_by_id]  integer,
+;[reason]          varchar(255) null,
+;[declined_reason] varchar(255) null,
+;[status]          varchar(255) null,
+;[unit]            varchar(255) null,
+; end_type integer [start_type] varchar(30) null
+
+;:startdate [[v/datetime british-date-format :message "Must be a valid date" :pre (comp seq :startdate)]]
+;:enddate [[v/datetime british-date-format :pre (comp seq :enddate) :message "Must be a valid date"]]
+
+
 (def booking-validation-rules
-  [:leave-type [[v/required :message "leave type is required"]]])
+  [
+   :start-date [[v/required :message "Start date is required"]]
+   :end-date [[v/required :message "End date is required"]]
+   :start-type [[v/required :message "Start time is required"]]
+   :end-type [[v/required :message "End time is required"]]
+   :leave-type-id [[v/required :message "Leave type is required"]]
+   :employee-id [[v/required :message "Leave type is required"]]
+   ])
+
 
 (defn validate-booking [db]
   (let [booking (:booking db)
@@ -110,13 +139,13 @@
   :new-booking
   ;TODO: Default to current employee
   (fn hdlr-new-booking [db [_]]
-    (assoc db :booking {:booking-id 0
-                        :employee-id nil
+    (assoc db :booking {:booking-id    0
+                        :employee-id   nil
                         :employee-name ""
                         :leave-type-id nil
-                        :leave-type ""
-                        :start-date ""
-                        :reason ""})))
+                        :leave-type    ""
+                        :start-date    ""
+                        :reason        ""})))
 
 (register-handler
   :input-change-reason
@@ -141,7 +170,7 @@
   (fn hdlr-fetch-end-types [db [_]]
     (assoc db
       :end-types [{:id "Lunchtime" :label "Lunchtime"}
-                    {:id "End of the day" :label "End of the day"}])))
+                  {:id "End of the day" :label "End of the day"}])))
 
 (register-handler
   :close-booking-drawer

@@ -631,9 +631,6 @@
           [employee-end-date employee]]]]]]]))
 
 
-
-
-
 (defn employee-balances [employee]
   [v-box
    :size "auto"
