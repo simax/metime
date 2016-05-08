@@ -30,7 +30,7 @@
                                    ["/" [#"\d*" :id] ""]           :department-by-id
                                    ["/" [#"\d*" :id] "/employees"] :department-employees}]
                   ["/bookings" {""                    :bookings
-                                ["/" [#"\d*" :id] ""] :lbooking-by-id}]
+                                ["/" [#"\d*" :id] ""] :booking-by-id}]
                   ["/employee-bookings"
                    {["/" [#"\d*" :id] ""] :employee-bookings}]
                   [["/department?name=" :name] :department-by-name]

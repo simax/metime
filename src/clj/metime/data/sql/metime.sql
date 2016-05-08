@@ -310,10 +310,11 @@ delete from employees
 
 -- ============================= Bookings ===========================
 -- Insert a new booking request
--- :name insert-booking-request :i! :n
+-- :name insert-booking-request :i!
 insert into bookings (start_date,
                       start_type,
                       end_date,
+                      end_type,
                       employee_id,
                       employee_name,
                       leave_type_id,
@@ -324,13 +325,14 @@ insert into bookings (start_date,
                       status,
                       unit)
                 values (
-                      :start-date,
-                      :start-type,
-                      :end-date,
-                      :employee-id,
-                      :employee-name,
-                      :leave-type-id,
-                      :leave-type,
+                      :start_date,
+                      :start_type,
+                      :end_date,
+                      :end_type,
+                      :employee_id,
+                      :employee_name,
+                      :leave_type_id,
+                      :leave_type,
                       :duration,
                       :deduction,
                       :reason,
@@ -381,4 +383,25 @@ id as 'booking-id',
 [status],
 [unit]
 from bookings where employee_id = :id
+
+-- Get the booking with the given id
+-- :name get-booking-by-id :? :1
+select
+id as 'booking-id',
+[start_date],
+[start_type],
+[end_date],
+[employee_id],
+[employee_name],
+[leave_type_id],
+[leave_type],
+[duration],
+[deduction],
+[actioned_by_id],
+[reason],
+[declined_reason],
+[status],
+[unit]
+from bookings where id = :id
+
 

@@ -473,9 +473,13 @@
              :handle-ok ::employees)
 
 
+(defn data->snake_case_keyword [data]
+  (transform-keys csk/->snake_case_keyword data))
+
 (defn fix-up-lt [data]
   (let [fixed-data (assoc data :reduce-leave (if (= (:reduce-leave data) "true") 1 0))]
-    (transform-keys csk/->snake_case_keyword fixed-data)))
+    (data->snake_case_keyword fixed-data)))
+
 
 (defresource leave-types []
              (secured-resource)
@@ -503,11 +507,17 @@
                         (try
                           (let [leave-type-data (make-keyword-map (get-posted-data ctx))
                                 data (fix-up-lt leave-type-data)]
-                            (when-let [new-id (ltypes/insert-leave-type db/db-spec data)]
-                              {::location (routes/api-endpoint-for :leave-type-by-id :id new-id)}))
+                            (when-let [raw-new-id (ltypes/insert-leave-type db/db-spec data)]
+                              (let [new-id (get raw-new-id (keyword "last_insert_rowid()"))]
+                                {::location (routes/api-endpoint-for :leave-type-by-id :id new-id)})))
                           (catch Exception e {::failure-message "leave-type already exists"}))))
 
              :post-redirect? false
+
+             :handle-created (fn [ctx]
+                               (if (::failure-message ctx)
+                                 {:status 500 :body (::failure-message ctx)}
+                                 {:location (::location ctx)}))
 
              :handle-ok ::leave-types)
 
@@ -694,19 +704,21 @@
 
              :handle-malformed ::failure-message
 
+             ;TODO Need to add exception logging to all posts/puts/deletes across the whole API
              :post! (fn [ctx]
-                      "We allow the DB to enforce its constraints here, rather than relying on the processable? descision point.
-                      That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
                       (if (requested-method ctx :post)
                         (try
-                          (when-let [new-id (bkngs/insert-booking-request db/db-spec (make-keyword-map (get-posted-data ctx)))]
-                            {::location (routes/api-endpoint-for :booking-by-id :id new-id)})
-                          (catch Exception e {::failure-message "Invalid booking request"}))))
+                          (let [raw-booking-request (make-keyword-map (get-posted-data ctx))
+                                booking-request (data->snake_case_keyword raw-booking-request)]
+                            (when-let [raw-new-id (bkngs/insert-booking-request db/db-spec booking-request)]
+                              (let [new-id (get raw-new-id (keyword "last_insert_rowid()"))]
+                                {::location (routes/api-endpoint-for :booking-by-id :id new-id)})))
+                          (catch Exception e {::failure-message (str "Invalid booking request: " (.getMessage e))}))))
 
              :post-redirect? false
              :handle-created (fn [ctx]
                                (if (::failure-message ctx)
-                                 {:status 403 :body (::failure-message ctx)}
+                                 {:status 500 :body (::failure-message ctx)}
                                  {:location (::location ctx)}))
 
              :handle-ok ::bookings)
@@ -726,3 +738,63 @@
                                  {:location (::location ctx)}))
 
              :handle-ok ::my-bookings)
+
+(defresource booking [id]
+             (secured-resource)
+             :available-media-types ["application/edn" "application/json"]
+             :allowed-methods [:get :delete :put]
+             :known-content-type? #(check-content-type % ["application/x-www-form-urlencoded" "application/json"])
+             :can-put-to-missing? false
+             :exists? (fn [ctx]
+                        (if (or (requested-method ctx :get) (requested-method ctx :put))
+                          (let [booking (bkngs/get-booking-by-id db/db-spec {:id id})]
+                            (if (empty? booking)
+                              false
+                              [true {::booking booking}]))
+                          true))
+
+             ;:processable? (fn [ctx]
+             ;                (if (requested-method ctx :delete)
+             ;                  (let [booking (ltypes/get-booking-by-id db/db-spec {:id id})]
+             ;                    (if true  ; Need to re-imburse days?
+             ;                      true
+             ;                      [false {::failure-message "Unable to delete"}]))
+             ;                  true))
+             ;
+             ;:handle-unprocessable-entity ::failure-message
+
+             ;:malformed? (fn [ctx]
+             ;              (if (requested-method ctx :put)
+             ;                (let [form-data (make-keyword-map (get-posted-data ctx))
+             ;                      validation-result (validate-booking form-data)]
+             ;                  (if (seq validation-result)
+             ;                    [true {::failure-message validation-result}]
+             ;                    false))
+             ;                false))
+
+             ;:handle-malformed ::failure-message
+
+             ;:conflict? (fn [ctx]
+             ;             (let [new-leave-type-name (-> ctx (get-posted-data) (make-keyword-map) (:leave-type))
+             ;                   existing-leave-type (->> {(csk/->snake_case_keyword :leave-type) new-leave-type-name} (ltypes/get-leave-type-by-name db/db-spec))]
+             ;               (info (str "existing leave-type-name: " (:leave-type existing-leave-type)))
+             ;               (and (seq existing-leave-type) (not= (str id) (str (:id existing-leave-type))))))
+
+             ;:handle-conflict {:leave-type ["leave-type already exists"]}
+
+             ;:delete! (fn [ctx]
+             ;           (delete-booking! id))
+
+             ;:put! (fn [ctx]
+             ;        (let [new-data (make-keyword-map (get-posted-data ctx))
+             ;              updated-data (fix-up-lt new-data)
+             ;              ]
+             ;          (ltypes/update-leave-type db/db-spec updated-data)
+             ;          {::leave-type updated-data}))
+             ;
+             ;:new? (fn [ctx] (nil? ::leave-type))
+             ;:respond-with-entity? (fn [ctx] (not (empty? (::booking ctx))))
+             ;:multiple-representations? false
+             :handle-ok ::booking
+             :handle-not-found "Booking not found")
+

@@ -56,7 +56,8 @@
                (ANY "/" [] (res/leave-types))               ; fn [_] {:status 200 :body "This is the /departments route"}
                (ANY "/:id" [id] (res/leave-type id)))
              (context "/bookings" []
-               (ANY "/" [] (res/bookings)))
+               (ANY "/" [] (res/bookings))
+               (ANY "/:id" [id] (res/booking id)))
              (context "/employee-bookings" []
                (ANY "/:id" [id] (res/employee-bookings id)))
              (route/not-found "Not Found"))
