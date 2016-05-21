@@ -238,9 +238,7 @@
    :start_type [[v/member booking-request-types :message (apply (partial str "Must be one of ") (interpose ", " booking-request-types))]]
    :end_date [[v/required] [v/datetime date-format :message "Must be a valid date"]]
    :employee_id [[v/required] [v/integer] [v/positive]]
-   :employee_name [[v/required :message "Employee name is required"]]
    :leave_type_id [[v/required] [v/integer] [v/positive]]
-   :leave_type [[v/required :message "Leave type is required"]]
    :duration [[v/required] [v/number] [v/positive]]
    :deduction [[v/required] [v/number] [v/positive]]
    :unit [[v/member booking-request-units :message (apply (partial str "Must be either ") (interpose " or " booking-request-units))]]])
@@ -680,8 +678,11 @@
   (assoc form-data
     :employee_id (parse-number (:employee_id form-data))
     :leave_type_id (parse-number (:leave_type_id form-data))
-    :duration (parse-number (:duration form-data))
-    :deduction (parse-number (:deduction form-data))))
+    :duration 1                                             ;(parse-number (:duration form-data))
+    :deduction 1                                            ;(parse-number (:deduction form-data))
+    :status "Pending"
+    :unit "Days"
+    ))
 
 (defresource bookings []
              (secured-resource)
@@ -692,14 +693,17 @@
                         (if (requested-method ctx :get)
                           [true {::bookings (bkngs/get-bookings db/db-spec)}]))
 
-
              :malformed? (fn [ctx]
                            (if (requested-method ctx :post)
-                             (let [form-data (-> ctx (get-posted-data) (make-keyword-map) (format-booking-request))
+                             (let [form-data (-> ctx
+                                                 (get-posted-data)
+                                                 (make-keyword-map)
+                                                 (data->snake_case_keyword)
+                                                 (format-booking-request))
                                    validation-result (validate-booking-request form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message (str validation-result)}]
-                                 false))
+                                 [false {::data form-data}]))
                              false))
 
              :handle-malformed ::failure-message
@@ -708,11 +712,9 @@
              :post! (fn [ctx]
                       (if (requested-method ctx :post)
                         (try
-                          (let [raw-booking-request (make-keyword-map (get-posted-data ctx))
-                                booking-request (data->snake_case_keyword raw-booking-request)]
-                            (when-let [raw-new-id (bkngs/insert-booking-request db/db-spec booking-request)]
-                              (let [new-id (get raw-new-id (keyword "last_insert_rowid()"))]
-                                {::location (routes/api-endpoint-for :booking-by-id :id new-id)})))
+                          (let [raw-new-id (bkngs/insert-booking-request db/db-spec (::data ctx))
+                                new-id (get raw-new-id (keyword "last_insert_rowid()"))]
+                            {::location (routes/api-endpoint-for :booking-by-id :id new-id)})
                           (catch Exception e {::failure-message (str "Invalid booking request: " (.getMessage e))}))))
 
              :post-redirect? false
