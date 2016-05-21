@@ -394,4 +394,9 @@ id as 'booking-id',
 [unit]
 from bookings where id = :id
 
+-- Delete the booking with the given id
+-- :name delete-booking :! :n
+delete from bookings where id = :id
+
+
 

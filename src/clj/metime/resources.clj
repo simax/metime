@@ -479,6 +479,9 @@
     (data->snake_case_keyword fixed-data)))
 
 
+(defn get-new-id [insert-response]
+  (get insert-response (keyword "last_insert_rowid()")))
+
 (defresource leave-types []
              (secured-resource)
              :available-media-types ["application/edn" "application/json"]
@@ -493,7 +496,7 @@
                                    validation-result (validate-leave-type form-data)]
                                (if (seq validation-result)
                                  [true {::failure-message validation-result}]
-                                 false))
+                                 [false {::data form-data}]))
                              false))
 
              :handle-malformed ::failure-message
@@ -503,11 +506,9 @@
                       That way we can be sure the DB has not been changed by another thread or user between calls to processable? and post!"
                       (if (requested-method ctx :post)
                         (try
-                          (let [leave-type-data (make-keyword-map (get-posted-data ctx))
-                                data (fix-up-lt leave-type-data)]
-                            (when-let [raw-new-id (ltypes/insert-leave-type db/db-spec data)]
-                              (let [new-id (get raw-new-id (keyword "last_insert_rowid()"))]
-                                {::location (routes/api-endpoint-for :leave-type-by-id :id new-id)})))
+                          (let [insert-response (ltypes/insert-leave-type db/db-spec (fix-up-lt (::data ctx)))
+                                new-id (get-new-id insert-response)]
+                            {::location (routes/api-endpoint-for :leave-type-by-id :id new-id)})
                           (catch Exception e {::failure-message "leave-type already exists"}))))
 
              :post-redirect? false
@@ -712,8 +713,8 @@
              :post! (fn [ctx]
                       (if (requested-method ctx :post)
                         (try
-                          (let [raw-new-id (bkngs/insert-booking-request db/db-spec (::data ctx))
-                                new-id (get raw-new-id (keyword "last_insert_rowid()"))]
+                          (let [insert-response (bkngs/insert-booking-request db/db-spec (::data ctx))
+                                new-id (get-new-id insert-response)]
                             {::location (routes/api-endpoint-for :booking-by-id :id new-id)})
                           (catch Exception e {::failure-message (str "Invalid booking request: " (.getMessage e))}))))
 
@@ -741,6 +742,9 @@
 
              :handle-ok ::my-bookings)
 
+(defn delete-booking! [id]
+  (bkngs/delete-booking db/db-spec {:id id}))
+
 (defresource booking [id]
              (secured-resource)
              :available-media-types ["application/edn" "application/json"]
@@ -755,15 +759,15 @@
                               [true {::booking booking}]))
                           true))
 
-             ;:processable? (fn [ctx]
-             ;                (if (requested-method ctx :delete)
-             ;                  (let [booking (ltypes/get-booking-by-id db/db-spec {:id id})]
-             ;                    (if true  ; Need to re-imburse days?
-             ;                      true
-             ;                      [false {::failure-message "Unable to delete"}]))
-             ;                  true))
-             ;
-             ;:handle-unprocessable-entity ::failure-message
+             :processable? (fn [ctx]
+                             (if (requested-method ctx :delete)
+                               (let [booking (ltypes/get-booking-by-id db/db-spec {:id id})]
+                                 (if true  ; Need to re-imburse days?
+                                   true
+                                   [false {::failure-message "Unable to delete"}]))
+                               true))
+
+             :handle-unprocessable-entity ::failure-message
 
              ;:malformed? (fn [ctx]
              ;              (if (requested-method ctx :put)
@@ -784,8 +788,8 @@
 
              ;:handle-conflict {:leave-type ["leave-type already exists"]}
 
-             ;:delete! (fn [ctx]
-             ;           (delete-booking! id))
+             :delete! (fn [ctx]
+                        (delete-booking! id))
 
              ;:put! (fn [ctx]
              ;        (let [new-data (make-keyword-map (get-posted-data ctx))
