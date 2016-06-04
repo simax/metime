@@ -93,8 +93,9 @@
 
 
 
-(defn secured-resource []
-  "The caller must be authenticate before calling this resource"
+(defn secured-resource
+  "Marks the resource as secure meaning the caller must be authenticated before calling this resource"
+  []
   {:authorized? #(authenticated? (:request %))
    :allowed?    (fn [_]
                   ;; Not currently doing any further role based authorization
